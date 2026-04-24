@@ -1,0 +1,69 @@
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
+import { readFile } from 'fs/promises';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+import pool          from './db/index.js';
+import contactRouter from './routes/contact.js';
+import stripeRouter  from './routes/stripe.js';
+import licenseRouter from './routes/license.js';
+import userRouter    from './routes/user.js';
+
+const app  = express();
+const PORT = process.env.PORT || 3000;
+
+// ── Stripe webhook must receive the RAW body — register BEFORE json() ───
+app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
+
+// ── CORS ─────────────────────────────────────────────────────────────────
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'http://localhost:5500',
+  'http://127.0.0.1:5500',
+].filter(Boolean);
+
+app.use(cors({
+  origin: (origin, cb) => {
+    // Allow requests with no origin (e.g. curl, Postman, CLI)
+    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    cb(new Error(`CORS: origin ${origin} not allowed`));
+  },
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+app.use(express.json());
+
+// ── Health check ─────────────────────────────────────────────────────────
+app.get('/health', (_req, res) => res.json({ ok: true, service: 'nyxprism-api' }));
+
+// ── Routes ────────────────────────────────────────────────────────────────
+app.use('/api/contact', contactRouter);
+app.use('/api/stripe',  stripeRouter);
+app.use('/api/license', licenseRouter);
+app.use('/api/user',    userRouter);
+
+// ── 404 catch-all ────────────────────────────────────────────────────────
+app.use((_req, res) => res.status(404).json({ error: 'Not found.' }));
+
+// ── Startup ───────────────────────────────────────────────────────────────
+async function start() {
+  // Apply schema (idempotent — uses IF NOT EXISTS)
+  try {
+    const __dir   = dirname(fileURLToPath(import.meta.url));
+    const schema  = await readFile(join(__dir, 'db/schema.sql'), 'utf8');
+    await pool.query(schema);
+    console.log('✓ Database schema applied.');
+  } catch (err) {
+    console.error('✗ Schema migration error:', err.message);
+    process.exit(1);
+  }
+
+  app.listen(PORT, () => {
+    console.log(`✓ NyxPrism API listening on port ${PORT}`);
+  });
+}
+
+start();

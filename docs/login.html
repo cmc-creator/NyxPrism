@@ -319,6 +319,10 @@
 </footer>
 
 <script type="module">
+  // ── Update this once Railway gives you a URL ─────────────────────────
+  const API = 'https://YOUR_RAILWAY_URL';
+  // ─────────────────────────────────────────────────────────────────────
+
   import { initializeApp }                                          from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
   import { getAuth, signInWithEmailAndPassword,
            createUserWithEmailAndPassword, sendPasswordResetEmail,
@@ -471,7 +475,7 @@
     btn.disabled = true;
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, password);
-      // Write user profile to Firestore
+      // Write user profile to Firestore (drives dashboard display)
       await setDoc(doc(db, 'users', cred.user.uid), {
         firstName,
         lastName,
@@ -481,6 +485,15 @@
         trialActive:  true,
         createdAt:    serverTimestamp(),
       });
+      // Sync to Railway Postgres (drives license verification + Stripe)
+      try {
+        const token = await cred.user.getIdToken();
+        await fetch(`${API}/api/user/sync`, {
+          method:  'POST',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ firstName, lastName, plan }),
+        });
+      } catch (_) { /* Non-fatal — sync can be retried on next login */ }
       // onAuthStateChanged fires → showDashboard()
     } catch (err) {
       showError('trial-error', authErrorMsg(err.code));

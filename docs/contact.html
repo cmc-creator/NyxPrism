@@ -338,23 +338,10 @@
   <a href="privacy.html">Privacy Policy</a>
 </footer>
 
-<script type="module">
-  import { initializeApp }                      from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-  import { getFirestore, collection, addDoc,
-           serverTimestamp }                    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-
-  const firebaseConfig = {
-    apiKey:            "AIzaSyD7bj__SwM4gE_yDnM9jjmzOgh6mX4NiD0",
-    authDomain:        "nyxprism-2a817.firebaseapp.com",
-    projectId:         "nyxprism-2a817",
-    storageBucket:     "nyxprism-2a817.firebasestorage.app",
-    messagingSenderId: "388040998105",
-    appId:             "1:388040998105:web:8e3fbfd27db0fdd60dd2c8",
-    measurementId:     "G-7XMV6H0KNM"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db  = getFirestore(app);
+<script>
+  // ── Update this once Railway gives you a URL ─────────────────────────
+  const API = 'https://YOUR_RAILWAY_URL';
+  // ─────────────────────────────────────────────────────────────────────
 
   const form      = document.getElementById('contact-form');
   const statusEl  = document.getElementById('form-status');
@@ -362,7 +349,7 @@
 
   function showStatus(msg, type) {
     statusEl.textContent = msg;
-    statusEl.className = 'form-status ' + type;
+    statusEl.className   = 'form-status ' + type;
     statusEl.style.display = 'block';
   }
 
@@ -381,15 +368,17 @@
     }
 
     submitBtn.textContent = 'Sending\u2026';
-    submitBtn.disabled = true;
+    submitBtn.disabled    = true;
     statusEl.style.display = 'none';
 
     try {
-      await addDoc(collection(db, 'contact_messages'), {
-        firstName, lastName, email, subject, message,
-        createdAt: serverTimestamp(),
-        read: false,
+      const res = await fetch(`${API}/api/contact`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ firstName, lastName, email, subject, message }),
       });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Unknown error');
       showStatus('Message sent \u2014 we\u2019ll get back to you within 48 hours.', 'success');
       form.reset();
     } catch (err) {
@@ -397,7 +386,7 @@
       console.error(err);
     } finally {
       submitBtn.textContent = 'Send Message';
-      submitBtn.disabled = false;
+      submitBtn.disabled    = false;
     }
   });
 
