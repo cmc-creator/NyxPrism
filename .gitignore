@@ -1,0 +1,10 @@
+nyxprism.egg-info/
+*.egg-info/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+dist/
+build/
+*.egg
+.eggs/
