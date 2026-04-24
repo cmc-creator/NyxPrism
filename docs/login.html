@@ -327,7 +327,7 @@
   import { getAuth, signInWithEmailAndPassword,
            createUserWithEmailAndPassword, sendPasswordResetEmail,
            onAuthStateChanged, signOut }                            from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-  import { getFirestore, doc, setDoc, getDoc,
+  import { getFirestore, doc, setDoc,
            serverTimestamp }                                        from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
   // ── REPLACE THESE VALUES WITH YOUR FIREBASE PROJECT CONFIG ──────────
@@ -388,44 +388,9 @@
     return map[code] || 'Something went wrong. Please try again.';
   }
 
-  /* ── LOGGED-IN DASHBOARD STATE ── */
-  async function showDashboard(user) {
-    let plan = 'community';
-    let firstName = '';
-    try {
-      const snap = await getDoc(doc(db, 'users', user.uid));
-      if (snap.exists()) {
-        const d = snap.data();
-        plan      = d.plan      || 'community';
-        firstName = d.firstName || '';
-      }
-    } catch (_) { /* Firestore rules may block before profile exists */ }
-
-    document.querySelector('.tab-row').style.display = 'none';
-    document.querySelector('.auth-card').innerHTML = `
-      <div style="text-align:center;padding:.5rem 0;">
-        <div style="width:56px;height:56px;border-radius:50%;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.28);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        </div>
-        <div style="font-size:1.25rem;font-weight:800;letter-spacing:-.025em;margin-bottom:.35rem;">Welcome back${firstName ? ', ' + firstName : ''}!</div>
-        <div style="font-size:.85rem;color:var(--muted);margin-bottom:1.75rem;">${user.email}</div>
-        <div style="background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);border-radius:var(--radius-sm);padding:.85rem 1rem;margin-bottom:1.75rem;">
-          <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.09em;margin-bottom:.4rem;">Active Plan</div>
-          <div style="font-size:1.05rem;font-weight:700;color:var(--accent-bright);text-transform:capitalize;">${plan}</div>
-        </div>
-        <a href="index.html" style="display:block;width:100%;padding:.75rem;border-radius:var(--radius-sm);background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff;font-weight:700;font-size:.9rem;margin-bottom:.75rem;text-decoration:none;">Back to Home</a>
-        <button id="signout-btn" style="width:100%;padding:.7rem;border:1px solid var(--border2);border-radius:var(--radius-sm);background:transparent;color:var(--muted);font-family:inherit;font-size:.875rem;font-weight:600;cursor:pointer;transition:border-color .15s,color .15s;">Sign Out</button>
-      </div>
-    `;
-    document.getElementById('signout-btn').addEventListener('click', async () => {
-      await signOut(auth);
-      location.reload();
-    });
-  }
-
-  /* ── OBSERVE AUTH STATE (handles page reload while still logged in) ── */
+  /* ── OBSERVE AUTH STATE — redirect to dashboard if already logged in ── */
   onAuthStateChanged(auth, user => {
-    if (user) showDashboard(user);
+    if (user) window.location.replace('dashboard.html');
   });
 
   /* ── LOGIN FORM ── */

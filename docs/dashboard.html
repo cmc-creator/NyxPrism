@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard &mdash; NyxPrism&#8482;</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:            #06080d;
+      --bg2:           #0b0f18;
+      --surface:       #0f1724;
+      --surface2:      #141e2e;
+      --border:        #1b2840;
+      --border2:       #253548;
+      --border3:       #2d4060;
+      --accent:        #7c3aed;
+      --accent3:       #5b21b6;
+      --accent-bright: #a78bfa;
+      --text:          #f0f4fc;
+      --text2:         #c8d3e0;
+      --text3:         #9aaec4;
+      --muted:         #6b7d96;
+      --muted2:        #4e5f75;
+      --green:         #34d399;
+      --yellow:        #fbbf24;
+      --red:           #f87171;
+      --radius-sm:     8px;
+      --radius:        12px;
+      --radius-lg:     16px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+    a { color: var(--accent-bright); text-decoration: none; }
+    a:hover { color: var(--text); }
+    code, .mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* ── LOADING SCREEN ── */
+    #loading-screen {
+      position: fixed; inset: 0; background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 999; transition: opacity .3s;
+    }
+    .spinner {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 3px solid var(--border2); border-top-color: var(--accent-bright);
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 200;
+      background: rgba(6,8,13,.9);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem; height: 62px;
+      display: flex; align-items: center; gap: 1.25rem;
+    }
+    .nav-brand { font-size: 1.05rem; font-weight: 800; letter-spacing: -.025em; }
+    .nav-brand em { color: var(--accent-bright); font-style: normal; }
+    .nav-sep { flex: 1; }
+    .nav-email { font-size: .8rem; color: var(--muted); }
+    .signout-btn {
+      font-size: .8rem; font-weight: 600; color: var(--muted);
+      background: none; border: 1px solid var(--border2); border-radius: var(--radius-sm);
+      padding: .35rem .8rem; cursor: pointer; font-family: inherit;
+      transition: color .15s, border-color .15s;
+    }
+    .signout-btn:hover { color: var(--text); border-color: var(--border3); }
+
+    /* ── PAGE GLOW ── */
+    .page-glow {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(124,58,237,.1) 0%, transparent 60%);
+    }
+
+    /* ── LAYOUT ── */
+    .page-wrap {
+      position: relative; z-index: 1;
+      max-width: 860px; margin: 0 auto;
+      padding: 2.5rem 1.5rem 5rem;
+    }
+
+    /* ── WELCOME BAND ── */
+    .welcome {
+      display: flex; align-items: center; gap: 1.25rem;
+      background: var(--surface); border: 1px solid var(--border2);
+      border-radius: var(--radius-lg); padding: 1.5rem 1.75rem;
+      margin-bottom: 2rem;
+    }
+    .avatar {
+      width: 52px; height: 52px; flex-shrink: 0; border-radius: 50%;
+      background: rgba(124,58,237,.12); border: 1px solid rgba(124,58,237,.28);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .avatar svg { width: 22px; height: 22px; stroke: var(--accent-bright); }
+    .welcome-text h1 { font-size: 1.2rem; font-weight: 800; letter-spacing: -.02em; margin-bottom: .2rem; }
+    .welcome-text p  { font-size: .85rem; color: var(--muted); }
+
+    /* ── PLAN BADGE ── */
+    .plan-band {
+      background: var(--surface); border: 1px solid var(--border2);
+      border-radius: var(--radius-lg); padding: 1.4rem 1.75rem;
+      margin-bottom: 2rem;
+      display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center;
+    }
+    .plan-detail { flex: 1; min-width: 160px; }
+    .plan-label  { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); margin-bottom: .3rem; }
+    .plan-value  { font-size: 1.05rem; font-weight: 800; color: var(--accent-bright); text-transform: capitalize; }
+    .status-pill {
+      display: inline-flex; align-items: center; gap: .4rem;
+      font-size: .75rem; font-weight: 700; letter-spacing: .04em;
+      padding: .3rem .85rem; border-radius: 999px;
+    }
+    .status-pill.active   { background: rgba(52,211,153,.1); color: var(--green);  border: 1px solid rgba(52,211,153,.25); }
+    .status-pill.trialing { background: rgba(251,191,36,.1);  color: var(--yellow); border: 1px solid rgba(251,191,36,.25); }
+    .status-pill.inactive { background: rgba(248,113,113,.1); color: var(--red);    border: 1px solid rgba(248,113,113,.25); }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+    .trial-note { font-size: .78rem; color: var(--muted); margin-top: .4rem; }
+
+    /* ── GRID ── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 2rem; }
+    @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--surface); border: 1px solid var(--border2);
+      border-radius: var(--radius-lg); padding: 1.5rem;
+    }
+    .card-header {
+      display: flex; align-items: center; gap: .75rem; margin-bottom: 1.1rem;
+    }
+    .card-icon {
+      width: 36px; height: 36px; flex-shrink: 0; border-radius: var(--radius-sm);
+      background: rgba(124,58,237,.1); border: 1px solid rgba(124,58,237,.2);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .card-icon svg { width: 16px; height: 16px; stroke: var(--accent-bright); }
+    .card h2 { font-size: .95rem; font-weight: 700; }
+
+    /* ── INSTALL STEPS ── */
+    .install-steps { display: flex; flex-direction: column; gap: .85rem; }
+    .step { display: flex; flex-direction: column; gap: .4rem; }
+    .step-label { font-size: .72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; }
+    .code-block {
+      background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: .6rem .9rem; font-family: 'JetBrains Mono', monospace;
+      font-size: .82rem; color: var(--text2);
+      display: flex; align-items: center; justify-content: space-between; gap: .5rem;
+    }
+    .copy-btn {
+      flex-shrink: 0; background: none; border: none; cursor: pointer;
+      color: var(--muted); padding: .1rem; transition: color .15s;
+    }
+    .copy-btn:hover { color: var(--accent-bright); }
+    .copy-btn svg { width: 14px; height: 14px; }
+
+    /* ── QUICK LINKS ── */
+    .quick-links { display: flex; flex-direction: column; gap: .6rem; }
+    .quick-link {
+      display: flex; align-items: center; gap: .75rem; padding: .7rem .85rem;
+      border-radius: var(--radius-sm); border: 1px solid var(--border);
+      color: var(--text2); font-size: .875rem; font-weight: 500;
+      transition: border-color .15s, background .15s, color .15s;
+    }
+    .quick-link:hover { border-color: var(--border3); background: var(--surface2); color: var(--text); }
+    .quick-link svg { width: 15px; height: 15px; stroke: var(--muted); flex-shrink: 0; }
+
+    /* ── FULL-WIDTH CARD ── */
+    .card-full { margin-bottom: 1.25rem; }
+    .cmd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: .6rem; margin-top: .25rem; }
+    .cmd-item {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: .55rem .85rem;
+      font-family: 'JetBrains Mono', monospace; font-size: .78rem; color: var(--text3);
+    }
+    .cmd-item span { color: var(--accent-bright); }
+  </style>
+</head>
+<body>
+
+<div id="loading-screen"><div class="spinner"></div></div>
+<div class="page-glow"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand"><em>Nyx</em>Prism&#8482;</div>
+  <div class="nav-sep"></div>
+  <div class="nav-email" id="nav-email"></div>
+  <button class="signout-btn" id="signout-btn">Sign Out</button>
+</nav>
+
+<!-- CONTENT (hidden until auth confirmed) -->
+<div class="page-wrap" id="page-content" style="display:none">
+
+  <!-- WELCOME -->
+  <div class="welcome">
+    <div class="avatar">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </div>
+    <div class="welcome-text">
+      <h1 id="welcome-heading">Welcome to NyxPrism</h1>
+      <p id="welcome-sub">You're signed in and ready to go.</p>
+    </div>
+  </div>
+
+  <!-- PLAN STATUS -->
+  <div class="plan-band">
+    <div class="plan-detail">
+      <div class="plan-label">Current Plan</div>
+      <div class="plan-value" id="plan-name">Professional</div>
+      <div class="trial-note" id="trial-note"></div>
+    </div>
+    <div>
+      <div class="plan-label" style="margin-bottom:.5rem">Status</div>
+      <div class="status-pill trialing" id="status-pill">
+        <div class="status-dot"></div>
+        <span id="status-text">Trial Active</span>
+      </div>
+    </div>
+    <div style="margin-left:auto">
+      <a href="index.html#pricing" id="upgrade-link"
+         style="display:inline-block;padding:.55rem 1.1rem;border-radius:var(--radius-sm);background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:.825rem;font-weight:700;">
+        Upgrade Plan
+      </a>
+    </div>
+  </div>
+
+  <!-- INSTALL + LINKS -->
+  <div class="grid-2">
+
+    <!-- INSTALL CARD -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        </div>
+        <h2>Install NyxPrism CLI</h2>
+      </div>
+      <div class="install-steps">
+        <div class="step">
+          <div class="step-label">1 — Install</div>
+          <div class="code-block">
+            <span>pip install nyxprism</span>
+            <button class="copy-btn" data-copy="pip install nyxprism" title="Copy">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-label">2 — Run any command</div>
+          <div class="code-block">
+            <span>nyx --help</span>
+            <button class="copy-btn" data-copy="nyx --help" title="Copy">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-label">Requires Python 3.9+</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUICK LINKS CARD -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </div>
+        <h2>Quick Links</h2>
+      </div>
+      <div class="quick-links">
+        <a class="quick-link" href="index.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Home &amp; Pricing
+        </a>
+        <a class="quick-link" href="contact.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          Contact Support
+        </a>
+        <a class="quick-link" href="terms.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Terms of Service
+        </a>
+        <a class="quick-link" href="privacy.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Privacy Policy
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- COMMAND REFERENCE -->
+  <div class="card card-full">
+    <div class="card-header">
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      </div>
+      <h2>Common Commands</h2>
+    </div>
+    <div class="cmd-grid">
+      <div class="cmd-item"><span>nyx split</span> input.pdf</div>
+      <div class="cmd-item"><span>nyx merge</span> a.pdf b.pdf</div>
+      <div class="cmd-item"><span>nyx compress</span> input.pdf</div>
+      <div class="cmd-item"><span>nyx ocr</span> scan.pdf</div>
+      <div class="cmd-item"><span>nyx watermark</span> input.pdf</div>
+      <div class="cmd-item"><span>nyx protect</span> input.pdf</div>
+      <div class="cmd-item"><span>nyx extract</span> input.pdf</div>
+      <div class="cmd-item"><span>nyx ai name</span> input.pdf</div>
+    </div>
+  </div>
+
+</div><!-- /.page-wrap -->
+
+<script type="module">
+  import { initializeApp }       from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import { getAuth,
+           onAuthStateChanged,
+           signOut }             from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+  import { getFirestore,
+           doc, getDoc }         from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+  const firebaseConfig = {
+    apiKey:            "AIzaSyD7bj__SwM4gE_yDnM9jjmzOgh6mX4NiD0",
+    authDomain:        "nyxprism-2a817.firebaseapp.com",
+    projectId:         "nyxprism-2a817",
+    storageBucket:     "nyxprism-2a817.firebasestorage.app",
+    messagingSenderId: "388040998105",
+    appId:             "1:388040998105:web:8e3fbfd27db0fdd60dd2c8",
+    measurementId:     "G-7XMV6H0KNM"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  const loading     = document.getElementById('loading-screen');
+  const content     = document.getElementById('page-content');
+  const navEmail    = document.getElementById('nav-email');
+  const signoutBtn  = document.getElementById('signout-btn');
+
+  onAuthStateChanged(auth, async user => {
+    if (!user) {
+      // Not logged in — send to login
+      window.location.replace('login.html');
+      return;
+    }
+
+    // Populate nav
+    navEmail.textContent = user.email;
+
+    // Fetch Firestore profile
+    let firstName = '';
+    let plan      = 'professional';
+    let trialStart = null;
+    try {
+      const snap = await getDoc(doc(db, 'users', user.uid));
+      if (snap.exists()) {
+        const d   = snap.data();
+        firstName  = d.firstName || '';
+        plan       = d.plan      || 'professional';
+        trialStart = d.trialStart?.toDate?.() || null;
+      }
+    } catch (_) {}
+
+    // Welcome heading
+    document.getElementById('welcome-heading').textContent =
+      `Welcome${firstName ? ', ' + firstName : ''}!`;
+    document.getElementById('welcome-sub').textContent =
+      `You\u2019re signed in as ${user.email}`;
+
+    // Plan name
+    document.getElementById('plan-name').textContent =
+      plan.charAt(0).toUpperCase() + plan.slice(1);
+
+    // Trial countdown
+    const pill     = document.getElementById('status-pill');
+    const statusTx = document.getElementById('status-text');
+    const trialNote = document.getElementById('trial-note');
+
+    if (trialStart) {
+      const trialEnd = new Date(trialStart);
+      trialEnd.setDate(trialEnd.getDate() + 14);
+      const daysLeft = Math.max(0, Math.ceil((trialEnd - new Date()) / 86400000));
+
+      if (daysLeft > 0) {
+        pill.className     = 'status-pill trialing';
+        statusTx.textContent = 'Trial Active';
+        trialNote.textContent = `${daysLeft} day${daysLeft !== 1 ? 's' : ''} remaining in your free trial`;
+        document.getElementById('upgrade-link').textContent = 'Activate Subscription';
+      } else {
+        pill.className     = 'status-pill inactive';
+        statusTx.textContent = 'Trial Expired';
+        trialNote.textContent = 'Subscribe to keep using NyxPrism';
+        document.getElementById('upgrade-link').textContent = 'Subscribe Now';
+      }
+    } else {
+      pill.className     = 'status-pill active';
+      statusTx.textContent = 'Active';
+    }
+
+    // Show page, hide spinner
+    loading.style.opacity = '0';
+    setTimeout(() => loading.style.display = 'none', 300);
+    content.style.display = 'block';
+  });
+
+  signoutBtn.addEventListener('click', async () => {
+    await signOut(auth);
+    window.location.replace('login.html');
+  });
+
+  // Copy buttons
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(btn.dataset.copy).then(() => {
+        btn.style.color = 'var(--green)';
+        setTimeout(() => btn.style.color = '', 1500);
+      });
+    });
+  });
+</script>
+
+</body>
+</html>
