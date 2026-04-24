@@ -452,6 +452,155 @@
       .btn { padding: .7rem 1.25rem; font-size: .9rem; }
       .section { padding: 4.5rem 1.25rem; }
     }
+
+    /* ── PRODUCT DEMO ─────────────────────────────────────────────────── */
+    .demo-bg {
+      background: linear-gradient(160deg, var(--bg3) 0%, #0a0e1a 50%, var(--bg3) 100%);
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    }
+    .demo-inner {
+      max-width: 1160px; margin: 0 auto; padding: 6.5rem 2rem;
+      display: grid; grid-template-columns: 1fr 1.15fr; gap: 4.5rem; align-items: center;
+    }
+    @media (max-width: 900px) { .demo-inner { grid-template-columns: 1fr; gap: 3rem; } }
+    .demo-copy .s-eyebrow, .demo-copy .s-title, .demo-copy .s-sub { text-align: left; margin-left: 0; }
+    .demo-copy .s-title { font-size: clamp(1.6rem, 3.5vw, 2.4rem); margin-bottom: .8rem; }
+    .demo-copy .s-sub { max-width: 100%; margin-bottom: 1.8rem; }
+    .demo-bullets { list-style: none; margin-bottom: 2.5rem; }
+    .demo-bullets li {
+      display: flex; align-items: flex-start; gap: .75rem;
+      padding: .65rem 0; border-bottom: 1px solid var(--border);
+      font-size: .9rem; color: var(--text2);
+    }
+    .demo-bullets li:last-child { border: none; }
+    .db-icon { color: var(--accent-bright); flex-shrink: 0; margin-top: .1rem; }
+    .db-icon svg { width: 15px; height: 15px; }
+    .db-text strong { color: var(--text); }
+    /* TUI mock window */
+    .tui-window {
+      background: #07090f; border: 1px solid var(--border2); border-radius: var(--radius-lg);
+      overflow: hidden; box-shadow: 0 40px 100px rgba(0,0,0,.7), 0 0 0 1px rgba(124,58,237,.08);
+      font-family: 'JetBrains Mono', monospace; font-size: .72rem;
+    }
+    .tui-titlebar {
+      background: #0c1220; border-bottom: 1px solid var(--border);
+      padding: .55rem 1rem; display: flex; align-items: center; gap: .45rem;
+    }
+    .tui-titlebar span { margin-left: .4rem; color: var(--muted2); font-size: .68rem; }
+    .tui-body { display: grid; grid-template-columns: 210px 1fr; min-height: 380px; }
+    .tui-sidebar {
+      background: #080d16; border-right: 1px solid var(--border);
+      padding: .6rem 0;
+    }
+    .tui-sidebar-hdr {
+      font-size: .6rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--muted2); padding: .3rem .9rem .5rem;
+    }
+    .tui-menu-item {
+      padding: .42rem .9rem; font-size: .72rem; cursor: default;
+      display: flex; align-items: center; gap: .55rem; color: var(--muted);
+    }
+    .tui-menu-item.active {
+      background: rgba(124,58,237,.18); color: var(--accent-bright);
+      border-left: 2px solid var(--accent-bright);
+    }
+    .tui-menu-item svg { width: 12px; height: 12px; flex-shrink: 0; }
+    .tui-main { padding: 1.1rem 1.25rem; }
+    .tui-section-hdr {
+      font-size: .65rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--accent-bright); margin-bottom: .75rem;
+    }
+    .tui-input-row { display: flex; align-items: center; gap: .5rem; margin-bottom: .6rem; }
+    .tui-label { color: var(--muted2); font-size: .7rem; width: 90px; flex-shrink: 0; }
+    .tui-input {
+      background: #0b1220; border: 1px solid var(--border2); border-radius: 4px;
+      color: var(--cyan); padding: .28rem .55rem; font-size: .7rem; flex: 1;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .tui-input.highlight { border-color: var(--accent); color: var(--text2); }
+    .tui-divider { border: none; border-top: 1px solid var(--border); margin: .9rem 0; }
+    .tui-option-row { display: flex; align-items: center; gap: .6rem; margin-bottom: .55rem; }
+    .tui-radio {
+      width: 12px; height: 12px; border-radius: 50%;
+      border: 1px solid var(--border3); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .tui-radio.on { border-color: var(--accent-bright); background: rgba(167,139,250,.15); }
+    .tui-radio.on::after { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--accent-bright); }
+    .tui-option-label { font-size: .7rem; color: var(--text3); }
+    .tui-statusbar {
+      background: var(--accent); padding: .3rem 1rem;
+      display: flex; gap: 1.5rem; font-size: .65rem; color: rgba(255,255,255,.85);
+    }
+    .tui-btn-row { display: flex; gap: .6rem; margin-top: 1rem; }
+    .tui-btn {
+      padding: .35rem .9rem; border-radius: 5px; font-size: .68rem; font-family: inherit;
+      font-weight: 600; cursor: default;
+    }
+    .tui-btn-primary { background: var(--accent); color: #fff; }
+    .tui-btn-ghost { background: transparent; border: 1px solid var(--border2); color: var(--muted); }
+    .tui-log {
+      background: #060b12; border-top: 1px solid var(--border); padding: .7rem 1.25rem;
+      font-size: .68rem; line-height: 1.8;
+    }
+    .tlog-ok { color: var(--green); }
+    .tlog-p  { color: var(--accent-bright); }
+    .tlog-m  { color: var(--muted2); }
+
+    /* ── HOW IT WORKS ─────────────────────────────────────────────────── */
+    .steps-grid {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 0; position: relative;
+    }
+    @media (max-width: 720px) { .steps-grid { grid-template-columns: 1fr; } }
+    .step-card {
+      padding: 2.5rem 2rem; position: relative;
+    }
+    .step-card + .step-card { border-left: 1px solid var(--border); }
+    @media (max-width: 720px) { .step-card + .step-card { border-left: none; border-top: 1px solid var(--border); } }
+    .step-num {
+      font-size: 3.5rem; font-weight: 900; letter-spacing: -.06em; line-height: 1;
+      color: rgba(124,58,237,.18); margin-bottom: .75rem; font-variant-numeric: tabular-nums;
+    }
+    .step-card h3 { font-size: 1.05rem; font-weight: 700; letter-spacing: -.01em; margin-bottom: .5rem; }
+    .step-card p { font-size: .875rem; color: var(--muted); line-height: 1.65; }
+    .step-arrow {
+      position: absolute; right: -14px; top: 50%; transform: translateY(-50%);
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--surface2); border: 1px solid var(--border2);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--accent-bright); z-index: 1;
+    }
+    @media (max-width: 720px) { .step-arrow { display: none; } }
+    .step-arrow svg { width: 13px; height: 13px; }
+
+    /* ── COMMAND CAPABILITIES ─────────────────────────────────────────── */
+    .caps-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem;
+    }
+    .cap-group {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); overflow: hidden;
+    }
+    .cap-group-hdr {
+      background: var(--surface2); border-bottom: 1px solid var(--border);
+      padding: .75rem 1.25rem; display: flex; align-items: center; gap: .6rem;
+    }
+    .cap-group-hdr svg { width: 14px; height: 14px; color: var(--accent-bright); flex-shrink: 0; }
+    .cap-group-hdr span { font-size: .78rem; font-weight: 700; letter-spacing: -.01em; color: var(--text2); }
+    .cap-cmd-list { padding: .5rem 0; }
+    .cap-cmd {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .42rem 1.25rem; gap: .5rem;
+    }
+    .cap-cmd:hover { background: var(--surface2); }
+    .cap-cmd code { font-size: .75rem; color: var(--cyan); background: none; padding: 0; }
+    .cap-cmd-desc { font-size: .75rem; color: var(--muted2); text-align: right; flex-shrink: 0; max-width: 130px; }
+    .cap-ai-pill {
+      display: inline-block; background: rgba(124,58,237,.12);
+      border: 1px solid rgba(124,58,237,.25); color: var(--accent-bright);
+      font-size: .55rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+      padding: .05rem .3rem; border-radius: 999px; margin-left: .3rem;
+    }
   </style>
 </head>
 <body>
@@ -463,6 +612,7 @@
     <div class="nav-co">by NyxCollective LLC</div>
   </a>
   <div class="nav-links">
+    <a class="hide-md" href="#product">Product</a>
     <a class="hide-md" href="#features">Features</a>
     <a class="hide-md" href="#pricing">Pricing</a>
     <a class="hide-md" href="#faq">FAQ</a>
@@ -507,6 +657,242 @@
     <div class="stat"><div class="stat-num">MIT</div><div class="stat-label">Open Source</div></div>
     <div class="stat"><div class="stat-num">3.10+</div><div class="stat-label">Python Support</div></div>
   </div>
+</div>
+
+<hr class="divider" />
+
+<!-- PRODUCT DEMO -->
+<div class="demo-bg" id="product">
+  <div class="demo-inner">
+    <div class="demo-copy">
+      <div class="s-eyebrow">See it in action</div>
+      <h2 class="s-title">The Visual Interface That Makes PDF Automation Effortless</h2>
+      <p class="s-sub">The Professional tier ships with NyxPrism UI — a full TUI built on Textual. Every operation is a guided form. No command memorisation required.</p>
+      <ul class="demo-bullets">
+        <li>
+          <span class="db-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+          <span class="db-text"><strong>Browse and select</strong> any PDF from your filesystem with the built-in file picker</span>
+        </li>
+        <li>
+          <span class="db-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+          <span class="db-text"><strong>Choose an operation</strong> from the sidebar menu — AI Split, Compress, OCR, Merge and more</span>
+        </li>
+        <li>
+          <span class="db-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+          <span class="db-text"><strong>Real-time output log</strong> streams progress directly in the interface as jobs run</span>
+        </li>
+        <li>
+          <span class="db-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+          <span class="db-text"><strong>Keyboard-first design</strong> with full mouse support for hybrid workflows</span>
+        </li>
+      </ul>
+      <a class="btn btn-primary" href="login.html#trial" style="display:inline-flex;">Try the UI Free</a>
+    </div>
+    <!-- TUI mock -->
+    <div class="tui-window">
+      <div class="tui-titlebar">
+        <span class="tdot td-r"></span>
+        <span class="tdot td-y"></span>
+        <span class="tdot td-g"></span>
+        <span>NyxPrism&#8482; UI &nbsp;&mdash;&nbsp; AI Split</span>
+      </div>
+      <div class="tui-body">
+        <div class="tui-sidebar">
+          <div class="tui-sidebar-hdr">Operations</div>
+          <div class="tui-menu-item active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
+            AI Split
+          </div>
+          <div class="tui-menu-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 10h10M4 14h12M4 18h8"/></svg>
+            AI Summarize
+          </div>
+          <div class="tui-menu-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/></svg>
+            AI Rename
+          </div>
+          <div class="tui-menu-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+            Merge
+          </div>
+          <div class="tui-menu-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9L3 15M15 9l6 6M9 15L3 9M15 15l6-6"/></svg>
+            Compress
+          </div>
+          <div class="tui-menu-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            OCR
+          </div>
+          <div class="tui-menu-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Protect
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;flex:1;min-width:0;">
+          <div class="tui-main" style="flex:1;">
+            <div class="tui-section-hdr">AI Split &mdash; Detect &amp; Separate Documents</div>
+            <div class="tui-input-row">
+              <span class="tui-label">Source PDF</span>
+              <span class="tui-input highlight">inbox/batch_scan_apr24.pdf</span>
+            </div>
+            <div class="tui-input-row">
+              <span class="tui-label">Output Dir</span>
+              <span class="tui-input">split_output/</span>
+            </div>
+            <hr class="tui-divider" />
+            <div class="tui-section-hdr" style="margin-top:.1rem;">Strategy</div>
+            <div class="tui-option-row">
+              <div class="tui-radio on"></div>
+              <span class="tui-option-label" style="color:var(--accent-bright);">Auto (recommended)</span>
+            </div>
+            <div class="tui-option-row">
+              <div class="tui-radio"></div>
+              <span class="tui-option-label">LLM (OpenAI)</span>
+            </div>
+            <div class="tui-option-row">
+              <div class="tui-radio"></div>
+              <span class="tui-option-label">Heuristic (offline)</span>
+            </div>
+            <div class="tui-btn-row">
+              <div class="tui-btn tui-btn-primary">&#9654; Run</div>
+              <div class="tui-btn tui-btn-ghost">&#10227; Reset</div>
+            </div>
+          </div>
+          <div class="tui-log">
+            <div class="tlog-ok">&#10003; Detected 8 document boundaries</div>
+            <div class="tlog-p">&#8594; Q1_Financial_Report.pdf &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; p.1-6</div>
+            <div class="tlog-p">&#8594; NDA_Acme_Corp_2026.pdf &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; p.7-11</div>
+            <div class="tlog-p">&#8594; Invoice_0042_Vendor_X.pdf &nbsp; p.12-13</div>
+            <div class="tlog-m">... 5 more documents extracted</div>
+          </div>
+          <div class="tui-statusbar">
+            <span>&#9679; RUNNING</span>
+            <span>8 docs detected</span>
+            <span>batch_scan_apr24.pdf</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider" />
+
+<!-- HOW IT WORKS -->
+<section class="section" id="how-it-works" style="padding-bottom:3rem;">
+  <div class="s-eyebrow">Simple by design</div>
+  <h2 class="s-title">Three Steps to a Clean Document Archive</h2>
+  <p class="s-sub">No configuration files. No setup wizards. Drop a PDF in, get organised files out.</p>
+</section>
+<div style="border-top:1px solid var(--border); border-bottom:1px solid var(--border); max-width:1160px; margin:0 auto 6.5rem;">
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-num">01</div>
+      <h3>Drop Your Batch Scan</h3>
+      <p>Feed NyxPrism any multi-document PDF — a day's worth of scanned mail, a stack of contracts, or an invoice run. One file, any size.</p>
+      <div class="step-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">02</div>
+      <h3>AI Finds Every Boundary</h3>
+      <p>The heuristic engine (or GPT-4o-mini with your API key) reads each page, detects where one document ends and the next begins, and generates a descriptive file name for each.</p>
+      <div class="step-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">03</div>
+      <h3>Collect Your Named Files</h3>
+      <p>The output folder fills with individually named PDFs — <code>NDA_Acme_Corp.pdf</code>, <code>Invoice_0042.pdf</code>, <code>Q1_Report.pdf</code>. Ready to file, email, or archive.</p>
+    </div>
+  </div>
+</div>
+
+<!-- COMMAND CAPABILITIES -->
+<div class="tinted-bg">
+  <section class="section" id="capabilities" style="padding-top:5.5rem;padding-bottom:5.5rem;">
+    <div class="s-eyebrow">Complete capability set</div>
+    <h2 class="s-title">19 Commands. Every PDF Task Covered.</h2>
+    <p class="s-sub">One install handles everything. No juggling multiple tools or online converters.</p>
+    <div class="caps-grid">
+
+      <div class="cap-group">
+        <div class="cap-group-hdr">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
+          <span>AI Operations</span>
+        </div>
+        <div class="cap-cmd-list">
+          <div class="cap-cmd"><code>ai-split<span class="cap-ai-pill">AI</span></code><span class="cap-cmd-desc">Detect &amp; split batch scans</span></div>
+          <div class="cap-cmd"><code>ai-rename<span class="cap-ai-pill">AI</span></code><span class="cap-cmd-desc">Rename files by content</span></div>
+          <div class="cap-cmd"><code>ai-summarize<span class="cap-ai-pill">AI</span></code><span class="cap-cmd-desc">Generate document summaries</span></div>
+          <div class="cap-cmd"><code>ai-classify<span class="cap-ai-pill">AI</span></code><span class="cap-cmd-desc">Detect document type</span></div>
+          <div class="cap-cmd"><code>ai-extract-info<span class="cap-ai-pill">AI</span></code><span class="cap-cmd-desc">Pull structured JSON data</span></div>
+        </div>
+      </div>
+
+      <div class="cap-group">
+        <div class="cap-group-hdr">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.12 15.88M14.47 14.48L20 20M8.12 8.12L12 12"/></svg>
+          <span>Split &amp; Merge</span>
+        </div>
+        <div class="cap-cmd-list">
+          <div class="cap-cmd"><code>split</code><span class="cap-cmd-desc">By pages, ranges or size</span></div>
+          <div class="cap-cmd"><code>merge</code><span class="cap-cmd-desc">Combine multiple PDFs</span></div>
+          <div class="cap-cmd"><code>interleave</code><span class="cap-cmd-desc">Odd/even scan assembly</span></div>
+        </div>
+      </div>
+
+      <div class="cap-group">
+        <div class="cap-group-hdr">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <span>Page Operations</span>
+        </div>
+        <div class="cap-cmd-list">
+          <div class="cap-cmd"><code>rotate</code><span class="cap-cmd-desc">Rotate selected pages</span></div>
+          <div class="cap-cmd"><code>reorder</code><span class="cap-cmd-desc">Rearrange page order</span></div>
+          <div class="cap-cmd"><code>delete-pages</code><span class="cap-cmd-desc">Remove specific pages</span></div>
+        </div>
+      </div>
+
+      <div class="cap-group">
+        <div class="cap-group-hdr">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          <span>Convert</span>
+        </div>
+        <div class="cap-cmd-list">
+          <div class="cap-cmd"><code>to-images</code><span class="cap-cmd-desc">Render pages as PNG/JPEG</span></div>
+          <div class="cap-cmd"><code>from-images</code><span class="cap-cmd-desc">Assemble images to PDF</span></div>
+          <div class="cap-cmd"><code>compress</code><span class="cap-cmd-desc">Shrink file size</span></div>
+        </div>
+      </div>
+
+      <div class="cap-group">
+        <div class="cap-group-hdr">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span>Text &amp; OCR</span>
+        </div>
+        <div class="cap-cmd-list">
+          <div class="cap-cmd"><code>extract-text</code><span class="cap-cmd-desc">Pull selectable text</span></div>
+          <div class="cap-cmd"><code>ocr</code><span class="cap-cmd-desc">Tesseract OCR on scans</span></div>
+        </div>
+      </div>
+
+      <div class="cap-group">
+        <div class="cap-group-hdr">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span>Security &amp; Branding</span>
+        </div>
+        <div class="cap-cmd-list">
+          <div class="cap-cmd"><code>protect</code><span class="cap-cmd-desc">Password-encrypt PDFs</span></div>
+          <div class="cap-cmd"><code>unlock</code><span class="cap-cmd-desc">Remove protection</span></div>
+          <div class="cap-cmd"><code>watermark</code><span class="cap-cmd-desc">Text or image overlay</span></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
 </div>
 
 <hr class="divider" />
@@ -814,6 +1200,7 @@
     </div>
     <div class="footer-col">
       <h4>Product</h4>
+      <a href="#product">Product</a>
       <a href="#features">Features</a>
       <a href="#pricing">Pricing</a>
       <a href="#faq">FAQ</a>
