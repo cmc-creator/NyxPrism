@@ -6,3 +6,4 @@ tqdm>=4.60
 openai>=1.0
 pytesseract>=0.3
 reportlab>=4.0
+textual>=0.61
