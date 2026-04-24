@@ -496,7 +496,6 @@
       Start Free Trial
     </a>
     <a class="btn btn-secondary" href="login.html">Log In</a>
-    <a class="btn btn-secondary" href="#commands">All Commands</a>
   </div>
   <div class="install-row">
     <div class="install-pill">
@@ -865,77 +864,6 @@
 
 <hr class="divider" />
 
-<!-- COMMANDS TABLE -->
-<section class="section" id="commands">
-  <div class="s-eyebrow">Reference</div>
-  <h2 class="s-title">Every Command at a Glance</h2>
-  <p class="s-sub">All 19 commands available via <code>nyxprism &lt;command&gt;</code> or as a Python library import.</p>
-  <div class="cmd-wrap">
-    <table>
-      <thead><tr><th>Command</th><th>Description</th><th>Key Options</th></tr></thead>
-      <tbody>
-        <tr><td><code>ai-split</code> <span class="ai-badge">AI</span></td><td class="cmd-desc">Boundary detection + auto-rename output files</td><td><code>--batch-dir</code> <code>--strategy</code> <code>--no-ocr</code></td></tr>
-        <tr><td><code>ai-rename</code> <span class="ai-badge">AI</span></td><td class="cmd-desc">Rename PDFs using AI-suggested descriptive names</td><td><code>--dry-run</code> <code>--prefix</code> <code>--strategy</code></td></tr>
-        <tr><td><code>ai-summarize</code> <span class="ai-badge">AI</span></td><td class="cmd-desc">Summarize document content</td><td><code>--pages</code> <code>--sentences</code> <code>--output</code></td></tr>
-        <tr><td><code>ai-classify</code> <span class="ai-badge">AI</span></td><td class="cmd-desc">Classify document type (invoice, contract, etc.)</td><td><code>--strategy</code> <code>--model</code></td></tr>
-        <tr><td><code>ai-extract-info</code> <span class="ai-badge">AI</span></td><td class="cmd-desc">Extract structured key info as JSON</td><td><code>--output</code> <code>--strategy</code></td></tr>
-        <tr><td><code>split</code></td><td class="cmd-desc">Split by range, every N pages, boundaries, or size</td><td><code>--every</code> <code>--ranges</code> <code>--at-pages</code> <code>--max-size</code></td></tr>
-        <tr><td><code>merge</code></td><td class="cmd-desc">Merge multiple PDFs into one</td><td><code>--bookmarks</code></td></tr>
-        <tr><td><code>interleave</code></td><td class="cmd-desc">Interleave odd/even pages from a double-sided scan</td><td><code>--no-reverse</code></td></tr>
-        <tr><td><code>compress</code></td><td class="cmd-desc">Compress streams and re-encode images</td><td><code>--quality</code></td></tr>
-        <tr><td><code>ocr</code></td><td class="cmd-desc">Tesseract OCR for scanned PDFs</td><td><code>--lang</code> <code>--dpi</code> <code>--pages</code></td></tr>
-        <tr><td><code>extract-text</code></td><td class="cmd-desc">Extract selectable text layer</td><td><code>--pages</code> <code>--output</code></td></tr>
-        <tr><td><code>to-images</code></td><td class="cmd-desc">Render each page as PNG / JPEG</td><td><code>--dpi</code> <code>--format</code></td></tr>
-        <tr><td><code>from-images</code></td><td class="cmd-desc">Combine images into a PDF</td><td></td></tr>
-        <tr><td><code>watermark</code></td><td class="cmd-desc">Add text watermark to every page</td><td><code>--text</code> <code>--opacity</code> <code>--angle</code></td></tr>
-        <tr><td><code>protect</code></td><td class="cmd-desc">Password-encrypt a PDF</td><td><code>--password</code> <code>--owner-password</code></td></tr>
-        <tr><td><code>unlock</code></td><td class="cmd-desc">Remove password protection</td><td><code>--password</code></td></tr>
-        <tr><td><code>rotate</code></td><td class="cmd-desc">Rotate pages by 90/180/270&deg;</td><td><code>--degrees</code> <code>--pages</code></td></tr>
-        <tr><td><code>reorder</code></td><td class="cmd-desc">Reorder pages by index list</td><td></td></tr>
-        <tr><td><code>delete-pages</code></td><td class="cmd-desc">Delete specific pages</td><td></td></tr>
-      </tbody>
-    </table>
-  </div>
-</section>
-
-<hr class="divider" />
-
-<!-- QUICK START -->
-<div class="qs-bg">
-  <section class="section" style="padding-top:5.5rem;padding-bottom:5.5rem;">
-    <div class="s-eyebrow">Get started in under a minute</div>
-    <h2 class="s-title">Quick Start</h2>
-    <p class="s-sub">Install with pip and run your first AI split immediately. No account, no API key required for the heuristic engine.</p>
-    <div class="terminal" style="max-width:760px;margin:0 auto;">
-      <div class="t-bar">
-        <span class="tdot td-r"></span><span class="tdot td-y"></span><span class="tdot td-g"></span>
-        <span class="t-title">quick start</span>
-      </div>
-      <div class="t-body">
-        <div class="t-cm"># 1. Install</div>
-        <div><span class="t-p">$</span> <span class="t-c">pip install nyxprism</span></div>
-        <br>
-        <div class="t-cm"># 2. (Optional) Add your OpenAI key for LLM-quality results</div>
-        <div><span class="t-p">$</span> <span class="t-c">export OPENAI_API_KEY="sk-..."</span></div>
-        <br>
-        <div class="t-cm"># 3. AI-split a batch scan</div>
-        <div><span class="t-p">$</span> <span class="t-c">nyxprism ai-split batch.pdf --output-dir ./split/</span></div>
-        <br>
-        <div class="t-cm"># 4. Batch-rename every PDF in a folder</div>
-        <div><span class="t-p">$</span> <span class="t-c">nyxprism ai-rename *.pdf --dry-run</span></div>
-        <br>
-        <div class="t-cm"># 5. Summarize a document</div>
-        <div><span class="t-p">$</span> <span class="t-c">nyxprism ai-summarize report.pdf</span></div>
-        <br>
-        <div class="t-cm"># 6. Launch the visual TUI (Professional tier)</div>
-        <div><span class="t-p">$</span> <span class="t-c">nyxprism-ui</span></div>
-      </div>
-    </div>
-  </section>
-</div>
-
-<hr class="divider" />
-
 <!-- FAQ -->
 <section class="section" id="faq">
   <div class="s-eyebrow">Common questions</div>
@@ -999,13 +927,12 @@
       <a href="#features">Features</a>
       <a href="#pricing">Pricing</a>
       <a href="#ai">AI Tools</a>
-      <a href="#commands">Commands</a>
       <a href="#faq">FAQ</a>
     </div>
     <div class="footer-col">
       <h4>Developers</h4>
       <a href="https://pypi.org/project/nyxprism/" target="_blank" rel="noopener">PyPI</a>
-      <a href="#commands">Commands Reference</a>
+      <a href="https://pypi.org/project/nyxprism/" target="_blank" rel="noopener">Documentation</a>
       <a href="contact.html">Report a Bug</a>
     </div>
     <div class="footer-col">
