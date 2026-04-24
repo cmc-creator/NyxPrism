@@ -131,8 +131,14 @@
       letter-spacing: -.04em; line-height: 1.06; margin-bottom: 1.5rem;
     }
     .grad {
-      background: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 40%, #7c3aed 100%);
+      background: linear-gradient(90deg, #e9d5ff 0%, #a78bfa 20%, #7c3aed 50%, #a78bfa 80%, #e9d5ff 100%);
+      background-size: 300% 100%;
       -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+      animation: shimmer-grad 5s ease-in-out infinite;
+    }
+    @keyframes shimmer-grad {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
     }
     .hero-sub {
       max-width: 600px; margin: 0 auto 2.75rem; color: var(--text3);
@@ -149,8 +155,15 @@
     .btn-primary {
       background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
       color: #fff; box-shadow: 0 4px 28px rgba(124,58,237,.38);
+      position: relative; overflow: hidden;
     }
-    .btn-primary:hover { box-shadow: 0 6px 36px rgba(124,58,237,.55); transform: translateY(-1px); color: #fff; }
+    .btn-primary::after {
+      content: ''; position: absolute; top: 0; left: -100%; width: 55%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.2), transparent);
+      transform: skewX(-15deg); transition: left .5s ease;
+    }
+    .btn-primary:hover { box-shadow: 0 8px 40px rgba(124,58,237,.65); transform: translateY(-2px); color: #fff; }
+    .btn-primary:hover::after { left: 160%; }
     .btn-secondary {
       background: var(--surface); color: var(--text2); border: 1px solid var(--border2);
     }
@@ -207,12 +220,20 @@
     .feature-card {
       background: var(--surface); border: 1px solid var(--border);
       border-radius: var(--radius-lg); padding: 1.85rem;
-      transition: border-color .2s, box-shadow .2s;
+      transition: border-color .25s, box-shadow .25s, transform .25s;
+      position: relative; overflow: hidden;
+    }
+    .feature-card::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(124,58,237,.18) 0%, transparent 55%);
+      opacity: 0; transition: opacity .35s;
     }
     .feature-card:hover {
-      border-color: var(--border3);
-      box-shadow: 0 0 0 1px rgba(124,58,237,.12), 0 8px 32px rgba(0,0,0,.28);
+      border-color: rgba(124,58,237,.45);
+      box-shadow: 0 0 0 1px rgba(124,58,237,.15), 0 16px 48px rgba(0,0,0,.4), 0 0 60px rgba(124,58,237,.07);
+      transform: translateY(-3px);
     }
+    .feature-card:hover::before { opacity: 1; }
     .feat-icon {
       width: 42px; height: 42px; border-radius: 10px;
       background: var(--accent-glow); border: 1px solid rgba(124,58,237,.25);
@@ -601,6 +622,172 @@
       font-size: .55rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
       padding: .05rem .3rem; border-radius: 999px; margin-left: .3rem;
     }
+
+    /* ══ VISUAL EFFECTS ═══════════════════════════════════════════════ */
+
+    /* Hero decorative elements */
+    .hero-grid {
+      position: absolute; inset: 0; pointer-events: none; z-index: 0;
+      background-image: radial-gradient(circle, rgba(124,58,237,.13) 1px, transparent 1px);
+      background-size: 40px 40px;
+      mask-image: radial-gradient(ellipse 85% 85% at 50% 50%, black 10%, transparent 75%);
+      -webkit-mask-image: radial-gradient(ellipse 85% 85% at 50% 50%, black 10%, transparent 75%);
+    }
+    .hero-orb { position: absolute; border-radius: 50%; pointer-events: none; z-index: 0; }
+    .hero-orb-1 {
+      width: 650px; height: 650px;
+      background: radial-gradient(circle, rgba(124,58,237,.22) 0%, transparent 65%);
+      top: -280px; left: 50%; transform: translateX(-50%);
+      animation: orb1 9s ease-in-out infinite;
+    }
+    .hero-orb-2 {
+      width: 380px; height: 380px;
+      background: radial-gradient(circle, rgba(99,102,241,.16) 0%, transparent 65%);
+      bottom: -100px; right: 6%;
+      animation: orb2 12s ease-in-out infinite;
+    }
+    .hero-orb-3 {
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(167,139,250,.1) 0%, transparent 65%);
+      top: 15%; left: 2%;
+      animation: orb3 14s ease-in-out infinite;
+    }
+    @keyframes orb1 {
+      0%,100% { transform: translateX(-50%) scale(1); opacity: 1; }
+      50%      { transform: translateX(-50%) translateY(-55px) scale(1.12); opacity: .75; }
+    }
+    @keyframes orb2 {
+      0%,100% { transform: translate(0,0) scale(1); }
+      50%      { transform: translate(-45px,-65px) scale(1.18); }
+    }
+    @keyframes orb3 {
+      0%,100% { transform: translate(0,0) scale(1); }
+      50%      { transform: translate(55px,-45px) scale(.85); }
+    }
+    .hero-body { position: relative; z-index: 1; }
+
+    /* Badge shimmer sweep */
+    .hero-badge { position: relative; overflow: hidden; }
+    .hero-badge::after {
+      content: ''; position: absolute; top: 0; left: -100%; width: 45%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent);
+      animation: badge-shine 4s ease-in-out infinite;
+    }
+    @keyframes badge-shine { 0% { left: -100%; } 100% { left: 200%; } }
+
+    /* Scroll fade-up */
+    .fade-up {
+      opacity: 0; transform: translateY(28px);
+      transition: opacity .65s ease, transform .65s ease;
+      will-change: opacity, transform;
+    }
+    .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+    /* Nav shadow on scroll */
+    nav.scrolled {
+      box-shadow: 0 4px 40px rgba(0,0,0,.55), 0 1px 0 rgba(124,58,237,.18);
+      border-bottom-color: rgba(124,58,237,.22);
+    }
+
+    /* Noise film grain overlay */
+    body::after {
+      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+      opacity: .03;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-repeat: repeat; background-size: 200px 200px;
+    }
+
+    /* Stats glow */
+    .stat-num { text-shadow: 0 0 50px rgba(167,139,250,.45); }
+
+    /* Featured pricing card pulse glow */
+    @keyframes featured-pulse {
+      0%,100% { box-shadow: 0 0 0 1px rgba(124,58,237,.3), 0 24px 64px rgba(124,58,237,.15); }
+      50%      { box-shadow: 0 0 0 1px rgba(167,139,250,.55), 0 24px 80px rgba(124,58,237,.32), 0 0 100px rgba(124,58,237,.14); }
+    }
+    .pricing-card.featured { animation: featured-pulse 3.5s ease-in-out infinite; }
+
+    /* TUI window float */
+    .tui-window {
+      animation: tui-float 7s ease-in-out infinite;
+      transition: box-shadow .3s;
+    }
+    @keyframes tui-float {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-14px); }
+    }
+    .tui-window:hover {
+      box-shadow: 0 40px 100px rgba(0,0,0,.7), 0 0 0 1px rgba(124,58,237,.25), 0 0 80px rgba(124,58,237,.1);
+    }
+
+    /* Demo section glow orb */
+    .demo-bg { position: relative; overflow: hidden; }
+    .demo-bg::after {
+      content: ''; position: absolute; width: 700px; height: 700px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(124,58,237,.08) 0%, transparent 65%);
+      top: 50%; right: -200px; transform: translateY(-50%);
+      pointer-events: none;
+    }
+
+    /* Enhanced uc-card hover */
+    .uc-card { transition: border-color .25s, box-shadow .25s, transform .25s; }
+    .uc-card:hover {
+      border-color: rgba(124,58,237,.38);
+      box-shadow: 0 8px 32px rgba(0,0,0,.32), 0 0 50px rgba(124,58,237,.06);
+      transform: translateY(-3px);
+    }
+
+    /* Cap group hover */
+    .cap-group { transition: border-color .22s, box-shadow .22s, transform .22s; }
+    .cap-group:hover {
+      border-color: var(--border3);
+      box-shadow: 0 8px 28px rgba(0,0,0,.25);
+      transform: translateY(-2px);
+    }
+
+    /* Step numbers as gradient text */
+    .step-num {
+      background: linear-gradient(135deg, rgba(167,139,250,.4) 0%, rgba(124,58,237,.15) 100%);
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    /* Step card hover */
+    .step-card { transition: background .2s; }
+    .step-card:hover { background: rgba(124,58,237,.03); }
+
+    /* Details/FAQ hover */
+    details { transition: border-color .2s, box-shadow .2s; }
+    details:hover { border-color: var(--border2); }
+    details[open] { box-shadow: 0 4px 24px rgba(0,0,0,.2); }
+
+    /* CTA band extra glow layers */
+    .cta-band::after {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background:
+        radial-gradient(circle 350px at 20% 50%, rgba(124,58,237,.1), transparent),
+        radial-gradient(circle 450px at 80% 50%, rgba(99,102,241,.08), transparent);
+    }
+
+    /* Pricing card hover (non-featured) */
+    .pricing-card:not(.featured) { transition: border-color .25s, box-shadow .25s, transform .25s; }
+    .pricing-card:not(.featured):hover {
+      border-color: var(--border3);
+      box-shadow: 0 12px 40px rgba(0,0,0,.3);
+      transform: translateY(-3px);
+    }
+
+    /* Divider subtle glow line */
+    .divider { box-shadow: 0 1px 0 rgba(124,58,237,.05); }
+
+    /* Reduce motion */
+    @media (prefers-reduced-motion: reduce) {
+      .grad { animation: none; background-position: 0 50%; }
+      .tui-window { animation: none; }
+      .hero-orb-1, .hero-orb-2, .hero-orb-3 { animation: none; }
+      .pricing-card.featured { animation: none; }
+      .hero-badge::after { animation: none; }
+      .fade-up { transition: none; }
+    }
   </style>
 </head>
 <body>
@@ -626,34 +813,40 @@
 
 <!-- HERO -->
 <header class="hero">
-  <div class="hero-badge">
-    <span class="badge-dot"></span>
-    v1.3.0 &nbsp;&middot;&nbsp; Now with Visual TUI
-  </div>
-  <h1>
-    PDF Intelligence,<br>
-    <span class="grad">Fully Automated.</span>
-  </h1>
-  <p class="hero-sub">
-    NyxPrism&#8482; is the professional AI-powered PDF toolkit that auto-splits batch scans,
-    renames files by content, summarizes documents, and extracts structured data.
-    Runs from an elegant terminal interface or as a scriptable Python library.
-  </p>
-  <div class="cta-row">
-    <a class="btn btn-primary" href="login.html#trial">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg>
-      Start Free Trial
-    </a>
-    <a class="btn btn-secondary" href="login.html">Log In</a>
+  <div class="hero-grid"></div>
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+  <div class="hero-orb hero-orb-3"></div>
+  <div class="hero-body">
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      v1.3.0 &nbsp;&middot;&nbsp; Now with Visual TUI
+    </div>
+    <h1>
+      PDF Intelligence,<br>
+      <span class="grad">Fully Automated.</span>
+    </h1>
+    <p class="hero-sub">
+      NyxPrism&#8482; is the professional AI-powered PDF toolkit that auto-splits batch scans,
+      renames files by content, summarizes documents, and extracts structured data.
+      Runs from an elegant terminal interface or as a scriptable Python library.
+    </p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="login.html#trial">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg>
+        Start Free Trial
+      </a>
+      <a class="btn btn-secondary" href="login.html">Log In</a>
+    </div>
   </div>
 </header>
 
 <!-- STATS -->
 <div class="stats-strip">
   <div class="stats-inner">
-    <div class="stat"><div class="stat-num">19</div><div class="stat-label">CLI Commands</div></div>
-    <div class="stat"><div class="stat-num">5</div><div class="stat-label">AI Capabilities</div></div>
-    <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Offline Capable</div></div>
+    <div class="stat"><div class="stat-num" data-target="19" data-suffix="">19</div><div class="stat-label">CLI Commands</div></div>
+    <div class="stat"><div class="stat-num" data-target="5" data-suffix="">5</div><div class="stat-label">AI Capabilities</div></div>
+    <div class="stat"><div class="stat-num" data-target="100" data-suffix="%">100%</div><div class="stat-label">Offline Capable</div></div>
     <div class="stat"><div class="stat-num">MIT</div><div class="stat-label">Open Source</div></div>
     <div class="stat"><div class="stat-num">3.10+</div><div class="stat-label">Python Support</div></div>
   </div>
@@ -1229,6 +1422,73 @@
     </span>
   </div>
 </footer>
+
+<script>
+  /* ── NAV SHADOW ON SCROLL ── */
+  const _nav = document.querySelector('nav');
+  window.addEventListener('scroll', () => {
+    _nav.classList.toggle('scrolled', window.scrollY > 10);
+  }, { passive: true });
+
+  /* ── SCROLL FADE-UP ANIMATIONS ── */
+  const _io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); _io.unobserve(e.target); }
+    });
+  }, { threshold: 0.1 });
+
+  /* Apply fade-up to cards and headings */
+  let _delay = 0;
+  document.querySelectorAll(
+    '.feature-card, .uc-card, .cap-group, .pricing-card, .step-card, .faq-list details, .demo-bullets li'
+  ).forEach((el, i) => {
+    el.classList.add('fade-up');
+    /* Stagger siblings in the same grid */
+    el.style.transitionDelay = (i % 4 * 0.09) + 's';
+    _io.observe(el);
+  });
+  document.querySelectorAll('.s-eyebrow, .s-title, .s-sub, .tui-window, .steps-grid').forEach(el => {
+    el.classList.add('fade-up');
+    _io.observe(el);
+  });
+
+  /* ── STATS COUNT-UP ── */
+  const _sc = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      const el = e.target;
+      const target = parseFloat(el.dataset.target);
+      const suffix = el.dataset.suffix || '';
+      const dur = 1800;
+      const t0 = performance.now();
+      (function tick(now) {
+        const p = Math.min((now - t0) / dur, 1);
+        const v = 1 - Math.pow(1 - p, 3); /* ease-out cubic */
+        el.textContent = Math.round(v * target) + suffix;
+        if (p < 1) requestAnimationFrame(tick);
+      })(t0);
+      _sc.unobserve(el);
+    });
+  }, { threshold: 0.6 });
+  document.querySelectorAll('.stat-num[data-target]').forEach(el => _sc.observe(el));
+
+  /* ── FEATURE CARD MOUSE-TRACKING GLOW ── */
+  document.querySelectorAll('.feature-card').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100).toFixed(1) + '%');
+      card.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100).toFixed(1) + '%');
+    });
+  });
+
+  /* ── REDUCED MOTION: skip animations ── */
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.querySelectorAll('.fade-up').forEach(el => {
+      el.classList.add('visible');
+      el.style.transitionDelay = '0s';
+    });
+  }
+</script>
 
 </body>
 </html>
