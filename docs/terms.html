@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terms of Service &#8212; NyxPrism&#8482; | NyxCollective LLC</title>
+  <meta name="description" content="Terms of Service for NyxPrism, a product of NyxCollective LLC." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #07090f; --bg2: #0d1117; --surface: #111827;
+      --border: #1f2d42; --accent: #7c3aed; --accent-bright: #a78bfa;
+      --text: #e8edf5; --text2: #c4cdd8; --muted: #7a8da6; --muted2: #5a6a80;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-bright); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    nav {
+      position: sticky; top: 0; z-index: 200;
+      background: rgba(7,9,15,.9); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem; display: flex; align-items: center; gap: 1.5rem; height: 60px;
+    }
+    .nav-brand { display: flex; flex-direction: column; line-height: 1.15; }
+    .nav-brand .product-name { font-size: 1.05rem; font-weight: 800; color: var(--text); }
+    .nav-brand .product-name span { color: var(--accent-bright); }
+    .nav-brand .company-name { font-size: .62rem; font-weight: 500; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+    .nav-links { display: flex; gap: 1.4rem; margin-left: auto; align-items: center; }
+    .nav-links a { color: var(--muted); font-size: .875rem; font-weight: 500; transition: color .2s; }
+    .nav-links a:hover { color: var(--text); text-decoration: none; }
+
+    .page-hero {
+      background: linear-gradient(160deg, #0d1117 0%, #0f0a20 60%, #0d1117 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 4rem 2rem 3rem; text-align: center;
+    }
+    .page-hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 900; letter-spacing: -.025em; margin-bottom: .6rem; }
+    .page-hero .meta { color: var(--muted); font-size: .9rem; }
+
+    .legal-wrap { max-width: 780px; margin: 0 auto; padding: 4rem 2rem 6rem; }
+    .legal-wrap h2 { font-size: 1.2rem; font-weight: 700; margin: 2.5rem 0 .75rem; color: var(--text); }
+    .legal-wrap h2:first-child { margin-top: 0; }
+    .legal-wrap p { color: var(--text2); margin-bottom: 1rem; font-size: .95rem; }
+    .legal-wrap ul { color: var(--text2); font-size: .95rem; margin: .5rem 0 1rem 1.4rem; }
+    .legal-wrap ul li { margin-bottom: .5rem; }
+    .legal-wrap strong { color: var(--text); }
+    .divider { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+
+    footer {
+      background: var(--bg); border-top: 1px solid var(--border); padding: 2rem;
+      text-align: center; font-size: .82rem; color: var(--muted2);
+    }
+    footer a { color: var(--muted2); margin: 0 .5rem; }
+    footer a:hover { color: var(--muted); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">
+    <div class="product-name">&#127752; <span>Nyx</span>Prism&#8482;</div>
+    <div class="company-name">by NyxCollective LLC</div>
+  </div>
+  <div class="nav-links">
+    <a href="index.html">&#8592; Home</a>
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="https://github.com/cmc-creator/NyxPrism" target="_blank" rel="noopener">GitHub</a>
+  </div>
+</nav>
+
+<div class="page-hero">
+  <h1>Terms of Service</h1>
+  <p class="meta">NyxCollective LLC &nbsp;&#183;&nbsp; Effective Date: April 24, 2026 &nbsp;&#183;&nbsp; Last Updated: April 24, 2026</p>
+</div>
+
+<div class="legal-wrap">
+
+  <p>Please read these Terms of Service (&#8220;Terms&#8221;) carefully before using NyxPrism&#8482; (the &#8220;Software&#8221;), a product of <strong>NyxCollective LLC</strong> (&#8220;Company,&#8221; &#8220;we,&#8221; &#8220;us,&#8221; or &#8220;our&#8221;). By downloading, installing, or using the Software, you agree to be bound by these Terms.</p>
+
+  <h2>1. Acceptance of Terms</h2>
+  <p>By accessing or using NyxPrism&#8482; in any form &#8212; including installation via pip, use of the command-line interface, integration of the Python library, or access to this website &#8212; you agree to comply with and be bound by these Terms. If you do not agree to these Terms, do not use the Software.</p>
+
+  <h2>2. Description of Software</h2>
+  <p>NyxPrism&#8482; is an AI-enhanced PDF processing toolkit distributed as open-source software under the MIT License. It provides command-line and Python library interfaces for splitting, merging, compressing, OCR-processing, watermarking, protecting, and applying AI analysis to PDF documents.</p>
+  <p>The source code is hosted publicly at <a href="https://github.com/cmc-creator/NyxPrism" target="_blank" rel="noopener">github.com/cmc-creator/NyxPrism</a> and distributed via the Python Package Index (PyPI).</p>
+
+  <h2>3. MIT License and Open Source Terms</h2>
+  <p>NyxPrism&#8482; is released under the <strong>MIT License</strong>. Subject to the terms of the MIT License, you are free to:</p>
+  <ul>
+    <li>Use the Software for personal, commercial, or academic purposes at no cost</li>
+    <li>Copy, modify, merge, publish, and distribute the Software</li>
+    <li>Sublicense or sell copies of the Software</li>
+  </ul>
+  <p>The full MIT License text is included in the Software and available at <a href="https://github.com/cmc-creator/NyxPrism/blob/main/LICENSE" target="_blank" rel="noopener">github.com/cmc-creator/NyxPrism/blob/main/LICENSE</a>. These Terms of Service supplement but do not replace the MIT License.</p>
+
+  <h2>4. Trademark Notice</h2>
+  <p><strong>NyxPrism&#8482;</strong> and <strong>NyxCollective&#8482;</strong> are trademarks of NyxCollective LLC. The MIT License grants you rights to the underlying software code; it does not grant you rights to use our trademarks, trade names, service marks, or product names. You may not use our marks in a way that implies endorsement, affiliation, or sponsorship by NyxCollective LLC without our prior written consent.</p>
+
+  <h2>5. Third-Party Services</h2>
+  <p>Certain features of the Software optionally interact with third-party services:</p>
+  <ul>
+    <li><strong>OpenAI API:</strong> When the LLM strategy is enabled (<code>--strategy llm</code> or <code>--strategy auto</code> with an API key configured), the Software transmits text extracted from your PDF documents to the OpenAI API. This data transmission is subject to <a href="https://openai.com/policies/terms-of-use" target="_blank" rel="noopener">OpenAI&#8217;s Terms of Use</a> and <a href="https://openai.com/policies/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>. NyxCollective LLC has no control over and assumes no responsibility for OpenAI&#8217;s data handling practices.</li>
+    <li><strong>Tesseract OCR:</strong> An optional locally-installed open-source library. No data leaves your machine when using Tesseract.</li>
+  </ul>
+  <p>You are solely responsible for obtaining any API keys, complying with third-party terms of service, and any costs associated with third-party service usage.</p>
+
+  <h2>6. Acceptable Use</h2>
+  <p>You agree not to use the Software to:</p>
+  <ul>
+    <li>Process documents you do not own or have lawful rights to process</li>
+    <li>Violate any applicable law or regulation, including privacy, data protection, and intellectual property laws</li>
+    <li>Circumvent digital rights management (DRM) protections on documents</li>
+    <li>Process personal data of others without appropriate legal basis and consent</li>
+    <li>Engage in any activity that is harmful, fraudulent, or illegal</li>
+  </ul>
+
+  <h2>7. Data Privacy and Security</h2>
+  <p>NyxCollective LLC does not collect, store, or process any documents or personal data you process using the Software. All PDF processing occurs locally on your machine. See our <a href="privacy.html">Privacy Policy</a> for full details on what information is collected through this website and how it is used.</p>
+
+  <h2>8. Disclaimer of Warranties</h2>
+  <p>THE SOFTWARE IS PROVIDED &#8220;AS IS,&#8221; WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. NYCOLLECTIVE LLC DOES NOT WARRANT THAT THE SOFTWARE WILL BE ERROR-FREE, UNINTERRUPTED, OR FREE OF VIRUSES OR OTHER HARMFUL COMPONENTS.</p>
+  <p>AI-generated outputs (document names, summaries, classifications, extracted data) are produced by automated systems and may be inaccurate. You are responsible for reviewing and validating all AI-generated outputs before relying on them.</p>
+
+  <h2>9. Limitation of Liability</h2>
+  <p>TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL NYXCOLLECTIVE LLC, ITS MEMBERS, MANAGERS, EMPLOYEES, AGENTS, LICENSORS, OR SERVICE PROVIDERS BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING BUT NOT LIMITED TO LOSS OF PROFITS, DATA, USE, GOODWILL, OR OTHER INTANGIBLE LOSSES, ARISING OUT OF OR RELATED TO YOUR USE OF OR INABILITY TO USE THE SOFTWARE, EVEN IF NYXCOLLECTIVE LLC HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.</p>
+  <p>NYXCOLLECTIVE LLC&#8217;S TOTAL LIABILITY TO YOU FOR ALL CLAIMS ARISING OUT OF OR RELATED TO THESE TERMS OR THE SOFTWARE SHALL NOT EXCEED $0, AS THE SOFTWARE IS PROVIDED FREE OF CHARGE.</p>
+
+  <h2>10. Indemnification</h2>
+  <p>You agree to indemnify, defend, and hold harmless NyxCollective LLC and its members, managers, employees, and agents from and against any claims, liabilities, damages, judgments, awards, losses, costs, expenses, or fees (including reasonable attorneys&#8217; fees) arising out of or relating to your violation of these Terms or your use of the Software.</p>
+
+  <h2>11. Intellectual Property</h2>
+  <p>Except for the open-source code licensed to you under the MIT License, NyxCollective LLC retains all right, title, and interest in and to the Software, including all associated intellectual property rights. Nothing in these Terms transfers ownership of any NyxCollective LLC intellectual property to you.</p>
+
+  <h2>12. Modifications to the Software and Terms</h2>
+  <p>NyxCollective LLC reserves the right to modify the Software at any time. We may also revise these Terms from time to time. The most current version will always be posted at this URL. Continued use of the Software after changes are posted constitutes your acceptance of the revised Terms.</p>
+
+  <h2>13. Governing Law and Dispute Resolution</h2>
+  <p>These Terms shall be governed by and construed in accordance with the laws of the United States, without regard to its conflict of law provisions. Any legal action or proceeding arising under these Terms shall be brought exclusively in the appropriate courts, and you consent to personal jurisdiction therein.</p>
+
+  <h2>14. Severability</h2>
+  <p>If any provision of these Terms is found to be unenforceable or invalid, that provision will be limited or eliminated to the minimum extent necessary so that these Terms will otherwise remain in full force and effect.</p>
+
+  <h2>15. Entire Agreement</h2>
+  <p>These Terms, together with the MIT License and our Privacy Policy, constitute the entire agreement between you and NyxCollective LLC regarding your use of the Software and supersede all prior agreements relating to the subject matter herein.</p>
+
+  <h2>16. Contact</h2>
+  <p>If you have any questions about these Terms, please open an issue on our <a href="https://github.com/cmc-creator/NyxPrism/issues" target="_blank" rel="noopener">GitHub repository</a>.</p>
+
+  <hr class="divider" />
+
+  <p style="font-size:.85rem;color:var(--muted2);">&#169; 2024&#8211;2026 NyxCollective LLC. All rights reserved. NyxPrism&#8482; is a trademark of NyxCollective LLC.</p>
+
+</div>
+
+<footer>
+  <div>&#169; 2024&#8211;2026 NyxCollective LLC &nbsp;&#183;&nbsp; NyxPrism&#8482; is a trademark of NyxCollective LLC.</div>
+  <div style="margin-top:.5rem;">
+    <a href="index.html">Home</a>
+    <a href="terms.html">Terms of Service</a>
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="https://github.com/cmc-creator/NyxPrism" target="_blank" rel="noopener">GitHub</a>
+  </div>
+</footer>
+
+</body>
+</html>

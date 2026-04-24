@@ -3,668 +3,564 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NyxPrism – AI-Enhanced PDF Multi-Tool</title>
-  <meta name="description" content="NyxPrism is a powerful AI-enhanced PDF toolkit: split, merge, compress, OCR, watermark, protect, and AI bulk-split with automatic renaming." />
+  <title>NyxPrism&#8482; &#8212; AI-Powered PDF Multi-Tool | NyxCollective LLC</title>
+  <meta name="description" content="NyxPrism is the professional AI-enhanced PDF toolkit from NyxCollective LLC. Split, merge, compress, OCR, rename, summarize and extract structured data from PDFs." />
+  <meta property="og:title" content="NyxPrism&#8482; &#8212; AI-Powered PDF Multi-Tool" />
+  <meta property="og:description" content="Stop wrestling with PDFs. NyxPrism auto-splits batch scans, renames files intelligently, summarizes documents, and extracts structured data." />
+  <meta property="og:url" content="https://cmc-creator.github.io/NyxPrism/" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #0d1117;
-      --surface: #161b22;
-      --border: #30363d;
-      --accent: #7c3aed;
-      --accent-bright: #a78bfa;
-      --accent-glow: #7c3aed44;
-      --text: #e6edf3;
-      --muted: #8b949e;
-      --code-bg: #1f2937;
-      --green: #3fb950;
-      --yellow: #d29922;
+      --bg:           #07090f;
+      --bg2:          #0d1117;
+      --surface:      #111827;
+      --surface2:     #1a2235;
+      --border:       #1f2d42;
+      --border2:      #2d3f57;
+      --accent:       #7c3aed;
+      --accent2:      #6d28d9;
+      --accent-bright:#a78bfa;
+      --accent-glow:  rgba(124,58,237,.18);
+      --accent-glow2: rgba(124,58,237,.08);
+      --text:         #e8edf5;
+      --text2:        #c4cdd8;
+      --muted:        #7a8da6;
+      --muted2:       #5a6a80;
+      --code-bg:      #0f1923;
+      --green:        #34d399;
+      --yellow:       #fbbf24;
+      --cyan:         #67e8f9;
     }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-                   "Helvetica Neue", Arial, sans-serif;
-      line-height: 1.6;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
     }
-
     a { color: var(--accent-bright); text-decoration: none; }
     a:hover { text-decoration: underline; }
 
     /* ── NAV ── */
     nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(13, 17, 23, 0.85);
-      backdrop-filter: blur(12px);
+      position: sticky; top: 0; z-index: 200;
+      background: rgba(7,9,15,.9);
+      backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border);
       padding: 0 2rem;
-      display: flex;
-      align-items: center;
-      gap: 2rem;
-      height: 56px;
+      display: flex; align-items: center; gap: 1.5rem;
+      height: 60px;
     }
-    .nav-logo {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      gap: .5rem;
-    }
-    .nav-logo span { color: var(--accent-bright); }
-    .nav-links { display: flex; gap: 1.5rem; margin-left: auto; }
-    .nav-links a { color: var(--muted); font-size: .9rem; transition: color .2s; }
+    .nav-brand { display: flex; flex-direction: column; line-height: 1.15; flex-shrink: 0; }
+    .nav-brand .product-name { font-size: 1.05rem; font-weight: 800; color: var(--text); letter-spacing: -.01em; }
+    .nav-brand .product-name span { color: var(--accent-bright); }
+    .nav-brand .company-name { font-size: .62rem; font-weight: 500; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+    .nav-links { display: flex; gap: 1.4rem; margin-left: auto; align-items: center; }
+    .nav-links a { color: var(--muted); font-size: .875rem; font-weight: 500; transition: color .2s; }
     .nav-links a:hover { color: var(--text); text-decoration: none; }
+    .nav-cta { background: var(--accent); color: #fff !important; padding: .4rem 1rem; border-radius: 6px; font-size: .85rem !important; font-weight: 700 !important; transition: background .2s, transform .15s !important; }
+    .nav-cta:hover { background: var(--accent2) !important; transform: translateY(-1px); }
+    @media (max-width: 680px) { .nav-links .hide-mobile { display: none; } }
 
     /* ── HERO ── */
     .hero {
-      text-align: center;
-      padding: 6rem 2rem 4rem;
-      background: radial-gradient(ellipse at 50% -10%, var(--accent-glow) 0%, transparent 70%);
+      position: relative; padding: 7rem 2rem 5rem; text-align: center; overflow: hidden;
     }
-    .badge {
-      display: inline-block;
-      background: var(--accent-glow);
-      border: 1px solid var(--accent);
-      color: var(--accent-bright);
-      font-size: .75rem;
-      font-weight: 600;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      padding: .3rem .8rem;
-      border-radius: 999px;
-      margin-bottom: 1.5rem;
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% -5%, rgba(124,58,237,.22) 0%, transparent 65%),
+                  radial-gradient(ellipse 40% 40% at 80% 80%, rgba(99,102,241,.09) 0%, transparent 55%);
+      pointer-events: none;
     }
-    .hero h1 {
-      font-size: clamp(2.4rem, 6vw, 4rem);
-      font-weight: 800;
-      line-height: 1.15;
-      margin-bottom: 1rem;
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: var(--accent-glow); border: 1px solid rgba(124,58,237,.4);
+      color: var(--accent-bright); font-size: .75rem; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase;
+      padding: .35rem .9rem; border-radius: 999px; margin-bottom: 2rem;
     }
-    .hero h1 span { color: var(--accent-bright); }
-    .hero p {
-      max-width: 620px;
-      margin: 0 auto 2rem;
-      color: var(--muted);
-      font-size: 1.1rem;
-    }
-    .cta-row {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: .75rem;
-    }
+    .dot-pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-bright); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:.5; transform:scale(.85); } }
+    .hero h1 { font-size: clamp(2.6rem, 7vw, 5rem); font-weight: 900; letter-spacing: -.03em; line-height: 1.08; margin-bottom: 1.5rem; position: relative; }
+    .hero h1 .line2 { color: var(--accent-bright); }
+    .hero-sub { max-width: 640px; margin: 0 auto 2.5rem; color: var(--text2); font-size: 1.15rem; line-height: 1.7; }
+    .cta-row { display: flex; justify-content: center; flex-wrap: wrap; gap: .85rem; margin-bottom: 3.5rem; }
     .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: .5rem;
-      padding: .65rem 1.4rem;
-      border-radius: 8px;
-      font-size: .95rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: opacity .2s, transform .15s;
+      display: inline-flex; align-items: center; gap: .5rem;
+      padding: .75rem 1.6rem; border-radius: 8px; font-size: 1rem; font-weight: 700;
+      cursor: pointer; transition: opacity .2s, transform .15s, box-shadow .2s;
+      border: none; text-decoration: none !important;
     }
-    .btn:hover { opacity: .88; transform: translateY(-1px); text-decoration: none; }
-    .btn-primary { background: var(--accent); color: #fff; }
-    .btn-outline {
-      background: transparent;
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-    .btn-outline:hover { border-color: var(--accent-bright); color: var(--accent-bright); }
-
-    /* ── QUICK INSTALL ── */
-    .install-block {
-      display: flex;
-      justify-content: center;
-      margin-top: 3rem;
-    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary { background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%); color: #fff; box-shadow: 0 4px 24px rgba(124,58,237,.4); }
+    .btn-primary:hover { box-shadow: 0 6px 32px rgba(124,58,237,.55); }
+    .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border2); }
+    .btn-secondary:hover { border-color: var(--accent-bright); color: var(--accent-bright); }
+    .install-pill-wrap { display: flex; justify-content: center; }
     .install-pill {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: .6rem 1.2rem;
-      font-family: "SFMono-Regular", Consolas, monospace;
-      font-size: .9rem;
-      color: var(--green);
-      display: flex;
-      align-items: center;
-      gap: .75rem;
+      display: inline-flex; align-items: center; gap: .85rem;
+      background: var(--surface); border: 1px solid var(--border2);
+      border-radius: 10px; padding: .7rem 1.4rem;
+      font-family: 'JetBrains Mono', monospace; font-size: .9rem; color: var(--green);
     }
-    .install-pill .prompt { color: var(--muted); }
+    .install-pill .prompt { color: var(--muted2); }
     .copy-btn {
-      background: none;
-      border: none;
-      color: var(--muted);
-      cursor: pointer;
-      font-size: .8rem;
-      padding: 0 .4rem;
-      border-radius: 4px;
-      transition: color .2s;
+      background: none; border: 1px solid var(--border2); color: var(--muted);
+      cursor: pointer; font-size: .75rem; padding: .15rem .55rem;
+      border-radius: 4px; transition: all .2s; font-family: inherit;
     }
-    .copy-btn:hover { color: var(--text); }
+    .copy-btn:hover { color: var(--text); border-color: var(--accent-bright); }
 
-    /* ── FEATURES GRID ── */
-    .section { padding: 5rem 2rem; max-width: 1100px; margin: 0 auto; }
-    .section-label {
-      text-align: center;
-      font-size: .8rem;
-      font-weight: 700;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      color: var(--accent-bright);
-      margin-bottom: .75rem;
-    }
-    .section-title {
-      text-align: center;
-      font-size: clamp(1.6rem, 4vw, 2.4rem);
-      font-weight: 800;
-      margin-bottom: .75rem;
-    }
-    .section-sub {
-      text-align: center;
-      color: var(--muted);
-      max-width: 560px;
-      margin: 0 auto 3rem;
-    }
+    /* ── STATS STRIP ── */
+    .stats-strip { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 2rem; }
+    .stats-inner { max-width: 900px; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: space-around; gap: 2rem; }
+    .stat { text-align: center; }
+    .stat-num { font-size: 2rem; font-weight: 900; color: var(--accent-bright); line-height: 1; }
+    .stat-label { font-size: .8rem; color: var(--muted); margin-top: .25rem; text-transform: uppercase; letter-spacing: .07em; }
 
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1.25rem;
-    }
-    .feature-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.5rem;
-      transition: border-color .25s, box-shadow .25s;
-    }
-    .feature-card:hover {
-      border-color: var(--accent);
-      box-shadow: 0 0 20px var(--accent-glow);
-    }
-    .feature-icon {
-      font-size: 1.8rem;
-      margin-bottom: .75rem;
-    }
-    .feature-card h3 {
-      font-size: 1rem;
-      font-weight: 700;
-      margin-bottom: .4rem;
-    }
-    .feature-card p {
-      color: var(--muted);
-      font-size: .875rem;
-    }
-    .ai-badge {
-      display: inline-block;
-      background: var(--accent-glow);
-      border: 1px solid var(--accent);
-      color: var(--accent-bright);
-      font-size: .65rem;
-      font-weight: 700;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-      padding: .1rem .45rem;
-      border-radius: 999px;
-      margin-left: .4rem;
-      vertical-align: middle;
-    }
-
-    /* ── AI SECTION ── */
-    .ai-section {
-      background: linear-gradient(135deg, var(--surface) 0%, #1a1040 100%);
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      padding: 5rem 2rem;
-    }
-    .ai-inner { max-width: 1100px; margin: 0 auto; }
-    .ai-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2.5rem;
-      align-items: center;
-      margin-top: 3rem;
-    }
-    @media (max-width: 720px) { .ai-grid { grid-template-columns: 1fr; } }
-
-    .terminal {
-      background: #0a0e14;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-      font-family: "SFMono-Regular", Consolas, monospace;
-      font-size: .82rem;
-    }
-    .terminal-bar {
-      background: #1c2028;
-      padding: .5rem 1rem;
-      display: flex;
-      gap: .5rem;
-      align-items: center;
-    }
-    .dot { width: 12px; height: 12px; border-radius: 50%; }
-    .dot-r { background: #ff5f57; }
-    .dot-y { background: #febc2e; }
-    .dot-g { background: #28c840; }
-    .terminal-body { padding: 1.25rem 1.5rem; line-height: 1.8; }
-    .t-prompt { color: #6272a4; }
-    .t-cmd { color: var(--accent-bright); }
-    .t-comment { color: #44475a; }
-    .t-info { color: var(--muted); }
-    .t-success { color: var(--green); }
-    .t-file { color: #f1fa8c; }
-
-    .ai-features-list { list-style: none; }
-    .ai-features-list li {
-      display: flex;
-      gap: .75rem;
-      padding: .75rem 0;
-      border-bottom: 1px solid var(--border);
-    }
-    .ai-features-list li:last-child { border: none; }
-    .ai-feat-icon {
-      font-size: 1.3rem;
-      flex-shrink: 0;
-      margin-top: .1rem;
-    }
-    .ai-feat-content h4 { font-size: .95rem; font-weight: 700; margin-bottom: .2rem; }
-    .ai-feat-content p { color: var(--muted); font-size: .85rem; }
-
-    /* ── COMMANDS TABLE ── */
-    .cmd-table-wrap { overflow-x: auto; margin-top: 2rem; }
-    table { width: 100%; border-collapse: collapse; font-size: .9rem; }
-    th {
-      text-align: left;
-      padding: .75rem 1rem;
-      color: var(--muted);
-      font-weight: 600;
-      font-size: .8rem;
-      text-transform: uppercase;
-      letter-spacing: .06em;
-      border-bottom: 1px solid var(--border);
-    }
-    td { padding: .75rem 1rem; border-bottom: 1px solid var(--border); }
-    tr:last-child td { border-bottom: none; }
-    tbody tr:hover { background: var(--surface); }
-    code {
-      background: var(--code-bg);
-      padding: .15rem .45rem;
-      border-radius: 4px;
-      font-family: "SFMono-Regular", Consolas, monospace;
-      font-size: .82em;
-      color: var(--accent-bright);
-    }
-
-    /* ── STRATEGIES ── */
-    .strategies { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
-    @media (max-width: 640px) { .strategies { grid-template-columns: 1fr; } }
-    .strat-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 1.25rem;
-    }
-    .strat-card h4 { font-size: .95rem; margin-bottom: .4rem; }
-    .strat-card p { color: var(--muted); font-size: .83rem; }
-    .strat-stars { font-size: .85rem; margin-top: .5rem; }
-
-    /* ── FOOTER ── */
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 2rem;
-      text-align: center;
-      color: var(--muted);
-      font-size: .85rem;
-    }
-    footer a { color: var(--muted); }
-    footer a:hover { color: var(--text); }
-
-    /* ── DIVIDER ── */
+    /* ── SECTION COMMONS ── */
+    .section { padding: 6rem 2rem; max-width: 1140px; margin: 0 auto; }
+    .section-eyebrow { text-align: center; font-size: .72rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--accent-bright); margin-bottom: .6rem; }
+    .section-title { text-align: center; font-size: clamp(1.7rem, 4vw, 2.6rem); font-weight: 800; letter-spacing: -.025em; line-height: 1.15; margin-bottom: .8rem; }
+    .section-sub { text-align: center; color: var(--muted); max-width: 560px; margin: 0 auto 3.5rem; font-size: 1.02rem; }
     .divider { border: none; border-top: 1px solid var(--border); margin: 0; }
 
-    /* ── SCROLL FADE ── */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
+    /* ── FEATURES GRID ── */
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 1.25rem; }
+    .feature-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.75rem;
+      transition: border-color .25s, box-shadow .25s, transform .2s;
     }
-    .fade-up { animation: fadeUp .5s ease both; }
+    .feature-card:hover { border-color: var(--accent); box-shadow: 0 0 30px var(--accent-glow2); transform: translateY(-2px); }
+    .feature-icon { font-size: 2rem; margin-bottom: 1rem; display: block; }
+    .feature-card h3 { font-size: 1.02rem; font-weight: 700; margin-bottom: .4rem; }
+    .feature-card p { color: var(--muted); font-size: .88rem; line-height: 1.6; }
+    .ai-tag {
+      display: inline-block; background: var(--accent-glow); border: 1px solid var(--accent);
+      color: var(--accent-bright); font-size: .62rem; font-weight: 700; letter-spacing: .06em;
+      text-transform: uppercase; padding: .1rem .45rem; border-radius: 999px; margin-left: .35rem; vertical-align: middle;
+    }
+
+    /* ── USE CASES ── */
+    .usecase-bg { background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .usecase-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.5rem; }
+    .usecase-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; }
+    .usecase-card .uc-icon { font-size: 1.8rem; margin-bottom: .75rem; }
+    .usecase-card h4 { font-size: .98rem; font-weight: 700; margin-bottom: .35rem; }
+    .usecase-card p { font-size: .85rem; color: var(--muted); line-height: 1.55; }
+
+    /* ── AI SECTION ── */
+    .ai-bg { background: linear-gradient(160deg, #0d1117 0%, #120a2e 50%, #0d1117 100%); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .ai-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 3rem; align-items: center; }
+    @media (max-width: 760px) { .ai-grid { grid-template-columns: 1fr; } }
+    .terminal {
+      background: #040810; border: 1px solid var(--border); border-radius: 14px; overflow: hidden;
+      font-family: 'JetBrains Mono', monospace; font-size: .78rem;
+      box-shadow: 0 24px 64px rgba(0,0,0,.5);
+    }
+    .terminal-bar { background: #0e131d; padding: .6rem 1rem; display: flex; gap: .5rem; align-items: center; border-bottom: 1px solid var(--border); }
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; } .dot-y { background: #febc2e; } .dot-g { background: #28c840; }
+    .terminal-title { color: var(--muted2); font-size: .72rem; margin-left: .5rem; }
+    .terminal-body { padding: 1.4rem 1.6rem; line-height: 2; }
+    .t-prompt { color: #4a5568; }
+    .t-cmd { color: var(--accent-bright); font-weight: 500; }
+    .t-comment { color: #2d3f57; }
+    .t-info { color: var(--muted2); }
+    .t-success { color: var(--green); }
+    .t-file { color: var(--yellow); }
+    .t-key { color: var(--cyan); }
+    .t-val { color: var(--green); }
+    .ai-feature-list { list-style: none; }
+    .ai-feature-list li { display: flex; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid var(--border); }
+    .ai-feature-list li:last-child { border: none; }
+    .ai-feat-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: .1rem; }
+    .ai-feat-body h4 { font-size: .95rem; font-weight: 700; margin-bottom: .2rem; }
+    .ai-feat-body p { font-size: .84rem; color: var(--muted); line-height: 1.55; }
+    .strategies { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.1rem; margin-top: 3rem; }
+    @media (max-width: 620px) { .strategies { grid-template-columns: 1fr; } }
+    .strat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.4rem; transition: border-color .2s; }
+    .strat-card.recommended { border-color: var(--accent); }
+    .strat-card h4 { font-size: .93rem; font-weight: 700; margin-bottom: .4rem; }
+    .strat-card p { font-size: .83rem; color: var(--muted); }
+    .strat-score { margin-top: .7rem; font-size: .8rem; }
+    .stars { color: var(--yellow); }
+    code {
+      background: var(--code-bg); padding: .15rem .4rem; border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace; font-size: .8em; color: var(--accent-bright);
+    }
+
+    /* ── COMMANDS TABLE ── */
+    .cmd-wrap { overflow-x: auto; margin-top: 2rem; border-radius: 12px; border: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+    th { text-align: left; padding: .85rem 1.1rem; color: var(--muted); font-weight: 600; font-size: .75rem; text-transform: uppercase; letter-spacing: .07em; background: var(--surface); border-bottom: 1px solid var(--border); }
+    td { padding: .8rem 1.1rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: var(--surface2); }
+    .cmd-desc { color: var(--text2); font-size: .85rem; }
+
+    /* ── FAQ ── */
+    .faq-list { max-width: 720px; margin: 0 auto; }
+    details { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.4rem; margin-bottom: .85rem; }
+    details[open] { border-color: var(--accent); }
+    summary { font-weight: 600; font-size: .97rem; list-style: none; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: '+'; color: var(--accent-bright); font-size: 1.2rem; }
+    details[open] summary::after { content: '\2212'; }
+    details p { color: var(--muted); font-size: .9rem; margin-top: .85rem; line-height: 1.65; }
+
+    /* ── CTA BAND ── */
+    .cta-band {
+      background: linear-gradient(135deg, #1a0a3e 0%, #0f0625 40%, #0d1117 100%);
+      border-top: 1px solid var(--border); padding: 6rem 2rem; text-align: center; position: relative; overflow: hidden;
+    }
+    .cta-band::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 70% at 50% 50%, rgba(124,58,237,.16) 0%, transparent 70%); pointer-events: none; }
+    .cta-band h2 { font-size: clamp(1.9rem, 4.5vw, 3rem); font-weight: 900; letter-spacing: -.025em; margin-bottom: 1rem; }
+    .cta-band p { color: var(--text2); font-size: 1.05rem; max-width: 520px; margin: 0 auto 2rem; }
+
+    /* ── FOOTER ── */
+    footer { background: var(--bg); border-top: 1px solid var(--border); padding: 3rem 2rem 2rem; }
+    .footer-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 2.5rem; }
+    @media (max-width: 720px) { .footer-inner { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 480px) { .footer-inner { grid-template-columns: 1fr; } }
+    .footer-brand h3 { font-size: 1.05rem; font-weight: 800; color: var(--text); margin-bottom: .3rem; }
+    .footer-brand h3 span { color: var(--accent-bright); }
+    .footer-brand .company { font-size: .78rem; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: .07em; margin-bottom: .85rem; }
+    .footer-brand p { font-size: .83rem; color: var(--muted2); line-height: 1.6; max-width: 260px; }
+    .footer-col h4 { font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); margin-bottom: .9rem; }
+    .footer-col a { display: block; font-size: .87rem; color: var(--muted); margin-bottom: .5rem; transition: color .2s; }
+    .footer-col a:hover { color: var(--text); text-decoration: none; }
+    .footer-bottom { max-width: 1100px; margin: 2.5rem auto 0; padding-top: 1.5rem; border-top: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; align-items: center; font-size: .8rem; color: var(--muted2); }
+    .footer-bottom a { color: var(--muted2); }
+    .footer-bottom a:hover { color: var(--muted); }
+    .tm-notice { font-size: .75rem; color: var(--muted2); margin-top: .6rem; }
+
+    /* ── QUICKSTART ── */
+    .quickstart-bg { background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:translateY(0); } }
+    .fade-up { animation: fadeUp .55s ease both; }
+    .delay-1 { animation-delay: .1s; }
+    .delay-2 { animation-delay: .2s; }
+    .delay-3 { animation-delay: .3s; }
+    @media (max-width: 580px) { .hero { padding: 5rem 1.25rem 3.5rem; } .btn { padding: .65rem 1.2rem; font-size: .9rem; } }
   </style>
 </head>
 <body>
 
-<!-- ── NAV ── -->
+<!-- NAV -->
 <nav>
-  <div class="nav-logo">🌈 <span>Nyx</span>Prism</div>
+  <div class="nav-brand">
+    <div class="product-name">&#127752; <span>Nyx</span>Prism&#8482;</div>
+    <div class="company-name">by NyxCollective LLC</div>
+  </div>
   <div class="nav-links">
-    <a href="#features">Features</a>
-    <a href="#ai">AI Tools</a>
-    <a href="#commands">Commands</a>
+    <a class="hide-mobile" href="#features">Features</a>
+    <a class="hide-mobile" href="#ai">AI Tools</a>
+    <a class="hide-mobile" href="#commands">Commands</a>
+    <a class="hide-mobile" href="#faq">FAQ</a>
     <a href="https://github.com/cmc-creator/NyxPrism" target="_blank" rel="noopener">GitHub</a>
-    <a href="https://pypi.org/project/nyxprism/" target="_blank" rel="noopener">PyPI</a>
+    <a class="nav-cta" href="https://pypi.org/project/nyxprism/" target="_blank" rel="noopener">Install Free &#8594;</a>
   </div>
 </nav>
 
-<!-- ── HERO ── -->
+<!-- HERO -->
 <header class="hero">
-  <div class="badge">Open Source · MIT License</div>
-  <h1>The AI‑Powered<br><span>PDF Multi‑Tool</span></h1>
-  <p>Split, merge, compress, OCR, watermark, protect — and let AI automatically
-     detect document boundaries, rename files, summarize content, and extract
-     key data.</p>
-  <div class="cta-row">
-    <a class="btn btn-primary" href="https://github.com/cmc-creator/NyxPrism" target="_blank" rel="noopener">
-      ★ Star on GitHub
+  <div class="hero-eyebrow">
+    <span class="dot-pulse"></span>
+    New &#8212; v1.2.0 with 5 AI commands
+  </div>
+  <h1 class="fade-up">
+    Stop Wrestling<br>
+    <span class="line2">With PDFs.</span>
+  </h1>
+  <p class="hero-sub fade-up delay-1">
+    NyxPrism&#8482; is the AI-powered PDF toolkit that auto-splits batch scans,
+    renames files intelligently, summarizes content, and pulls out structured data &#8212;
+    all from one CLI or Python library. No account required.
+  </p>
+  <div class="cta-row fade-up delay-2">
+    <a class="btn btn-primary" href="https://pypi.org/project/nyxprism/" target="_blank" rel="noopener">
+      &#128230; Install Free
     </a>
-    <a class="btn btn-outline" href="https://pypi.org/project/nyxprism/" target="_blank" rel="noopener">
-      📦 PyPI Package
+    <a class="btn btn-secondary" href="https://github.com/cmc-creator/NyxPrism" target="_blank" rel="noopener">
+      &#9733; Star on GitHub
     </a>
-    <a class="btn btn-outline" href="https://github.com/cmc-creator/NyxPrism#readme" target="_blank" rel="noopener">
-      📄 Documentation
+    <a class="btn btn-secondary" href="https://github.com/cmc-creator/NyxPrism#readme" target="_blank" rel="noopener">
+      &#128196; Docs
     </a>
   </div>
-  <div class="install-block">
+  <div class="install-pill-wrap fade-up delay-3">
     <div class="install-pill">
       <span class="prompt">$</span>
-      <span>pip install nyxprism</span>
-      <button class="copy-btn" onclick="navigator.clipboard.writeText('pip install nyxprism'); this.textContent='✓'; setTimeout(()=>this.textContent='copy',1500)">copy</button>
+      <span id="pip-cmd">pip install nyxprism</span>
+      <button class="copy-btn" onclick="navigator.clipboard.writeText('pip install nyxprism');this.textContent='&#10003;';setTimeout(function(){this.textContent='copy';}.bind(this),1600)">copy</button>
     </div>
   </div>
 </header>
 
+<!-- STATS STRIP -->
+<div class="stats-strip">
+  <div class="stats-inner">
+    <div class="stat"><div class="stat-num">19</div><div class="stat-label">CLI Commands</div></div>
+    <div class="stat"><div class="stat-num">5</div><div class="stat-label">AI Capabilities</div></div>
+    <div class="stat"><div class="stat-num">0</div><div class="stat-label">API Key Required</div></div>
+    <div class="stat"><div class="stat-num">MIT</div><div class="stat-label">License</div></div>
+    <div class="stat"><div class="stat-num">Python 3.10+</div><div class="stat-label">Compatible</div></div>
+  </div>
+</div>
+
 <hr class="divider" />
 
-<!-- ── FEATURES ── -->
+<!-- FEATURES -->
 <section class="section" id="features">
-  <div class="section-label">Everything you need</div>
-  <h2 class="section-title">Full PDF Toolkit</h2>
-  <p class="section-sub">Professional-grade PDF operations in a single CLI or Python library — no GUI required.</p>
-
+  <div class="section-eyebrow">Everything you need</div>
+  <h2 class="section-title">One Tool. Every PDF Task.</h2>
+  <p class="section-sub">Professional-grade operations in a single install &#8212; with AI baked in, not bolted on.</p>
   <div class="features-grid">
     <div class="feature-card">
-      <div class="feature-icon">🤖</div>
-      <h3>AI Bulk Split &amp; Rename <span class="ai-badge">AI</span></h3>
-      <p>Auto-detect document boundaries in a scanned batch PDF and rename each output descriptively — using LLM or built-in heuristics.</p>
+      <span class="feature-icon">&#129302;</span>
+      <h3>AI Bulk Split &amp; Rename <span class="ai-tag">AI</span></h3>
+      <p>Drop a 50-page scan containing 8 different documents. NyxPrism detects every boundary and names each output file descriptively &#8212; automatically.</p>
     </div>
     <div class="feature-card">
-      <div class="feature-icon">📝</div>
-      <h3>AI Summarize <span class="ai-badge">AI</span></h3>
-      <p>Generate a concise summary of any PDF's content. Perfect for quickly understanding large documents without reading every page.</p>
+      <span class="feature-icon">&#128221;</span>
+      <h3>AI Summarize <span class="ai-tag">AI</span></h3>
+      <p>Get a concise summary of any document in seconds. Target specific pages or let it determine what matters from the whole document.</p>
     </div>
     <div class="feature-card">
-      <div class="feature-icon">🏷️</div>
-      <h3>AI Classify &amp; Rename <span class="ai-badge">AI</span></h3>
-      <p>Detect document type (invoice, contract, report, etc.) and batch-rename files with AI-suggested descriptive names.</p>
+      <span class="feature-icon">&#127991;&#65039;</span>
+      <h3>AI Classify <span class="ai-tag">AI</span></h3>
+      <p>Instantly detect whether a PDF is an invoice, contract, report, letter, or resume &#8212; with zero manual reading.</p>
     </div>
     <div class="feature-card">
-      <div class="feature-icon">🔍</div>
-      <h3>AI Key Info Extraction <span class="ai-badge">AI</span></h3>
-      <p>Pull structured data — dates, amounts, parties, reference numbers — from any document as clean JSON output.</p>
+      <span class="feature-icon">&#128269;</span>
+      <h3>AI Key Info Extraction <span class="ai-tag">AI</span></h3>
+      <p>Pull dates, parties, amounts, and reference numbers as clean JSON &#8212; ready to feed into your database or workflow.</p>
     </div>
     <div class="feature-card">
-      <div class="feature-icon">✂️</div>
+      <span class="feature-icon">&#9999;&#65039;</span>
+      <h3>AI Rename <span class="ai-tag">AI</span></h3>
+      <p>Batch-rename a folder of scan_001.pdf files into meaningful names. Preview with <code>--dry-run</code> before committing.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">&#9986;&#65039;</span>
       <h3>Smart Split</h3>
-      <p>Split by page range, every N pages, explicit boundaries, or file-size limits. Batch-split a whole folder at once.</p>
+      <p>Every N pages, explicit ranges, page boundaries, or file-size limits. Batch-process a whole folder in one command.</p>
     </div>
     <div class="feature-card">
-      <div class="feature-icon">🔗</div>
+      <span class="feature-icon">&#128279;</span>
       <h3>Merge &amp; Interleave</h3>
-      <p>Concatenate PDFs, add bookmarks per file, or interleave odd/even scans into a single double-sided document.</p>
+      <p>Concatenate PDFs with bookmarks, or interleave odd/even scans into a perfect double-sided document.</p>
     </div>
     <div class="feature-card">
-      <div class="feature-icon">🗜️</div>
+      <span class="feature-icon">&#128290;</span>
       <h3>Compress</h3>
-      <p>FlateDecode stream compression and JPEG image re-encoding to dramatically reduce file size.</p>
+      <p>Shrink bloated PDFs using FlateDecode stream compression and configurable JPEG image re-encoding.</p>
     </div>
     <div class="feature-card">
-      <div class="feature-icon">👁️</div>
+      <span class="feature-icon">&#128065;&#65039;</span>
       <h3>OCR (Tesseract)</h3>
-      <p>Extract text from scanned / image PDFs using Tesseract. Automatic fallback during AI analysis for image-only pages.</p>
+      <p>Extract text from image-only scans. AI analysis automatically triggers OCR on blank pages so nothing is missed.</p>
     </div>
     <div class="feature-card">
-      <div class="feature-icon">🖼️</div>
-      <h3>PDF ↔ Images</h3>
-      <p>Convert PDFs to raster images (PNG/JPEG) or combine images back into a PDF. Extract embedded images from any PDF.</p>
+      <span class="feature-icon">&#128247;</span>
+      <h3>PDF &#8596; Images</h3>
+      <p>Render every page as PNG/JPEG, or assemble a stack of images back into a clean PDF with a single command.</p>
     </div>
     <div class="feature-card">
-      <div class="feature-icon">💧</div>
+      <span class="feature-icon">&#128167;</span>
       <h3>Watermark</h3>
-      <p>Add text or image watermarks to every page with configurable opacity and rotation angle.</p>
+      <p>Text or image watermarks with configurable opacity and rotation, applied across every page in one pass.</p>
     </div>
     <div class="feature-card">
-      <div class="feature-icon">🔒</div>
+      <span class="feature-icon">&#128274;</span>
       <h3>Protect &amp; Unlock</h3>
-      <p>Password-encrypt PDFs with separate user and owner passwords, or remove protection from existing files.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🔄</div>
-      <h3>Page Operations</h3>
-      <p>Rotate, reorder, or delete individual pages without touching the rest of the document.</p>
+      <p>Password-encrypt sensitive documents with separate user/owner passwords, or remove protection from existing PDFs.</p>
     </div>
   </div>
 </section>
 
 <hr class="divider" />
 
-<!-- ── AI SECTION ── -->
-<section class="ai-section" id="ai">
-  <div class="ai-inner">
-    <div class="section-label">Powered by LLM + Heuristics</div>
-    <h2 class="section-title">AI Everywhere — No Key Required</h2>
-    <p class="section-sub">Every AI feature works in heuristic mode with zero API cost. Add an OpenAI key for LLM-quality results.</p>
+<!-- USE CASES -->
+<div class="usecase-bg">
+  <section class="section" style="padding-top:5rem;padding-bottom:5rem;">
+    <div class="section-eyebrow">Built for real workflows</div>
+    <h2 class="section-title">Who Uses NyxPrism&#8482;</h2>
+    <p class="section-sub">From solo developers to enterprise automation pipelines.</p>
+    <div class="usecase-grid">
+      <div class="usecase-card">
+        <div class="uc-icon">&#9878;&#65039;</div>
+        <h4>Legal &amp; Compliance</h4>
+        <p>Extract key dates and parties from contracts automatically. Classify incoming documents and route them to the right folder instantly.</p>
+      </div>
+      <div class="usecase-card">
+        <div class="uc-icon">&#128188;</div>
+        <h4>Accounting &amp; Finance</h4>
+        <p>Pull amounts, invoice numbers, and vendor names from invoices as JSON. Automate the data entry nobody wants to do.</p>
+      </div>
+      <div class="usecase-card">
+        <div class="uc-icon">&#128230;</div>
+        <h4>Document Management</h4>
+        <p>Turn a pile of scan_001.pdf chaos into a perfectly named, organised archive with a single <code>ai-rename</code> command.</p>
+      </div>
+      <div class="usecase-card">
+        <div class="uc-icon">&#128300;</div>
+        <h4>Research &amp; Academia</h4>
+        <p>Summarise dense papers, extract citations and dates, and split multi-paper batch scans from the copier.</p>
+      </div>
+      <div class="usecase-card">
+        <div class="uc-icon">&#127973;</div>
+        <h4>Healthcare Records</h4>
+        <p>Split bulk scan exports into individual patient documents, extract key info, and apply compliant watermarks or passwords.</p>
+      </div>
+      <div class="usecase-card">
+        <div class="uc-icon">&#128736;&#65039;</div>
+        <h4>Developer Automation</h4>
+        <p>Drop NyxPrism into any Python pipeline or shell script. Scriptable, composable, and library-friendly with a clean Python API.</p>
+      </div>
+    </div>
+  </section>
+</div>
 
+<hr class="divider" />
+
+<!-- AI SECTION -->
+<div class="ai-bg" id="ai">
+  <section class="section">
+    <div class="section-eyebrow">Powered by LLM + Heuristics</div>
+    <h2 class="section-title">AI Everywhere &#8212; No Key Required</h2>
+    <p class="section-sub">Every AI feature has a built-in heuristic fallback &#8212; zero API cost, always available. Add an OpenAI key for maximum accuracy.</p>
     <div class="ai-grid">
-      <!-- Terminal demo -->
       <div class="terminal fade-up">
         <div class="terminal-bar">
-          <span class="dot dot-r"></span>
-          <span class="dot dot-y"></span>
-          <span class="dot dot-g"></span>
+          <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+          <span class="terminal-title">nyxprism &#183; ai-split + ai-extract-info</span>
         </div>
         <div class="terminal-body">
           <div><span class="t-prompt">$</span> <span class="t-cmd">nyxprism ai-split --batch-dir ./inbox/ --output-dir ./split/</span></div>
           <br>
-          <div class="t-info">[NyxPrism] Processing batch_scans.pdf …</div>
-          <div class="t-info">[NyxPrism] Running OCR on 3 blank page(s) …</div>
+          <div class="t-info">[NyxPrism] Processing batch_scans.pdf (22 pages)</div>
+          <div class="t-info">[NyxPrism] Running OCR on 3 image-only page(s)...</div>
+          <div class="t-info">[NyxPrism] Detecting boundaries (strategy=auto)...</div>
           <div class="t-info">[NyxPrism] Found 4 document(s) at pages: [1, 6, 11, 18]</div>
-          <div class="t-info">[NyxPrism] Generating document names …</div>
-          <div class="t-info">[NyxPrism] Splitting PDF …</div>
-          <div class="t-success">  [1/4] Pages 1–5   → <span class="t-file">invoice_2024-01-15.pdf</span></div>
-          <div class="t-success">  [2/4] Pages 6–10  → <span class="t-file">contract_service_agreement.pdf</span></div>
-          <div class="t-success">  [3/4] Pages 11–17 → <span class="t-file">quarterly_report_Q1_2024.pdf</span></div>
-          <div class="t-success">  [4/4] Pages 18–22 → <span class="t-file">letter_Dear_Alice.pdf</span></div>
+          <div class="t-success">  [1/4] Pages 1-5 &#8594; <span class="t-file">invoice_2024-01-15_acme.pdf</span></div>
+          <div class="t-success">  [2/4] Pages 6-10 &#8594; <span class="t-file">contract_service_agreement.pdf</span></div>
+          <div class="t-success">  [3/4] Pages 11-17 &#8594; <span class="t-file">quarterly_report_Q1_2024.pdf</span></div>
+          <div class="t-success">  [4/4] Pages 18-22 &#8594; <span class="t-file">letter_dear_alice.pdf</span></div>
           <br>
-          <div><span class="t-prompt">$</span> <span class="t-cmd">nyxprism ai-rename *.pdf --dry-run</span></div>
+          <div><span class="t-prompt">$</span> <span class="t-cmd">nyxprism ai-extract-info invoice_2024-01-15_acme.pdf</span></div>
           <br>
-          <div class="t-success">  scan_001.pdf → <span class="t-file">Q4_budget_forecast_2024.pdf</span></div>
-          <div class="t-success">  scan_002.pdf → <span class="t-file">vendor_agreement_acme_corp.pdf</span></div>
-          <div class="t-info">2 file(s) previewed (--dry-run, no changes made).</div>
+          <div><span style="color:#4a5568;">{</span></div>
+          <div>&nbsp;&nbsp;<span class="t-key">"document_type"</span>: <span class="t-val">"invoice"</span>,</div>
+          <div>&nbsp;&nbsp;<span class="t-key">"date"</span>: <span class="t-val">"2024-01-15"</span>,</div>
+          <div>&nbsp;&nbsp;<span class="t-key">"parties"</span>: <span class="t-val">"Acme Corp, Widget Ltd"</span>,</div>
+          <div>&nbsp;&nbsp;<span class="t-key">"amount"</span>: <span class="t-val">"$4,250.00"</span>,</div>
+          <div>&nbsp;&nbsp;<span class="t-key">"reference_number"</span>: <span class="t-val">"INV-20240115-042"</span></div>
+          <div><span style="color:#4a5568;">}</span></div>
         </div>
       </div>
-
-      <!-- Feature list -->
-      <ul class="ai-features-list">
+      <ul class="ai-feature-list">
         <li>
-          <div class="ai-feat-icon">🔀</div>
-          <div class="ai-feat-content">
-            <h4>ai-split — Bulk Split &amp; Auto-Rename</h4>
-            <p>Detect boundaries across a multi-document PDF, split, and name each file descriptively. Supports single files or an entire folder with <code>--batch-dir</code>.</p>
+          <div class="ai-feat-icon">&#128256;</div>
+          <div class="ai-feat-body">
+            <h4>ai-split &#8212; Bulk Split &amp; Auto-Rename</h4>
+            <p>Detect document boundaries inside a batch scan, split, and name each output file descriptively. Single file or entire folder with <code>--batch-dir</code>.</p>
           </div>
         </li>
         <li>
-          <div class="ai-feat-icon">✏️</div>
-          <div class="ai-feat-content">
-            <h4>ai-rename — Batch Rename PDFs</h4>
-            <p>Rename one or many PDFs based on content analysis. Preview with <code>--dry-run</code> before committing changes.</p>
+          <div class="ai-feat-icon">&#9999;&#65039;</div>
+          <div class="ai-feat-body">
+            <h4>ai-rename &#8212; Intelligent Batch Rename</h4>
+            <p>Rename PDFs based on content analysis. Preview everything with <code>--dry-run</code> before touching a single file.</p>
           </div>
         </li>
         <li>
-          <div class="ai-feat-icon">📄</div>
-          <div class="ai-feat-content">
-            <h4>ai-summarize — Content Summaries</h4>
-            <p>Generate concise summaries for any PDF. Summarise specific pages or the whole document. Output to file or stdout.</p>
+          <div class="ai-feat-icon">&#128196;</div>
+          <div class="ai-feat-body">
+            <h4>ai-summarize &#8212; Content Summaries</h4>
+            <p>Concise summaries for any PDF. Target specific pages or summarize the whole document in one command.</p>
           </div>
         </li>
         <li>
-          <div class="ai-feat-icon">🏷️</div>
-          <div class="ai-feat-content">
-            <h4>ai-classify — Document Type Detection</h4>
-            <p>Instantly identify whether a PDF is an invoice, contract, report, letter, resume, and more.</p>
+          <div class="ai-feat-icon">&#127991;&#65039;</div>
+          <div class="ai-feat-body">
+            <h4>ai-classify &#8212; Document Type Detection</h4>
+            <p>Invoice, contract, report, letter, resume &#8212; NyxPrism identifies document type so you can route or process accordingly.</p>
           </div>
         </li>
         <li>
-          <div class="ai-feat-icon">🔎</div>
-          <div class="ai-feat-content">
-            <h4>ai-extract-info — Structured Data Extraction</h4>
-            <p>Pull dates, monetary amounts, parties, reference numbers, and a brief summary as clean JSON output.</p>
+          <div class="ai-feat-icon">&#128270;</div>
+          <div class="ai-feat-body">
+            <h4>ai-extract-info &#8212; Structured JSON Extraction</h4>
+            <p>Dates, amounts, parties, and reference numbers &#8212; extracted and ready for your database or downstream workflow.</p>
           </div>
         </li>
       </ul>
     </div>
-
-    <!-- Strategy cards -->
-    <div style="margin-top: 3rem;">
-      <h3 style="text-align:center; margin-bottom: 1.25rem; font-size:1.15rem;">Choose Your Strategy</h3>
+    <div style="margin-top:4rem;">
+      <h3 style="text-align:center;font-size:1.1rem;font-weight:700;margin-bottom:1.5rem;">Choose Your Strategy</h3>
       <div class="strategies">
         <div class="strat-card">
-          <h4>🧠 LLM <code>--strategy llm</code></h4>
-          <p>Calls the OpenAI API for highest-accuracy results. Requires <code>OPENAI_API_KEY</code>.</p>
-          <div class="strat-stars" style="color: #d29922;">★★★★★ Accuracy · ⏱️ Moderate speed</div>
+          <h4>&#9889; Heuristic</h4>
+          <code>--strategy heuristic</code>
+          <p style="margin-top:.5rem;">Rule-based patterns. Instant results with zero API cost. Works completely offline.</p>
+          <div class="strat-score"><span class="stars">&#9733;&#9733;&#9733;</span>&#9734;&#9734; Accuracy &nbsp;&#183;&nbsp; &#9889; Instant</div>
         </div>
         <div class="strat-card">
-          <h4>⚡ Heuristic <code>--strategy heuristic</code></h4>
-          <p>Rule-based patterns and keyword matching. Instant results with no API key or cost.</p>
-          <div class="strat-stars" style="color: #d29922;">★★★☆☆ Accuracy · ⚡ Instant</div>
+          <h4>&#129504; LLM</h4>
+          <code>--strategy llm</code>
+          <p style="margin-top:.5rem;">Calls OpenAI API for highest-accuracy results. Requires <code>OPENAI_API_KEY</code>.</p>
+          <div class="strat-score"><span class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span> Accuracy &nbsp;&#183;&nbsp; &#8987; Moderate</div>
         </div>
-        <div class="strat-card" style="border-color: var(--accent);">
-          <h4>🔄 Auto <code>--strategy auto</code> (default)</h4>
-          <p>Uses LLM when a key is available; automatically falls back to heuristic otherwise.</p>
-          <div class="strat-stars" style="color: var(--green);">✓ Best of both worlds</div>
+        <div class="strat-card recommended">
+          <h4>&#128260; Auto <small style="color:var(--accent-bright);font-size:.7rem;">(default)</small></h4>
+          <code>--strategy auto</code>
+          <p style="margin-top:.5rem;">LLM when a key is available; heuristic otherwise. Best of both &#8212; automatically.</p>
+          <div class="strat-score" style="color:var(--green);">&#10003; Best of both worlds</div>
         </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
+</div>
 
 <hr class="divider" />
 
-<!-- ── COMMANDS ── -->
+<!-- COMMANDS TABLE -->
 <section class="section" id="commands">
-  <div class="section-label">Reference</div>
-  <h2 class="section-title">All Commands</h2>
-  <p class="section-sub">Every command is available via the <code>nyxprism</code> CLI and as a Python API.</p>
-
-  <div class="cmd-table-wrap">
+  <div class="section-eyebrow">Reference</div>
+  <h2 class="section-title">Every Command at a Glance</h2>
+  <p class="section-sub">All 19 commands available via <code>nyxprism &lt;command&gt;</code> or as a Python library import.</p>
+  <div class="cmd-wrap">
     <table>
-      <thead>
-        <tr>
-          <th>Command</th>
-          <th>Description</th>
-          <th>Key Options</th>
-        </tr>
-      </thead>
+      <thead><tr><th>Command</th><th>What it does</th><th>Key options</th></tr></thead>
       <tbody>
-        <tr>
-          <td><code>ai-split</code> 🤖</td>
-          <td>AI bulk split — detect boundaries and auto-rename</td>
-          <td><code>--batch-dir</code> <code>--strategy</code> <code>--no-ocr</code></td>
-        </tr>
-        <tr>
-          <td><code>ai-rename</code> 🤖</td>
-          <td>Rename PDFs using AI-suggested descriptive names</td>
-          <td><code>--dry-run</code> <code>--prefix</code> <code>--strategy</code></td>
-        </tr>
-        <tr>
-          <td><code>ai-summarize</code> 🤖</td>
-          <td>Summarize PDF content with AI or heuristics</td>
-          <td><code>--pages</code> <code>--sentences</code> <code>--output</code></td>
-        </tr>
-        <tr>
-          <td><code>ai-classify</code> 🤖</td>
-          <td>Classify document type (invoice, contract, etc.)</td>
-          <td><code>--strategy</code> <code>--model</code></td>
-        </tr>
-        <tr>
-          <td><code>ai-extract-info</code> 🤖</td>
-          <td>Extract structured key info as JSON</td>
-          <td><code>--output</code> <code>--strategy</code></td>
-        </tr>
-        <tr>
-          <td><code>split</code></td>
-          <td>Split PDF by range, every N pages, boundaries, or size</td>
-          <td><code>--every</code> <code>--ranges</code> <code>--at-pages</code> <code>--max-size</code></td>
-        </tr>
-        <tr>
-          <td><code>merge</code></td>
-          <td>Merge multiple PDFs into one</td>
-          <td><code>--bookmarks</code></td>
-        </tr>
-        <tr>
-          <td><code>interleave</code></td>
-          <td>Interleave odd/even pages (double-sided scan)</td>
-          <td><code>--no-reverse</code></td>
-        </tr>
-        <tr>
-          <td><code>compress</code></td>
-          <td>Compress a PDF (stream + image re-encoding)</td>
-          <td><code>--quality</code></td>
-        </tr>
-        <tr>
-          <td><code>ocr</code></td>
-          <td>Tesseract OCR for scanned PDFs</td>
-          <td><code>--lang</code> <code>--dpi</code> <code>--pages</code></td>
-        </tr>
-        <tr>
-          <td><code>extract-text</code></td>
-          <td>Extract selectable text from PDF</td>
-          <td><code>--pages</code> <code>--output</code></td>
-        </tr>
-        <tr>
-          <td><code>to-images</code></td>
-          <td>Render each page as PNG / JPEG</td>
-          <td><code>--dpi</code> <code>--format</code></td>
-        </tr>
-        <tr>
-          <td><code>from-images</code></td>
-          <td>Combine images into a PDF</td>
-          <td>—</td>
-        </tr>
-        <tr>
-          <td><code>watermark</code></td>
-          <td>Text or image watermark on every page</td>
-          <td><code>--text</code> <code>--image</code> <code>--opacity</code> <code>--angle</code></td>
-        </tr>
-        <tr>
-          <td><code>protect</code></td>
-          <td>Password-protect a PDF</td>
-          <td><code>--password</code> <code>--owner-password</code></td>
-        </tr>
-        <tr>
-          <td><code>unlock</code></td>
-          <td>Remove password protection</td>
-          <td><code>--password</code></td>
-        </tr>
-        <tr>
-          <td><code>rotate</code></td>
-          <td>Rotate pages (90 / 180 / 270°)</td>
-          <td><code>--degrees</code> <code>--pages</code></td>
-        </tr>
-        <tr>
-          <td><code>reorder</code></td>
-          <td>Reorder pages by index list</td>
-          <td>—</td>
-        </tr>
-        <tr>
-          <td><code>delete-pages</code></td>
-          <td>Delete specific pages</td>
-          <td>—</td>
-        </tr>
+        <tr><td><code>ai-split</code> &#129302;</td><td class="cmd-desc">AI boundary detection + auto-rename output files</td><td><code>--batch-dir</code> <code>--strategy</code> <code>--no-ocr</code></td></tr>
+        <tr><td><code>ai-rename</code> &#129302;</td><td class="cmd-desc">Rename PDFs using AI-suggested descriptive names</td><td><code>--dry-run</code> <code>--prefix</code> <code>--strategy</code></td></tr>
+        <tr><td><code>ai-summarize</code> &#129302;</td><td class="cmd-desc">Summarize document content</td><td><code>--pages</code> <code>--sentences</code> <code>--output</code></td></tr>
+        <tr><td><code>ai-classify</code> &#129302;</td><td class="cmd-desc">Classify document type (invoice, contract, etc.)</td><td><code>--strategy</code> <code>--model</code></td></tr>
+        <tr><td><code>ai-extract-info</code> &#129302;</td><td class="cmd-desc">Extract structured key info as JSON</td><td><code>--output</code> <code>--strategy</code></td></tr>
+        <tr><td><code>split</code></td><td class="cmd-desc">Split by range, every N pages, boundaries, or size</td><td><code>--every</code> <code>--ranges</code> <code>--at-pages</code> <code>--max-size</code></td></tr>
+        <tr><td><code>merge</code></td><td class="cmd-desc">Merge multiple PDFs into one</td><td><code>--bookmarks</code></td></tr>
+        <tr><td><code>interleave</code></td><td class="cmd-desc">Interleave odd/even pages (double-sided scan)</td><td><code>--no-reverse</code></td></tr>
+        <tr><td><code>compress</code></td><td class="cmd-desc">Compress streams and re-encode images</td><td><code>--quality</code></td></tr>
+        <tr><td><code>ocr</code></td><td class="cmd-desc">Tesseract OCR for scanned PDFs</td><td><code>--lang</code> <code>--dpi</code> <code>--pages</code></td></tr>
+        <tr><td><code>extract-text</code></td><td class="cmd-desc">Extract selectable text layer</td><td><code>--pages</code> <code>--output</code></td></tr>
+        <tr><td><code>to-images</code></td><td class="cmd-desc">Render each page as PNG / JPEG</td><td><code>--dpi</code> <code>--format</code></td></tr>
+        <tr><td><code>from-images</code></td><td class="cmd-desc">Combine images into a PDF</td><td>&#8212;</td></tr>
+        <tr><td><code>watermark</code></td><td class="cmd-desc">Add text or image watermark to every page</td><td><code>--text</code> <code>--image</code> <code>--opacity</code> <code>--angle</code></td></tr>
+        <tr><td><code>protect</code></td><td class="cmd-desc">Password-encrypt a PDF</td><td><code>--password</code> <code>--owner-password</code></td></tr>
+        <tr><td><code>unlock</code></td><td class="cmd-desc">Remove password protection</td><td><code>--password</code></td></tr>
+        <tr><td><code>rotate</code></td><td class="cmd-desc">Rotate pages (90 / 180 / 270&#176;)</td><td><code>--degrees</code> <code>--pages</code></td></tr>
+        <tr><td><code>reorder</code></td><td class="cmd-desc">Reorder pages by index list</td><td>&#8212;</td></tr>
+        <tr><td><code>delete-pages</code></td><td class="cmd-desc">Delete specific pages</td><td>&#8212;</td></tr>
       </tbody>
     </table>
   </div>
@@ -672,48 +568,134 @@
 
 <hr class="divider" />
 
-<!-- ── QUICK START CODE ── -->
-<section class="section">
-  <div class="section-label">Get started in seconds</div>
-  <h2 class="section-title">Quick Start</h2>
-  <p class="section-sub">Install with pip and run your first AI split immediately.</p>
+<!-- QUICK START -->
+<div class="quickstart-bg">
+  <section class="section" style="padding-top:5rem;padding-bottom:5rem;">
+    <div class="section-eyebrow">Get started in under a minute</div>
+    <h2 class="section-title">Quick Start</h2>
+    <p class="section-sub">Install with pip and run your first AI split immediately &#8212; no account, no API key required.</p>
+    <div class="terminal fade-up" style="max-width:740px;margin:0 auto;">
+      <div class="terminal-bar">
+        <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+        <span class="terminal-title">quick start</span>
+      </div>
+      <div class="terminal-body">
+        <div class="t-comment"># 1. Install</div>
+        <div><span class="t-prompt">$</span> <span class="t-cmd">pip install nyxprism</span></div>
+        <br>
+        <div class="t-comment"># 2. (Optional) Add your OpenAI key for LLM-quality results</div>
+        <div><span class="t-prompt">$</span> <span class="t-cmd">export OPENAI_API_KEY="sk-..."</span></div>
+        <br>
+        <div class="t-comment"># 3. AI-split a batch scan</div>
+        <div><span class="t-prompt">$</span> <span class="t-cmd">nyxprism ai-split batch.pdf --output-dir ./split/</span></div>
+        <br>
+        <div class="t-comment"># 4. Batch-rename every PDF in a folder</div>
+        <div><span class="t-prompt">$</span> <span class="t-cmd">nyxprism ai-rename *.pdf --dry-run</span></div>
+        <br>
+        <div class="t-comment"># 5. Summarize a document</div>
+        <div><span class="t-prompt">$</span> <span class="t-cmd">nyxprism ai-summarize report.pdf</span></div>
+        <br>
+        <div class="t-comment"># 6. Extract structured info as JSON</div>
+        <div><span class="t-prompt">$</span> <span class="t-cmd">nyxprism ai-extract-info invoice.pdf</span></div>
+      </div>
+    </div>
+  </section>
+</div>
 
-  <div class="terminal fade-up" style="max-width: 700px; margin: 0 auto;">
-    <div class="terminal-bar">
-      <span class="dot dot-r"></span>
-      <span class="dot dot-y"></span>
-      <span class="dot dot-g"></span>
-    </div>
-    <div class="terminal-body">
-      <div class="t-comment"># Install</div>
-      <div><span class="t-prompt">$</span> <span class="t-cmd">pip install nyxprism</span></div>
-      <br>
-      <div class="t-comment"># (Optional) Add your OpenAI key for LLM-quality results</div>
-      <div><span class="t-prompt">$</span> <span class="t-cmd">export OPENAI_API_KEY="sk-..."</span></div>
-      <br>
-      <div class="t-comment"># AI-split a batch scan — works without a key too!</div>
-      <div><span class="t-prompt">$</span> <span class="t-cmd">nyxprism ai-split batch.pdf --output-dir split_docs/</span></div>
-      <br>
-      <div class="t-comment"># Batch-rename every PDF in a folder</div>
-      <div><span class="t-prompt">$</span> <span class="t-cmd">nyxprism ai-rename *.pdf --dry-run</span></div>
-      <br>
-      <div class="t-comment"># Summarize a document</div>
-      <div><span class="t-prompt">$</span> <span class="t-cmd">nyxprism ai-summarize report.pdf</span></div>
-      <br>
-      <div class="t-comment"># Extract structured info as JSON</div>
-      <div><span class="t-prompt">$</span> <span class="t-cmd">nyxprism ai-extract-info invoice.pdf</span></div>
-    </div>
+<hr class="divider" />
+
+<!-- FAQ -->
+<section class="section" id="faq">
+  <div class="section-eyebrow">Common questions</div>
+  <h2 class="section-title">FAQ</h2>
+  <p class="section-sub">Everything you need to know before installing.</p>
+  <div class="faq-list">
+    <details>
+      <summary>Do I need an OpenAI API key to use the AI features?</summary>
+      <p>No. Every AI command has a built-in heuristic engine that runs instantly with no API key and no cost. Set <code>OPENAI_API_KEY</code> to unlock LLM-quality results. The default <code>--strategy auto</code> picks the best available option automatically.</p>
+    </details>
+    <details>
+      <summary>Is NyxPrism free to use?</summary>
+      <p>Yes &#8212; NyxPrism&#8482; is free and open source under the MIT License. You can use it in personal and commercial projects at no cost. The only potential cost is your own OpenAI API usage if you choose to enable the LLM strategy.</p>
+    </details>
+    <details>
+      <summary>Does NyxPrism send my PDF content to any server?</summary>
+      <p>Only if you explicitly enable the LLM strategy. In that case, text extracted from your PDF is sent to the OpenAI API for analysis. In heuristic mode, all processing is entirely local. No data is ever sent to NyxCollective LLC servers. See our <a href="privacy.html">Privacy Policy</a> for full details.</p>
+    </details>
+    <details>
+      <summary>What Python version is required?</summary>
+      <p>Python 3.10 or higher. NyxPrism uses modern union type hints and other Python 3.10+ features throughout the codebase.</p>
+    </details>
+    <details>
+      <summary>Is Tesseract OCR required?</summary>
+      <p>Only if you use the <code>ocr</code> command or AI features on image-only scanned PDFs. Install Tesseract separately (<code>sudo apt install tesseract-ocr</code> on Linux, <code>brew install tesseract</code> on macOS). For PDFs with a selectable text layer, OCR is not needed.</p>
+    </details>
+    <details>
+      <summary>Can I use NyxPrism as a Python library, not just CLI?</summary>
+      <p>Yes. Every command has a corresponding Python function. Import from <code>nyxprism.core.*</code> and <code>nyxprism.ai.*</code> to integrate directly into your own scripts and applications.</p>
+    </details>
+    <details>
+      <summary>How does the --batch-dir mode work for ai-split?</summary>
+      <p>Pass <code>--batch-dir ./folder/</code> instead of a single file. NyxPrism iterates every <code>*.pdf</code> in the directory, runs the full split pipeline on each one, and places each file&#8217;s outputs into its own subdirectory under <code>--output-dir</code>.</p>
+    </details>
   </div>
 </section>
 
-<!-- ── FOOTER ── -->
+<hr class="divider" />
+
+<!-- CTA BAND -->
+<section class="cta-band">
+  <h2>Ready to Take Back<br>Control of Your PDFs?</h2>
+  <p>Free. Open source. No account required. Install in seconds and let AI do the heavy lifting.</p>
+  <div class="cta-row">
+    <a class="btn btn-primary" href="https://pypi.org/project/nyxprism/" target="_blank" rel="noopener">
+      &#128230; pip install nyxprism
+    </a>
+    <a class="btn btn-secondary" href="https://github.com/cmc-creator/NyxPrism" target="_blank" rel="noopener">
+      View Source on GitHub &#8594;
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
 <footer>
-  <p>NyxPrism is open source and released under the <a href="https://github.com/cmc-creator/NyxPrism/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>.</p>
-  <p style="margin-top:.5rem;">
-    <a href="https://github.com/cmc-creator/NyxPrism" target="_blank" rel="noopener">GitHub</a> ·
-    <a href="https://pypi.org/project/nyxprism/" target="_blank" rel="noopener">PyPI</a> ·
-    <a href="https://github.com/cmc-creator/NyxPrism/issues" target="_blank" rel="noopener">Issues</a>
-  </p>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <h3>&#127752; <span>Nyx</span>Prism&#8482;</h3>
+      <div class="company">NyxCollective LLC</div>
+      <p>The AI-powered PDF multi-tool built for developers, legal teams, finance departments, and anyone who handles documents at scale.</p>
+      <p class="tm-notice">NyxPrism&#8482; is a trademark of NyxCollective LLC.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Product</h4>
+      <a href="#features">Features</a>
+      <a href="#ai">AI Tools</a>
+      <a href="#commands">Commands</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://github.com/cmc-creator/NyxPrism/releases" target="_blank" rel="noopener">Changelog</a>
+    </div>
+    <div class="footer-col">
+      <h4>Developers</h4>
+      <a href="https://github.com/cmc-creator/NyxPrism" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://pypi.org/project/nyxprism/" target="_blank" rel="noopener">PyPI</a>
+      <a href="https://github.com/cmc-creator/NyxPrism#readme" target="_blank" rel="noopener">Documentation</a>
+      <a href="https://github.com/cmc-creator/NyxPrism/issues" target="_blank" rel="noopener">Report a Bug</a>
+    </div>
+    <div class="footer-col">
+      <h4>Legal</h4>
+      <a href="terms.html">Terms of Service</a>
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="https://github.com/cmc-creator/NyxPrism/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>&#169; 2024&#8211;2026 NyxCollective LLC. All rights reserved. NyxPrism&#8482; is a trademark of NyxCollective LLC.</span>
+    <span>
+      <a href="terms.html">Terms</a> &nbsp;&#183;&nbsp;
+      <a href="privacy.html">Privacy</a> &nbsp;&#183;&nbsp;
+      <a href="https://github.com/cmc-creator/NyxPrism/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
+    </span>
+  </div>
 </footer>
 
 </body>
