@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Log In &mdash; NyxPrism&#8482; | NyxCollective LLC</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:            #06080d;
+      --bg2:           #0b0f18;
+      --surface:       #0f1724;
+      --surface2:      #141e2e;
+      --surface3:      #1a2535;
+      --border:        #1b2840;
+      --border2:       #253548;
+      --border3:       #2d4060;
+      --accent:        #7c3aed;
+      --accent2:       #6d28d9;
+      --accent3:       #5b21b6;
+      --accent-bright: #a78bfa;
+      --accent-glow:   rgba(124,58,237,.14);
+      --text:          #f0f4fc;
+      --text2:         #c8d3e0;
+      --text3:         #9aaec4;
+      --muted:         #6b7d96;
+      --muted2:        #4e5f75;
+      --green:         #34d399;
+      --red:           #f87171;
+      --radius-sm:     8px;
+      --radius:        12px;
+      --radius-lg:     16px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-feature-settings: "liga" 1;
+      -webkit-font-smoothing: antialiased;
+      display: flex; flex-direction: column; min-height: 100vh;
+    }
+    a { color: var(--accent-bright); text-decoration: none; }
+    a:hover { color: var(--text); }
+    ::selection { background: rgba(124,58,237,.35); color: #fff; }
+
+    /* ── NAV ──────────────────────────────────────────────────────────── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 300;
+      background: rgba(6,8,13,.85);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2.5rem;
+      display: flex; align-items: center;
+      height: 62px;
+    }
+    .nav-brand { display: flex; flex-direction: column; line-height: 1.2; flex-shrink: 0; }
+    .nav-brand:hover { opacity: .85; }
+    .nav-wordmark { font-size: 1.05rem; font-weight: 800; color: var(--text); letter-spacing: -.025em; }
+    .nav-wordmark em { color: var(--accent-bright); font-style: normal; }
+    .nav-co { font-size: .58rem; font-weight: 600; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; }
+    .nav-sep { flex: 1; }
+    .nav-back {
+      color: var(--muted); font-size: .875rem; font-weight: 500;
+      display: flex; align-items: center; gap: .4rem;
+      padding: .4rem .75rem; border-radius: var(--radius-sm);
+      transition: color .15s, background .15s;
+    }
+    .nav-back:hover { color: var(--text); background: var(--surface2); }
+    .nav-back svg { width: 14px; height: 14px; }
+
+    /* ── BACKGROUND GLOW ──────────────────────────────────────────────── */
+    .page-glow {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 50% 0%, rgba(124,58,237,.12) 0%, transparent 65%),
+        radial-gradient(ellipse 40% 40% at 80% 80%, rgba(99,102,241,.06) 0%, transparent 50%);
+    }
+
+    /* ── MAIN ─────────────────────────────────────────────────────────── */
+    main {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      padding: 6.5rem 1.5rem 3rem; position: relative; z-index: 1;
+    }
+    .auth-wrap { width: 100%; max-width: 420px; }
+
+    /* ── LOGO MARK ────────────────────────────────────────────────────── */
+    .auth-logo {
+      text-align: center; margin-bottom: 2.25rem;
+    }
+    .auth-logo .wordmark { font-size: 1.5rem; font-weight: 900; letter-spacing: -.035em; }
+    .auth-logo .wordmark em { color: var(--accent-bright); font-style: normal; }
+    .auth-logo .co { font-size: .65rem; font-weight: 600; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; margin-top: .2rem; }
+
+    /* ── TAB TOGGLE ───────────────────────────────────────────────────── */
+    .tab-row {
+      display: flex; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: .25rem; margin-bottom: 2rem;
+    }
+    .tab-btn {
+      flex: 1; padding: .55rem; border: none; background: none; cursor: pointer;
+      font-family: inherit; font-size: .875rem; font-weight: 600; color: var(--muted);
+      border-radius: 9px; transition: all .18s; letter-spacing: -.01em;
+    }
+    .tab-btn.active { background: var(--surface3); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,.3); }
+
+    /* ── CARD ─────────────────────────────────────────────────────────── */
+    .auth-card {
+      background: var(--surface); border: 1px solid var(--border2);
+      border-radius: var(--radius-lg); padding: 2.25rem;
+      box-shadow: 0 24px 64px rgba(0,0,0,.45), 0 0 0 1px rgba(124,58,237,.06);
+    }
+    .form-panel { display: none; }
+    .form-panel.active { display: block; }
+    .form-title { font-size: 1.3rem; font-weight: 800; letter-spacing: -.025em; margin-bottom: .45rem; }
+    .form-sub { font-size: .875rem; color: var(--muted); line-height: 1.6; margin-bottom: 1.75rem; }
+
+    /* ── FORM FIELDS ──────────────────────────────────────────────────── */
+    .field { margin-bottom: 1.1rem; }
+    .field label { display: block; font-size: .8rem; font-weight: 600; color: var(--text3); margin-bottom: .45rem; letter-spacing: .02em; }
+    .field input, .field select {
+      width: 100%; padding: .75rem 1rem;
+      background: var(--surface2); border: 1px solid var(--border2);
+      border-radius: var(--radius-sm); color: var(--text);
+      font-family: inherit; font-size: .9rem; transition: border-color .15s, box-shadow .15s;
+      outline: none; -webkit-appearance: none; appearance: none;
+    }
+    .field input::placeholder { color: var(--muted2); }
+    .field input:focus, .field select:focus {
+      border-color: var(--accent); box-shadow: 0 0 0 3px rgba(124,58,237,.18);
+    }
+    .field select { cursor: pointer; color: var(--text2); }
+    .field select option { background: var(--surface); }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: .85rem; }
+    .field-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: -.35rem; margin-bottom: 1.1rem;
+    }
+    .remember { display: flex; align-items: center; gap: .45rem; cursor: pointer; }
+    .remember input[type="checkbox"] { accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer; }
+    .remember span { font-size: .82rem; color: var(--muted); }
+    .forgot { font-size: .82rem; color: var(--muted); }
+    .forgot:hover { color: var(--accent-bright); }
+
+    /* ── SUBMIT ───────────────────────────────────────────────────────── */
+    .submit-btn {
+      width: 100%; padding: .85rem; border: none; border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent3) 100%);
+      color: #fff; font-family: inherit; font-size: .95rem; font-weight: 700;
+      letter-spacing: -.01em; cursor: pointer;
+      transition: box-shadow .2s, transform .15s; margin-top: .25rem;
+      box-shadow: 0 4px 22px rgba(124,58,237,.35);
+    }
+    .submit-btn:hover { box-shadow: 0 6px 30px rgba(124,58,237,.55); transform: translateY(-1px); }
+    .submit-btn:active { transform: translateY(0); }
+
+    /* ── DIVIDER ──────────────────────────────────────────────────────── */
+    .or-row {
+      display: flex; align-items: center; gap: .85rem;
+      margin: 1.4rem 0; color: var(--muted2); font-size: .8rem;
+    }
+    .or-row::before, .or-row::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* ── GITHUB BUTTON ────────────────────────────────────────────────── */
+    .github-btn {
+      display: flex; align-items: center; justify-content: center; gap: .7rem;
+      width: 100%; padding: .8rem; border: 1px solid var(--border2);
+      border-radius: var(--radius-sm); background: var(--surface2); color: var(--text2);
+      font-family: inherit; font-size: .9rem; font-weight: 600; cursor: pointer;
+      transition: border-color .15s, color .15s, background .15s; letter-spacing: -.01em;
+    }
+    .github-btn:hover { border-color: var(--border3); color: var(--text); background: var(--surface3); }
+    .github-btn svg { width: 18px; height: 18px; fill: currentColor; }
+
+    /* ── CARD FOOTER ──────────────────────────────────────────────────── */
+    .card-foot {
+      text-align: center; font-size: .82rem; color: var(--muted);
+      margin-top: 1.5rem;
+    }
+    .card-foot a { color: var(--accent-bright); font-weight: 600; }
+    .card-foot a:hover { color: var(--text); }
+
+    /* ── PLAN HINT ────────────────────────────────────────────────────── */
+    .plan-hint {
+      background: rgba(124,58,237,.08); border: 1px solid rgba(124,58,237,.2);
+      border-radius: var(--radius-sm); padding: .75rem 1rem;
+      font-size: .82rem; color: var(--text3); line-height: 1.6; margin-bottom: 1.25rem;
+    }
+    .plan-hint strong { color: var(--accent-bright); }
+
+    /* ── FOOTER ───────────────────────────────────────────────────────── */
+    .page-foot {
+      position: relative; z-index: 1;
+      text-align: center; padding: 1.5rem 2rem 2.5rem;
+      font-size: .78rem; color: var(--muted2);
+      display: flex; flex-wrap: wrap; gap: .6rem 1.4rem;
+      justify-content: center; align-items: center;
+    }
+    .page-foot a { color: var(--muted2); }
+    .page-foot a:hover { color: var(--muted); }
+  </style>
+</head>
+<body>
+
+<div class="page-glow"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-brand">
+    <div class="nav-wordmark"><em>Nyx</em>Prism&#8482;</div>
+    <div class="nav-co">by NyxCollective LLC</div>
+  </a>
+  <div class="nav-sep"></div>
+  <a class="nav-back" href="index.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to home
+  </a>
+</nav>
+
+<!-- MAIN -->
+<main>
+  <div class="auth-wrap">
+
+    <div class="auth-logo">
+      <div class="wordmark"><em>Nyx</em>Prism&#8482;</div>
+      <div class="co">NyxCollective LLC</div>
+    </div>
+
+    <!-- TAB TOGGLE -->
+    <div class="tab-row" role="tablist">
+      <button class="tab-btn active" onclick="switchTab('login')" role="tab" aria-selected="true" id="tab-login">Log In</button>
+      <button class="tab-btn" onclick="switchTab('trial')" role="tab" aria-selected="false" id="tab-trial">Start Free Trial</button>
+    </div>
+
+    <div class="auth-card">
+
+      <!-- LOG IN PANEL -->
+      <div class="form-panel active" id="panel-login">
+        <div class="form-title">Welcome back</div>
+        <p class="form-sub">Sign in to your NyxPrism&#8482; account to access your Professional features.</p>
+        <form onsubmit="handleSubmit(event, 'login')">
+          <div class="field">
+            <label for="login-email">Email address</label>
+            <input type="email" id="login-email" name="email" placeholder="you@example.com" autocomplete="email" required />
+          </div>
+          <div class="field">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" name="password" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" autocomplete="current-password" required />
+          </div>
+          <div class="field-footer">
+            <label class="remember">
+              <input type="checkbox" name="remember" />
+              <span>Remember me</span>
+            </label>
+            <a class="forgot" href="#">Forgot password?</a>
+          </div>
+          <button type="submit" class="submit-btn">Log In</button>
+        </form>
+        <div class="or-row">or</div>
+        <button class="github-btn" onclick="handleGitHub()">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.335-1.755-1.335-1.755-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+          Continue with GitHub
+        </button>
+        <p class="card-foot">No account? <a href="#" onclick="switchTab('trial');return false;">Start your free trial</a></p>
+      </div>
+
+      <!-- TRIAL PANEL -->
+      <div class="form-panel" id="panel-trial">
+        <div class="form-title">Start your free trial</div>
+        <p class="form-sub">14 days free, no credit card required. Access NyxPrism&#8482; Professional immediately.</p>
+        <div class="plan-hint">
+          Starting with <strong>Professional</strong> &mdash; includes NyxPrism UI, LLM AI, and email support. Downgrade to Community (free) any time.
+        </div>
+        <form onsubmit="handleSubmit(event, 'trial')">
+          <div class="field-row">
+            <div class="field">
+              <label for="trial-first">First name</label>
+              <input type="text" id="trial-first" name="first_name" placeholder="Alex" autocomplete="given-name" required />
+            </div>
+            <div class="field">
+              <label for="trial-last">Last name</label>
+              <input type="text" id="trial-last" name="last_name" placeholder="Smith" autocomplete="family-name" required />
+            </div>
+          </div>
+          <div class="field">
+            <label for="trial-email">Work email</label>
+            <input type="email" id="trial-email" name="email" placeholder="you@company.com" autocomplete="email" required />
+          </div>
+          <div class="field">
+            <label for="trial-password">Create a password</label>
+            <input type="password" id="trial-password" name="password" placeholder="Min. 12 characters" autocomplete="new-password" required minlength="12" />
+          </div>
+          <div class="field">
+            <label for="trial-plan">Plan</label>
+            <select id="trial-plan" name="plan">
+              <option value="professional" selected>Professional &mdash; $12/mo (14-day free trial)</option>
+              <option value="enterprise">Enterprise &mdash; Contact sales</option>
+            </select>
+          </div>
+          <button type="submit" class="submit-btn">Create Account &amp; Start Trial</button>
+        </form>
+        <div class="or-row">or</div>
+        <button class="github-btn" onclick="handleGitHub()">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.335-1.755-1.335-1.755-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+          Sign up with GitHub
+        </button>
+        <p class="card-foot">Already have an account? <a href="#" onclick="switchTab('login');return false;">Log in</a></p>
+        <p style="text-align:center;font-size:.75rem;color:var(--muted2);margin-top:1rem;line-height:1.5;">
+          By creating an account you agree to our <a href="terms.html" style="color:var(--muted);">Terms of Service</a> and <a href="privacy.html" style="color:var(--muted);">Privacy Policy</a>.
+        </p>
+      </div>
+
+    </div><!-- /.auth-card -->
+  </div><!-- /.auth-wrap -->
+</main>
+
+<!-- PAGE FOOTER -->
+<footer class="page-foot">
+  <span>&copy; 2024&ndash;2026 NyxCollective LLC</span>
+  <a href="terms.html">Terms of Service</a>
+  <a href="privacy.html">Privacy Policy</a>
+  <a href="https://github.com/cmc-creator/NyxPrism" target="_blank" rel="noopener">GitHub</a>
+</footer>
+
+<script>
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+    document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    document.getElementById('tab-' + tab).setAttribute('aria-selected','true');
+    document.getElementById('panel-' + tab).classList.add('active');
+    if (history.replaceState) history.replaceState(null, '', '#' + tab);
+  }
+
+  function handleSubmit(e, type) {
+    e.preventDefault();
+    const btn = e.target.querySelector('.submit-btn');
+    btn.textContent = type === 'login' ? 'Signing in...' : 'Creating account...';
+    btn.disabled = true;
+    // Placeholder: backend not yet connected
+    setTimeout(() => {
+      btn.textContent = type === 'login' ? 'Log In' : 'Create Account & Start Trial';
+      btn.disabled = false;
+      alert('Authentication backend coming soon. Thank you for your interest in NyxPrism\u2122!');
+    }, 1200);
+  }
+
+  function handleGitHub() {
+    alert('GitHub OAuth integration coming soon. Thank you for your interest in NyxPrism\u2122!');
+  }
+
+  // Auto-activate trial tab if URL fragment is #trial
+  if (window.location.hash === '#trial') {
+    switchTab('trial');
+  }
+</script>
+
+</body>
+</html>

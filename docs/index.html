@@ -3,316 +3,519 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NyxPrism&#8482; &#8212; AI-Powered PDF Multi-Tool | NyxCollective LLC</title>
+  <title>NyxPrism&#8482; &#8212; AI-Powered PDF Intelligence | NyxCollective LLC</title>
   <meta name="description" content="NyxPrism is the professional AI-enhanced PDF toolkit from NyxCollective LLC. Split, merge, compress, OCR, rename, summarize and extract structured data from PDFs." />
-  <meta property="og:title" content="NyxPrism&#8482; &#8212; AI-Powered PDF Multi-Tool" />
+  <meta property="og:title" content="NyxPrism&#8482; &#8212; AI-Powered PDF Intelligence" />
   <meta property="og:description" content="Stop wrestling with PDFs. NyxPrism auto-splits batch scans, renames files intelligently, summarizes documents, and extracts structured data." />
   <meta property="og:url" content="https://cmc-creator.github.io/NyxPrism/" />
   <meta name="twitter:card" content="summary_large_image" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;0,14..32,900;1,14..32,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg:           #07090f;
-      --bg2:          #0d1117;
-      --surface:      #111827;
-      --surface2:     #1a2235;
-      --border:       #1f2d42;
-      --border2:      #2d3f57;
-      --accent:       #7c3aed;
-      --accent2:      #6d28d9;
-      --accent-bright:#a78bfa;
-      --accent-glow:  rgba(124,58,237,.18);
-      --accent-glow2: rgba(124,58,237,.08);
-      --text:         #e8edf5;
-      --text2:        #c4cdd8;
-      --muted:        #7a8da6;
-      --muted2:       #5a6a80;
-      --code-bg:      #0f1923;
-      --green:        #34d399;
-      --yellow:       #fbbf24;
-      --cyan:         #67e8f9;
+      --bg:            #06080d;
+      --bg2:           #0b0f18;
+      --bg3:           #0d1117;
+      --surface:       #0f1724;
+      --surface2:      #141e2e;
+      --surface3:      #1a2535;
+      --border:        #1b2840;
+      --border2:       #253548;
+      --border3:       #2d4060;
+      --accent:        #7c3aed;
+      --accent2:       #6d28d9;
+      --accent3:       #5b21b6;
+      --accent-bright: #a78bfa;
+      --accent-glow:   rgba(124,58,237,.14);
+      --text:          #f0f4fc;
+      --text2:         #c8d3e0;
+      --text3:         #9aaec4;
+      --muted:         #6b7d96;
+      --muted2:        #4e5f75;
+      --code-bg:       #080e18;
+      --green:         #34d399;
+      --yellow:        #fbbf24;
+      --cyan:          #67e8f9;
+      --radius-sm:     8px;
+      --radius:        12px;
+      --radius-lg:     16px;
+      --radius-xl:     20px;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
     body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      line-height: 1.65;
-      -webkit-font-smoothing: antialiased;
+      background: var(--bg); color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-feature-settings: "liga" 1, "cv11" 1;
+      line-height: 1.65; -webkit-font-smoothing: antialiased;
     }
     a { color: var(--accent-bright); text-decoration: none; }
-    a:hover { text-decoration: underline; }
+    a:hover { color: var(--text); }
+    ::selection { background: rgba(124,58,237,.35); color: #fff; }
 
-    /* ── NAV ── */
+    /* ── NAV ──────────────────────────────────────────────────────────── */
     nav {
-      position: sticky; top: 0; z-index: 200;
-      background: rgba(7,9,15,.9);
-      backdrop-filter: blur(16px);
+      position: sticky; top: 0; z-index: 300;
+      background: rgba(6,8,13,.85);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
       border-bottom: 1px solid var(--border);
-      padding: 0 2rem;
-      display: flex; align-items: center; gap: 1.5rem;
-      height: 60px;
+      padding: 0 2.5rem;
+      display: flex; align-items: center;
+      height: 62px;
     }
-    .nav-brand { display: flex; flex-direction: column; line-height: 1.15; flex-shrink: 0; }
-    .nav-brand .product-name { font-size: 1.05rem; font-weight: 800; color: var(--text); letter-spacing: -.01em; }
-    .nav-brand .product-name span { color: var(--accent-bright); }
-    .nav-brand .company-name { font-size: .62rem; font-weight: 500; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
-    .nav-links { display: flex; gap: 1.4rem; margin-left: auto; align-items: center; }
-    .nav-links a { color: var(--muted); font-size: .875rem; font-weight: 500; transition: color .2s; }
-    .nav-links a:hover { color: var(--text); text-decoration: none; }
-    .nav-cta { background: var(--accent); color: #fff !important; padding: .4rem 1rem; border-radius: 6px; font-size: .85rem !important; font-weight: 700 !important; transition: background .2s, transform .15s !important; }
-    .nav-cta:hover { background: var(--accent2) !important; transform: translateY(-1px); }
-    @media (max-width: 680px) { .nav-links .hide-mobile { display: none; } }
+    .nav-brand {
+      display: flex; flex-direction: column; line-height: 1.2;
+      flex-shrink: 0; margin-right: 2.5rem; text-decoration: none !important;
+    }
+    .nav-brand:hover { opacity: .85; }
+    .nav-wordmark { font-size: 1.05rem; font-weight: 800; color: var(--text); letter-spacing: -.025em; }
+    .nav-wordmark em { color: var(--accent-bright); font-style: normal; }
+    .nav-co { font-size: .58rem; font-weight: 600; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; }
+    .nav-links { display: flex; gap: .15rem; align-items: center; }
+    .nav-links a {
+      color: var(--muted); font-size: .875rem; font-weight: 500;
+      padding: .4rem .75rem; border-radius: var(--radius-sm);
+      transition: color .15s, background .15s;
+    }
+    .nav-links a:hover { color: var(--text); background: var(--surface2); }
+    .nav-sep { flex: 1; }
+    .nav-actions { display: flex; gap: .6rem; align-items: center; }
+    .nav-login {
+      color: var(--text3); font-size: .875rem; font-weight: 500;
+      padding: .4rem .85rem; border-radius: var(--radius-sm);
+      border: 1px solid var(--border2); transition: all .15s;
+    }
+    .nav-login:hover { color: var(--text); border-color: var(--border3); background: var(--surface); }
+    .nav-trial {
+      background: var(--accent); color: #fff !important; font-size: .875rem; font-weight: 600;
+      padding: .4rem 1rem; border-radius: var(--radius-sm);
+      transition: background .15s, box-shadow .15s;
+    }
+    .nav-trial:hover { background: var(--accent2); box-shadow: 0 0 20px rgba(124,58,237,.4); }
+    @media (max-width: 880px) { .hide-md { display: none !important; } }
+    @media (max-width: 580px) {
+      nav { padding: 0 1.25rem; }
+      .nav-links { display: none; }
+      .nav-sep { display: none; }
+      .nav-actions { margin-left: auto; }
+    }
 
-    /* ── HERO ── */
+    /* ── HERO ─────────────────────────────────────────────────────────── */
     .hero {
-      position: relative; padding: 7rem 2rem 5rem; text-align: center; overflow: hidden;
+      position: relative; overflow: hidden;
+      padding: 8rem 2rem 6rem; text-align: center;
     }
     .hero::before {
-      content: ''; position: absolute; inset: 0;
-      background: radial-gradient(ellipse 80% 60% at 50% -5%, rgba(124,58,237,.22) 0%, transparent 65%),
-                  radial-gradient(ellipse 40% 40% at 80% 80%, rgba(99,102,241,.09) 0%, transparent 55%);
-      pointer-events: none;
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 90% 55% at 50% -5%, rgba(124,58,237,.18) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 50% at 85% 90%, rgba(99,102,241,.07) 0%, transparent 55%),
+        radial-gradient(ellipse 40% 40% at 10% 70%, rgba(124,58,237,.05) 0%, transparent 50%);
     }
-    .hero-eyebrow {
+    .hero-badge {
       display: inline-flex; align-items: center; gap: .5rem;
-      background: var(--accent-glow); border: 1px solid rgba(124,58,237,.4);
-      color: var(--accent-bright); font-size: .75rem; font-weight: 700;
+      background: rgba(124,58,237,.1); border: 1px solid rgba(124,58,237,.3);
+      color: var(--accent-bright); font-size: .72rem; font-weight: 700;
       letter-spacing: .1em; text-transform: uppercase;
-      padding: .35rem .9rem; border-radius: 999px; margin-bottom: 2rem;
+      padding: .3rem .85rem; border-radius: 999px; margin-bottom: 2rem;
     }
-    .dot-pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-bright); animation: pulse 2s infinite; }
-    @keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:.5; transform:scale(.85); } }
-    .hero h1 { font-size: clamp(2.6rem, 7vw, 5rem); font-weight: 900; letter-spacing: -.03em; line-height: 1.08; margin-bottom: 1.5rem; position: relative; }
-    .hero h1 .line2 { color: var(--accent-bright); }
-    .hero-sub { max-width: 640px; margin: 0 auto 2.5rem; color: var(--text2); font-size: 1.15rem; line-height: 1.7; }
+    .badge-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--accent-bright);
+      animation: pulse 2.2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
+    .hero h1 {
+      font-size: clamp(2.8rem, 7.5vw, 5.2rem); font-weight: 900;
+      letter-spacing: -.04em; line-height: 1.06; margin-bottom: 1.5rem;
+    }
+    .grad {
+      background: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 40%, #7c3aed 100%);
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero-sub {
+      max-width: 600px; margin: 0 auto 2.75rem; color: var(--text3);
+      font-size: 1.12rem; line-height: 1.75; letter-spacing: -.01em;
+    }
     .cta-row { display: flex; justify-content: center; flex-wrap: wrap; gap: .85rem; margin-bottom: 3.5rem; }
     .btn {
-      display: inline-flex; align-items: center; gap: .5rem;
-      padding: .75rem 1.6rem; border-radius: 8px; font-size: 1rem; font-weight: 700;
-      cursor: pointer; transition: opacity .2s, transform .15s, box-shadow .2s;
-      border: none; text-decoration: none !important;
+      display: inline-flex; align-items: center; gap: .55rem;
+      padding: .8rem 1.75rem; border-radius: var(--radius);
+      font-size: .95rem; font-weight: 600; letter-spacing: -.01em;
+      cursor: pointer; transition: all .2s; border: none;
+      text-decoration: none !important; font-family: inherit;
     }
-    .btn:hover { transform: translateY(-2px); }
-    .btn-primary { background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%); color: #fff; box-shadow: 0 4px 24px rgba(124,58,237,.4); }
-    .btn-primary:hover { box-shadow: 0 6px 32px rgba(124,58,237,.55); }
-    .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border2); }
-    .btn-secondary:hover { border-color: var(--accent-bright); color: var(--accent-bright); }
-    .install-pill-wrap { display: flex; justify-content: center; }
+    .btn-primary {
+      background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
+      color: #fff; box-shadow: 0 4px 28px rgba(124,58,237,.38);
+    }
+    .btn-primary:hover { box-shadow: 0 6px 36px rgba(124,58,237,.55); transform: translateY(-1px); color: #fff; }
+    .btn-secondary {
+      background: var(--surface); color: var(--text2); border: 1px solid var(--border2);
+    }
+    .btn-secondary:hover { border-color: var(--border3); color: var(--text); transform: translateY(-1px); }
+    .install-row { display: flex; justify-content: center; }
     .install-pill {
       display: inline-flex; align-items: center; gap: .85rem;
       background: var(--surface); border: 1px solid var(--border2);
-      border-radius: 10px; padding: .7rem 1.4rem;
-      font-family: 'JetBrains Mono', monospace; font-size: .9rem; color: var(--green);
+      border-radius: var(--radius); padding: .7rem 1.25rem;
+      font-family: 'JetBrains Mono', monospace; font-size: .88rem; color: var(--green);
     }
-    .install-pill .prompt { color: var(--muted2); }
+    .ip-prompt { color: var(--muted2); }
     .copy-btn {
       background: none; border: 1px solid var(--border2); color: var(--muted);
-      cursor: pointer; font-size: .75rem; padding: .15rem .55rem;
-      border-radius: 4px; transition: all .2s; font-family: inherit;
+      cursor: pointer; font-size: .72rem; padding: .12rem .5rem;
+      border-radius: 4px; transition: all .15s; font-family: inherit;
     }
-    .copy-btn:hover { color: var(--text); border-color: var(--accent-bright); }
+    .copy-btn:hover { color: var(--text2); border-color: var(--border3); }
 
-    /* ── STATS STRIP ── */
-    .stats-strip { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 2rem; }
-    .stats-inner { max-width: 900px; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: space-around; gap: 2rem; }
+    /* ── STATS ────────────────────────────────────────────────────────── */
+    .stats-strip {
+      background: var(--bg2); border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border); padding: 2.25rem 2rem;
+    }
+    .stats-inner {
+      max-width: 960px; margin: 0 auto;
+      display: flex; flex-wrap: wrap; justify-content: space-around; gap: 2rem;
+    }
     .stat { text-align: center; }
-    .stat-num { font-size: 2rem; font-weight: 900; color: var(--accent-bright); line-height: 1; }
-    .stat-label { font-size: .8rem; color: var(--muted); margin-top: .25rem; text-transform: uppercase; letter-spacing: .07em; }
+    .stat-num { font-size: 2.1rem; font-weight: 900; letter-spacing: -.04em; line-height: 1; color: var(--accent-bright); }
+    .stat-label { font-size: .74rem; color: var(--muted); margin-top: .3rem; letter-spacing: .08em; text-transform: uppercase; }
 
-    /* ── SECTION COMMONS ── */
-    .section { padding: 6rem 2rem; max-width: 1140px; margin: 0 auto; }
-    .section-eyebrow { text-align: center; font-size: .72rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--accent-bright); margin-bottom: .6rem; }
-    .section-title { text-align: center; font-size: clamp(1.7rem, 4vw, 2.6rem); font-weight: 800; letter-spacing: -.025em; line-height: 1.15; margin-bottom: .8rem; }
-    .section-sub { text-align: center; color: var(--muted); max-width: 560px; margin: 0 auto 3.5rem; font-size: 1.02rem; }
+    /* ── SECTION ──────────────────────────────────────────────────────── */
+    .section { padding: 6.5rem 2rem; max-width: 1160px; margin: 0 auto; }
+    .s-eyebrow {
+      text-align: center; font-size: .7rem; font-weight: 700;
+      letter-spacing: .16em; text-transform: uppercase; color: var(--accent-bright);
+      margin-bottom: .65rem;
+    }
+    .s-title {
+      text-align: center; font-size: clamp(1.75rem, 4vw, 2.7rem);
+      font-weight: 800; letter-spacing: -.03em; line-height: 1.14; margin-bottom: .9rem;
+    }
+    .s-sub {
+      text-align: center; color: var(--muted); max-width: 520px;
+      margin: 0 auto 4rem; font-size: 1rem; line-height: 1.7;
+    }
     .divider { border: none; border-top: 1px solid var(--border); margin: 0; }
 
-    /* ── FEATURES GRID ── */
-    .features-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 1.25rem; }
+    /* ── FEATURES ─────────────────────────────────────────────────────── */
+    .features-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(292px, 1fr)); gap: 1.25rem;
+    }
     .feature-card {
-      background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.75rem;
-      transition: border-color .25s, box-shadow .25s, transform .2s;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 1.85rem;
+      transition: border-color .2s, box-shadow .2s;
     }
-    .feature-card:hover { border-color: var(--accent); box-shadow: 0 0 30px var(--accent-glow2); transform: translateY(-2px); }
-    .feature-icon { font-size: 2rem; margin-bottom: 1rem; display: block; }
-    .feature-card h3 { font-size: 1.02rem; font-weight: 700; margin-bottom: .4rem; }
-    .feature-card p { color: var(--muted); font-size: .88rem; line-height: 1.6; }
-    .ai-tag {
-      display: inline-block; background: var(--accent-glow); border: 1px solid var(--accent);
-      color: var(--accent-bright); font-size: .62rem; font-weight: 700; letter-spacing: .06em;
-      text-transform: uppercase; padding: .1rem .45rem; border-radius: 999px; margin-left: .35rem; vertical-align: middle;
+    .feature-card:hover {
+      border-color: var(--border3);
+      box-shadow: 0 0 0 1px rgba(124,58,237,.12), 0 8px 32px rgba(0,0,0,.28);
     }
-
-    /* ── USE CASES ── */
-    .usecase-bg { background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-    .usecase-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.5rem; }
-    .usecase-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; }
-    .usecase-card .uc-icon { font-size: 1.8rem; margin-bottom: .75rem; }
-    .usecase-card h4 { font-size: .98rem; font-weight: 700; margin-bottom: .35rem; }
-    .usecase-card p { font-size: .85rem; color: var(--muted); line-height: 1.55; }
-
-    /* ── AI SECTION ── */
-    .ai-bg { background: linear-gradient(160deg, #0d1117 0%, #120a2e 50%, #0d1117 100%); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-    .ai-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 3rem; align-items: center; }
-    @media (max-width: 760px) { .ai-grid { grid-template-columns: 1fr; } }
-    .terminal {
-      background: #040810; border: 1px solid var(--border); border-radius: 14px; overflow: hidden;
-      font-family: 'JetBrains Mono', monospace; font-size: .78rem;
-      box-shadow: 0 24px 64px rgba(0,0,0,.5);
+    .feat-icon {
+      width: 42px; height: 42px; border-radius: 10px;
+      background: var(--accent-glow); border: 1px solid rgba(124,58,237,.25);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--accent-bright); margin-bottom: 1.25rem;
     }
-    .terminal-bar { background: #0e131d; padding: .6rem 1rem; display: flex; gap: .5rem; align-items: center; border-bottom: 1px solid var(--border); }
-    .dot { width: 12px; height: 12px; border-radius: 50%; }
-    .dot-r { background: #ff5f57; } .dot-y { background: #febc2e; } .dot-g { background: #28c840; }
-    .terminal-title { color: var(--muted2); font-size: .72rem; margin-left: .5rem; }
-    .terminal-body { padding: 1.4rem 1.6rem; line-height: 2; }
-    .t-prompt { color: #4a5568; }
-    .t-cmd { color: var(--accent-bright); font-weight: 500; }
-    .t-comment { color: #2d3f57; }
-    .t-info { color: var(--muted2); }
-    .t-success { color: var(--green); }
-    .t-file { color: var(--yellow); }
-    .t-key { color: var(--cyan); }
-    .t-val { color: var(--green); }
-    .ai-feature-list { list-style: none; }
-    .ai-feature-list li { display: flex; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid var(--border); }
-    .ai-feature-list li:last-child { border: none; }
-    .ai-feat-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: .1rem; }
-    .ai-feat-body h4 { font-size: .95rem; font-weight: 700; margin-bottom: .2rem; }
-    .ai-feat-body p { font-size: .84rem; color: var(--muted); line-height: 1.55; }
-    .strategies { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.1rem; margin-top: 3rem; }
-    @media (max-width: 620px) { .strategies { grid-template-columns: 1fr; } }
-    .strat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.4rem; transition: border-color .2s; }
-    .strat-card.recommended { border-color: var(--accent); }
-    .strat-card h4 { font-size: .93rem; font-weight: 700; margin-bottom: .4rem; }
-    .strat-card p { font-size: .83rem; color: var(--muted); }
-    .strat-score { margin-top: .7rem; font-size: .8rem; }
-    .stars { color: var(--yellow); }
+    .feat-icon svg { width: 18px; height: 18px; }
+    .feature-card h3 { font-size: 1rem; font-weight: 700; letter-spacing: -.01em; margin-bottom: .45rem; }
+    .feature-card p { color: var(--muted); font-size: .875rem; line-height: 1.65; }
+    .ai-badge {
+      display: inline-block; background: rgba(124,58,237,.15);
+      border: 1px solid rgba(124,58,237,.35); color: var(--accent-bright);
+      font-size: .58rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+      padding: .08rem .4rem; border-radius: 999px; margin-left: .4rem; vertical-align: middle;
+    }
     code {
-      background: var(--code-bg); padding: .15rem .4rem; border-radius: 4px;
+      background: var(--surface2); padding: .15rem .4rem; border-radius: 5px;
       font-family: 'JetBrains Mono', monospace; font-size: .8em; color: var(--accent-bright);
     }
 
-    /* ── COMMANDS TABLE ── */
-    .cmd-wrap { overflow-x: auto; margin-top: 2rem; border-radius: 12px; border: 1px solid var(--border); }
-    table { width: 100%; border-collapse: collapse; font-size: .88rem; }
-    th { text-align: left; padding: .85rem 1.1rem; color: var(--muted); font-weight: 600; font-size: .75rem; text-transform: uppercase; letter-spacing: .07em; background: var(--surface); border-bottom: 1px solid var(--border); }
-    td { padding: .8rem 1.1rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    /* ── USE CASES ────────────────────────────────────────────────────── */
+    .tinted-bg { background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .usecase-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.4rem; }
+    .uc-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 1.6rem;
+      transition: border-color .2s;
+    }
+    .uc-card:hover { border-color: var(--border3); }
+    .uc-icon {
+      width: 38px; height: 38px; border-radius: var(--radius-sm);
+      background: var(--surface2); border: 1px solid var(--border2);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text3); margin-bottom: 1rem;
+    }
+    .uc-icon svg { width: 16px; height: 16px; }
+    .uc-card h4 { font-size: .95rem; font-weight: 700; letter-spacing: -.01em; margin-bottom: .4rem; }
+    .uc-card p { font-size: .85rem; color: var(--muted); line-height: 1.6; }
+
+    /* ── AI SECTION ───────────────────────────────────────────────────── */
+    .ai-bg {
+      background: linear-gradient(160deg, var(--bg3) 0%, #0e0820 50%, var(--bg3) 100%);
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    }
+    .ai-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 3.5rem; align-items: start; }
+    @media (max-width: 780px) { .ai-grid { grid-template-columns: 1fr; } }
+    .terminal {
+      background: var(--code-bg); border: 1px solid var(--border); border-radius: var(--radius-lg);
+      overflow: hidden; font-family: 'JetBrains Mono', monospace; font-size: .775rem;
+      box-shadow: 0 32px 80px rgba(0,0,0,.55);
+    }
+    .t-bar {
+      background: #0c1220; padding: .65rem 1.1rem;
+      display: flex; gap: .45rem; align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .tdot { width: 11px; height: 11px; border-radius: 50%; }
+    .td-r{background:#ff5f57} .td-y{background:#febc2e} .td-g{background:#28c840}
+    .t-title { color: var(--muted2); font-size: .7rem; margin-left: .5rem; }
+    .t-body { padding: 1.4rem 1.6rem; line-height: 2.1; }
+    .t-p  { color: #3d5470; }
+    .t-c  { color: var(--accent-bright); font-weight: 500; }
+    .t-cm { color: #2a3d52; }
+    .t-ok { color: var(--green); }
+    .t-f  { color: var(--yellow); }
+    .t-k  { color: var(--cyan); }
+    .t-v  { color: var(--green); }
+    .t-i  { color: var(--muted2); }
+    .ai-feat-list { list-style: none; }
+    .ai-feat-list li {
+      display: flex; gap: 1.1rem; padding: 1.1rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .ai-feat-list li:last-child { border: none; padding-bottom: 0; }
+    .af-icon {
+      width: 34px; height: 34px; border-radius: var(--radius-sm);
+      background: var(--accent-glow); border: 1px solid rgba(124,58,237,.2);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--accent-bright); flex-shrink: 0; margin-top: .1rem;
+    }
+    .af-icon svg { width: 15px; height: 15px; }
+    .af-body h4 { font-size: .93rem; font-weight: 700; letter-spacing: -.01em; margin-bottom: .25rem; }
+    .af-body p { font-size: .84rem; color: var(--muted); line-height: 1.58; }
+
+    .strategies { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.1rem; margin-top: 3.5rem; }
+    @media (max-width: 640px) { .strategies { grid-template-columns: 1fr; } }
+    .strat-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.5rem;
+    }
+    .strat-card.recommended { border-color: var(--accent); background: linear-gradient(160deg, #110830 0%, #0e0820 100%); }
+    .strat-card h4 { font-size: .92rem; font-weight: 700; letter-spacing: -.01em; margin-bottom: .5rem; }
+    .strat-card p { font-size: .83rem; color: var(--muted); line-height: 1.55; }
+    .strat-label {
+      display: inline-block; font-size: .68rem; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; padding: .18rem .55rem; border-radius: 999px; margin-bottom: .9rem;
+    }
+    .strat-label.offline { background: rgba(52,211,153,.1); color: var(--green); border: 1px solid rgba(52,211,153,.25); }
+    .strat-label.llm { background: rgba(167,139,250,.1); color: var(--accent-bright); border: 1px solid rgba(167,139,250,.25); }
+    .strat-label.auto { background: rgba(103,232,249,.1); color: var(--cyan); border: 1px solid rgba(103,232,249,.25); }
+
+    /* ── PRICING ──────────────────────────────────────────────────────── */
+    .pricing-bg { background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .pricing-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;
+      max-width: 980px; margin: 0 auto;
+    }
+    @media (max-width: 860px) { .pricing-grid { grid-template-columns: 1fr; max-width: 420px; } }
+    .pricing-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-xl); padding: 2rem 1.85rem 1.85rem;
+      display: flex; flex-direction: column;
+    }
+    .pricing-card.featured {
+      background: linear-gradient(160deg, #130a2e 0%, #0e0622 60%, #0d1117 100%);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(124,58,237,.15), 0 24px 64px rgba(124,58,237,.12);
+      position: relative;
+    }
+    .pricing-popular {
+      position: absolute; top: -1px; left: 50%; transform: translateX(-50%);
+      background: linear-gradient(90deg, #7c3aed, #6d28d9);
+      color: #fff; font-size: .65rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; padding: .3rem .85rem; border-radius: 0 0 8px 8px;
+      white-space: nowrap;
+    }
+    .pricing-tier {
+      font-size: .7rem; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: .9rem;
+    }
+    .featured .pricing-tier { color: var(--accent-bright); }
+    .pricing-price { display: flex; align-items: baseline; gap: .35rem; margin-bottom: .25rem; }
+    .price-amount { font-size: 2.6rem; font-weight: 900; letter-spacing: -.04em; line-height: 1; }
+    .price-period { font-size: .85rem; color: var(--muted); }
+    .price-annual { font-size: .78rem; color: var(--muted2); margin-bottom: 1.4rem; min-height: 1.2em; }
+    .price-annual span { color: var(--green); font-weight: 600; }
+    .pricing-desc { font-size: .87rem; color: var(--muted); line-height: 1.6; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
+    .pricing-features { list-style: none; flex: 1; margin-bottom: 1.75rem; }
+    .pricing-features li {
+      display: flex; align-items: flex-start; gap: .65rem;
+      padding: .5rem 0; font-size: .875rem; color: var(--text2);
+    }
+    .pricing-features li + li { border-top: 1px solid var(--border); }
+    .pf-check { color: var(--accent-bright); flex-shrink: 0; margin-top: .05rem; }
+    .pf-check svg { width: 14px; height: 14px; }
+    .pf-x { color: var(--muted2); flex-shrink: 0; margin-top: .05rem; }
+    .pf-x svg { width: 14px; height: 14px; }
+    .pf-dim { color: var(--muted2); }
+    .pricing-cta {
+      display: block; text-align: center; padding: .8rem;
+      border-radius: var(--radius); font-size: .9rem; font-weight: 600;
+      letter-spacing: -.01em; transition: all .2s; text-decoration: none !important;
+    }
+    .cta-free { background: var(--surface2); border: 1px solid var(--border2); color: var(--text2); }
+    .cta-free:hover { border-color: var(--border3); color: var(--text); }
+    .cta-pro {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent3) 100%);
+      color: #fff; box-shadow: 0 4px 24px rgba(124,58,237,.35);
+    }
+    .cta-pro:hover { box-shadow: 0 6px 32px rgba(124,58,237,.55); transform: translateY(-1px); color: #fff; }
+    .cta-ent { background: var(--surface2); border: 1px solid var(--border2); color: var(--text2); }
+    .cta-ent:hover { border-color: var(--border3); color: var(--text); }
+
+    /* ── COMMANDS TABLE ───────────────────────────────────────────────── */
+    .cmd-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; font-size: .875rem; }
+    th {
+      text-align: left; padding: .85rem 1.25rem; color: var(--muted);
+      font-weight: 600; font-size: .72rem; text-transform: uppercase; letter-spacing: .09em;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+    }
+    td { padding: .8rem 1.25rem; border-bottom: 1px solid var(--border); vertical-align: top; }
     tr:last-child td { border-bottom: none; }
     tbody tr:hover { background: var(--surface2); }
-    .cmd-desc { color: var(--text2); font-size: .85rem; }
+    .cmd-desc { color: var(--text3); }
 
-    /* ── FAQ ── */
-    .faq-list { max-width: 720px; margin: 0 auto; }
-    details { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.4rem; margin-bottom: .85rem; }
-    details[open] { border-color: var(--accent); }
-    summary { font-weight: 600; font-size: .97rem; list-style: none; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
-    summary::-webkit-details-marker { display: none; }
-    summary::after { content: '+'; color: var(--accent-bright); font-size: 1.2rem; }
-    details[open] summary::after { content: '\2212'; }
-    details p { color: var(--muted); font-size: .9rem; margin-top: .85rem; line-height: 1.65; }
-
-    /* ── CTA BAND ── */
-    .cta-band {
-      background: linear-gradient(135deg, #1a0a3e 0%, #0f0625 40%, #0d1117 100%);
-      border-top: 1px solid var(--border); padding: 6rem 2rem; text-align: center; position: relative; overflow: hidden;
+    /* ── FAQ ──────────────────────────────────────────────────────────── */
+    .faq-list { max-width: 740px; margin: 0 auto; }
+    details {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.1rem 1.4rem; margin-bottom: .75rem;
     }
-    .cta-band::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 70% at 50% 50%, rgba(124,58,237,.16) 0%, transparent 70%); pointer-events: none; }
-    .cta-band h2 { font-size: clamp(1.9rem, 4.5vw, 3rem); font-weight: 900; letter-spacing: -.025em; margin-bottom: 1rem; }
-    .cta-band p { color: var(--text2); font-size: 1.05rem; max-width: 520px; margin: 0 auto 2rem; }
+    details[open] { border-color: var(--border3); }
+    summary {
+      font-weight: 600; font-size: .97rem; letter-spacing: -.01em;
+      list-style: none; display: flex; justify-content: space-between; align-items: center;
+      cursor: pointer; user-select: none; color: var(--text);
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: '+'; color: var(--muted); font-size: 1.15rem; margin-left: 1rem; flex-shrink: 0; }
+    details[open] summary::after { content: '\2212'; color: var(--accent-bright); }
+    details p { color: var(--muted); font-size: .9rem; margin-top: .85rem; line-height: 1.7; }
 
-    /* ── FOOTER ── */
-    footer { background: var(--bg); border-top: 1px solid var(--border); padding: 3rem 2rem 2rem; }
-    .footer-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 2.5rem; }
-    @media (max-width: 720px) { .footer-inner { grid-template-columns: 1fr 1fr; } }
+    /* ── CTA BAND ─────────────────────────────────────────────────────── */
+    .cta-band {
+      background: linear-gradient(135deg, #120828 0%, #0e0520 50%, #0b0f18 100%);
+      border-top: 1px solid var(--border); padding: 7rem 2rem; text-align: center; position: relative; overflow: hidden;
+    }
+    .cta-band::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 70% 80% at 50% 50%, rgba(124,58,237,.13) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .cta-band h2 { font-size: clamp(2rem, 4.5vw, 3.2rem); font-weight: 900; letter-spacing: -.035em; margin-bottom: 1.1rem; line-height: 1.1; }
+    .cta-band p { color: var(--text3); font-size: 1.05rem; max-width: 500px; margin: 0 auto 2.5rem; line-height: 1.7; }
+
+    /* ── FOOTER ───────────────────────────────────────────────────────── */
+    footer { background: var(--bg); border-top: 1px solid var(--border); padding: 3.5rem 2.5rem 2.5rem; }
+    .footer-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 2.5rem;
+    }
+    @media (max-width: 760px) { .footer-inner { grid-template-columns: 1fr 1fr; } }
     @media (max-width: 480px) { .footer-inner { grid-template-columns: 1fr; } }
-    .footer-brand h3 { font-size: 1.05rem; font-weight: 800; color: var(--text); margin-bottom: .3rem; }
-    .footer-brand h3 span { color: var(--accent-bright); }
-    .footer-brand .company { font-size: .78rem; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: .07em; margin-bottom: .85rem; }
-    .footer-brand p { font-size: .83rem; color: var(--muted2); line-height: 1.6; max-width: 260px; }
-    .footer-col h4 { font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); margin-bottom: .9rem; }
-    .footer-col a { display: block; font-size: .87rem; color: var(--muted); margin-bottom: .5rem; transition: color .2s; }
-    .footer-col a:hover { color: var(--text); text-decoration: none; }
-    .footer-bottom { max-width: 1100px; margin: 2.5rem auto 0; padding-top: 1.5rem; border-top: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; align-items: center; font-size: .8rem; color: var(--muted2); }
+    .f-wordmark { font-size: 1.05rem; font-weight: 800; letter-spacing: -.02em; color: var(--text); }
+    .f-wordmark em { color: var(--accent-bright); font-style: normal; }
+    .f-co { font-size: .65rem; font-weight: 600; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; margin-bottom: .9rem; }
+    .footer-brand p { font-size: .84rem; color: var(--muted2); line-height: 1.65; max-width: 260px; margin-top: .7rem; }
+    .footer-brand .tm { font-size: .72rem; color: var(--muted2); margin-top: .55rem; }
+    .footer-col h4 { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--muted2); margin-bottom: 1rem; }
+    .footer-col a { display: block; font-size: .875rem; color: var(--muted); margin-bottom: .55rem; transition: color .15s; }
+    .footer-col a:hover { color: var(--text); }
+    .footer-bottom {
+      max-width: 1100px; margin: 2.5rem auto 0; padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      display: flex; flex-wrap: wrap; gap: 1rem;
+      justify-content: space-between; align-items: center;
+      font-size: .78rem; color: var(--muted2);
+    }
     .footer-bottom a { color: var(--muted2); }
     .footer-bottom a:hover { color: var(--muted); }
-    .tm-notice { font-size: .75rem; color: var(--muted2); margin-top: .6rem; }
 
-    /* ── QUICKSTART ── */
-    .quickstart-bg { background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .qs-bg { background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
 
-    /* ── ANIMATIONS ── */
-    @keyframes fadeUp { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:translateY(0); } }
-    .fade-up { animation: fadeUp .55s ease both; }
-    .delay-1 { animation-delay: .1s; }
-    .delay-2 { animation-delay: .2s; }
-    .delay-3 { animation-delay: .3s; }
-    @media (max-width: 580px) { .hero { padding: 5rem 1.25rem 3.5rem; } .btn { padding: .65rem 1.2rem; font-size: .9rem; } }
+    @media (max-width: 580px) {
+      .hero { padding: 5rem 1.25rem 3.5rem; }
+      .btn { padding: .7rem 1.25rem; font-size: .9rem; }
+      .section { padding: 4.5rem 1.25rem; }
+    }
   </style>
 </head>
 <body>
 
 <!-- NAV -->
 <nav>
-  <div class="nav-brand">
-    <div class="product-name">&#127752; <span>Nyx</span>Prism&#8482;</div>
-    <div class="company-name">by NyxCollective LLC</div>
-  </div>
+  <a href="index.html" class="nav-brand">
+    <div class="nav-wordmark"><em>Nyx</em>Prism&#8482;</div>
+    <div class="nav-co">by NyxCollective LLC</div>
+  </a>
   <div class="nav-links">
-    <a class="hide-mobile" href="#features">Features</a>
-    <a class="hide-mobile" href="#ai">AI Tools</a>
-    <a class="hide-mobile" href="#commands">Commands</a>
-    <a class="hide-mobile" href="#faq">FAQ</a>
+    <a class="hide-md" href="#features">Features</a>
+    <a class="hide-md" href="#pricing">Pricing</a>
+    <a class="hide-md" href="#ai">AI Tools</a>
+    <a class="hide-md" href="#faq">FAQ</a>
     <a href="https://github.com/cmc-creator/NyxPrism" target="_blank" rel="noopener">GitHub</a>
-    <a class="nav-cta" href="https://pypi.org/project/nyxprism/" target="_blank" rel="noopener">Install Free &#8594;</a>
+  </div>
+  <div class="nav-sep"></div>
+  <div class="nav-actions">
+    <a class="nav-login" href="login.html">Log In</a>
+    <a class="nav-trial" href="login.html#trial">Start Free Trial</a>
   </div>
 </nav>
 
 <!-- HERO -->
 <header class="hero">
-  <div class="hero-eyebrow">
-    <span class="dot-pulse"></span>
-    New &#8212; v1.2.0 with 5 AI commands
+  <div class="hero-badge">
+    <span class="badge-dot"></span>
+    v1.3.0 &mdash; TUI interface now available
   </div>
-  <h1 class="fade-up">
-    Stop Wrestling<br>
-    <span class="line2">With PDFs.</span>
+  <h1>
+    PDF Intelligence,<br>
+    <span class="grad">Fully Automated.</span>
   </h1>
-  <p class="hero-sub fade-up delay-1">
-    NyxPrism&#8482; is the AI-powered PDF toolkit that auto-splits batch scans,
-    renames files intelligently, summarizes content, and pulls out structured data &#8212;
-    all from one CLI or Python library. No account required.
+  <p class="hero-sub">
+    NyxPrism&#8482; is the professional AI-powered PDF toolkit that auto-splits batch scans,
+    renames files by content, summarizes documents, and extracts structured data &mdash;
+    from an elegant terminal interface or scriptable Python library.
   </p>
-  <div class="cta-row fade-up delay-2">
-    <a class="btn btn-primary" href="https://pypi.org/project/nyxprism/" target="_blank" rel="noopener">
-      &#128230; Install Free
+  <div class="cta-row">
+    <a class="btn btn-primary" href="login.html#trial">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg>
+      Start Free Trial
     </a>
-    <a class="btn btn-secondary" href="https://github.com/cmc-creator/NyxPrism" target="_blank" rel="noopener">
-      &#9733; Star on GitHub
-    </a>
-    <a class="btn btn-secondary" href="https://github.com/cmc-creator/NyxPrism#readme" target="_blank" rel="noopener">
-      &#128196; Docs
-    </a>
+    <a class="btn btn-secondary" href="login.html">Log In</a>
+    <a class="btn btn-secondary" href="https://github.com/cmc-creator/NyxPrism#readme" target="_blank" rel="noopener">Documentation</a>
   </div>
-  <div class="install-pill-wrap fade-up delay-3">
+  <div class="install-row">
     <div class="install-pill">
-      <span class="prompt">$</span>
-      <span id="pip-cmd">pip install nyxprism</span>
-      <button class="copy-btn" onclick="navigator.clipboard.writeText('pip install nyxprism');this.textContent='&#10003;';setTimeout(function(){this.textContent='copy';}.bind(this),1600)">copy</button>
+      <span class="ip-prompt">$</span>
+      <span>pip install nyxprism</span>
+      <button class="copy-btn" onclick="navigator.clipboard.writeText('pip install nyxprism');this.textContent='Copied';setTimeout(()=>this.textContent='Copy',1800)">Copy</button>
     </div>
   </div>
 </header>
 
-<!-- STATS STRIP -->
+<!-- STATS -->
 <div class="stats-strip">
   <div class="stats-inner">
     <div class="stat"><div class="stat-num">19</div><div class="stat-label">CLI Commands</div></div>
     <div class="stat"><div class="stat-num">5</div><div class="stat-label">AI Capabilities</div></div>
-    <div class="stat"><div class="stat-num">0</div><div class="stat-label">API Key Required</div></div>
-    <div class="stat"><div class="stat-num">MIT</div><div class="stat-label">License</div></div>
-    <div class="stat"><div class="stat-num">Python 3.10+</div><div class="stat-label">Compatible</div></div>
+    <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Offline Capable</div></div>
+    <div class="stat"><div class="stat-num">MIT</div><div class="stat-label">Open Source</div></div>
+    <div class="stat"><div class="stat-num">3.10+</div><div class="stat-label">Python Support</div></div>
   </div>
 </div>
 
@@ -320,112 +523,168 @@
 
 <!-- FEATURES -->
 <section class="section" id="features">
-  <div class="section-eyebrow">Everything you need</div>
-  <h2 class="section-title">One Tool. Every PDF Task.</h2>
-  <p class="section-sub">Professional-grade operations in a single install &#8212; with AI baked in, not bolted on.</p>
+  <div class="s-eyebrow">Everything you need</div>
+  <h2 class="s-title">One Toolkit. Every PDF Task.</h2>
+  <p class="s-sub">Professional-grade operations in a single install &mdash; with AI built in, not bolted on.</p>
   <div class="features-grid">
+
     <div class="feature-card">
-      <span class="feature-icon">&#129302;</span>
-      <h3>AI Bulk Split &amp; Rename <span class="ai-tag">AI</span></h3>
-      <p>Drop a 50-page scan containing 8 different documents. NyxPrism detects every boundary and names each output file descriptively &#8212; automatically.</p>
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
+      </div>
+      <h3>AI Bulk Split &amp; Rename <span class="ai-badge">AI</span></h3>
+      <p>Drop a 50-page scan containing 8 different documents. NyxPrism detects every boundary and names each output file descriptively &mdash; automatically.</p>
     </div>
+
     <div class="feature-card">
-      <span class="feature-icon">&#128221;</span>
-      <h3>AI Summarize <span class="ai-tag">AI</span></h3>
-      <p>Get a concise summary of any document in seconds. Target specific pages or let it determine what matters from the whole document.</p>
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 10h10M4 14h12M4 18h8"/></svg>
+      </div>
+      <h3>AI Summarize <span class="ai-badge">AI</span></h3>
+      <p>Get a concise, accurate summary of any document in seconds. Target specific pages or let it determine what matters from the whole file.</p>
     </div>
+
     <div class="feature-card">
-      <span class="feature-icon">&#127991;&#65039;</span>
-      <h3>AI Classify <span class="ai-tag">AI</span></h3>
-      <p>Instantly detect whether a PDF is an invoice, contract, report, letter, or resume &#8212; with zero manual reading.</p>
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10M7 12h6M3 5a2 2 0 012-2h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5z"/></svg>
+      </div>
+      <h3>AI Classify <span class="ai-badge">AI</span></h3>
+      <p>Instantly detect whether a PDF is an invoice, contract, report, letter, or resume &mdash; with zero manual reading.</p>
     </div>
+
     <div class="feature-card">
-      <span class="feature-icon">&#128269;</span>
-      <h3>AI Key Info Extraction <span class="ai-tag">AI</span></h3>
-      <p>Pull dates, parties, amounts, and reference numbers as clean JSON &#8212; ready to feed into your database or workflow.</p>
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/></svg>
+      </div>
+      <h3>AI Key Info Extraction <span class="ai-badge">AI</span></h3>
+      <p>Pull dates, parties, amounts, and reference numbers as clean JSON &mdash; ready to feed into your database or downstream workflow.</p>
     </div>
+
     <div class="feature-card">
-      <span class="feature-icon">&#9999;&#65039;</span>
-      <h3>AI Rename <span class="ai-tag">AI</span></h3>
-      <p>Batch-rename a folder of scan_001.pdf files into meaningful names. Preview with <code>--dry-run</code> before committing.</p>
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/></svg>
+      </div>
+      <h3>AI Rename <span class="ai-badge">AI</span></h3>
+      <p>Batch-rename a folder of <code>scan_001.pdf</code> files into meaningful names. Preview with <code>--dry-run</code> before committing.</p>
     </div>
+
     <div class="feature-card">
-      <span class="feature-icon">&#9986;&#65039;</span>
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.12 15.88M14.47 14.48L20 20M8.12 8.12L12 12"/></svg>
+      </div>
       <h3>Smart Split</h3>
-      <p>Every N pages, explicit ranges, page boundaries, or file-size limits. Batch-process a whole folder in one command.</p>
+      <p>Every N pages, explicit ranges, page boundaries, or file-size limits. Batch-process an entire folder in one command.</p>
     </div>
+
     <div class="feature-card">
-      <span class="feature-icon">&#128279;</span>
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+      </div>
       <h3>Merge &amp; Interleave</h3>
       <p>Concatenate PDFs with bookmarks, or interleave odd/even scans into a perfect double-sided document.</p>
     </div>
+
     <div class="feature-card">
-      <span class="feature-icon">&#128290;</span>
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9L3 15M15 9l6 6M9 15L3 9M15 15l6-6"/></svg>
+      </div>
       <h3>Compress</h3>
       <p>Shrink bloated PDFs using FlateDecode stream compression and configurable JPEG image re-encoding.</p>
     </div>
+
     <div class="feature-card">
-      <span class="feature-icon">&#128065;&#65039;</span>
-      <h3>OCR (Tesseract)</h3>
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </div>
+      <h3>OCR &mdash; Tesseract</h3>
       <p>Extract text from image-only scans. AI analysis automatically triggers OCR on blank pages so nothing is missed.</p>
     </div>
+
     <div class="feature-card">
-      <span class="feature-icon">&#128247;</span>
-      <h3>PDF &#8596; Images</h3>
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+      </div>
+      <h3>PDF &harr; Images</h3>
       <p>Render every page as PNG/JPEG, or assemble a stack of images back into a clean PDF with a single command.</p>
     </div>
+
     <div class="feature-card">
-      <span class="feature-icon">&#128167;</span>
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg>
+      </div>
       <h3>Watermark</h3>
-      <p>Text or image watermarks with configurable opacity and rotation, applied across every page in one pass.</p>
+      <p>Text watermarks with configurable opacity and rotation, applied uniformly across every page in a single pass.</p>
     </div>
+
     <div class="feature-card">
-      <span class="feature-icon">&#128274;</span>
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
       <h3>Protect &amp; Unlock</h3>
-      <p>Password-encrypt sensitive documents with separate user/owner passwords, or remove protection from existing PDFs.</p>
+      <p>Password-encrypt sensitive documents with user/owner passwords, or remove protection from existing PDFs.</p>
     </div>
+
   </div>
 </section>
 
 <hr class="divider" />
 
 <!-- USE CASES -->
-<div class="usecase-bg">
-  <section class="section" style="padding-top:5rem;padding-bottom:5rem;">
-    <div class="section-eyebrow">Built for real workflows</div>
-    <h2 class="section-title">Who Uses NyxPrism&#8482;</h2>
-    <p class="section-sub">From solo developers to enterprise automation pipelines.</p>
+<div class="tinted-bg">
+  <section class="section" style="padding-top:5.5rem;padding-bottom:5.5rem;">
+    <div class="s-eyebrow">Built for real workflows</div>
+    <h2 class="s-title">Who Uses NyxPrism&#8482;</h2>
+    <p class="s-sub">From solo developers to enterprise automation pipelines.</p>
     <div class="usecase-grid">
-      <div class="usecase-card">
-        <div class="uc-icon">&#9878;&#65039;</div>
+
+      <div class="uc-card">
+        <div class="uc-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 10h18M3 14h12M3 18h8"/></svg>
+        </div>
         <h4>Legal &amp; Compliance</h4>
         <p>Extract key dates and parties from contracts automatically. Classify incoming documents and route them to the right folder instantly.</p>
       </div>
-      <div class="usecase-card">
-        <div class="uc-icon">&#128188;</div>
+
+      <div class="uc-card">
+        <div class="uc-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
+        </div>
         <h4>Accounting &amp; Finance</h4>
         <p>Pull amounts, invoice numbers, and vendor names from invoices as JSON. Automate the data entry nobody wants to do.</p>
       </div>
-      <div class="usecase-card">
-        <div class="uc-icon">&#128230;</div>
+
+      <div class="uc-card">
+        <div class="uc-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+        </div>
         <h4>Document Management</h4>
-        <p>Turn a pile of scan_001.pdf chaos into a perfectly named, organised archive with a single <code>ai-rename</code> command.</p>
+        <p>Turn a pile of unnamed scans into a perfectly organised archive with a single <code>ai-rename</code> command.</p>
       </div>
-      <div class="usecase-card">
-        <div class="uc-icon">&#128300;</div>
+
+      <div class="uc-card">
+        <div class="uc-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
         <h4>Research &amp; Academia</h4>
         <p>Summarise dense papers, extract citations and dates, and split multi-paper batch scans from the copier.</p>
       </div>
-      <div class="usecase-card">
-        <div class="uc-icon">&#127973;</div>
+
+      <div class="uc-card">
+        <div class="uc-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        </div>
         <h4>Healthcare Records</h4>
         <p>Split bulk scan exports into individual patient documents, extract key info, and apply compliant watermarks or passwords.</p>
       </div>
-      <div class="usecase-card">
-        <div class="uc-icon">&#128736;&#65039;</div>
+
+      <div class="uc-card">
+        <div class="uc-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        </div>
         <h4>Developer Automation</h4>
         <p>Drop NyxPrism into any Python pipeline or shell script. Scriptable, composable, and library-friendly with a clean Python API.</p>
       </div>
+
     </div>
   </section>
 </div>
@@ -435,96 +694,97 @@
 <!-- AI SECTION -->
 <div class="ai-bg" id="ai">
   <section class="section">
-    <div class="section-eyebrow">Powered by LLM + Heuristics</div>
-    <h2 class="section-title">AI Everywhere &#8212; No Key Required</h2>
-    <p class="section-sub">Every AI feature has a built-in heuristic fallback &#8212; zero API cost, always available. Add an OpenAI key for maximum accuracy.</p>
+    <div class="s-eyebrow">LLM + Heuristic Engine</div>
+    <h2 class="s-title">AI Without Compromise</h2>
+    <p class="s-sub">Every AI feature has a built-in offline fallback &mdash; zero API cost, always available. Add an OpenAI key for maximum accuracy.</p>
     <div class="ai-grid">
-      <div class="terminal fade-up">
-        <div class="terminal-bar">
-          <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
-          <span class="terminal-title">nyxprism &#183; ai-split + ai-extract-info</span>
+      <div class="terminal">
+        <div class="t-bar">
+          <span class="tdot td-r"></span><span class="tdot td-y"></span><span class="tdot td-g"></span>
+          <span class="t-title">nyxprism &middot; ai-split + ai-extract-info</span>
         </div>
-        <div class="terminal-body">
-          <div><span class="t-prompt">$</span> <span class="t-cmd">nyxprism ai-split --batch-dir ./inbox/ --output-dir ./split/</span></div>
+        <div class="t-body">
+          <div><span class="t-p">$</span> <span class="t-c">nyxprism ai-split batch.pdf --output-dir ./out/</span></div>
           <br>
-          <div class="t-info">[NyxPrism] Processing batch_scans.pdf (22 pages)</div>
-          <div class="t-info">[NyxPrism] Running OCR on 3 image-only page(s)...</div>
-          <div class="t-info">[NyxPrism] Detecting boundaries (strategy=auto)...</div>
-          <div class="t-info">[NyxPrism] Found 4 document(s) at pages: [1, 6, 11, 18]</div>
-          <div class="t-success">  [1/4] Pages 1-5 &#8594; <span class="t-file">invoice_2024-01-15_acme.pdf</span></div>
-          <div class="t-success">  [2/4] Pages 6-10 &#8594; <span class="t-file">contract_service_agreement.pdf</span></div>
-          <div class="t-success">  [3/4] Pages 11-17 &#8594; <span class="t-file">quarterly_report_Q1_2024.pdf</span></div>
-          <div class="t-success">  [4/4] Pages 18-22 &#8594; <span class="t-file">letter_dear_alice.pdf</span></div>
+          <div class="t-i">[NyxPrism] Processing batch.pdf (22 pages)</div>
+          <div class="t-i">[NyxPrism] Running OCR on 3 image-only page(s)...</div>
+          <div class="t-i">[NyxPrism] Detecting boundaries (strategy=auto)...</div>
+          <div class="t-i">[NyxPrism] Found 4 document(s)</div>
+          <div class="t-ok">&nbsp;&nbsp;[1/4] pp.&nbsp;1&#8211;5 &rarr; <span class="t-f">invoice_2024-01-15_acme.pdf</span></div>
+          <div class="t-ok">&nbsp;&nbsp;[2/4] pp.&nbsp;6&#8211;10 &rarr; <span class="t-f">contract_service_agreement.pdf</span></div>
+          <div class="t-ok">&nbsp;&nbsp;[3/4] pp. 11&#8211;17 &rarr; <span class="t-f">quarterly_report_Q1_2024.pdf</span></div>
+          <div class="t-ok">&nbsp;&nbsp;[4/4] pp. 18&#8211;22 &rarr; <span class="t-f">letter_dear_alice.pdf</span></div>
           <br>
-          <div><span class="t-prompt">$</span> <span class="t-cmd">nyxprism ai-extract-info invoice_2024-01-15_acme.pdf</span></div>
+          <div><span class="t-p">$</span> <span class="t-c">nyxprism ai-extract-info invoice_2024-01-15_acme.pdf</span></div>
           <br>
-          <div><span style="color:#4a5568;">{</span></div>
-          <div>&nbsp;&nbsp;<span class="t-key">"document_type"</span>: <span class="t-val">"invoice"</span>,</div>
-          <div>&nbsp;&nbsp;<span class="t-key">"date"</span>: <span class="t-val">"2024-01-15"</span>,</div>
-          <div>&nbsp;&nbsp;<span class="t-key">"parties"</span>: <span class="t-val">"Acme Corp, Widget Ltd"</span>,</div>
-          <div>&nbsp;&nbsp;<span class="t-key">"amount"</span>: <span class="t-val">"$4,250.00"</span>,</div>
-          <div>&nbsp;&nbsp;<span class="t-key">"reference_number"</span>: <span class="t-val">"INV-20240115-042"</span></div>
-          <div><span style="color:#4a5568;">}</span></div>
+          <div style="color:#2d4060;">{</div>
+          <div>&nbsp;&nbsp;<span class="t-k">"document_type"</span>: <span class="t-v">"invoice"</span>,</div>
+          <div>&nbsp;&nbsp;<span class="t-k">"date"</span>: <span class="t-v">"2024-01-15"</span>,</div>
+          <div>&nbsp;&nbsp;<span class="t-k">"parties"</span>: <span class="t-v">"Acme Corp, Widget Ltd"</span>,</div>
+          <div>&nbsp;&nbsp;<span class="t-k">"amount"</span>: <span class="t-v">"$4,250.00"</span>,</div>
+          <div>&nbsp;&nbsp;<span class="t-k">"ref"</span>: <span class="t-v">"INV-20240115-042"</span></div>
+          <div style="color:#2d4060;">}</div>
         </div>
       </div>
-      <ul class="ai-feature-list">
+      <ul class="ai-feat-list">
         <li>
-          <div class="ai-feat-icon">&#128256;</div>
-          <div class="ai-feat-body">
-            <h4>ai-split &#8212; Bulk Split &amp; Auto-Rename</h4>
-            <p>Detect document boundaries inside a batch scan, split, and name each output file descriptively. Single file or entire folder with <code>--batch-dir</code>.</p>
+          <div class="af-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg></div>
+          <div class="af-body">
+            <h4>ai-split &mdash; Bulk Split &amp; Auto-Rename</h4>
+            <p>Detect document boundaries in a batch scan, split, and name each file descriptively. Process a single file or entire folder.</p>
           </div>
         </li>
         <li>
-          <div class="ai-feat-icon">&#9999;&#65039;</div>
-          <div class="ai-feat-body">
-            <h4>ai-rename &#8212; Intelligent Batch Rename</h4>
-            <p>Rename PDFs based on content analysis. Preview everything with <code>--dry-run</code> before touching a single file.</p>
+          <div class="af-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg></div>
+          <div class="af-body">
+            <h4>ai-rename &mdash; Intelligent Batch Rename</h4>
+            <p>Rename PDFs based on content analysis. Preview with <code>--dry-run</code> before touching a single file.</p>
           </div>
         </li>
         <li>
-          <div class="ai-feat-icon">&#128196;</div>
-          <div class="ai-feat-body">
-            <h4>ai-summarize &#8212; Content Summaries</h4>
+          <div class="af-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 10h10M4 14h12M4 18h8"/></svg></div>
+          <div class="af-body">
+            <h4>ai-summarize &mdash; Content Summaries</h4>
             <p>Concise summaries for any PDF. Target specific pages or summarize the whole document in one command.</p>
           </div>
         </li>
         <li>
-          <div class="ai-feat-icon">&#127991;&#65039;</div>
-          <div class="ai-feat-body">
-            <h4>ai-classify &#8212; Document Type Detection</h4>
-            <p>Invoice, contract, report, letter, resume &#8212; NyxPrism identifies document type so you can route or process accordingly.</p>
+          <div class="af-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10M7 12h6M3 5a2 2 0 012-2h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5z"/></svg></div>
+          <div class="af-body">
+            <h4>ai-classify &mdash; Document Type Detection</h4>
+            <p>Invoice, contract, report, letter, resume &mdash; NyxPrism identifies document type so you can route or process accordingly.</p>
           </div>
         </li>
         <li>
-          <div class="ai-feat-icon">&#128270;</div>
-          <div class="ai-feat-body">
-            <h4>ai-extract-info &#8212; Structured JSON Extraction</h4>
-            <p>Dates, amounts, parties, and reference numbers &#8212; extracted and ready for your database or downstream workflow.</p>
+          <div class="af-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/></svg></div>
+          <div class="af-body">
+            <h4>ai-extract-info &mdash; Structured JSON</h4>
+            <p>Dates, amounts, parties, and reference numbers &mdash; extracted and ready for your database or workflow.</p>
           </div>
         </li>
       </ul>
     </div>
-    <div style="margin-top:4rem;">
-      <h3 style="text-align:center;font-size:1.1rem;font-weight:700;margin-bottom:1.5rem;">Choose Your Strategy</h3>
+
+    <div style="margin-top:4.5rem;">
+      <h3 style="text-align:center;font-size:1.05rem;font-weight:700;letter-spacing:-.01em;margin-bottom:1.75rem;">Choose Your AI Strategy</h3>
       <div class="strategies">
         <div class="strat-card">
-          <h4>&#9889; Heuristic</h4>
+          <div class="strat-label offline">Offline</div>
+          <h4>Heuristic</h4>
           <code>--strategy heuristic</code>
-          <p style="margin-top:.5rem;">Rule-based patterns. Instant results with zero API cost. Works completely offline.</p>
-          <div class="strat-score"><span class="stars">&#9733;&#9733;&#9733;</span>&#9734;&#9734; Accuracy &nbsp;&#183;&nbsp; &#9889; Instant</div>
+          <p style="margin-top:.65rem;">Rule-based patterns. Instant results with zero API cost. Works completely offline.</p>
         </div>
         <div class="strat-card">
-          <h4>&#129504; LLM</h4>
+          <div class="strat-label llm">LLM</div>
+          <h4>Language Model</h4>
           <code>--strategy llm</code>
-          <p style="margin-top:.5rem;">Calls OpenAI API for highest-accuracy results. Requires <code>OPENAI_API_KEY</code>.</p>
-          <div class="strat-score"><span class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span> Accuracy &nbsp;&#183;&nbsp; &#8987; Moderate</div>
+          <p style="margin-top:.65rem;">Calls OpenAI API for highest-accuracy results. Requires <code>OPENAI_API_KEY</code>.</p>
         </div>
         <div class="strat-card recommended">
-          <h4>&#128260; Auto <small style="color:var(--accent-bright);font-size:.7rem;">(default)</small></h4>
+          <div class="strat-label auto">Recommended</div>
+          <h4>Auto <small style="color:var(--accent-bright);font-size:.72rem;font-weight:500;">(default)</small></h4>
           <code>--strategy auto</code>
-          <p style="margin-top:.5rem;">LLM when a key is available; heuristic otherwise. Best of both &#8212; automatically.</p>
-          <div class="strat-score" style="color:var(--green);">&#10003; Best of both worlds</div>
+          <p style="margin-top:.65rem;">LLM when a key is set; heuristic otherwise. Best of both &mdash; automatically.</p>
         </div>
       </div>
     </div>
@@ -533,34 +793,107 @@
 
 <hr class="divider" />
 
+<!-- PRICING -->
+<div class="pricing-bg" id="pricing">
+  <section class="section" style="padding-top:6rem;padding-bottom:6rem;">
+    <div class="s-eyebrow">Simple, transparent pricing</div>
+    <h2 class="s-title">Start Free. Scale When Ready.</h2>
+    <p class="s-sub">The core toolkit is open source and always free. Upgrade for the visual interface, managed support, and professional extras.</p>
+
+    <div class="pricing-grid">
+
+      <!-- Community -->
+      <div class="pricing-card">
+        <div class="pricing-tier">Community</div>
+        <div class="pricing-price"><span class="price-amount">$0</span></div>
+        <div class="price-annual">&nbsp;</div>
+        <div class="pricing-desc">The full open-source toolkit &mdash; no account required. Install with pip and start working immediately.</div>
+        <ul class="pricing-features">
+          <li><span class="pf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>All 19 CLI commands</li>
+          <li><span class="pf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Heuristic AI (fully offline)</li>
+          <li><span class="pf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Python library API</li>
+          <li><span class="pf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>MIT licensed, forever free</li>
+          <li><span class="pf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Community support (GitHub)</li>
+          <li><span class="pf-x"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span><span class="pf-dim">Visual TUI interface</span></li>
+          <li><span class="pf-x"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span><span class="pf-dim">Email support</span></li>
+        </ul>
+        <a class="pricing-cta cta-free" href="https://pypi.org/project/nyxprism/" target="_blank" rel="noopener">Install via pip</a>
+      </div>
+
+      <!-- Professional -->
+      <div class="pricing-card featured">
+        <div class="pricing-popular">Most Popular</div>
+        <div class="pricing-tier">Professional</div>
+        <div class="pricing-price">
+          <span class="price-amount">$12</span>
+          <span class="price-period">/ month</span>
+        </div>
+        <div class="price-annual"><span>Save 30%</span> with annual billing &mdash; $99/yr</div>
+        <div class="pricing-desc">For individuals and small teams who want the full experience with support and the visual interface.</div>
+        <ul class="pricing-features">
+          <li><span class="pf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Everything in Community</li>
+          <li><span class="pf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>NyxPrism UI (visual terminal)</li>
+          <li><span class="pf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>LLM AI integration</li>
+          <li><span class="pf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Email support &middot; 48h response</li>
+          <li><span class="pf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Early access to new releases</li>
+          <li><span class="pf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Integration guides &amp; examples</li>
+          <li><span class="pf-x"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span><span class="pf-dim">Dedicated Slack channel</span></li>
+        </ul>
+        <a class="pricing-cta cta-pro" href="login.html#trial">Start Free Trial</a>
+      </div>
+
+      <!-- Enterprise -->
+      <div class="pricing-card">
+        <div class="pricing-tier">Enterprise</div>
+        <div class="pricing-price"><span class="price-amount">Custom</span></div>
+        <div class="price-annual">&nbsp;</div>
+        <div class="pricing-desc">For organisations requiring SLAs, custom deployment, and team-wide licensing with priority support.</div>
+        <ul class="pricing-features">
+          <li><span class="pf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Everything in Professional</li>
+          <li><span class="pf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Dedicated Slack channel</li>
+          <li><span class="pf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>SLA response guarantees</li>
+          <li><span class="pf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Team licensing (unlimited seats)</li>
+          <li><span class="pf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Custom deployment support</li>
+          <li><span class="pf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Invoice billing</li>
+          <li><span class="pf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Priority feature requests</li>
+        </ul>
+        <a class="pricing-cta cta-ent" href="https://github.com/cmc-creator/NyxPrism/issues" target="_blank" rel="noopener">Contact Sales</a>
+      </div>
+
+    </div>
+  </section>
+</div>
+
+<hr class="divider" />
+
 <!-- COMMANDS TABLE -->
 <section class="section" id="commands">
-  <div class="section-eyebrow">Reference</div>
-  <h2 class="section-title">Every Command at a Glance</h2>
-  <p class="section-sub">All 19 commands available via <code>nyxprism &lt;command&gt;</code> or as a Python library import.</p>
+  <div class="s-eyebrow">Reference</div>
+  <h2 class="s-title">Every Command at a Glance</h2>
+  <p class="s-sub">All 19 commands available via <code>nyxprism &lt;command&gt;</code> or as a Python library import.</p>
   <div class="cmd-wrap">
     <table>
-      <thead><tr><th>Command</th><th>What it does</th><th>Key options</th></tr></thead>
+      <thead><tr><th>Command</th><th>Description</th><th>Key Options</th></tr></thead>
       <tbody>
-        <tr><td><code>ai-split</code> &#129302;</td><td class="cmd-desc">AI boundary detection + auto-rename output files</td><td><code>--batch-dir</code> <code>--strategy</code> <code>--no-ocr</code></td></tr>
-        <tr><td><code>ai-rename</code> &#129302;</td><td class="cmd-desc">Rename PDFs using AI-suggested descriptive names</td><td><code>--dry-run</code> <code>--prefix</code> <code>--strategy</code></td></tr>
-        <tr><td><code>ai-summarize</code> &#129302;</td><td class="cmd-desc">Summarize document content</td><td><code>--pages</code> <code>--sentences</code> <code>--output</code></td></tr>
-        <tr><td><code>ai-classify</code> &#129302;</td><td class="cmd-desc">Classify document type (invoice, contract, etc.)</td><td><code>--strategy</code> <code>--model</code></td></tr>
-        <tr><td><code>ai-extract-info</code> &#129302;</td><td class="cmd-desc">Extract structured key info as JSON</td><td><code>--output</code> <code>--strategy</code></td></tr>
+        <tr><td><code>ai-split</code> <span class="ai-badge">AI</span></td><td class="cmd-desc">Boundary detection + auto-rename output files</td><td><code>--batch-dir</code> <code>--strategy</code> <code>--no-ocr</code></td></tr>
+        <tr><td><code>ai-rename</code> <span class="ai-badge">AI</span></td><td class="cmd-desc">Rename PDFs using AI-suggested descriptive names</td><td><code>--dry-run</code> <code>--prefix</code> <code>--strategy</code></td></tr>
+        <tr><td><code>ai-summarize</code> <span class="ai-badge">AI</span></td><td class="cmd-desc">Summarize document content</td><td><code>--pages</code> <code>--sentences</code> <code>--output</code></td></tr>
+        <tr><td><code>ai-classify</code> <span class="ai-badge">AI</span></td><td class="cmd-desc">Classify document type (invoice, contract, etc.)</td><td><code>--strategy</code> <code>--model</code></td></tr>
+        <tr><td><code>ai-extract-info</code> <span class="ai-badge">AI</span></td><td class="cmd-desc">Extract structured key info as JSON</td><td><code>--output</code> <code>--strategy</code></td></tr>
         <tr><td><code>split</code></td><td class="cmd-desc">Split by range, every N pages, boundaries, or size</td><td><code>--every</code> <code>--ranges</code> <code>--at-pages</code> <code>--max-size</code></td></tr>
         <tr><td><code>merge</code></td><td class="cmd-desc">Merge multiple PDFs into one</td><td><code>--bookmarks</code></td></tr>
-        <tr><td><code>interleave</code></td><td class="cmd-desc">Interleave odd/even pages (double-sided scan)</td><td><code>--no-reverse</code></td></tr>
+        <tr><td><code>interleave</code></td><td class="cmd-desc">Interleave odd/even pages from a double-sided scan</td><td><code>--no-reverse</code></td></tr>
         <tr><td><code>compress</code></td><td class="cmd-desc">Compress streams and re-encode images</td><td><code>--quality</code></td></tr>
         <tr><td><code>ocr</code></td><td class="cmd-desc">Tesseract OCR for scanned PDFs</td><td><code>--lang</code> <code>--dpi</code> <code>--pages</code></td></tr>
         <tr><td><code>extract-text</code></td><td class="cmd-desc">Extract selectable text layer</td><td><code>--pages</code> <code>--output</code></td></tr>
         <tr><td><code>to-images</code></td><td class="cmd-desc">Render each page as PNG / JPEG</td><td><code>--dpi</code> <code>--format</code></td></tr>
-        <tr><td><code>from-images</code></td><td class="cmd-desc">Combine images into a PDF</td><td>&#8212;</td></tr>
-        <tr><td><code>watermark</code></td><td class="cmd-desc">Add text or image watermark to every page</td><td><code>--text</code> <code>--image</code> <code>--opacity</code> <code>--angle</code></td></tr>
+        <tr><td><code>from-images</code></td><td class="cmd-desc">Combine images into a PDF</td><td>&mdash;</td></tr>
+        <tr><td><code>watermark</code></td><td class="cmd-desc">Add text watermark to every page</td><td><code>--text</code> <code>--opacity</code> <code>--angle</code></td></tr>
         <tr><td><code>protect</code></td><td class="cmd-desc">Password-encrypt a PDF</td><td><code>--password</code> <code>--owner-password</code></td></tr>
         <tr><td><code>unlock</code></td><td class="cmd-desc">Remove password protection</td><td><code>--password</code></td></tr>
-        <tr><td><code>rotate</code></td><td class="cmd-desc">Rotate pages (90 / 180 / 270&#176;)</td><td><code>--degrees</code> <code>--pages</code></td></tr>
-        <tr><td><code>reorder</code></td><td class="cmd-desc">Reorder pages by index list</td><td>&#8212;</td></tr>
-        <tr><td><code>delete-pages</code></td><td class="cmd-desc">Delete specific pages</td><td>&#8212;</td></tr>
+        <tr><td><code>rotate</code></td><td class="cmd-desc">Rotate pages by 90/180/270&deg;</td><td><code>--degrees</code> <code>--pages</code></td></tr>
+        <tr><td><code>reorder</code></td><td class="cmd-desc">Reorder pages by index list</td><td>&mdash;</td></tr>
+        <tr><td><code>delete-pages</code></td><td class="cmd-desc">Delete specific pages</td><td>&mdash;</td></tr>
       </tbody>
     </table>
   </div>
@@ -569,34 +902,34 @@
 <hr class="divider" />
 
 <!-- QUICK START -->
-<div class="quickstart-bg">
-  <section class="section" style="padding-top:5rem;padding-bottom:5rem;">
-    <div class="section-eyebrow">Get started in under a minute</div>
-    <h2 class="section-title">Quick Start</h2>
-    <p class="section-sub">Install with pip and run your first AI split immediately &#8212; no account, no API key required.</p>
-    <div class="terminal fade-up" style="max-width:740px;margin:0 auto;">
-      <div class="terminal-bar">
-        <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
-        <span class="terminal-title">quick start</span>
+<div class="qs-bg">
+  <section class="section" style="padding-top:5.5rem;padding-bottom:5.5rem;">
+    <div class="s-eyebrow">Get started in under a minute</div>
+    <h2 class="s-title">Quick Start</h2>
+    <p class="s-sub">Install with pip and run your first AI split immediately &mdash; no account, no API key required for the heuristic engine.</p>
+    <div class="terminal" style="max-width:760px;margin:0 auto;">
+      <div class="t-bar">
+        <span class="tdot td-r"></span><span class="tdot td-y"></span><span class="tdot td-g"></span>
+        <span class="t-title">quick start</span>
       </div>
-      <div class="terminal-body">
-        <div class="t-comment"># 1. Install</div>
-        <div><span class="t-prompt">$</span> <span class="t-cmd">pip install nyxprism</span></div>
+      <div class="t-body">
+        <div class="t-cm"># 1. Install</div>
+        <div><span class="t-p">$</span> <span class="t-c">pip install nyxprism</span></div>
         <br>
-        <div class="t-comment"># 2. (Optional) Add your OpenAI key for LLM-quality results</div>
-        <div><span class="t-prompt">$</span> <span class="t-cmd">export OPENAI_API_KEY="sk-..."</span></div>
+        <div class="t-cm"># 2. (Optional) Add your OpenAI key for LLM-quality results</div>
+        <div><span class="t-p">$</span> <span class="t-c">export OPENAI_API_KEY="sk-..."</span></div>
         <br>
-        <div class="t-comment"># 3. AI-split a batch scan</div>
-        <div><span class="t-prompt">$</span> <span class="t-cmd">nyxprism ai-split batch.pdf --output-dir ./split/</span></div>
+        <div class="t-cm"># 3. AI-split a batch scan</div>
+        <div><span class="t-p">$</span> <span class="t-c">nyxprism ai-split batch.pdf --output-dir ./split/</span></div>
         <br>
-        <div class="t-comment"># 4. Batch-rename every PDF in a folder</div>
-        <div><span class="t-prompt">$</span> <span class="t-cmd">nyxprism ai-rename *.pdf --dry-run</span></div>
+        <div class="t-cm"># 4. Batch-rename every PDF in a folder</div>
+        <div><span class="t-p">$</span> <span class="t-c">nyxprism ai-rename *.pdf --dry-run</span></div>
         <br>
-        <div class="t-comment"># 5. Summarize a document</div>
-        <div><span class="t-prompt">$</span> <span class="t-cmd">nyxprism ai-summarize report.pdf</span></div>
+        <div class="t-cm"># 5. Summarize a document</div>
+        <div><span class="t-p">$</span> <span class="t-c">nyxprism ai-summarize report.pdf</span></div>
         <br>
-        <div class="t-comment"># 6. Extract structured info as JSON</div>
-        <div><span class="t-prompt">$</span> <span class="t-cmd">nyxprism ai-extract-info invoice.pdf</span></div>
+        <div class="t-cm"># 6. Launch the visual TUI (Professional tier)</div>
+        <div><span class="t-p">$</span> <span class="t-c">nyxprism-ui</span></div>
       </div>
     </div>
   </section>
@@ -606,37 +939,37 @@
 
 <!-- FAQ -->
 <section class="section" id="faq">
-  <div class="section-eyebrow">Common questions</div>
-  <h2 class="section-title">FAQ</h2>
-  <p class="section-sub">Everything you need to know before installing.</p>
+  <div class="s-eyebrow">Common questions</div>
+  <h2 class="s-title">FAQ</h2>
+  <p class="s-sub">Everything you need to know before installing.</p>
   <div class="faq-list">
     <details>
       <summary>Do I need an OpenAI API key to use the AI features?</summary>
       <p>No. Every AI command has a built-in heuristic engine that runs instantly with no API key and no cost. Set <code>OPENAI_API_KEY</code> to unlock LLM-quality results. The default <code>--strategy auto</code> picks the best available option automatically.</p>
     </details>
     <details>
-      <summary>Is NyxPrism free to use?</summary>
-      <p>Yes &#8212; NyxPrism&#8482; is free and open source under the MIT License. You can use it in personal and commercial projects at no cost. The only potential cost is your own OpenAI API usage if you choose to enable the LLM strategy.</p>
+      <summary>Is the Community tier genuinely free?</summary>
+      <p>Yes &mdash; NyxPrism&#8482; is free and open source under the MIT License. The Community tier requires no account and no payment. All 19 commands and heuristic AI are included. The paid tiers add the visual TUI, email support, and professional extras.</p>
     </details>
     <details>
       <summary>Does NyxPrism send my PDF content to any server?</summary>
       <p>Only if you explicitly enable the LLM strategy. In that case, text extracted from your PDF is sent to the OpenAI API for analysis. In heuristic mode, all processing is entirely local. No data is ever sent to NyxCollective LLC servers. See our <a href="privacy.html">Privacy Policy</a> for full details.</p>
     </details>
     <details>
+      <summary>What is the NyxPrism UI (nyxprism-ui)?</summary>
+      <p>A beautiful terminal-based visual interface built with Textual. Instead of memorising commands, you see a menu of buttons for every operation. Select an action, fill in your file paths, hit Run &mdash; results stream right in the interface. Available in the Professional tier.</p>
+    </details>
+    <details>
       <summary>What Python version is required?</summary>
-      <p>Python 3.10 or higher. NyxPrism uses modern union type hints and other Python 3.10+ features throughout the codebase.</p>
+      <p>Python 3.10 or higher. NyxPrism uses modern type hint syntax and other Python 3.10+ language features.</p>
     </details>
     <details>
       <summary>Is Tesseract OCR required?</summary>
-      <p>Only if you use the <code>ocr</code> command or AI features on image-only scanned PDFs. Install Tesseract separately (<code>sudo apt install tesseract-ocr</code> on Linux, <code>brew install tesseract</code> on macOS). For PDFs with a selectable text layer, OCR is not needed.</p>
+      <p>Only for the <code>ocr</code> command or AI analysis of image-only scanned PDFs. Install separately (<code>sudo apt install tesseract-ocr</code> on Linux, <code>brew install tesseract</code> on macOS). For PDFs with a selectable text layer, OCR is not needed.</p>
     </details>
     <details>
       <summary>Can I use NyxPrism as a Python library, not just CLI?</summary>
       <p>Yes. Every command has a corresponding Python function. Import from <code>nyxprism.core.*</code> and <code>nyxprism.ai.*</code> to integrate directly into your own scripts and applications.</p>
-    </details>
-    <details>
-      <summary>How does the --batch-dir mode work for ai-split?</summary>
-      <p>Pass <code>--batch-dir ./folder/</code> instead of a single file. NyxPrism iterates every <code>*.pdf</code> in the directory, runs the full split pipeline on each one, and places each file&#8217;s outputs into its own subdirectory under <code>--output-dir</code>.</p>
     </details>
   </div>
 </section>
@@ -645,15 +978,11 @@
 
 <!-- CTA BAND -->
 <section class="cta-band">
-  <h2>Ready to Take Back<br>Control of Your PDFs?</h2>
-  <p>Free. Open source. No account required. Install in seconds and let AI do the heavy lifting.</p>
+  <h2>The PDF Toolkit<br>Your Workflow Deserves.</h2>
+  <p>Free to install. No account required to start. Let the AI handle the rest.</p>
   <div class="cta-row">
-    <a class="btn btn-primary" href="https://pypi.org/project/nyxprism/" target="_blank" rel="noopener">
-      &#128230; pip install nyxprism
-    </a>
-    <a class="btn btn-secondary" href="https://github.com/cmc-creator/NyxPrism" target="_blank" rel="noopener">
-      View Source on GitHub &#8594;
-    </a>
+    <a class="btn btn-primary" href="login.html#trial">Start Free Trial</a>
+    <a class="btn btn-secondary" href="https://github.com/cmc-creator/NyxPrism" target="_blank" rel="noopener">View on GitHub</a>
   </div>
 </section>
 
@@ -661,18 +990,18 @@
 <footer>
   <div class="footer-inner">
     <div class="footer-brand">
-      <h3>&#127752; <span>Nyx</span>Prism&#8482;</h3>
-      <div class="company">NyxCollective LLC</div>
-      <p>The AI-powered PDF multi-tool built for developers, legal teams, finance departments, and anyone who handles documents at scale.</p>
-      <p class="tm-notice">NyxPrism&#8482; is a trademark of NyxCollective LLC.</p>
+      <div class="f-wordmark"><em>Nyx</em>Prism&#8482;</div>
+      <div class="f-co">NyxCollective LLC</div>
+      <p>The AI-powered PDF toolkit built for developers, legal teams, finance departments, and anyone who handles documents at scale.</p>
+      <p class="tm">NyxPrism&#8482; is a trademark of NyxCollective LLC.</p>
     </div>
     <div class="footer-col">
       <h4>Product</h4>
       <a href="#features">Features</a>
+      <a href="#pricing">Pricing</a>
       <a href="#ai">AI Tools</a>
       <a href="#commands">Commands</a>
       <a href="#faq">FAQ</a>
-      <a href="https://github.com/cmc-creator/NyxPrism/releases" target="_blank" rel="noopener">Changelog</a>
     </div>
     <div class="footer-col">
       <h4>Developers</h4>
@@ -680,19 +1009,22 @@
       <a href="https://pypi.org/project/nyxprism/" target="_blank" rel="noopener">PyPI</a>
       <a href="https://github.com/cmc-creator/NyxPrism#readme" target="_blank" rel="noopener">Documentation</a>
       <a href="https://github.com/cmc-creator/NyxPrism/issues" target="_blank" rel="noopener">Report a Bug</a>
+      <a href="https://github.com/cmc-creator/NyxPrism/releases" target="_blank" rel="noopener">Changelog</a>
     </div>
     <div class="footer-col">
-      <h4>Legal</h4>
+      <h4>Company</h4>
+      <a href="login.html">Log In</a>
+      <a href="login.html#trial">Start Free Trial</a>
       <a href="terms.html">Terms of Service</a>
       <a href="privacy.html">Privacy Policy</a>
       <a href="https://github.com/cmc-creator/NyxPrism/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
     </div>
   </div>
   <div class="footer-bottom">
-    <span>&#169; 2024&#8211;2026 NyxCollective LLC. All rights reserved. NyxPrism&#8482; is a trademark of NyxCollective LLC.</span>
+    <span>&copy; 2024&ndash;2026 NyxCollective LLC. All rights reserved.</span>
     <span>
-      <a href="terms.html">Terms</a> &nbsp;&#183;&nbsp;
-      <a href="privacy.html">Privacy</a> &nbsp;&#183;&nbsp;
+      <a href="terms.html">Terms</a> &nbsp;&middot;&nbsp;
+      <a href="privacy.html">Privacy</a> &nbsp;&middot;&nbsp;
       <a href="https://github.com/cmc-creator/NyxPrism/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
     </span>
   </div>
