@@ -1,0 +1,12 @@
+{
+  "$schema": "https://schema.railpack.com",
+  "provider": "node",
+  "steps": {
+    "install": {
+      "commands": ["cd backend && npm install"]
+    }
+  },
+  "deploy": {
+    "startCommand": "node backend/src/index.js"
+  }
+}
