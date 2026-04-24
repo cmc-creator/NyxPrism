@@ -4,19 +4,26 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nyxprism"
-version = "1.0.0"
-description = "Powerful AI-enhanced PDF multi-tool: split, merge, compress, convert, OCR, watermark, protect, and AI bulk-split with auto-rename"
+version = "1.2.0"
+description = "Powerful AI-enhanced PDF multi-tool: split, merge, compress, convert, OCR, watermark, protect, AI bulk-split with auto-rename, summarize, classify, and key-info extraction"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [{ name = "NyxPrism Contributors" }]
-keywords = ["pdf", "ai", "split", "merge", "ocr", "compress", "convert"]
+keywords = ["pdf", "ai", "split", "merge", "ocr", "compress", "convert", "rename",
+            "summarize", "classify", "extract", "watermark", "protect"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Topic :: Utilities",
 ]
+
+[project.urls]
+Homepage = "https://cmc-creator.github.io/NyxPrism/"
+Source = "https://github.com/cmc-creator/NyxPrism"
+"Bug Tracker" = "https://github.com/cmc-creator/NyxPrism/issues"
+Changelog = "https://github.com/cmc-creator/NyxPrism/releases"
 dependencies = [
     "pypdf>=4.0",
     "pdfplumber>=0.10",

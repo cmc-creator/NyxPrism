@@ -62,7 +62,7 @@ def cli() -> None:
 # ---------------------------------------------------------------------------
 
 @cli.command("ai-split")
-@click.argument("source", type=click.Path(exists=True, dir_okay=False))
+@click.argument("source", type=click.Path(exists=True), required=False, default=None)
 @click.option("--output-dir", "-o", default=None,
               help="Directory for output files (default: <source>_split/)")
 @click.option("--strategy", "-s",
@@ -81,27 +81,71 @@ def cli() -> None:
               help="DPI used to render pages for OCR.")
 @click.option("--quiet", "-q", is_flag=True, default=False,
               help="Suppress progress output.")
-def ai_split(source, output_dir, strategy, api_key, model, no_ocr, ocr_lang, ocr_dpi, quiet):
+@click.option("--batch-dir", "-b", default=None,
+              type=click.Path(exists=True, file_okay=False),
+              help="Process ALL PDFs in this directory (ignores SOURCE).")
+def ai_split(source, output_dir, strategy, api_key, model, no_ocr, ocr_lang, ocr_dpi,
+             quiet, batch_dir):
     """Bulk-split SOURCE using AI-detected document boundaries.
 
-    SOURCE must be a PDF file (may contain multiple concatenated documents).
+    SOURCE must be a multi-document PDF (several concatenated documents).
     Each detected sub-document is written as a separate, descriptively-named
     PDF in OUTPUT_DIR.
+
+    Use --batch-dir to process every PDF in a folder at once:
+
+    \b
+        nyxprism ai-split --batch-dir ./inbox/ --output-dir ./split/
     """
     from nyxprism.ai.splitter import bulk_split
 
+    common_kwargs = dict(
+        strategy=strategy,
+        api_key=api_key,
+        model=model,
+        ocr_fallback=not no_ocr,
+        ocr_lang=ocr_lang,
+        ocr_dpi=ocr_dpi,
+        progress=not quiet,
+    )
+
+    # ------------------------------------------------------------------
+    # Batch-directory mode
+    # ------------------------------------------------------------------
+    if batch_dir:
+        pdf_files = sorted(Path(batch_dir).glob("*.pdf"))
+        if not pdf_files:
+            click.echo(f"No PDF files found in {batch_dir}", err=True)
+            sys.exit(1)
+        total_docs = 0
+        for pdf in pdf_files:
+            per_output = (Path(output_dir) / pdf.stem) if output_dir else None
+            if not quiet:
+                click.echo(f"\n[NyxPrism] Processing {pdf.name} …")
+            try:
+                results = bulk_split(source=pdf, output_dir=per_output, **common_kwargs)
+                total_docs += len(results)
+                for path, label in results:
+                    click.echo(f"  {label:50s} {path}")
+            except Exception as exc:
+                click.echo(f"  Error processing {pdf.name}: {exc}", err=True)
+        if not quiet:
+            click.echo(f"\nBatch complete. {total_docs} document(s) extracted from "
+                       f"{len(pdf_files)} file(s).")
+        return
+
+    # ------------------------------------------------------------------
+    # Single-file mode
+    # ------------------------------------------------------------------
+    if not source:
+        click.echo("Error: provide SOURCE or --batch-dir.", err=True)
+        sys.exit(1)
+    if not Path(source).is_file():
+        click.echo(f"Error: {source!r} is not a file.", err=True)
+        sys.exit(1)
+
     try:
-        results = bulk_split(
-            source=source,
-            output_dir=output_dir,
-            strategy=strategy,
-            api_key=api_key,
-            model=model,
-            ocr_fallback=not no_ocr,
-            ocr_lang=ocr_lang,
-            ocr_dpi=ocr_dpi,
-            progress=not quiet,
-        )
+        results = bulk_split(source=source, output_dir=output_dir, **common_kwargs)
         if not quiet:
             click.echo(f"\nSplit into {len(results)} document(s):")
         for path, label in results:
@@ -511,6 +555,202 @@ def interleave(odd_source, even_source, output, no_reverse):
     except Exception as exc:
         click.echo(f"Error: {exc}", err=True)
         sys.exit(1)
+
+
+# ---------------------------------------------------------------------------
+# ai-summarize
+# ---------------------------------------------------------------------------
+
+@cli.command("ai-summarize")
+@click.argument("source", type=click.Path(exists=True, dir_okay=False))
+@click.option("--output", "-o", default=None,
+              help="Save summary to file (prints to stdout if not specified).")
+@click.option("--strategy", "-s",
+              type=click.Choice(["auto", "llm", "heuristic"]), default="auto",
+              show_default=True)
+@click.option("--api-key", default=None, envvar="OPENAI_API_KEY")
+@click.option("--model", default="gpt-4o-mini", show_default=True)
+@click.option("--pages", "-p", default=None,
+              help="Comma-separated 1-based page numbers to summarise (default: all).")
+@click.option("--sentences", type=int, default=5, show_default=True,
+              help="Target sentences for heuristic summary.")
+def ai_summarize(source, output, strategy, api_key, model, pages, sentences):
+    """Summarize a PDF using AI or extractive heuristics.
+
+    Works without an API key (heuristic mode). Set OPENAI_API_KEY for
+    higher-quality LLM summaries.
+    """
+    from nyxprism.ai.summarizer import summarize_text
+    from nyxprism.core.extract import extract_text as _extract_text
+
+    page_list = None
+    if pages:
+        page_list = [int(p.strip()) for p in pages.split(",") if p.strip()]
+    try:
+        text = _extract_text(source, page_numbers=page_list)
+        summary = summarize_text(
+            text,
+            strategy=strategy,
+            api_key=api_key,
+            model=model,
+            sentences=sentences,
+        )
+        if output:
+            Path(output).write_text(summary, encoding="utf-8")
+            click.echo(f"Summary saved to: {output}")
+        else:
+            click.echo(summary)
+    except Exception as exc:
+        click.echo(f"Error: {exc}", err=True)
+        sys.exit(1)
+
+
+# ---------------------------------------------------------------------------
+# ai-classify
+# ---------------------------------------------------------------------------
+
+@cli.command("ai-classify")
+@click.argument("source", type=click.Path(exists=True, dir_okay=False))
+@click.option("--strategy", "-s",
+              type=click.Choice(["auto", "llm", "heuristic"]), default="auto",
+              show_default=True)
+@click.option("--api-key", default=None, envvar="OPENAI_API_KEY")
+@click.option("--model", default="gpt-4o-mini", show_default=True)
+def ai_classify(source, strategy, api_key, model):
+    """Classify the document type of a PDF (invoice, contract, report, etc.).
+
+    Works without an API key (heuristic mode). Set OPENAI_API_KEY for
+    higher-accuracy LLM classification.
+    """
+    from nyxprism.ai.summarizer import classify_document
+    from nyxprism.core.extract import extract_text as _extract_text
+
+    try:
+        text = _extract_text(source)
+        label = classify_document(
+            text,
+            strategy=strategy,
+            api_key=api_key,
+            model=model,
+        )
+        click.echo(f"Document type: {label}")
+    except Exception as exc:
+        click.echo(f"Error: {exc}", err=True)
+        sys.exit(1)
+
+
+# ---------------------------------------------------------------------------
+# ai-extract-info
+# ---------------------------------------------------------------------------
+
+@cli.command("ai-extract-info")
+@click.argument("source", type=click.Path(exists=True, dir_okay=False))
+@click.option("--output", "-o", default=None,
+              help="Save JSON output to file (prints to stdout if not specified).")
+@click.option("--strategy", "-s",
+              type=click.Choice(["auto", "llm", "heuristic"]), default="auto",
+              show_default=True)
+@click.option("--api-key", default=None, envvar="OPENAI_API_KEY")
+@click.option("--model", default="gpt-4o-mini", show_default=True)
+def ai_extract_info(source, output, strategy, api_key, model):
+    """Extract structured key information from a PDF (dates, amounts, parties, etc.).
+
+    Outputs a JSON object with fields: document_type, date, parties,
+    subject, reference_number, amount, summary.
+    """
+    import json
+    from nyxprism.ai.summarizer import extract_key_info
+    from nyxprism.core.extract import extract_text as _extract_text
+
+    try:
+        text = _extract_text(source)
+        info = extract_key_info(
+            text,
+            strategy=strategy,
+            api_key=api_key,
+            model=model,
+        )
+        json_str = json.dumps(info, indent=2, ensure_ascii=False)
+        if output:
+            Path(output).write_text(json_str, encoding="utf-8")
+            click.echo(f"Info saved to: {output}")
+        else:
+            click.echo(json_str)
+    except Exception as exc:
+        click.echo(f"Error: {exc}", err=True)
+        sys.exit(1)
+
+
+# ---------------------------------------------------------------------------
+# ai-rename
+# ---------------------------------------------------------------------------
+
+@cli.command("ai-rename")
+@click.argument("sources", nargs=-1, required=True,
+                type=click.Path(exists=True, dir_okay=False))
+@click.option("--strategy", "-s",
+              type=click.Choice(["auto", "llm", "heuristic"]), default="auto",
+              show_default=True)
+@click.option("--api-key", default=None, envvar="OPENAI_API_KEY")
+@click.option("--model", default="gpt-4o-mini", show_default=True)
+@click.option("--dry-run", is_flag=True, default=False,
+              help="Preview new names without renaming files.")
+@click.option("--prefix", default="", help="Optional prefix added to every new name.")
+def ai_rename(sources, strategy, api_key, model, dry_run, prefix):
+    """Rename one or more PDF files using AI-suggested descriptive names.
+
+    Analyses each file's content and proposes a clean, descriptive filename.
+    Use --dry-run to preview names before committing.
+
+    Examples:
+
+    \b
+        nyxprism ai-rename scan001.pdf scan002.pdf
+        nyxprism ai-rename *.pdf --strategy heuristic --dry-run
+        nyxprism ai-rename invoice.pdf --prefix "2024_"
+    """
+    from nyxprism.ai.namer import suggest_names_bulk
+    from nyxprism.core.extract import extract_text as _extract_text
+
+    source_paths = [Path(s) for s in sources]
+    texts: list[str] = []
+    for sp in source_paths:
+        try:
+            texts.append(_extract_text(sp))
+        except Exception:
+            texts.append("")
+
+    names = suggest_names_bulk(
+        texts,
+        strategy=strategy,
+        api_key=api_key,
+        model=model,
+    )
+
+    renamed = 0
+    for sp, name in zip(source_paths, names):
+        new_stem = f"{prefix}{name}" if prefix else name
+        new_path = sp.parent / f"{new_stem}.pdf"
+
+        # Avoid overwriting a different file
+        if new_path.exists() and new_path != sp:
+            base = new_path.stem
+            suffix = 1
+            while new_path.exists() and new_path != sp:
+                new_path = sp.parent / f"{base}_{suffix}.pdf"
+                suffix += 1
+
+        action = "→" if not dry_run else "(dry-run) →"
+        click.echo(f"  {sp.name:50s} {action} {new_path.name}")
+
+        if not dry_run and new_path != sp:
+            sp.rename(new_path)
+            renamed += 1
+
+    if not dry_run:
+        click.echo(f"\nRenamed {renamed} of {len(source_paths)} file(s).")
+    else:
+        click.echo(f"\n{len(source_paths)} file(s) previewed (--dry-run, no changes made).")
 
 
 if __name__ == "__main__":
