@@ -193,6 +193,14 @@
     }
     .page-foot a { color: var(--muted2); }
     .page-foot a:hover { color: var(--muted); }
+
+    /* ── AUTH ERROR ───────────────────────────────────────────────────── */
+    .auth-error {
+      display: none; font-size: .82rem; font-weight: 500;
+      color: var(--red); background: rgba(248,113,113,.07);
+      border: 1px solid rgba(248,113,113,.2); border-radius: var(--radius-sm);
+      padding: .6rem .85rem; margin-bottom: .9rem;
+    }
   </style>
 </head>
 <body>
@@ -233,7 +241,7 @@
       <div class="form-panel active" id="panel-login">
         <div class="form-title">Welcome back</div>
         <p class="form-sub">Sign in to your NyxPrism&#8482; account to access your Professional features.</p>
-        <form onsubmit="handleSubmit(event, 'login')">
+        <form id="form-login">
           <div class="field">
             <label for="login-email">Email address</label>
             <input type="email" id="login-email" name="email" placeholder="you@example.com" autocomplete="email" required />
@@ -247,8 +255,9 @@
               <input type="checkbox" name="remember" />
               <span>Remember me</span>
             </label>
-            <a class="forgot" href="#">Forgot password?</a>
+            <a class="forgot" href="#" id="btn-forgot">Forgot password?</a>
           </div>
+          <div class="auth-error" id="login-error"></div>
           <button type="submit" class="submit-btn">Log In</button>
         </form>
         <p class="card-foot">No account? <a href="#" onclick="switchTab('trial');return false;">Start your free trial</a></p>
@@ -261,7 +270,7 @@
         <div class="plan-hint">
           Starting with <strong>Professional</strong> &mdash; includes NyxPrism UI, LLM AI, and email support. Downgrade to Community (free) any time.
         </div>
-        <form onsubmit="handleSubmit(event, 'trial')">
+        <form id="form-trial">
           <div class="field-row">
             <div class="field">
               <label for="trial-first">First name</label>
@@ -287,6 +296,7 @@
               <option value="enterprise">Enterprise &mdash; Contact sales</option>
             </select>
           </div>
+          <div class="auth-error" id="trial-error"></div>
           <button type="submit" class="submit-btn">Create Account &amp; Start Trial</button>
         </form>
         <p class="card-foot">Already have an account? <a href="#" onclick="switchTab('login');return false;">Log in</a></p>
@@ -307,33 +317,178 @@
   <a href="contact.html">Contact Us</a>
 </footer>
 
-<script>
-  function switchTab(tab) {
+<script type="module">
+  import { initializeApp }                                          from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import { getAuth, signInWithEmailAndPassword,
+           createUserWithEmailAndPassword, sendPasswordResetEmail,
+           onAuthStateChanged, signOut }                            from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+  import { getFirestore, doc, setDoc, getDoc,
+           serverTimestamp }                                        from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+  // ── REPLACE THESE VALUES WITH YOUR FIREBASE PROJECT CONFIG ──────────
+  // firebase console → Project Settings → Your apps → Web app → Config
+  const firebaseConfig = {
+    apiKey:            "REPLACE_WITH_YOUR_API_KEY",
+    authDomain:        "REPLACE_WITH_YOUR_PROJECT.firebaseapp.com",
+    projectId:         "REPLACE_WITH_YOUR_PROJECT_ID",
+    storageBucket:     "REPLACE_WITH_YOUR_PROJECT.appspot.com",
+    messagingSenderId: "REPLACE_WITH_YOUR_SENDER_ID",
+    appId:             "REPLACE_WITH_YOUR_APP_ID"
+  };
+  // ─────────────────────────────────────────────────────────────────────
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  /* ── TAB SWITCHING (exposed to window for onclick handlers) ── */
+  window.switchTab = function(tab) {
     document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
     document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
     document.getElementById('tab-' + tab).classList.add('active');
     document.getElementById('tab-' + tab).setAttribute('aria-selected','true');
     document.getElementById('panel-' + tab).classList.add('active');
     if (history.replaceState) history.replaceState(null, '', '#' + tab);
+  };
+
+  /* ── ERROR HELPERS ── */
+  function showError(id, msg, isSuccess = false) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.style.display = 'block';
+    el.style.color = isSuccess ? 'var(--green)' : '';
+    el.style.background = isSuccess ? 'rgba(52,211,153,.07)' : '';
+    el.style.borderColor = isSuccess ? 'rgba(52,211,153,.2)' : '';
+  }
+  function clearError(id) {
+    const el = document.getElementById(id);
+    el.textContent = '';
+    el.style.display = 'none';
   }
 
-  function handleSubmit(e, type) {
+  /* ── FIREBASE ERROR CODES → HUMAN MESSAGES ── */
+  function authErrorMsg(code) {
+    const map = {
+      'auth/user-not-found':          'No account found with that email.',
+      'auth/wrong-password':          'Incorrect password. Please try again.',
+      'auth/invalid-credential':      'Incorrect email or password.',
+      'auth/email-already-in-use':    'An account with that email already exists.',
+      'auth/weak-password':           'Password must be at least 12 characters.',
+      'auth/invalid-email':           'Please enter a valid email address.',
+      'auth/network-request-failed':  'Network error — check your connection.',
+      'auth/too-many-requests':       'Too many attempts. Please wait a moment and try again.',
+      'auth/operation-not-allowed':   'Email/password sign-in is not enabled. Contact support.',
+    };
+    return map[code] || 'Something went wrong. Please try again.';
+  }
+
+  /* ── LOGGED-IN DASHBOARD STATE ── */
+  async function showDashboard(user) {
+    let plan = 'community';
+    let firstName = '';
+    try {
+      const snap = await getDoc(doc(db, 'users', user.uid));
+      if (snap.exists()) {
+        const d = snap.data();
+        plan      = d.plan      || 'community';
+        firstName = d.firstName || '';
+      }
+    } catch (_) { /* Firestore rules may block before profile exists */ }
+
+    document.querySelector('.tab-row').style.display = 'none';
+    document.querySelector('.auth-card').innerHTML = `
+      <div style="text-align:center;padding:.5rem 0;">
+        <div style="width:56px;height:56px;border-radius:50%;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.28);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div style="font-size:1.25rem;font-weight:800;letter-spacing:-.025em;margin-bottom:.35rem;">Welcome back${firstName ? ', ' + firstName : ''}!</div>
+        <div style="font-size:.85rem;color:var(--muted);margin-bottom:1.75rem;">${user.email}</div>
+        <div style="background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);border-radius:var(--radius-sm);padding:.85rem 1rem;margin-bottom:1.75rem;">
+          <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.09em;margin-bottom:.4rem;">Active Plan</div>
+          <div style="font-size:1.05rem;font-weight:700;color:var(--accent-bright);text-transform:capitalize;">${plan}</div>
+        </div>
+        <a href="index.html" style="display:block;width:100%;padding:.75rem;border-radius:var(--radius-sm);background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff;font-weight:700;font-size:.9rem;margin-bottom:.75rem;text-decoration:none;">Back to Home</a>
+        <button id="signout-btn" style="width:100%;padding:.7rem;border:1px solid var(--border2);border-radius:var(--radius-sm);background:transparent;color:var(--muted);font-family:inherit;font-size:.875rem;font-weight:600;cursor:pointer;transition:border-color .15s,color .15s;">Sign Out</button>
+      </div>
+    `;
+    document.getElementById('signout-btn').addEventListener('click', async () => {
+      await signOut(auth);
+      location.reload();
+    });
+  }
+
+  /* ── OBSERVE AUTH STATE (handles page reload while still logged in) ── */
+  onAuthStateChanged(auth, user => {
+    if (user) showDashboard(user);
+  });
+
+  /* ── LOGIN FORM ── */
+  document.getElementById('form-login').addEventListener('submit', async e => {
     e.preventDefault();
-    const btn = e.target.querySelector('.submit-btn');
-    btn.textContent = type === 'login' ? 'Signing in...' : 'Creating account...';
+    clearError('login-error');
+    const btn      = e.target.querySelector('.submit-btn');
+    const email    = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    btn.textContent = 'Signing in...';
     btn.disabled = true;
-    // Placeholder: backend not yet connected
-    setTimeout(() => {
-      btn.textContent = type === 'login' ? 'Log In' : 'Create Account & Start Trial';
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      // onAuthStateChanged fires → showDashboard()
+    } catch (err) {
+      showError('login-error', authErrorMsg(err.code));
+      btn.textContent = 'Log In';
       btn.disabled = false;
-      alert('Authentication backend coming soon. Thank you for your interest in NyxPrism\u2122!');
-    }, 1200);
-  }
+    }
+  });
 
-  // Auto-activate trial tab if URL fragment is #trial
-  if (window.location.hash === '#trial') {
-    switchTab('trial');
-  }
+  /* ── FORGOT PASSWORD ── */
+  document.getElementById('btn-forgot').addEventListener('click', async e => {
+    e.preventDefault();
+    const email = document.getElementById('login-email').value.trim();
+    if (!email) { showError('login-error', 'Enter your email address above first.'); return; }
+    clearError('login-error');
+    try {
+      await sendPasswordResetEmail(auth, email);
+      showError('login-error', 'Password reset email sent — check your inbox.', true);
+    } catch (err) {
+      showError('login-error', authErrorMsg(err.code));
+    }
+  });
+
+  /* ── TRIAL / SIGN-UP FORM ── */
+  document.getElementById('form-trial').addEventListener('submit', async e => {
+    e.preventDefault();
+    clearError('trial-error');
+    const btn       = e.target.querySelector('.submit-btn');
+    const firstName = document.getElementById('trial-first').value.trim();
+    const lastName  = document.getElementById('trial-last').value.trim();
+    const email     = document.getElementById('trial-email').value.trim();
+    const password  = document.getElementById('trial-password').value;
+    const plan      = document.getElementById('trial-plan').value;
+    btn.textContent = 'Creating account...';
+    btn.disabled = true;
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      // Write user profile to Firestore
+      await setDoc(doc(db, 'users', cred.user.uid), {
+        firstName,
+        lastName,
+        email,
+        plan,
+        trialStart:   serverTimestamp(),
+        trialActive:  true,
+        createdAt:    serverTimestamp(),
+      });
+      // onAuthStateChanged fires → showDashboard()
+    } catch (err) {
+      showError('trial-error', authErrorMsg(err.code));
+      btn.textContent = 'Create Account & Start Trial';
+      btn.disabled = false;
+    }
+  });
+
+  /* ── AUTO-ACTIVATE TAB FROM URL HASH ── */
+  if (window.location.hash === '#trial') window.switchTab('trial');
 </script>
 
 </body>
