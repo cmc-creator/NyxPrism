@@ -1,437 +1,754 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard &mdash; NyxPrism&#8482;</title>
+  <title>NyxPrism&#8482; — PDF Tools</title>
   <meta name="robots" content="noindex, nofollow" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg:            #06080d;
-      --bg2:           #0b0f18;
-      --surface:       #0f1724;
-      --surface2:      #141e2e;
-      --border:        #1b2840;
-      --border2:       #253548;
-      --border3:       #2d4060;
-      --accent:        #7c3aed;
-      --accent3:       #5b21b6;
-      --accent-bright: #a78bfa;
-      --text:          #f0f4fc;
-      --text2:         #c8d3e0;
-      --text3:         #9aaec4;
-      --muted:         #6b7d96;
-      --muted2:        #4e5f75;
-      --green:         #34d399;
-      --yellow:        #fbbf24;
-      --red:           #f87171;
-      --radius-sm:     8px;
-      --radius:        12px;
-      --radius-lg:     16px;
+      --bg:#06080d;--bg2:#09101a;--surface:#0f1724;--surface2:#131d2e;--surface3:#172031;
+      --border:#1b2840;--border2:#253548;--border3:#2d4060;
+      --accent:#7c3aed;--accent2:#6d28d9;--accent3:#5b21b6;--accent-bright:#a78bfa;--accent-glow:rgba(124,58,237,.18);
+      --text:#f0f4fc;--text2:#c8d3e0;--text3:#9aaec4;--muted:#6b7d96;--muted2:#4e5f75;
+      --green:#34d399;--green-bg:rgba(52,211,153,.08);--yellow:#fbbf24;--yellow-bg:rgba(251,191,36,.08);
+      --red:#f87171;--red-bg:rgba(248,113,113,.08);--blue:#60a5fa;--blue-bg:rgba(96,165,250,.08);
+      --radius-sm:6px;--radius:10px;--radius-lg:14px;--shadow:0 4px 24px rgba(0,0,0,.5);
     }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; }
-    body {
-      background: var(--bg); color: var(--text);
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      -webkit-font-smoothing: antialiased;
-      min-height: 100vh;
-    }
-    a { color: var(--accent-bright); text-decoration: none; }
-    a:hover { color: var(--text); }
-    code, .mono { font-family: 'JetBrains Mono', monospace; }
-
-    /* ── LOADING SCREEN ── */
-    #loading-screen {
-      position: fixed; inset: 0; background: var(--bg);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 999; transition: opacity .3s;
-    }
-    .spinner {
-      width: 36px; height: 36px; border-radius: 50%;
-      border: 3px solid var(--border2); border-top-color: var(--accent-bright);
-      animation: spin .7s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ── NAV ── */
-    nav {
-      position: sticky; top: 0; z-index: 200;
-      background: rgba(6,8,13,.9);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border);
-      padding: 0 2rem; height: 62px;
-      display: flex; align-items: center; gap: 1.25rem;
-    }
-    .nav-brand { font-size: 1.05rem; font-weight: 800; letter-spacing: -.025em; }
-    .nav-brand em { color: var(--accent-bright); font-style: normal; }
-    .nav-sep { flex: 1; }
-    .nav-email { font-size: .8rem; color: var(--muted); }
-    .signout-btn {
-      font-size: .8rem; font-weight: 600; color: var(--muted);
-      background: none; border: 1px solid var(--border2); border-radius: var(--radius-sm);
-      padding: .35rem .8rem; cursor: pointer; font-family: inherit;
-      transition: color .15s, border-color .15s;
-    }
-    .signout-btn:hover { color: var(--text); border-color: var(--border3); }
-
-    /* ── PAGE GLOW ── */
-    .page-glow {
-      position: fixed; inset: 0; pointer-events: none; z-index: 0;
-      background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(124,58,237,.1) 0%, transparent 60%);
-    }
-
-    /* ── LAYOUT ── */
-    .page-wrap {
-      position: relative; z-index: 1;
-      max-width: 860px; margin: 0 auto;
-      padding: 2.5rem 1.5rem 5rem;
-    }
-
-    /* ── WELCOME BAND ── */
-    .welcome {
-      display: flex; align-items: center; gap: 1.25rem;
-      background: var(--surface); border: 1px solid var(--border2);
-      border-radius: var(--radius-lg); padding: 1.5rem 1.75rem;
-      margin-bottom: 2rem;
-    }
-    .avatar {
-      width: 52px; height: 52px; flex-shrink: 0; border-radius: 50%;
-      background: rgba(124,58,237,.12); border: 1px solid rgba(124,58,237,.28);
-      display: flex; align-items: center; justify-content: center;
-    }
-    .avatar svg { width: 22px; height: 22px; stroke: var(--accent-bright); }
-    .welcome-text h1 { font-size: 1.2rem; font-weight: 800; letter-spacing: -.02em; margin-bottom: .2rem; }
-    .welcome-text p  { font-size: .85rem; color: var(--muted); }
-
-    /* ── PLAN BADGE ── */
-    .plan-band {
-      background: var(--surface); border: 1px solid var(--border2);
-      border-radius: var(--radius-lg); padding: 1.4rem 1.75rem;
-      margin-bottom: 2rem;
-      display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center;
-    }
-    .plan-detail { flex: 1; min-width: 160px; }
-    .plan-label  { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); margin-bottom: .3rem; }
-    .plan-value  { font-size: 1.05rem; font-weight: 800; color: var(--accent-bright); text-transform: capitalize; }
-    .status-pill {
-      display: inline-flex; align-items: center; gap: .4rem;
-      font-size: .75rem; font-weight: 700; letter-spacing: .04em;
-      padding: .3rem .85rem; border-radius: 999px;
-    }
-    .status-pill.active   { background: rgba(52,211,153,.1); color: var(--green);  border: 1px solid rgba(52,211,153,.25); }
-    .status-pill.trialing { background: rgba(251,191,36,.1);  color: var(--yellow); border: 1px solid rgba(251,191,36,.25); }
-    .status-pill.inactive { background: rgba(248,113,113,.1); color: var(--red);    border: 1px solid rgba(248,113,113,.25); }
-    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
-    .trial-note { font-size: .78rem; color: var(--muted); margin-top: .4rem; }
-
-    /* ── GRID ── */
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 2rem; }
-    @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
-
-    /* ── CARD ── */
-    .card {
-      background: var(--surface); border: 1px solid var(--border2);
-      border-radius: var(--radius-lg); padding: 1.5rem;
-    }
-    .card-header {
-      display: flex; align-items: center; gap: .75rem; margin-bottom: 1.1rem;
-    }
-    .card-icon {
-      width: 36px; height: 36px; flex-shrink: 0; border-radius: var(--radius-sm);
-      background: rgba(124,58,237,.1); border: 1px solid rgba(124,58,237,.2);
-      display: flex; align-items: center; justify-content: center;
-    }
-    .card-icon svg { width: 16px; height: 16px; stroke: var(--accent-bright); }
-    .card h2 { font-size: .95rem; font-weight: 700; }
-
-    /* ── INSTALL STEPS ── */
-    .install-steps { display: flex; flex-direction: column; gap: .85rem; }
-    .step { display: flex; flex-direction: column; gap: .4rem; }
-    .step-label { font-size: .72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; }
-    .code-block {
-      background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-sm);
-      padding: .6rem .9rem; font-family: 'JetBrains Mono', monospace;
-      font-size: .82rem; color: var(--text2);
-      display: flex; align-items: center; justify-content: space-between; gap: .5rem;
-    }
-    .copy-btn {
-      flex-shrink: 0; background: none; border: none; cursor: pointer;
-      color: var(--muted); padding: .1rem; transition: color .15s;
-    }
-    .copy-btn:hover { color: var(--accent-bright); }
-    .copy-btn svg { width: 14px; height: 14px; }
-
-    /* ── QUICK LINKS ── */
-    .quick-links { display: flex; flex-direction: column; gap: .6rem; }
-    .quick-link {
-      display: flex; align-items: center; gap: .75rem; padding: .7rem .85rem;
-      border-radius: var(--radius-sm); border: 1px solid var(--border);
-      color: var(--text2); font-size: .875rem; font-weight: 500;
-      transition: border-color .15s, background .15s, color .15s;
-    }
-    .quick-link:hover { border-color: var(--border3); background: var(--surface2); color: var(--text); }
-    .quick-link svg { width: 15px; height: 15px; stroke: var(--muted); flex-shrink: 0; }
-
-    /* ── FULL-WIDTH CARD ── */
-    .card-full { margin-bottom: 1.25rem; }
-    .cmd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: .6rem; margin-top: .25rem; }
-    .cmd-item {
-      background: var(--bg2); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); padding: .55rem .85rem;
-      font-family: 'JetBrains Mono', monospace; font-size: .78rem; color: var(--text3);
-    }
-    .cmd-item span { color: var(--accent-bright); }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',-apple-system,sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh}
+    a{color:inherit;text-decoration:none} button{font-family:inherit;cursor:pointer} input,select,textarea{font-family:inherit}
+    #loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .3s}
+    .spinner{width:36px;height:36px;border-radius:50%;border:3px solid var(--border2);border-top-color:var(--accent-bright);animation:spin .7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    nav{position:sticky;top:0;z-index:500;background:rgba(6,8,13,.92);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);height:58px;padding:0 1.5rem;display:flex;align-items:center;gap:1rem}
+    .nav-brand{display:flex;align-items:center;gap:.5rem}
+    .nav-brand-logo{width:26px;height:26px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--accent),var(--accent3));border-radius:7px}
+    .nav-brand-logo svg{width:14px;height:14px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .nav-brand-name{font-size:.95rem;font-weight:800;letter-spacing:-.025em}
+    .nav-brand-name em{color:var(--accent-bright);font-style:normal}
+    .nav-sep{flex:1}
+    .nav-plan{font-size:.72rem;font-weight:700;letter-spacing:.06em;padding:.28rem .65rem;border-radius:999px;background:var(--accent-glow);border:1px solid rgba(124,58,237,.3);color:var(--accent-bright);text-transform:uppercase}
+    .nav-avatar{width:32px;height:32px;border-radius:50%;border:1px solid var(--border2);background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:var(--accent-bright);cursor:pointer;position:relative}
+    .nav-dropdown{position:absolute;top:42px;right:0;min-width:180px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;display:none;z-index:600}
+    .nav-avatar.open .nav-dropdown{display:block}
+    .nav-dropdown-email{font-size:.75rem;color:var(--muted);padding:.75rem 1rem .5rem;border-bottom:1px solid var(--border)}
+    .nav-dropdown-item{display:flex;align-items:center;gap:.65rem;padding:.65rem 1rem;font-size:.825rem;color:var(--text2);transition:background .12s}
+    .nav-dropdown-item:hover{background:var(--surface2);color:var(--text)}
+    .nav-dropdown-item svg{width:14px;height:14px;flex-shrink:0}
+    .nav-dropdown-item.danger{color:var(--red)}
+    .app-shell{display:flex;min-height:calc(100vh - 58px)}
+    .sidebar{width:220px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);padding:1.25rem .75rem;display:flex;flex-direction:column;gap:.25rem;position:sticky;top:58px;height:calc(100vh - 58px);overflow-y:auto}
+    .sidebar-section{font-size:.65rem;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;padding:.85rem .75rem .35rem;margin-top:.25rem}
+    .sidebar-section:first-child{padding-top:.2rem}
+    .nav-item{display:flex;align-items:center;gap:.7rem;padding:.55rem .75rem;border-radius:var(--radius-sm);font-size:.845rem;font-weight:500;color:var(--text3);transition:background .12s,color .12s;border:none;background:none;width:100%;text-align:left}
+    .nav-item svg{width:16px;height:16px;stroke:currentColor;flex-shrink:0;opacity:.75}
+    .nav-item:hover{background:var(--surface);color:var(--text2)}
+    .nav-item.active{background:var(--accent-glow);color:var(--accent-bright);border:1px solid rgba(124,58,237,.2)}
+    .nav-item.active svg{opacity:1}
+    .main{flex:1;padding:2rem;max-width:960px}
+    .panel{display:none}
+    .panel.active{display:block}
+    .page-header{margin-bottom:1.75rem}
+    .page-header h1{font-size:1.5rem;font-weight:800;letter-spacing:-.03em;margin-bottom:.35rem}
+    .page-header p{font-size:.875rem;color:var(--muted)}
+    .card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1.25rem}
+    .card-title{font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:1.1rem}
+    .drop-zone{border:2px dashed var(--border2);border-radius:var(--radius-lg);padding:2.5rem 1.5rem;text-align:center;background:var(--bg2);transition:border-color .2s,background .2s;cursor:pointer;position:relative;margin-bottom:1.25rem}
+    .drop-zone:hover,.drop-zone.drag-over{border-color:var(--accent);background:var(--accent-glow)}
+    .drop-zone input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+    .drop-icon{margin:0 auto .75rem;width:44px;height:44px;border-radius:var(--radius);background:var(--accent-glow);border:1px solid rgba(124,58,237,.25);display:flex;align-items:center;justify-content:center}
+    .drop-icon svg{width:20px;height:20px;stroke:var(--accent-bright)}
+    .drop-title{font-size:.95rem;font-weight:700;margin-bottom:.35rem}
+    .drop-sub{font-size:.8rem;color:var(--muted)}
+    .file-list{display:flex;flex-direction:column;gap:.45rem;margin-bottom:1.25rem}
+    .file-item{display:flex;align-items:center;gap:.75rem;padding:.6rem .85rem;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.82rem}
+    .file-item svg{width:14px;height:14px;stroke:var(--accent-bright);flex-shrink:0}
+    .file-item .fname{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text2)}
+    .file-item .fsize{font-size:.75rem;color:var(--muted);flex-shrink:0}
+    .file-item .fremove{background:none;border:none;color:var(--muted);padding:.1rem;transition:color .12s}
+    .file-item .fremove:hover{color:var(--red)}
+    .file-item .fremove svg{width:13px;height:13px;stroke:currentColor}
+    .form-row{display:flex;flex-wrap:wrap;gap:.85rem;margin-bottom:1rem}
+    .form-group{display:flex;flex-direction:column;gap:.4rem;flex:1;min-width:140px}
+    .form-label{font-size:.75rem;font-weight:600;color:var(--text3)}
+    .form-input,.form-select{padding:.55rem .75rem;border-radius:var(--radius-sm);background:var(--bg2);border:1px solid var(--border2);color:var(--text);font-size:.855rem;transition:border-color .15s}
+    .form-input:focus,.form-select:focus{outline:none;border-color:var(--accent)}
+    .form-select option{background:var(--surface)}
+    .form-hint{font-size:.72rem;color:var(--muted)}
+    .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.6rem 1.25rem;border-radius:var(--radius-sm);font-size:.855rem;font-weight:700;border:none;transition:opacity .15s,transform .1s}
+    .btn:active{transform:scale(.98)} .btn:disabled{opacity:.4;cursor:not-allowed}
+    .btn svg{width:15px;height:15px;stroke:currentColor}
+    .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff}
+    .btn-primary:hover:not(:disabled){opacity:.88}
+    .btn-secondary{background:var(--surface2);border:1px solid var(--border2);color:var(--text2)}
+    .btn-secondary:hover:not(:disabled){border-color:var(--border3);color:var(--text)}
+    .btn-ghost{background:none;border:1px solid var(--border2);color:var(--muted)}
+    .btn-ghost:hover:not(:disabled){border-color:var(--accent);color:var(--accent-bright)}
+    .btn-row{display:flex;gap:.75rem;flex-wrap:wrap;align-items:center}
+    .result-box{border-radius:var(--radius);padding:1rem 1.25rem;display:none;align-items:center;gap:.9rem;font-size:.855rem;margin-bottom:1rem}
+    .result-box.visible{display:flex}
+    .result-box.success{background:var(--green-bg);border:1px solid rgba(52,211,153,.2);color:var(--green)}
+    .result-box.error{background:var(--red-bg);border:1px solid rgba(248,113,113,.2);color:var(--red)}
+    .result-box.info{background:var(--blue-bg);border:1px solid rgba(96,165,250,.2);color:var(--blue)}
+    .result-box svg{width:18px;height:18px;stroke:currentColor;flex-shrink:0}
+    .result-box .rtext{flex:1}
+    .range-list{display:flex;flex-direction:column;gap:.5rem;margin-bottom:.75rem}
+    .range-row{display:flex;align-items:center;gap:.5rem}
+    .range-row .form-input{width:72px}
+    .range-row .range-dash{color:var(--muted);font-weight:600}
+    .range-row .fremove{background:none;border:none;color:var(--muted);transition:color .12s}
+    .range-row .fremove:hover{color:var(--red)}
+    .range-row .fremove svg{width:14px;height:14px;stroke:currentColor}
+    .ocr-text{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--text2);white-space:pre-wrap;word-break:break-word;max-height:340px;overflow-y:auto;margin-bottom:1rem}
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1rem;margin-bottom:1.75rem}
+    .stat-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:1.25rem 1.1rem}
+    .stat-icon{width:34px;height:34px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;margin-bottom:.75rem}
+    .stat-icon svg{width:16px;height:16px;stroke:currentColor}
+    .stat-num{font-size:1.5rem;font-weight:800;letter-spacing:-.04em;line-height:1;margin-bottom:.2rem}
+    .stat-label{font-size:.75rem;color:var(--muted)}
+    .tool-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:1rem}
+    .tool-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:1.25rem;cursor:pointer;transition:border-color .15s,background .15s,transform .12s}
+    .tool-card:hover{border-color:var(--border3);background:var(--surface2);transform:translateY(-2px)}
+    .tool-card-icon{width:40px;height:40px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;margin-bottom:.85rem}
+    .tool-card-icon svg{width:19px;height:19px;stroke:currentColor}
+    .tool-card h3{font-size:.9rem;font-weight:700;margin-bottom:.3rem}
+    .tool-card p{font-size:.775rem;color:var(--muted);line-height:1.45}
+    .trial-banner{background:linear-gradient(135deg,rgba(124,58,237,.12),rgba(91,33,182,.08));border:1px solid rgba(124,58,237,.25);border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+    .trial-banner svg{width:18px;height:18px;stroke:var(--accent-bright);flex-shrink:0}
+    .trial-banner-text{flex:1;font-size:.845rem}
+    .trial-banner-text strong{color:var(--accent-bright)}
+    .install-strip{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.1rem 1.25rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-top:1.75rem}
+    .install-strip .label{font-size:.8rem;color:var(--muted);flex-shrink:0}
+    .code-pill{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:.4rem .9rem;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--text2);display:flex;align-items:center;gap:.6rem}
+    .code-pill .copy-btn{background:none;border:none;color:var(--muted);transition:color .12s;padding:0}
+    .code-pill .copy-btn:hover{color:var(--accent-bright)}
+    .code-pill .copy-btn svg{width:13px;height:13px;stroke:currentColor}
+    ::-webkit-scrollbar{width:6px;height:6px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+    #toast-container{position:fixed;bottom:1.5rem;right:1.5rem;z-index:9000;display:flex;flex-direction:column;gap:.5rem}
+    .toast{padding:.75rem 1.1rem;border-radius:var(--radius);font-size:.845rem;font-weight:600;max-width:320px;box-shadow:var(--shadow);display:flex;align-items:center;gap:.65rem;animation:slideUp .25s ease;pointer-events:none}
+    .toast.success{background:#052a1a;border:1px solid rgba(52,211,153,.3);color:var(--green)}
+    .toast.error{background:#210f0f;border:1px solid rgba(248,113,113,.3);color:var(--red)}
+    .toast svg{width:15px;height:15px;stroke:currentColor;flex-shrink:0}
+    @keyframes slideUp{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+    @media(max-width:760px){.sidebar{display:none}.main{padding:1.25rem}}
   </style>
 </head>
 <body>
-
 <div id="loading-screen"><div class="spinner"></div></div>
-<div class="page-glow"></div>
+<div id="toast-container"></div>
 
-<!-- NAV -->
 <nav>
-  <div class="nav-brand"><em>Nyx</em>Prism&#8482;</div>
+  <div class="nav-brand">
+    <div class="nav-brand-logo">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    </div>
+    <span class="nav-brand-name"><em>Nyx</em>Prism&#8482;</span>
+  </div>
   <div class="nav-sep"></div>
-  <div class="nav-email" id="nav-email"></div>
-  <button class="signout-btn" id="signout-btn">Sign Out</button>
+  <span class="nav-plan" id="nav-plan-badge">Professional</span>
+  <div class="nav-avatar" id="nav-avatar" tabindex="0">
+    <span id="nav-initial">?</span>
+    <div class="nav-dropdown" id="nav-dropdown">
+      <div class="nav-dropdown-email" id="nav-dropdown-email">loading...</div>
+      <a class="nav-dropdown-item" href="index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Home
+      </a>
+      <a class="nav-dropdown-item" href="contact.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Support
+      </a>
+      <button class="nav-dropdown-item danger" id="signout-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </div>
 </nav>
 
-<!-- CONTENT (hidden until auth confirmed) -->
-<div class="page-wrap" id="page-content" style="display:none">
+<div class="app-shell">
+<aside class="sidebar">
+  <div class="sidebar-section">Overview</div>
+  <button class="nav-item active" data-panel="home">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    Dashboard
+  </button>
+  <div class="sidebar-section">PDF Tools</div>
+  <button class="nav-item" data-panel="split">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M8 3H3v5M3 21l7-7M21 21l-7-7M3 16v5h5M21 16v5h-5"/></svg>
+    Split PDF
+  </button>
+  <button class="nav-item" data-panel="merge">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6l4-4 4 4M12 2v13M8 18l4 4 4-4M12 22V11"/></svg>
+    Merge PDFs
+  </button>
+  <button class="nav-item" data-panel="compress">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="20" x2="21" y2="9"/><line x1="3" y1="15" x2="14" y2="4"/></svg>
+    Compress
+  </button>
+  <button class="nav-item" data-panel="watermark">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    Watermark
+  </button>
+  <button class="nav-item" data-panel="protect">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+    Protect
+  </button>
+  <button class="nav-item" data-panel="extract">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+    Extract Text
+  </button>
+  <button class="nav-item" data-panel="ocr">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2"/><rect x="7" y="7" width="10" height="10"/></svg>
+    OCR Scan
+  </button>
+  <button class="nav-item" data-panel="rotate">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+    Rotate Pages
+  </button>
+  <div class="sidebar-section">Developer</div>
+  <button class="nav-item" data-panel="cli">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+    CLI Reference
+  </button>
+</aside>
 
-  <!-- WELCOME -->
-  <div class="welcome">
-    <div class="avatar">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-    </div>
-    <div class="welcome-text">
-      <h1 id="welcome-heading">Welcome to NyxPrism</h1>
-      <p id="welcome-sub">You're signed in and ready to go.</p>
-    </div>
-  </div>
+<main class="main" id="main-content" style="display:none">
 
-  <!-- PLAN STATUS -->
-  <div class="plan-band">
-    <div class="plan-detail">
-      <div class="plan-label">Current Plan</div>
-      <div class="plan-value" id="plan-name">Professional</div>
-      <div class="trial-note" id="trial-note"></div>
+  <!-- HOME -->
+  <div class="panel active" id="panel-home">
+    <div class="page-header">
+      <h1 id="home-welcome">Welcome back!</h1>
+      <p>Your PDF workspace — pick a tool or drag a file to get started.</p>
     </div>
-    <div>
-      <div class="plan-label" style="margin-bottom:.5rem">Status</div>
-      <div class="status-pill trialing" id="status-pill">
-        <div class="status-dot"></div>
-        <span id="status-text">Trial Active</span>
-      </div>
+    <div id="trial-banner" class="trial-banner" style="display:none">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <div class="trial-banner-text"><strong id="trial-days"></strong> <span id="trial-msg"></span></div>
+      <a href="index.html#pricing" class="btn btn-primary" style="font-size:.8rem;padding:.45rem .95rem">Upgrade Now</a>
     </div>
-    <div style="margin-left:auto">
-      <a href="index.html#pricing" id="upgrade-link"
-         style="display:inline-block;padding:.55rem 1.1rem;border-radius:var(--radius-sm);background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:.825rem;font-weight:700;">
-        Upgrade Plan
-      </a>
-    </div>
-  </div>
-
-  <!-- INSTALL + LINKS -->
-  <div class="grid-2">
-
-    <!-- INSTALL CARD -->
-    <div class="card">
-      <div class="card-header">
-        <div class="card-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-        </div>
-        <h2>Install NyxPrism CLI</h2>
-      </div>
-      <div class="install-steps">
-        <div class="step">
-          <div class="step-label">1 — Install</div>
-          <div class="code-block">
-            <span>pip install nyxprism</span>
-            <button class="copy-btn" data-copy="pip install nyxprism" title="Copy">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-            </button>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-label">2 — Run any command</div>
-          <div class="code-block">
-            <span>nyx --help</span>
-            <button class="copy-btn" data-copy="nyx --help" title="Copy">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-            </button>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-label">Requires Python 3.9+</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- QUICK LINKS CARD -->
-    <div class="card">
-      <div class="card-header">
-        <div class="card-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-        </div>
-        <h2>Quick Links</h2>
-      </div>
-      <div class="quick-links">
-        <a class="quick-link" href="index.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-          Home &amp; Pricing
-        </a>
-        <a class="quick-link" href="contact.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-          Contact Support
-        </a>
-        <a class="quick-link" href="terms.html">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(124,58,237,.1);color:var(--accent-bright)">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          Terms of Service
-        </a>
-        <a class="quick-link" href="privacy.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          Privacy Policy
-        </a>
+        </div>
+        <div class="stat-num" id="stat-processed">0</div>
+        <div class="stat-label">Files Processed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(52,211,153,.08);color:var(--green)">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="20" x2="21" y2="9"/><line x1="3" y1="15" x2="14" y2="4"/></svg>
+        </div>
+        <div class="stat-num" id="stat-saved">0</div>
+        <div class="stat-label">MB Saved</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(96,165,250,.08);color:var(--blue)">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="stat-num" id="stat-plan">Pro</div>
+        <div class="stat-label">Current Plan</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(251,191,36,.08);color:var(--yellow)">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <div class="stat-num">8</div>
+        <div class="stat-label">Tools Available</div>
       </div>
     </div>
-
+    <div class="card-title" style="margin-bottom:.85rem">All Tools</div>
+    <div class="tool-grid">
+      <div class="tool-card" data-launch="split"><div class="tool-card-icon" style="background:rgba(124,58,237,.1);color:var(--accent-bright)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M8 3H3v5M3 21l7-7M21 21l-7-7M3 16v5h5M21 16v5h-5"/></svg></div><h3>Split PDF</h3><p>Extract pages, split by range or every N pages</p></div>
+      <div class="tool-card" data-launch="merge"><div class="tool-card-icon" style="background:rgba(52,211,153,.08);color:var(--green)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6l4-4 4 4M12 2v13M8 18l4 4 4-4M12 22V11"/></svg></div><h3>Merge PDFs</h3><p>Combine multiple PDFs into one document</p></div>
+      <div class="tool-card" data-launch="compress"><div class="tool-card-icon" style="background:rgba(96,165,250,.08);color:var(--blue)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="20" x2="21" y2="9"/><line x1="3" y1="15" x2="14" y2="4"/></svg></div><h3>Compress</h3><p>Reduce file size without losing quality</p></div>
+      <div class="tool-card" data-launch="watermark"><div class="tool-card-icon" style="background:rgba(251,191,36,.08);color:var(--yellow)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><h3>Watermark</h3><p>Stamp CONFIDENTIAL or custom text on pages</p></div>
+      <div class="tool-card" data-launch="protect"><div class="tool-card-icon" style="background:rgba(248,113,113,.08);color:var(--red)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div><h3>Protect</h3><p>Password-encrypt PDF files</p></div>
+      <div class="tool-card" data-launch="extract"><div class="tool-card-icon" style="background:rgba(124,58,237,.1);color:var(--accent-bright)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg></div><h3>Extract Text</h3><p>Pull all text from a PDF for copy or export</p></div>
+      <div class="tool-card" data-launch="ocr"><div class="tool-card-icon" style="background:rgba(52,211,153,.08);color:var(--green)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2"/><rect x="7" y="7" width="10" height="10"/></svg></div><h3>OCR Scan</h3><p>Extract text from scanned image PDFs</p></div>
+      <div class="tool-card" data-launch="rotate"><div class="tool-card-icon" style="background:rgba(96,165,250,.08);color:var(--blue)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg></div><h3>Rotate Pages</h3><p>Rotate specific pages or whole document</p></div>
+    </div>
+    <div class="install-strip">
+      <span class="label">CLI &nbsp;›</span>
+      <div class="code-pill"><span>pip install nyxprism</span><button class="copy-btn" data-copy="pip install nyxprism" title="Copy"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+      <div class="code-pill"><span>nyx --help</span><button class="copy-btn" data-copy="nyx --help" title="Copy"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+    </div>
   </div>
 
-  <!-- COMMAND REFERENCE -->
-  <div class="card card-full">
-    <div class="card-header">
-      <div class="card-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+  <!-- SPLIT -->
+  <div class="panel" id="panel-split">
+    <div class="page-header"><h1>Split PDF</h1><p>Extract pages or split into multiple files by range or every N pages.</p></div>
+    <div class="drop-zone" id="split-drop"><input type="file" id="split-file" accept=".pdf" /><div class="drop-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div><div class="drop-title">Drop your PDF here</div><div class="drop-sub">or click to browse</div></div>
+    <div class="file-list" id="split-file-list"></div>
+    <div id="split-options" style="display:none">
+      <div class="card">
+        <div class="card-title">Split Options</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Split Mode</label>
+            <select class="form-select" id="split-mode"><option value="every">Every N pages</option><option value="ranges">Custom page ranges</option><option value="extract">Extract all pages individually</option></select>
+          </div>
+        </div>
+        <div id="split-every-opts"><div class="form-row"><div class="form-group" style="max-width:160px"><label class="form-label">Pages per file</label><input class="form-input" type="number" id="split-n" value="1" min="1" /></div></div></div>
+        <div id="split-ranges-opts" style="display:none">
+          <div class="form-label" style="margin-bottom:.5rem">Page Ranges <span style="font-weight:400;color:var(--muted)">(1-based)</span></div>
+          <div class="range-list" id="range-list"><div class="range-row"><input class="form-input" type="number" placeholder="From" min="1" /><span class="range-dash">–</span><input class="form-input" type="number" placeholder="To" min="1" /><button class="fremove"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div></div>
+          <button class="btn btn-ghost" id="add-range" style="margin-bottom:.5rem"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Range</button>
+        </div>
       </div>
-      <h2>Common Commands</h2>
-    </div>
-    <div class="cmd-grid">
-      <div class="cmd-item"><span>nyx split</span> input.pdf</div>
-      <div class="cmd-item"><span>nyx merge</span> a.pdf b.pdf</div>
-      <div class="cmd-item"><span>nyx compress</span> input.pdf</div>
-      <div class="cmd-item"><span>nyx ocr</span> scan.pdf</div>
-      <div class="cmd-item"><span>nyx watermark</span> input.pdf</div>
-      <div class="cmd-item"><span>nyx protect</span> input.pdf</div>
-      <div class="cmd-item"><span>nyx extract</span> input.pdf</div>
-      <div class="cmd-item"><span>nyx ai name</span> input.pdf</div>
+      <div class="result-box" id="split-result"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="split-run"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>Split PDF</button>
+        <button class="btn btn-secondary" id="split-clear">Clear</button>
+      </div>
     </div>
   </div>
 
-</div><!-- /.page-wrap -->
+  <!-- MERGE -->
+  <div class="panel" id="panel-merge">
+    <div class="page-header"><h1>Merge PDFs</h1><p>Combine multiple PDFs into a single document.</p></div>
+    <div class="drop-zone" id="merge-drop"><input type="file" id="merge-files" accept=".pdf" multiple /><div class="drop-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6l4-4 4 4M12 2v13M8 18l4 4 4-4M12 22V11"/></svg></div><div class="drop-title">Drop PDFs here</div><div class="drop-sub">Multiple files supported — merged in order shown</div></div>
+    <div class="file-list" id="merge-file-list"></div>
+    <div id="merge-options" style="display:none">
+      <div class="form-row"><div class="form-group"><label class="form-label">Output filename</label><input class="form-input" type="text" id="merge-output-name" value="merged.pdf" /></div></div>
+      <div class="result-box" id="merge-result"></div>
+      <div class="btn-row"><button class="btn btn-primary" id="merge-run"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>Merge PDFs</button><button class="btn btn-secondary" id="merge-clear">Clear</button></div>
+    </div>
+  </div>
+
+  <!-- COMPRESS -->
+  <div class="panel" id="panel-compress">
+    <div class="page-header"><h1>Compress PDF</h1><p>Reduce file size by compressing content streams. Best results on PDFs with images.</p></div>
+    <div class="drop-zone" id="compress-drop"><input type="file" id="compress-file" accept=".pdf" /><div class="drop-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="20" x2="21" y2="9"/><line x1="3" y1="15" x2="14" y2="4"/></svg></div><div class="drop-title">Drop your PDF here</div><div class="drop-sub">or click to browse</div></div>
+    <div class="file-list" id="compress-file-list"></div>
+    <div id="compress-options" style="display:none">
+      <div class="card"><div class="card-title">Compression Settings</div><div class="form-row"><div class="form-group"><label class="form-label">Image Quality &nbsp;<strong id="quality-val">75</strong>%</label><input type="range" id="compress-quality" min="10" max="95" value="75" style="width:100%;accent-color:var(--accent)" /><div class="form-hint">Lower = smaller file, higher = better image quality. 65–80 recommended.</div></div></div></div>
+      <div class="result-box" id="compress-result"></div>
+      <div class="btn-row"><button class="btn btn-primary" id="compress-run"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>Compress PDF</button><button class="btn btn-secondary" id="compress-clear">Clear</button></div>
+    </div>
+  </div>
+
+  <!-- WATERMARK -->
+  <div class="panel" id="panel-watermark">
+    <div class="page-header"><h1>Watermark PDF</h1><p>Stamp diagonal text across every page of your document.</p></div>
+    <div class="drop-zone" id="wm-drop"><input type="file" id="wm-file" accept=".pdf" /><div class="drop-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="drop-title">Drop your PDF here</div><div class="drop-sub">or click to browse</div></div>
+    <div class="file-list" id="wm-file-list"></div>
+    <div id="wm-options" style="display:none">
+      <div class="card"><div class="card-title">Watermark Settings</div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Watermark Text</label><input class="form-input" type="text" id="wm-text" placeholder="CONFIDENTIAL" value="CONFIDENTIAL" /></div>
+          <div class="form-group" style="max-width:140px"><label class="form-label">Opacity &nbsp;<strong id="opacity-val">30</strong>%</label><input type="range" id="wm-opacity" min="5" max="80" value="30" style="width:100%;accent-color:var(--accent)" /></div>
+          <div class="form-group" style="max-width:140px"><label class="form-label">Font Size &nbsp;<strong id="fontsize-val">60</strong>pt</label><input type="range" id="wm-fontsize" min="20" max="120" value="60" style="width:100%;accent-color:var(--accent)" /></div>
+          <div class="form-group" style="max-width:140px"><label class="form-label">Angle &nbsp;<strong id="angle-val">45</strong>&deg;</label><input type="range" id="wm-angle" min="0" max="90" value="45" style="width:100%;accent-color:var(--accent)" /></div>
+        </div>
+      </div>
+      <div class="result-box" id="wm-result"></div>
+      <div class="btn-row"><button class="btn btn-primary" id="wm-run"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>Apply Watermark</button><button class="btn btn-secondary" id="wm-clear">Clear</button></div>
+    </div>
+  </div>
+
+  <!-- PROTECT -->
+  <div class="panel" id="panel-protect">
+    <div class="page-header"><h1>Protect PDF</h1><p>Encrypt your PDF — generates the CLI command since browser encryption is not supported by pdf-lib.</p></div>
+    <div class="drop-zone" id="protect-drop"><input type="file" id="protect-file" accept=".pdf" /><div class="drop-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div><div class="drop-title">Drop your PDF here</div><div class="drop-sub">or click to browse</div></div>
+    <div class="file-list" id="protect-file-list"></div>
+    <div id="protect-options" style="display:none">
+      <div class="card"><div class="card-title">Password Settings</div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">User Password <span style="color:var(--red)">*</span></label><input class="form-input" type="password" id="protect-pass" placeholder="Required to open the PDF" autocomplete="new-password" /></div>
+          <div class="form-group"><label class="form-label">Owner Password <span style="color:var(--muted)">(optional)</span></label><input class="form-input" type="password" id="protect-owner" placeholder="Full-access password" autocomplete="new-password" /><div class="form-hint">Leave blank to use same as user password</div></div>
+        </div>
+      </div>
+      <div class="result-box" id="protect-result"></div>
+      <div class="btn-row"><button class="btn btn-primary" id="protect-run"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>Generate CLI Command</button><button class="btn btn-secondary" id="protect-clear">Clear</button></div>
+    </div>
+  </div>
+
+  <!-- EXTRACT -->
+  <div class="panel" id="panel-extract">
+    <div class="page-header"><h1>Extract Text</h1><p>Pull all readable text from a PDF — copy it or download as .txt.</p></div>
+    <div class="drop-zone" id="extract-drop"><input type="file" id="extract-file" accept=".pdf" /><div class="drop-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><div class="drop-title">Drop your PDF here</div><div class="drop-sub">or click to browse</div></div>
+    <div class="file-list" id="extract-file-list"></div>
+    <div id="extract-options" style="display:none">
+      <div class="result-box" id="extract-result"></div>
+      <div class="btn-row" style="margin-bottom:1rem"><button class="btn btn-primary" id="extract-run"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>Extract Text</button><button class="btn btn-secondary" id="extract-clear">Clear</button></div>
+      <div id="extract-output" style="display:none">
+        <div class="ocr-text" id="extract-text"></div>
+        <div class="btn-row">
+          <button class="btn btn-secondary" id="extract-copy"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>Copy Text</button>
+          <button class="btn btn-ghost" id="extract-download"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download .txt</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OCR -->
+  <div class="panel" id="panel-ocr">
+    <div class="page-header"><h1>OCR Scan</h1><p>Extract text from scanned PDFs or image-based documents.</p></div>
+    <div class="result-box info visible" style="margin-bottom:1.25rem">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div class="rtext">OCR requires <strong>Tesseract</strong> installed locally. Drop your file to get the CLI command to copy and run.</div>
+    </div>
+    <div class="drop-zone" id="ocr-drop"><input type="file" id="ocr-file" accept=".pdf" /><div class="drop-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2"/><rect x="7" y="7" width="10" height="10"/></svg></div><div class="drop-title">Drop your scanned PDF here</div><div class="drop-sub">Generates the CLI command for you to run locally</div></div>
+    <div class="file-list" id="ocr-file-list"></div>
+    <div id="ocr-options" style="display:none">
+      <div class="card"><div class="card-title">OCR Settings</div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Language</label><select class="form-select" id="ocr-lang"><option value="eng">English</option><option value="fra">French</option><option value="deu">German</option><option value="spa">Spanish</option><option value="ita">Italian</option><option value="por">Portuguese</option><option value="chi_sim">Chinese (Simplified)</option><option value="jpn">Japanese</option><option value="ara">Arabic</option><option value="rus">Russian</option></select></div>
+          <div class="form-group"><label class="form-label">DPI</label><select class="form-select" id="ocr-dpi"><option value="150">150 (fast)</option><option value="200">200</option><option value="300" selected>300 (recommended)</option><option value="400">400 (high quality)</option></select></div>
+        </div>
+      </div>
+      <div class="card-title" style="margin-bottom:.6rem">Your CLI Command</div>
+      <div class="code-pill" style="margin-bottom:1.25rem;width:100%"><span id="ocr-cmd" style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">nyx ocr scan.pdf --lang eng --dpi 300</span><button class="copy-btn" id="ocr-copy-cmd" title="Copy command"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+    </div>
+  </div>
+
+  <!-- ROTATE -->
+  <div class="panel" id="panel-rotate">
+    <div class="page-header"><h1>Rotate Pages</h1><p>Rotate specific pages or the entire document.</p></div>
+    <div class="drop-zone" id="rotate-drop"><input type="file" id="rotate-file" accept=".pdf" /><div class="drop-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg></div><div class="drop-title">Drop your PDF here</div><div class="drop-sub">or click to browse</div></div>
+    <div class="file-list" id="rotate-file-list"></div>
+    <div id="rotate-options" style="display:none">
+      <div class="card"><div class="card-title">Rotation Settings</div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Rotation</label><select class="form-select" id="rotate-degrees"><option value="90">90&deg; clockwise</option><option value="180">180&deg; (upside down)</option><option value="270">270&deg; counter-clockwise</option></select></div>
+          <div class="form-group"><label class="form-label">Apply To</label><select class="form-select" id="rotate-scope"><option value="all">All pages</option><option value="specific">Specific pages</option></select></div>
+        </div>
+        <div id="rotate-pages-row" style="display:none"><div class="form-group"><label class="form-label">Page Numbers</label><input class="form-input" type="text" id="rotate-pages" placeholder="e.g. 1,3,5" /><div class="form-hint">Comma-separated page numbers (1-based)</div></div></div>
+      </div>
+      <div class="result-box" id="rotate-result"></div>
+      <div class="btn-row"><button class="btn btn-primary" id="rotate-run"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>Rotate PDF</button><button class="btn btn-secondary" id="rotate-clear">Clear</button></div>
+    </div>
+  </div>
+
+  <!-- CLI -->
+  <div class="panel" id="panel-cli">
+    <div class="page-header"><h1>CLI Reference</h1><p>Run NyxPrism from your terminal for batch processing, automation, and scripting.</p></div>
+    <div class="card" style="margin-bottom:1rem">
+      <div class="card-title">Install</div>
+      <div class="code-pill" style="width:100%;margin-bottom:.5rem"><span style="flex:1">pip install nyxprism</span><button class="copy-btn" data-copy="pip install nyxprism"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+      <div class="form-hint">Requires Python 3.9+. For OCR: also install <code style="font-family:monospace">tesseract-ocr</code> from your OS package manager.</div>
+    </div>
+    <div id="cli-commands"></div>
+  </div>
+
+</main>
+</div>
 
 <script type="module">
-  import { initializeApp }       from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-  import { getAuth,
-           onAuthStateChanged,
-           signOut }             from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-  import { getFirestore,
-           doc, getDoc }         from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getFirestore, doc, getDoc }            from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-  const firebaseConfig = {
-    apiKey:            "AIzaSyD7bj__SwM4gE_yDnM9jjmzOgh6mX4NiD0",
-    authDomain:        "nyxprism-2a817.firebaseapp.com",
-    projectId:         "nyxprism-2a817",
-    storageBucket:     "nyxprism-2a817.firebasestorage.app",
-    messagingSenderId: "388040998105",
-    appId:             "1:388040998105:web:8e3fbfd27db0fdd60dd2c8",
-    measurementId:     "G-7XMV6H0KNM"
-  };
+const firebaseConfig = {
+  apiKey:"AIzaSyD7bj__SwM4gE_yDnM9jjmzOgh6mX4NiD0",
+  authDomain:"nyxprism-2a817.firebaseapp.com",
+  projectId:"nyxprism-2a817",
+  storageBucket:"nyxprism-2a817.firebasestorage.app",
+  messagingSenderId:"388040998105",
+  appId:"1:388040998105:web:8e3fbfd27db0fdd60dd2c8",
+  measurementId:"G-7XMV6H0KNM"
+};
 
-  const app  = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db   = getFirestore(app);
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
 
-  const loading     = document.getElementById('loading-screen');
-  const content     = document.getElementById('page-content');
-  const navEmail    = document.getElementById('nav-email');
-  const signoutBtn  = document.getElementById('signout-btn');
+const Stats = {
+  get:()=>JSON.parse(localStorage.getItem('nyx_stats')||'{"processed":0,"saved":0}'),
+  inc(savedMB=0){const s=this.get();s.processed++;s.saved=Math.round((s.saved+savedMB)*10)/10;localStorage.setItem('nyx_stats',JSON.stringify(s));renderStats(s);}
+};
+function renderStats(s){
+  const a=document.getElementById('stat-processed'),b=document.getElementById('stat-saved');
+  if(a)a.textContent=s.processed; if(b)b.textContent=s.saved;
+}
 
-  onAuthStateChanged(auth, async user => {
-    if (!user) {
-      // Not logged in — send to login
-      window.location.replace('login.html');
-      return;
-    }
+const loading=document.getElementById('loading-screen'),content=document.getElementById('main-content');
 
-    // Populate nav
-    navEmail.textContent = user.email;
+onAuthStateChanged(auth,async user=>{
+  if(!user){window.location.replace('login.html');return;}
+  let firstName='',plan='professional',trialStart=null;
+  try{
+    const snap=await getDoc(doc(db,'users',user.uid));
+    if(snap.exists()){const d=snap.data();firstName=d.firstName||'';plan=d.plan||'professional';trialStart=d.trialStart?.toDate?.()??null;}
+  }catch(_){}
+  document.getElementById('nav-initial').textContent=(firstName||user.email)[0].toUpperCase();
+  document.getElementById('nav-dropdown-email').textContent=user.email;
+  document.getElementById('nav-plan-badge').textContent=plan.charAt(0).toUpperCase()+plan.slice(1);
+  document.getElementById('stat-plan').textContent=plan.charAt(0).toUpperCase()+plan.slice(1);
+  document.getElementById('home-welcome').textContent=`Welcome back${firstName?', '+firstName:''}!`;
+  if(trialStart){
+    const trialEnd=new Date(trialStart);trialEnd.setDate(trialEnd.getDate()+14);
+    const daysLeft=Math.max(0,Math.ceil((trialEnd-new Date())/86400000));
+    const banner=document.getElementById('trial-banner');banner.style.display='flex';
+    if(daysLeft>0){document.getElementById('trial-days').textContent=`${daysLeft} day${daysLeft!==1?'s':''}`; document.getElementById('trial-msg').textContent='left in your free trial — upgrade to keep full access.';}
+    else{document.getElementById('trial-days').textContent='Trial expired.';document.getElementById('trial-msg').textContent='Subscribe to continue using NyxPrism.';}
+  }
+  renderStats(Stats.get());
+  loading.style.opacity='0';
+  setTimeout(()=>loading.style.display='none',300);
+  content.style.display='block';
+});
 
-    // Fetch Firestore profile
-    let firstName = '';
-    let plan      = 'professional';
-    let trialStart = null;
-    try {
-      const snap = await getDoc(doc(db, 'users', user.uid));
-      if (snap.exists()) {
-        const d   = snap.data();
-        firstName  = d.firstName || '';
-        plan       = d.plan      || 'professional';
-        trialStart = d.trialStart?.toDate?.() || null;
-      }
-    } catch (_) {}
+document.getElementById('signout-btn').addEventListener('click',async()=>{await signOut(auth);window.location.replace('login.html');});
 
-    // Welcome heading
-    document.getElementById('welcome-heading').textContent =
-      `Welcome${firstName ? ', ' + firstName : ''}!`;
-    document.getElementById('welcome-sub').textContent =
-      `You\u2019re signed in as ${user.email}`;
+const avatar=document.getElementById('nav-avatar');
+document.addEventListener('click',e=>{if(avatar.contains(e.target)){avatar.classList.toggle('open');}else{avatar.classList.remove('open');}});
 
-    // Plan name
-    document.getElementById('plan-name').textContent =
-      plan.charAt(0).toUpperCase() + plan.slice(1);
+function switchPanel(name){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  const panel=document.getElementById('panel-'+name);
+  if(panel)panel.classList.add('active');
+  document.querySelectorAll(`[data-panel="${name}"]`).forEach(b=>b.classList.add('active'));
+  window.scrollTo(0,0);
+}
+document.querySelectorAll('[data-panel]').forEach(btn=>btn.addEventListener('click',()=>switchPanel(btn.dataset.panel)));
+document.querySelectorAll('[data-launch]').forEach(card=>card.addEventListener('click',()=>switchPanel(card.dataset.launch)));
 
-    // Trial countdown
-    const pill     = document.getElementById('status-pill');
-    const statusTx = document.getElementById('status-text');
-    const trialNote = document.getElementById('trial-note');
+function toast(msg,type='success'){
+  const t=document.createElement('div');t.className=`toast ${type}`;
+  t.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${type==='success'?'<polyline points="20 6 9 17 4 12"/>':`<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>`}</svg><span>${msg}</span>`;
+  document.getElementById('toast-container').appendChild(t);
+  setTimeout(()=>t.remove(),3500);
+}
 
-    if (trialStart) {
-      const trialEnd = new Date(trialStart);
-      trialEnd.setDate(trialEnd.getDate() + 14);
-      const daysLeft = Math.max(0, Math.ceil((trialEnd - new Date()) / 86400000));
+function fmtSize(b){if(b<1024)return b+' B';if(b<1048576)return (b/1024).toFixed(1)+' KB';return (b/1048576).toFixed(1)+' MB';}
 
-      if (daysLeft > 0) {
-        pill.className     = 'status-pill trialing';
-        statusTx.textContent = 'Trial Active';
-        trialNote.textContent = `${daysLeft} day${daysLeft !== 1 ? 's' : ''} remaining in your free trial`;
-        document.getElementById('upgrade-link').textContent = 'Activate Subscription';
-      } else {
-        pill.className     = 'status-pill inactive';
-        statusTx.textContent = 'Trial Expired';
-        trialNote.textContent = 'Subscribe to keep using NyxPrism';
-        document.getElementById('upgrade-link').textContent = 'Subscribe Now';
-      }
-    } else {
-      pill.className     = 'status-pill active';
-      statusTx.textContent = 'Active';
-    }
+function renderFileItem(file,onRemove){
+  const el=document.createElement('div');el.className='file-item';
+  el.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span class="fname">${file.name}</span><span class="fsize">${fmtSize(file.size)}</span><button class="fremove" title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
+  el.querySelector('.fremove').addEventListener('click',()=>{el.remove();onRemove();});
+  return el;
+}
 
-    // Show page, hide spinner
-    loading.style.opacity = '0';
-    setTimeout(() => loading.style.display = 'none', 300);
-    content.style.display = 'block';
+function showResult(el,type,msg){
+  const icons={success:'<polyline points="20 6 9 17 4 12"/>',error:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',info:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>'};
+  el.className=`result-box ${type} visible`;
+  el.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${icons[type]}</svg><div class="rtext">${msg}</div>`;
+}
+
+function triggerDownload(blob,filename){
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),3000);
+}
+
+function setupDrop(dropEl,input,onFiles){
+  dropEl.addEventListener('dragover',e=>{e.preventDefault();dropEl.classList.add('drag-over');});
+  dropEl.addEventListener('dragleave',()=>dropEl.classList.remove('drag-over'));
+  dropEl.addEventListener('drop',e=>{e.preventDefault();dropEl.classList.remove('drag-over');const files=[...e.dataTransfer.files].filter(f=>f.name.endsWith('.pdf'));if(files.length)onFiles(files);});
+  input.addEventListener('change',()=>{if(input.files.length)onFiles([...input.files]);});
+}
+
+async function loadPdfLib(){
+  if(window.PDFLib)return window.PDFLib;
+  return new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js';s.onload=()=>resolve(window.PDFLib);s.onerror=reject;document.head.appendChild(s);});
+}
+async function loadPdfjsLib(){
+  if(window.pdfjsLib)return window.pdfjsLib;
+  return new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';s.onload=()=>{window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';resolve(window.pdfjsLib);};s.onerror=reject;document.head.appendChild(s);});
+}
+
+// SPLIT
+{
+  let splitFile=null;
+  const dropEl=document.getElementById('split-drop'),input=document.getElementById('split-file'),listEl=document.getElementById('split-file-list'),optsEl=document.getElementById('split-options'),resultEl=document.getElementById('split-result'),modeEl=document.getElementById('split-mode');
+  function setFile(file){splitFile=file;listEl.innerHTML='';listEl.appendChild(renderFileItem(file,()=>{splitFile=null;optsEl.style.display='none';resultEl.className='result-box';}));optsEl.style.display='block';}
+  setupDrop(dropEl,input,f=>setFile(f[0]));
+  modeEl.addEventListener('change',()=>{document.getElementById('split-every-opts').style.display=modeEl.value==='every'?'block':'none';document.getElementById('split-ranges-opts').style.display=modeEl.value==='ranges'?'block':'none';});
+  document.getElementById('add-range').addEventListener('click',()=>{const row=document.createElement('div');row.className='range-row';row.innerHTML=`<input class="form-input" type="number" placeholder="From" min="1" /><span class="range-dash">–</span><input class="form-input" type="number" placeholder="To" min="1" /><button class="fremove"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;row.querySelector('.fremove').addEventListener('click',()=>row.remove());document.getElementById('range-list').appendChild(row);});
+  document.getElementById('split-run').addEventListener('click',async()=>{
+    if(!splitFile)return toast('Select a PDF first','error');
+    const btn=document.getElementById('split-run');btn.disabled=true;btn.textContent='Processing…';
+    try{
+      const{PDFDocument}=await loadPdfLib();const srcBytes=await splitFile.arrayBuffer();const srcDoc=await PDFDocument.load(srcBytes);const total=srcDoc.getPageCount();const mode=modeEl.value;let ranges=[];
+      if(mode==='every'){const n=parseInt(document.getElementById('split-n').value)||1;for(let i=0;i<total;i+=n)ranges.push([i,Math.min(i+n-1,total-1)]);}
+      else if(mode==='extract'){for(let i=0;i<total;i++)ranges.push([i,i]);}
+      else{const rows=document.querySelectorAll('#range-list .range-row');rows.forEach(row=>{const inputs=row.querySelectorAll('input');const from=parseInt(inputs[0].value)-1;const to=parseInt(inputs[1].value)-1;if(!isNaN(from)&&!isNaN(to)&&from>=0&&to<total&&from<=to)ranges.push([from,to]);});if(!ranges.length){toast('Add at least one valid range','error');btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Split PDF';return;}}
+      const stem=splitFile.name.replace('.pdf','');
+      for(let i=0;i<ranges.length;i++){const[from,to]=ranges[i];const newDoc=await PDFDocument.create();const pages=await newDoc.copyPages(srcDoc,Array.from({length:to-from+1},(_,k)=>from+k));pages.forEach(p=>newDoc.addPage(p));const bytes=await newDoc.save();triggerDownload(new Blob([bytes],{type:'application/pdf'}),`${stem}_part${i+1}.pdf`);}
+      Stats.inc(0);showResult(resultEl,'success',`Split into ${ranges.length} file${ranges.length!==1?'s':''} — downloading now.`);toast(`Split complete — ${ranges.length} files`);
+    }catch(err){showResult(resultEl,'error','Error: '+err.message);toast(err.message,'error');}
+    btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Split PDF';
   });
+  document.getElementById('split-clear').addEventListener('click',()=>{splitFile=null;listEl.innerHTML='';optsEl.style.display='none';resultEl.className='result-box';input.value='';});
+}
 
-  signoutBtn.addEventListener('click', async () => {
-    await signOut(auth);
-    window.location.replace('login.html');
+// MERGE
+{
+  let mergeFiles=[];
+  const dropEl=document.getElementById('merge-drop'),input=document.getElementById('merge-files'),listEl=document.getElementById('merge-file-list'),optsEl=document.getElementById('merge-options'),resultEl=document.getElementById('merge-result');
+  function addFiles(files){files.forEach(f=>{mergeFiles.push(f);listEl.appendChild(renderFileItem(f,()=>{mergeFiles=mergeFiles.filter(x=>x!==f);if(!mergeFiles.length)optsEl.style.display='none';}));});optsEl.style.display=mergeFiles.length?'block':'none';}
+  setupDrop(dropEl,input,addFiles);
+  document.getElementById('merge-run').addEventListener('click',async()=>{
+    if(mergeFiles.length<1)return toast('Add at least one PDF','error');
+    const btn=document.getElementById('merge-run');btn.disabled=true;btn.textContent='Merging…';
+    try{
+      const{PDFDocument}=await loadPdfLib();const merged=await PDFDocument.create();
+      for(const f of mergeFiles){const bytes=await f.arrayBuffer();const src=await PDFDocument.load(bytes);const pages=await merged.copyPages(src,src.getPageIndices());pages.forEach(p=>merged.addPage(p));}
+      const outBytes=await merged.save();const name=document.getElementById('merge-output-name').value||'merged.pdf';
+      const origSize=mergeFiles.reduce((s,f)=>s+f.size,0);
+      triggerDownload(new Blob([outBytes],{type:'application/pdf'}),name.endsWith('.pdf')?name:name+'.pdf');
+      Stats.inc(Math.round((origSize-outBytes.byteLength)/1048576*10)/10);
+      showResult(resultEl,'success',`Merged ${mergeFiles.length} PDFs into ${name}`);toast('Merge complete!');
+    }catch(err){showResult(resultEl,'error','Error: '+err.message);toast(err.message,'error');}
+    btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Merge PDFs';
   });
+  document.getElementById('merge-clear').addEventListener('click',()=>{mergeFiles=[];listEl.innerHTML='';optsEl.style.display='none';resultEl.className='result-box';input.value='';});
+}
 
-  // Copy buttons
-  document.querySelectorAll('.copy-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      navigator.clipboard.writeText(btn.dataset.copy).then(() => {
-        btn.style.color = 'var(--green)';
-        setTimeout(() => btn.style.color = '', 1500);
-      });
-    });
+// COMPRESS
+{
+  let cFile=null;
+  const dropEl=document.getElementById('compress-drop'),input=document.getElementById('compress-file'),listEl=document.getElementById('compress-file-list'),optsEl=document.getElementById('compress-options'),resultEl=document.getElementById('compress-result');
+  document.getElementById('compress-quality').addEventListener('input',e=>document.getElementById('quality-val').textContent=e.target.value);
+  setupDrop(dropEl,input,f=>{cFile=f[0];listEl.innerHTML='';listEl.appendChild(renderFileItem(cFile,()=>{cFile=null;optsEl.style.display='none';resultEl.className='result-box';}));optsEl.style.display='block';});
+  document.getElementById('compress-run').addEventListener('click',async()=>{
+    if(!cFile)return toast('Select a PDF first','error');
+    const btn=document.getElementById('compress-run');btn.disabled=true;btn.textContent='Compressing…';
+    try{
+      const{PDFDocument}=await loadPdfLib();const bytes=await cFile.arrayBuffer();const doc=await PDFDocument.load(bytes,{updateMetadata:false});
+      const out=await doc.save({useObjectStreams:true});
+      const pct=Math.round((1-out.byteLength/bytes.byteLength)*100);
+      triggerDownload(new Blob([out],{type:'application/pdf'}),cFile.name.replace('.pdf','_compressed.pdf'));
+      Stats.inc(Math.max(0,Math.round((bytes.byteLength-out.byteLength)/1048576*10)/10));
+      showResult(resultEl,'success',`${fmtSize(bytes.byteLength)} &rarr; ${fmtSize(out.byteLength)} (${pct>=0?pct+'% smaller':'no change — try the CLI for deeper compression'})`);
+      toast('Compression complete!');
+    }catch(err){showResult(resultEl,'error','Error: '+err.message);toast(err.message,'error');}
+    btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Compress PDF';
   });
+  document.getElementById('compress-clear').addEventListener('click',()=>{cFile=null;listEl.innerHTML='';optsEl.style.display='none';resultEl.className='result-box';input.value='';});
+}
+
+// WATERMARK
+{
+  let wmFile=null;
+  const dropEl=document.getElementById('wm-drop'),input=document.getElementById('wm-file'),listEl=document.getElementById('wm-file-list'),optsEl=document.getElementById('wm-options'),resultEl=document.getElementById('wm-result');
+  document.getElementById('wm-opacity').addEventListener('input',e=>document.getElementById('opacity-val').textContent=e.target.value);
+  document.getElementById('wm-fontsize').addEventListener('input',e=>document.getElementById('fontsize-val').textContent=e.target.value);
+  document.getElementById('wm-angle').addEventListener('input',e=>document.getElementById('angle-val').textContent=e.target.value);
+  setupDrop(dropEl,input,f=>{wmFile=f[0];listEl.innerHTML='';listEl.appendChild(renderFileItem(wmFile,()=>{wmFile=null;optsEl.style.display='none';resultEl.className='result-box';}));optsEl.style.display='block';});
+  document.getElementById('wm-run').addEventListener('click',async()=>{
+    if(!wmFile)return toast('Select a PDF first','error');
+    const text=document.getElementById('wm-text').value.trim();if(!text)return toast('Enter watermark text','error');
+    const opacity=parseFloat(document.getElementById('wm-opacity').value)/100;const fontSize=parseInt(document.getElementById('wm-fontsize').value);const angleDeg=parseFloat(document.getElementById('wm-angle').value);
+    const btn=document.getElementById('wm-run');btn.disabled=true;btn.textContent='Applying…';
+    try{
+      const{PDFDocument,rgb,degrees}=await loadPdfLib();const bytes=await wmFile.arrayBuffer();const pdfDoc=await PDFDocument.load(bytes);const pages=pdfDoc.getPages();
+      for(const page of pages){const{width,height}=page.getSize();page.drawText(text,{x:width/2-(text.length*fontSize*0.3),y:height/2,size:fontSize,color:rgb(0.5,0.5,0.5),opacity,rotate:degrees(angleDeg)});}
+      const out=await pdfDoc.save();triggerDownload(new Blob([out],{type:'application/pdf'}),wmFile.name.replace('.pdf','_watermarked.pdf'));
+      Stats.inc(0);showResult(resultEl,'success',`Watermark "${text}" applied to ${pages.length} page${pages.length!==1?'s':''}.`);toast('Watermark applied!');
+    }catch(err){showResult(resultEl,'error','Error: '+err.message);toast(err.message,'error');}
+    btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Apply Watermark';
+  });
+  document.getElementById('wm-clear').addEventListener('click',()=>{wmFile=null;listEl.innerHTML='';optsEl.style.display='none';resultEl.className='result-box';input.value='';});
+}
+
+// PROTECT
+{
+  let pFile=null;
+  const dropEl=document.getElementById('protect-drop'),input=document.getElementById('protect-file'),listEl=document.getElementById('protect-file-list'),optsEl=document.getElementById('protect-options'),resultEl=document.getElementById('protect-result');
+  setupDrop(dropEl,input,f=>{pFile=f[0];listEl.innerHTML='';listEl.appendChild(renderFileItem(pFile,()=>{pFile=null;optsEl.style.display='none';resultEl.className='result-box';}));optsEl.style.display='block';});
+  document.getElementById('protect-run').addEventListener('click',()=>{
+    if(!pFile)return toast('Select a PDF first','error');
+    const pass=document.getElementById('protect-pass').value;if(!pass)return toast('Enter a password','error');
+    const owner=document.getElementById('protect-owner').value||pass;
+    const cmd=`nyx protect "${pFile.name}" --password "${pass}" --owner-password "${owner}"`;
+    showResult(resultEl,'info',`PDF encryption requires the CLI. Copy and run this command:<br><br><code style="font-family:monospace;font-size:.8rem">${cmd}</code>`);
+    navigator.clipboard.writeText(cmd).then(()=>toast('CLI command copied!'));
+  });
+  document.getElementById('protect-clear').addEventListener('click',()=>{pFile=null;listEl.innerHTML='';optsEl.style.display='none';resultEl.className='result-box';input.value='';});
+}
+
+// EXTRACT TEXT
+{
+  let eFile=null;
+  const dropEl=document.getElementById('extract-drop'),input=document.getElementById('extract-file'),listEl=document.getElementById('extract-file-list'),optsEl=document.getElementById('extract-options'),resultEl=document.getElementById('extract-result'),outputEl=document.getElementById('extract-output'),textEl=document.getElementById('extract-text');
+  setupDrop(dropEl,input,f=>{eFile=f[0];listEl.innerHTML='';listEl.appendChild(renderFileItem(eFile,()=>{eFile=null;optsEl.style.display='none';resultEl.className='result-box';outputEl.style.display='none';}));optsEl.style.display='block';});
+  document.getElementById('extract-run').addEventListener('click',async()=>{
+    if(!eFile)return toast('Select a PDF first','error');
+    const btn=document.getElementById('extract-run');btn.disabled=true;btn.textContent='Extracting…';outputEl.style.display='none';
+    try{
+      const pdfjs=await loadPdfjsLib();const bytes=await eFile.arrayBuffer();const pdf=await pdfjs.getDocument({data:bytes}).promise;let fullText='';
+      for(let i=1;i<=pdf.numPages;i++){const page=await pdf.getPage(i);const content=await page.getTextContent();const pageText=content.items.map(it=>it.str).join(' ');fullText+=`--- Page ${i} ---\n${pageText}\n\n`;}
+      if(!fullText.trim()){showResult(resultEl,'info','No readable text found. This may be a scanned PDF — try OCR instead.');}
+      else{textEl.textContent=fullText;outputEl.style.display='block';showResult(resultEl,'success',`Extracted text from ${pdf.numPages} page${pdf.numPages!==1?'s':''}.`);Stats.inc(0);}
+    }catch(err){showResult(resultEl,'error','Error: '+err.message);toast(err.message,'error');}
+    btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Extract Text';
+  });
+  document.getElementById('extract-copy').addEventListener('click',()=>{navigator.clipboard.writeText(textEl.textContent).then(()=>toast('Copied to clipboard!'));});
+  document.getElementById('extract-download').addEventListener('click',()=>{triggerDownload(new Blob([textEl.textContent],{type:'text/plain'}),(eFile?.name||'extracted').replace('.pdf','')+'.txt');});
+  document.getElementById('extract-clear').addEventListener('click',()=>{eFile=null;listEl.innerHTML='';optsEl.style.display='none';resultEl.className='result-box';outputEl.style.display='none';input.value='';});
+}
+
+// OCR
+{
+  let oFile=null;
+  const dropEl=document.getElementById('ocr-drop'),input=document.getElementById('ocr-file'),listEl=document.getElementById('ocr-file-list'),optsEl=document.getElementById('ocr-options'),cmdEl=document.getElementById('ocr-cmd');
+  function updateCmd(){const fname=oFile?`"${oFile.name}"`:'scan.pdf';const lang=document.getElementById('ocr-lang').value;const dpi=document.getElementById('ocr-dpi').value;cmdEl.textContent=`nyx ocr ${fname} --lang ${lang} --dpi ${dpi}`;}
+  setupDrop(dropEl,input,f=>{oFile=f[0];listEl.innerHTML='';listEl.appendChild(renderFileItem(oFile,()=>{oFile=null;optsEl.style.display='none';updateCmd();}));optsEl.style.display='block';updateCmd();});
+  document.getElementById('ocr-lang').addEventListener('change',updateCmd);
+  document.getElementById('ocr-dpi').addEventListener('change',updateCmd);
+  document.getElementById('ocr-copy-cmd').addEventListener('click',()=>{navigator.clipboard.writeText(cmdEl.textContent).then(()=>toast('Command copied!'));});
+}
+
+// ROTATE
+{
+  let rFile=null;
+  const dropEl=document.getElementById('rotate-drop'),input=document.getElementById('rotate-file'),listEl=document.getElementById('rotate-file-list'),optsEl=document.getElementById('rotate-options'),resultEl=document.getElementById('rotate-result'),scopeEl=document.getElementById('rotate-scope');
+  scopeEl.addEventListener('change',()=>{document.getElementById('rotate-pages-row').style.display=scopeEl.value==='specific'?'block':'none';});
+  setupDrop(dropEl,input,f=>{rFile=f[0];listEl.innerHTML='';listEl.appendChild(renderFileItem(rFile,()=>{rFile=null;optsEl.style.display='none';resultEl.className='result-box';}));optsEl.style.display='block';});
+  document.getElementById('rotate-run').addEventListener('click',async()=>{
+    if(!rFile)return toast('Select a PDF first','error');
+    const btn=document.getElementById('rotate-run');btn.disabled=true;btn.textContent='Rotating…';
+    try{
+      const{PDFDocument,degrees}=await loadPdfLib();const bytes=await rFile.arrayBuffer();const pdfDoc=await PDFDocument.load(bytes);const pages=pdfDoc.getPages();const deg=parseInt(document.getElementById('rotate-degrees').value);
+      let targetIdxs=pages.map((_,i)=>i);
+      if(scopeEl.value==='specific'){const raw=document.getElementById('rotate-pages').value;targetIdxs=[];raw.split(',').forEach(part=>{const p=part.trim();if(p.includes('-')){const[a,b]=p.split('-').map(x=>parseInt(x)-1);for(let i=a;i<=b;i++)if(i>=0&&i<pages.length)targetIdxs.push(i);}else{const n=parseInt(p)-1;if(n>=0&&n<pages.length)targetIdxs.push(n);}});}
+      targetIdxs.forEach(i=>pages[i].setRotation(degrees((pages[i].getRotation().angle+deg)%360)));
+      const out=await pdfDoc.save();triggerDownload(new Blob([out],{type:'application/pdf'}),rFile.name.replace('.pdf','_rotated.pdf'));
+      Stats.inc(0);showResult(resultEl,'success',`Rotated ${targetIdxs.length} page${targetIdxs.length!==1?'s':''} by ${deg}&deg;.`);toast('Rotation complete!');
+    }catch(err){showResult(resultEl,'error','Error: '+err.message);toast(err.message,'error');}
+    btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Rotate PDF';
+  });
+  document.getElementById('rotate-clear').addEventListener('click',()=>{rFile=null;listEl.innerHTML='';optsEl.style.display='none';resultEl.className='result-box';input.value='';});
+}
+
+// CLI REFERENCE
+{
+  const cmds=[
+    {title:'AI Bulk Split',cmd:'nyx ai-split batch.pdf --output-dir split_docs/',desc:'AI detects document boundaries and splits into named files'},
+    {title:'AI Split (Batch Directory)',cmd:'nyx ai-split --batch-dir ./inbox/ --output-dir ./split/',desc:'Process every PDF in a folder automatically'},
+    {title:'Split — Every N Pages',cmd:'nyx split batch.pdf --every 1 --output-dir pages/',desc:'Split into individual pages or N-page chunks'},
+    {title:'Split — Custom Ranges',cmd:'nyx split batch.pdf --ranges "1-5,6-10" --output-dir out/',desc:'Extract specific page ranges to separate files'},
+    {title:'Merge PDFs',cmd:'nyx merge a.pdf b.pdf c.pdf --output merged.pdf',desc:'Merge multiple PDFs in order into one file'},
+    {title:'Compress',cmd:'nyx compress big.pdf --output small.pdf --quality 65',desc:'Compress and re-encode embedded images (10–95 quality)'},
+    {title:'Watermark',cmd:'nyx watermark doc.pdf --text "CONFIDENTIAL"',desc:'Stamp diagonal text watermark on every page'},
+    {title:'Protect (Encrypt)',cmd:'nyx protect doc.pdf --password "s3cret"',desc:'Password-encrypt a PDF with AES-128'},
+    {title:'Extract Text',cmd:'nyx extract-text doc.pdf',desc:'Print all extractable text to stdout'},
+    {title:'Rotate Pages',cmd:'nyx rotate doc.pdf --degrees 90 --pages 1,3,5',desc:'Rotate specific or all pages'},
+    {title:'OCR',cmd:'nyx ocr scan.pdf --lang eng --dpi 300',desc:'Run Tesseract OCR on scanned pages (requires tesseract installed)'},
+    {title:'PDF → Images',cmd:'nyx to-images doc.pdf --dpi 200 --format png',desc:'Convert PDF pages to PNG or JPEG images'},
+    {title:'Images → PDF',cmd:'nyx from-images page1.png page2.png --output out.pdf',desc:'Build a PDF from image files'},
+  ];
+  const container=document.getElementById('cli-commands');
+  cmds.forEach(c=>{
+    const card=document.createElement('div');card.className='card';card.style.marginBottom='.75rem';
+    card.innerHTML=`<div style="font-size:.82rem;font-weight:700;color:var(--text2);margin-bottom:.5rem">${c.title}</div><div class="code-pill" style="width:100%;margin-bottom:.4rem"><span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.cmd}</span><button class="copy-btn" data-copy="${c.cmd.replace(/"/g,'&quot;')}" title="Copy"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div><div style="font-size:.775rem;color:var(--muted)">${c.desc}</div>`;
+    container.appendChild(card);
+  });
+}
+
+// GLOBAL COPY BUTTONS
+document.addEventListener('click',e=>{
+  const btn=e.target.closest('.copy-btn');if(!btn)return;
+  const text=btn.dataset.copy||btn.closest('.code-pill')?.querySelector('span')?.textContent;
+  if(!text)return;
+  navigator.clipboard.writeText(text).then(()=>{btn.style.color='var(--green)';setTimeout(()=>btn.style.color='',1500);toast('Copied!');});
+});
 </script>
-
 </body>
 </html>
