@@ -4,70 +4,67 @@ import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
 
-// Rate limit: max 1500 chars of PDF text per request to keep costs sane
 const MAX_TEXT_CHARS = 80_000;
 
 router.post('/', requireAuth, async (req, res) => {
-  const { pdfText, criteria, filename } = req.body;
+  const { pdfText, messages, filename, pageCount } = req.body;
 
   if (!pdfText || typeof pdfText !== 'string') {
     return res.status(400).json({ error: 'pdfText is required.' });
   }
-  if (!criteria || typeof criteria !== 'string') {
-    return res.status(400).json({ error: 'criteria is required.' });
+  if (!Array.isArray(messages) || messages.length === 0) {
+    return res.status(400).json({ error: 'messages array is required.' });
   }
 
   const truncated = pdfText.slice(0, MAX_TEXT_CHARS);
+  const pages = pageCount || '?';
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-  const systemPrompt = `You are a PDF document analysis assistant. The user has a multi-page PDF and wants to split it intelligently.
-You will receive the text content of the PDF (pages separated by "--- Page N ---" markers) and a split criteria.
-Your job is to return a JSON array of split groups. Each group represents one output file.
+  const systemPrompt = `You are an AI assistant built into NyxPrism, a browser-based PDF tool. Your job is to help the user split their PDF intelligently through a friendly conversation.
 
-Rules:
-- Return ONLY valid JSON, no explanation, no markdown code fences.
-- Each element: { "pages": [1, 2, 3], "filename": "suggested_name.pdf" }
-- Pages are 1-based integers.
-- Every page must appear in exactly one group.
-- Filenames must be filesystem-safe (no special chars except underscores and hyphens), end in .pdf.
-- Base filenames on the criteria value found (e.g. policy number, invoice number, customer name).
-- If a page cannot be clearly assigned, put it with the previous group.
-- Keep filenames concise but descriptive (max 60 chars).`;
+The user uploaded: "${filename || 'document.pdf'}" (${pages} pages).
 
-  const userPrompt = `PDF filename: ${filename || 'document.pdf'}
-
-Split criteria: "${criteria}"
-
-PDF text content:
+PDF text content (pages separated by "--- Page N ---" markers):
+===
 ${truncated}
+===
 
-Return the JSON split plan now.`;
+Conversation rules:
+- Be concise and friendly.
+- On the very first message, greet the user, mention the filename and page count, and ask how they'd like to split it. Give 2–3 short examples.
+- Ask follow-up questions if the criteria are unclear (e.g. which pages belong to which section).
+- Once you have enough information, produce the split plan inline using this exact format — no markdown fences, just the tag:
+  <SPLIT_PLAN>[{"pages":[1,2],"filename":"part1.pdf"},...]</SPLIT_PLAN>
+- After the tag, briefly explain the plan in plain language.
+- Filename rules: filesystem-safe (alphanumeric, underscores, hyphens only), end in .pdf, max 60 chars, descriptive.
+- Every page 1..${pages} must appear in exactly one group. Pages are 1-based integers.
+- If the user wants to revise, update the plan by emitting a new <SPLIT_PLAN> tag.`;
 
   try {
     const message = await client.messages.create({
       model: 'claude-opus-4-5',
       max_tokens: 4096,
-      messages: [{ role: 'user', content: userPrompt }],
       system: systemPrompt,
+      messages,
     });
 
-    const raw = message.content[0]?.text?.trim();
-    if (!raw) return res.status(500).json({ error: 'Empty response from AI.' });
+    const raw = message.content[0]?.text?.trim() || '';
 
-    // Strip any accidental markdown fences
-    const jsonStr = raw.replace(/^```json?\n?/, '').replace(/\n?```$/, '').trim();
-    const splits = JSON.parse(jsonStr);
-
-    if (!Array.isArray(splits)) {
-      return res.status(500).json({ error: 'AI returned unexpected format.' });
+    // Extract plan if present
+    let plan = null;
+    const planMatch = raw.match(/<SPLIT_PLAN>([\s\S]*?)<\/SPLIT_PLAN>/);
+    if (planMatch) {
+      try {
+        const parsed = JSON.parse(planMatch[1].trim());
+        if (Array.isArray(parsed)) plan = parsed;
+      } catch {
+        // Plan tag present but malformed — let the conversation continue
+      }
     }
 
-    res.json({ splits });
+    res.json({ reply: raw, plan });
   } catch (err) {
-    if (err instanceof SyntaxError) {
-      return res.status(500).json({ error: 'AI returned invalid JSON. Try again or simplify your criteria.' });
-    }
     console.error('AI split error:', err.message);
     res.status(500).json({ error: err.message });
   }

@@ -142,6 +142,16 @@
     .plan-card-pages{font-size:.75rem;color:var(--muted);margin-top:.25rem}
     .plan-card-name{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);padding:.3rem .6rem;font-size:.82rem;font-family:'Inter',sans-serif}
     .plan-card-name:focus{outline:none;border-color:var(--accent)}
+    /* AI chat */
+    .chat-messages{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:1rem;min-height:220px;max-height:380px;overflow-y:auto;display:flex;flex-direction:column;gap:.75rem;margin-bottom:.75rem;scroll-behavior:smooth}
+    .chat-bubble{max-width:82%;padding:.65rem .9rem;border-radius:12px;font-size:.875rem;line-height:1.6;word-break:break-word;white-space:pre-wrap}
+    .chat-bubble.ai{background:var(--bg2);border:1px solid var(--border2);color:var(--text);align-self:flex-start;border-bottom-left-radius:3px}
+    .chat-bubble.user{background:var(--accent);color:#fff;align-self:flex-end;border-bottom-right-radius:3px}
+    .chat-bubble.typing{opacity:.6;font-style:italic}
+    .chat-input-row{display:flex;gap:.5rem;align-items:center}
+    .chat-input{flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);color:var(--text);padding:.6rem .9rem;font-size:.875rem;font-family:'Inter',sans-serif;outline:none;transition:border-color .15s}
+    .chat-input:focus{border-color:var(--accent)}
+    .chat-send-btn{padding:.6rem .85rem;flex-shrink:0}
     /* Edit PDF page list */
     .page-thumb-list{display:flex;flex-direction:column;gap:.45rem;max-height:380px;overflow-y:auto;margin-bottom:1rem}
     .page-thumb-row{display:flex;align-items:center;gap:.75rem;padding:.5rem .75rem;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm)}
@@ -477,27 +487,24 @@
 
   <!-- AI SMART SPLIT -->
   <div class="panel" id="panel-aisplit">
-    <div class="page-header"><h1>AI Smart Split</h1><p>Describe how to split your PDF — Claude reads it and suggests named output files. Text is extracted in your browser; your PDF binary is never uploaded.</p></div>
-    <div class="drop-zone" id="aisplit-drop"><input type="file" id="aisplit-file" accept=".pdf" /><div class="drop-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div><div class="drop-title">Drop your PDF here</div><div class="drop-sub">AI will read the content and suggest how to split it</div></div>
+    <div class="page-header"><h1>AI Smart Split</h1><p>Drop a PDF and chat with Claude — describe how you want it split and it will plan and execute it for you. Text is extracted in your browser; your PDF is never uploaded.</p></div>
+    <div id="aisplit-upload-area">
+      <div class="drop-zone" id="aisplit-drop"><input type="file" id="aisplit-file" accept=".pdf" /><div class="drop-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div><div class="drop-title">Drop your PDF here</div><div class="drop-sub">Claude will read the content and guide you through splitting it</div></div>
+    </div>
     <div class="file-list" id="aisplit-file-list"></div>
-    <div id="aisplit-options" style="display:none">
-      <div class="card">
-        <div class="card-title">Split Criteria</div>
-        <div class="form-group" style="margin-bottom:1rem">
-          <label class="form-label">Describe how to split this PDF</label>
-          <input class="form-input" type="text" id="aisplit-criteria" placeholder='e.g. "split by policy number" or "one file per invoice" or "separate by customer name"' />
-          <div class="form-hint">Be specific — the more detail, the better the result.</div>
-        </div>
-        <div class="btn-row"><button class="btn btn-primary" id="aisplit-analyze"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>Analyze with AI</button></div>
+    <div id="aisplit-chat-area" style="display:none">
+      <div class="chat-messages" id="aisplit-chat-messages"></div>
+      <div class="chat-input-row" id="aisplit-input-row">
+        <input class="chat-input" type="text" id="aisplit-chat-input" placeholder="Type your reply…" autocomplete="off" />
+        <button class="btn btn-primary chat-send-btn" id="aisplit-chat-send"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
       </div>
-      <div class="result-box" id="aisplit-result"></div>
-      <div id="aisplit-plan-section" style="display:none">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem"><div class="card-title" style="margin-bottom:0">Proposed Split Plan</div><div style="font-size:.75rem;color:var(--muted)">Edit filenames as needed</div></div>
-        <div class="split-plan" id="aisplit-plan-list"></div>
-        <div class="btn-row">
-          <button class="btn btn-primary" id="aisplit-apply"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Apply &amp; Download All</button>
-          <button class="btn btn-secondary" id="aisplit-reanalyze">Re-analyze</button>
-        </div>
+    </div>
+    <div id="aisplit-plan-section" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin:.85rem 0"><div class="card-title" style="margin-bottom:0">Proposed Split Plan</div><div style="font-size:.75rem;color:var(--muted)">Edit filenames as needed</div></div>
+      <div class="split-plan" id="aisplit-plan-list"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="aisplit-apply"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Apply &amp; Download All</button>
+        <button class="btn btn-secondary" id="aisplit-revise">Revise with AI</button>
       </div>
     </div>
     <div class="btn-row" style="margin-top:1rem"><button class="btn btn-ghost" id="aisplit-clear">Clear</button></div>
@@ -885,48 +892,97 @@ async function loadPdfjsLib(){
 }
 
 // AI SMART SPLIT
+// AI SMART SPLIT — conversational
 {
-  let aiFile=null,aiPlan=null;
-  const dropEl=document.getElementById('aisplit-drop'),input=document.getElementById('aisplit-file'),listEl=document.getElementById('aisplit-file-list'),optsEl=document.getElementById('aisplit-options'),resultEl=document.getElementById('aisplit-result'),planSection=document.getElementById('aisplit-plan-section'),planList=document.getElementById('aisplit-plan-list');
-  setupDrop(dropEl,input,f=>{aiFile=f[0];listEl.innerHTML='';listEl.appendChild(renderFileItem(aiFile,()=>{aiFile=null;aiPlan=null;optsEl.style.display='none';planSection.style.display='none';}));optsEl.style.display='block';});
-  async function doAnalyze(){
-    if(!aiFile)return toast('Select a PDF first','error');
-    const criteria=document.getElementById('aisplit-criteria').value.trim();
-    if(!criteria)return toast('Describe how to split the PDF','error');
+  let aiFile=null,aiPdfText=null,aiPlan=null,aiMessages=[],aiPageCount=0;
+  const uploadArea=document.getElementById('aisplit-upload-area');
+  const dropEl=document.getElementById('aisplit-drop'),input=document.getElementById('aisplit-file'),listEl=document.getElementById('aisplit-file-list');
+  const chatArea=document.getElementById('aisplit-chat-area'),msgsEl=document.getElementById('aisplit-chat-messages'),chatInput=document.getElementById('aisplit-chat-input');
+  const planSection=document.getElementById('aisplit-plan-section'),planList=document.getElementById('aisplit-plan-list');
+
+  function addBubble(text,role){
+    const div=document.createElement('div');div.className=`chat-bubble ${role}`;
+    // Strip plan tag from displayed text
+    div.textContent=(text||'').replace(/<SPLIT_PLAN>[\s\S]*?<\/SPLIT_PLAN>/g,'').trim();
+    msgsEl.appendChild(div);msgsEl.scrollTop=msgsEl.scrollHeight;return div;
+  }
+  function addTyping(){
+    const div=document.createElement('div');div.className='chat-bubble ai typing';
+    div.innerHTML='<span class="inline-spinner"></span>\u00a0Claude is thinking\u2026';
+    msgsEl.appendChild(div);msgsEl.scrollTop=msgsEl.scrollHeight;return div;
+  }
+  function renderPlan(plan){
+    aiPlan=plan;planList.innerHTML='';
+    plan.forEach((item,idx)=>{
+      const card=document.createElement('div');card.className='plan-card';
+      card.innerHTML=`<div class="plan-card-num">${idx+1}</div><div class="plan-card-body"><input class="plan-card-name" type="text" value="${item.filename.replace(/"/g,'&quot;')}" /><div class="plan-card-pages">Pages\u00a0${item.pages.join(', ')}\u00a0\u00b7\u00a0${item.pages.length}\u00a0page${item.pages.length!==1?'s':''}</div></div>`;
+      card.querySelector('.plan-card-name').addEventListener('input',e=>{aiPlan[idx].filename=e.target.value;});
+      planList.appendChild(card);
+    });
+    planSection.style.display='block';
+  }
+  async function callAI(userMsg){
     const token=await auth.currentUser?.getIdToken(true);
-    if(!token)return toast('Please sign in again','error');
-    const btn=document.getElementById('aisplit-analyze');btn.disabled=true;
-    btn.innerHTML='<span class="inline-spinner"></span>Extracting text\u2026';
-    planSection.style.display='none';resultEl.className='result-box';
+    if(!token){toast('Please sign in again','error');return;}
+    if(userMsg){addBubble(userMsg,'user');aiMessages.push({role:'user',content:userMsg});}
+    const typing=addTyping();
+    chatInput.disabled=true;document.getElementById('aisplit-chat-send').disabled=true;
     try{
-      const pdfjs=await loadPdfjsLib();const bytes=await aiFile.arrayBuffer();const pdf=await pdfjs.getDocument({data:bytes}).promise;
-      let pdfText='';
-      for(let i=1;i<=pdf.numPages;i++){const page=await pdf.getPage(i);const c=await page.getTextContent();pdfText+=`--- Page ${i} ---\n${c.items.map(it=>it.str).join(' ')}\n\n`;}
-      btn.innerHTML='<span class="inline-spinner"></span>Asking Claude\u2026';
-      const res=await fetch(`${API}/api/ai-split`,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({pdfText,criteria,filename:aiFile.name,pageCount:pdf.numPages})});
+      const res=await fetch(`${API}/api/ai-split`,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({pdfText:aiPdfText,messages:aiMessages,filename:aiFile.name,pageCount:aiPageCount})});
       const data=await res.json();
       if(!res.ok)throw new Error(data.error||`Server error ${res.status}`);
-      aiPlan=data.splits;
-      planList.innerHTML='';
-      aiPlan.forEach((item,idx)=>{const card=document.createElement('div');card.className='plan-card';card.innerHTML=`<div class="plan-card-num">${idx+1}</div><div class="plan-card-body"><input class="plan-card-name" type="text" value="${item.filename.replace(/"/g,'&quot;')}" /><div class="plan-card-pages">Pages\u00a0${item.pages.join(', ')}\u00a0\u00b7\u00a0${item.pages.length}\u00a0page${item.pages.length!==1?'s':''}</div></div>`;card.querySelector('.plan-card-name').addEventListener('input',e=>{aiPlan[idx].filename=e.target.value;});planList.appendChild(card);});
-      planSection.style.display='block';
-      showResult(resultEl,'success',`AI suggested ${aiPlan.length} output file${aiPlan.length!==1?'s':''}. Review filenames then click Apply.`);toast(`AI plan ready — ${aiPlan.length} files`);
-    }catch(err){showResult(resultEl,'error','Error: '+err.message);toast(err.message,'error');}
-    btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg> Analyze with AI';
+      typing.remove();
+      const reply=data.reply||'';
+      aiMessages.push({role:'assistant',content:reply});
+      addBubble(reply,'ai');
+      if(data.plan&&Array.isArray(data.plan)&&data.plan.length>0){renderPlan(data.plan);}
+    }catch(err){typing.remove();addBubble('Sorry, something went wrong: '+err.message,'ai');toast(err.message,'error');}
+    chatInput.disabled=false;document.getElementById('aisplit-chat-send').disabled=false;chatInput.focus();
   }
-  document.getElementById('aisplit-analyze').addEventListener('click',doAnalyze);
-  document.getElementById('aisplit-reanalyze').addEventListener('click',doAnalyze);
+  async function startConversation(file){
+    aiFile=file;aiPlan=null;aiMessages=[];aiPageCount=0;aiPdfText=null;
+    planSection.style.display='none';planList.innerHTML='';msgsEl.innerHTML='';
+    uploadArea.style.display='none';chatArea.style.display='block';
+    const typing=addTyping();
+    try{
+      const pdfjs=await loadPdfjsLib();const bytes=await file.arrayBuffer();const pdf=await pdfjs.getDocument({data:bytes}).promise;
+      aiPageCount=pdf.numPages;let text='';
+      for(let i=1;i<=pdf.numPages;i++){const page=await pdf.getPage(i);const c=await page.getTextContent();text+=`--- Page ${i} ---\n${c.items.map(it=>it.str).join(' ')}\n\n`;}
+      aiPdfText=text;
+    }catch(err){typing.remove();addBubble('Could not read PDF text: '+err.message,'ai');return;}
+    typing.remove();
+    // Synthetic first turn so Claude opens the conversation
+    aiMessages=[{role:'user',content:'I just uploaded my PDF.'}];
+    await callAI(null);
+  }
+  setupDrop(dropEl,input,f=>{
+    listEl.innerHTML='';listEl.appendChild(renderFileItem(f[0],()=>{
+      aiFile=null;aiPdfText=null;aiPlan=null;aiMessages=[];
+      uploadArea.style.display='block';chatArea.style.display='none';planSection.style.display='none';listEl.innerHTML='';
+    }));startConversation(f[0]);
+  });
+  function sendChat(){
+    const msg=chatInput.value.trim();if(!msg||!aiFile||chatInput.disabled)return;
+    chatInput.value='';planSection.style.display='none';callAI(msg);
+  }
+  document.getElementById('aisplit-chat-send').addEventListener('click',sendChat);
+  chatInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}});
   document.getElementById('aisplit-apply').addEventListener('click',async()=>{
     if(!aiFile||!aiPlan)return;
-    const btn=document.getElementById('aisplit-apply');btn.disabled=true;btn.innerHTML='<span class="inline-spinner"></span>Splitting\u2026';
+    const btn=document.getElementById('aisplit-apply');btn.disabled=true;
+    btn.innerHTML='<span class="inline-spinner"></span>Splitting\u2026';
     try{
       const{PDFDocument}=await loadPdfLib();const srcBytes=await aiFile.arrayBuffer();const srcDoc=await PDFDocument.load(srcBytes);
       for(const item of aiPlan){const newDoc=await PDFDocument.create();const idxs=item.pages.map(p=>p-1).filter(i=>i>=0&&i<srcDoc.getPageCount());const pages=await newDoc.copyPages(srcDoc,idxs);pages.forEach(p=>newDoc.addPage(p));const out=await newDoc.save();triggerDownload(new Blob([out],{type:'application/pdf'}),item.filename||`part_${aiPlan.indexOf(item)+1}.pdf`);await new Promise(r=>setTimeout(r,150));}
-      Stats.inc(0);showResult(resultEl,'success',`Downloaded ${aiPlan.length} files.`);toast(`Done \u2014 ${aiPlan.length} files!`);
-    }catch(err){showResult(resultEl,'error','Error: '+err.message);toast(err.message,'error');}
+      Stats.inc(0);toast(`Done \u2014 ${aiPlan.length} files!`);addBubble(`\u2713 Done! ${aiPlan.length} file${aiPlan.length!==1?'s':''} downloaded.`,'ai');
+    }catch(err){toast(err.message,'error');addBubble('Error: '+err.message,'ai');}
     btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Apply &amp; Download All';
   });
-  document.getElementById('aisplit-clear').addEventListener('click',()=>{aiFile=null;aiPlan=null;listEl.innerHTML='';optsEl.style.display='none';planSection.style.display='none';resultEl.className='result-box';input.value='';});
+  document.getElementById('aisplit-revise').addEventListener('click',()=>{planSection.style.display='none';chatInput.focus();});
+  document.getElementById('aisplit-clear').addEventListener('click',()=>{
+    aiFile=null;aiPdfText=null;aiPlan=null;aiMessages=[];aiPageCount=0;
+    listEl.innerHTML='';msgsEl.innerHTML='';uploadArea.style.display='block';chatArea.style.display='none';planSection.style.display='none';input.value='';
+  });
 }
 
 // EDIT PDF
