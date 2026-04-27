@@ -1,13 +1,29 @@
 import express from 'express';
-import { Resend } from 'resend';
 import rateLimit from 'express-rate-limit';
 import pool from '../db/index.js';
 
 const router = express.Router();
 
-function getResend() {
-  if (!process.env.RESEND_API_KEY) throw new Error('RESEND_API_KEY is not configured.');
-  return new Resend(process.env.RESEND_API_KEY);
+async function sendEmail({ to, replyTo, subject, html }) {
+  if (!process.env.BREVO_API_KEY) throw new Error('BREVO_API_KEY is not configured.');
+  const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: {
+      'api-key': process.env.BREVO_API_KEY,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      sender:  { name: 'NyxPrism Contact', email: 'noreply@nyxprism.com' },
+      to:      [{ email: to }],
+      replyTo: { email: replyTo },
+      subject,
+      htmlContent: html,
+    }),
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Brevo error ${res.status}: ${body}`);
+  }
 }
 
 // 5 submissions per IP per 15 minutes
@@ -50,8 +66,7 @@ router.post('/', limiter, async (req, res) => {
       [safe.firstName, safe.lastName, safe.email, safe.subject, safe.message],
     );
 
-    await getResend().emails.send({
-      from:    'NyxPrism Contact <noreply@nyxprism.com>',
+    await sendEmail({
       to:      process.env.CONTACT_EMAIL,
       replyTo: safe.email,
       subject: `[NyxPrism] ${safe.subject} — ${safe.firstName} ${safe.lastName}`,
