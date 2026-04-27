@@ -65,8 +65,9 @@ async function start() {
     await pool.query(schema);
     console.log('✓ Database schema applied.');
   } catch (err) {
-    console.error('✗ Schema migration error:', err.message);
-    process.exit(1);
+    console.error('✗ Schema migration error (server stays up):', err.message);
+    // Do NOT exit — let the server keep running so /health stays reachable.
+    // DB-dependent routes will fail gracefully; fix DATABASE_URL in env vars.
   }
 }
 
