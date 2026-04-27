@@ -134,6 +134,31 @@
     .toast.error{background:#210f0f;border:1px solid rgba(248,113,113,.3);color:var(--red)}
     .toast svg{width:15px;height:15px;stroke:currentColor;flex-shrink:0}
     @keyframes slideUp{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+    /* AI Split plan cards */
+    .split-plan{display:flex;flex-direction:column;gap:.65rem;margin-bottom:1.25rem}
+    .plan-card{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:.85rem 1rem;display:flex;align-items:center;gap:.85rem}
+    .plan-card-num{width:28px;height:28px;border-radius:50%;background:var(--accent-glow);border:1px solid rgba(124,58,237,.3);color:var(--accent-bright);font-size:.75rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .plan-card-body{flex:1;min-width:0}
+    .plan-card-pages{font-size:.75rem;color:var(--muted);margin-top:.25rem}
+    .plan-card-name{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);padding:.3rem .6rem;font-size:.82rem;font-family:'Inter',sans-serif}
+    .plan-card-name:focus{outline:none;border-color:var(--accent)}
+    /* Edit PDF page list */
+    .page-thumb-list{display:flex;flex-direction:column;gap:.45rem;max-height:380px;overflow-y:auto;margin-bottom:1rem}
+    .page-thumb-row{display:flex;align-items:center;gap:.75rem;padding:.5rem .75rem;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm)}
+    .page-thumb-row.selected{border-color:var(--accent);background:var(--accent-glow)}
+    .page-thumb-row input[type=checkbox]{accent-color:var(--accent);width:15px;height:15px;flex-shrink:0}
+    .page-thumb-canvas{width:40px;height:52px;object-fit:contain;border:1px solid var(--border);border-radius:3px;background:#fff;flex-shrink:0}
+    .page-thumb-label{flex:1;font-size:.82rem;color:var(--text2)}
+    .page-thumb-btns{display:flex;gap:.35rem;flex-shrink:0}
+    .page-thumb-btns button{background:none;border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--muted);padding:.2rem .45rem;font-size:.75rem;transition:color .12s,border-color .12s}
+    .page-thumb-btns button:hover{color:var(--accent-bright);border-color:var(--accent)}
+    /* Convert tabs */
+    .tab-bar{display:flex;gap:.35rem;margin-bottom:1.25rem;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:.3rem}
+    .tab-btn{flex:1;padding:.45rem .75rem;border-radius:4px;border:none;background:none;color:var(--text3);font-size:.83rem;font-weight:600;transition:background .12s,color .12s;cursor:pointer}
+    .tab-btn.active{background:var(--accent);color:#fff}
+    .tab-pane{display:none}
+    .tab-pane.active{display:block}
+    .inline-spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:inline-block;vertical-align:middle;margin-right:.4rem}
     @media(max-width:760px){.sidebar{display:none}.main{padding:1.25rem}}
   </style>
 </head>
@@ -210,6 +235,18 @@
     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
     Rotate Pages
   </button>
+  <button class="nav-item" data-panel="aisplit">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+    AI Smart Split
+  </button>
+  <button class="nav-item" data-panel="editpdf">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+    Edit PDF
+  </button>
+  <button class="nav-item" data-panel="convert">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>
+    Convert PDF
+  </button>
   <div class="sidebar-section">Developer</div>
   <button class="nav-item" data-panel="cli">
     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
@@ -256,7 +293,7 @@
         <div class="stat-icon" style="background:rgba(251,191,36,.08);color:var(--yellow)">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         </div>
-        <div class="stat-num">8</div>
+        <div class="stat-num">11</div>
         <div class="stat-label">Tools Available</div>
       </div>
     </div>
@@ -270,6 +307,9 @@
       <div class="tool-card" data-launch="extract"><div class="tool-card-icon" style="background:rgba(124,58,237,.1);color:var(--accent-bright)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg></div><h3>Extract Text</h3><p>Pull all text from a PDF for copy or export</p></div>
       <div class="tool-card" data-launch="ocr"><div class="tool-card-icon" style="background:rgba(52,211,153,.08);color:var(--green)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2"/><rect x="7" y="7" width="10" height="10"/></svg></div><h3>OCR Scan</h3><p>Extract text from scanned image PDFs</p></div>
       <div class="tool-card" data-launch="rotate"><div class="tool-card-icon" style="background:rgba(96,165,250,.08);color:var(--blue)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg></div><h3>Rotate Pages</h3><p>Rotate specific pages or whole document</p></div>
+      <div class="tool-card" data-launch="aisplit"><div class="tool-card-icon" style="background:rgba(124,58,237,.15);color:var(--accent-bright)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div><h3>AI Smart Split</h3><p>Type criteria — AI reads the doc and splits it intelligently</p></div>
+      <div class="tool-card" data-launch="editpdf"><div class="tool-card-icon" style="background:rgba(251,191,36,.08);color:var(--yellow)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div><h3>Edit PDF</h3><p>Delete, reorder pages and add text overlays</p></div>
+      <div class="tool-card" data-launch="convert"><div class="tool-card-icon" style="background:rgba(52,211,153,.08);color:var(--green)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg></div><h3>Convert PDF</h3><p>PDF to images or images to PDF</p></div>
     </div>
     <div class="install-strip">
       <span class="label">CLI &nbsp;›</span>
@@ -435,6 +475,105 @@
     <div id="cli-commands"></div>
   </div>
 
+  <!-- AI SMART SPLIT -->
+  <div class="panel" id="panel-aisplit">
+    <div class="page-header"><h1>AI Smart Split</h1><p>Describe how to split your PDF — Claude reads it and suggests named output files. Text is extracted in your browser; your PDF binary is never uploaded.</p></div>
+    <div class="drop-zone" id="aisplit-drop"><input type="file" id="aisplit-file" accept=".pdf" /><div class="drop-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div><div class="drop-title">Drop your PDF here</div><div class="drop-sub">AI will read the content and suggest how to split it</div></div>
+    <div class="file-list" id="aisplit-file-list"></div>
+    <div id="aisplit-options" style="display:none">
+      <div class="card">
+        <div class="card-title">Split Criteria</div>
+        <div class="form-group" style="margin-bottom:1rem">
+          <label class="form-label">Describe how to split this PDF</label>
+          <input class="form-input" type="text" id="aisplit-criteria" placeholder='e.g. "split by policy number" or "one file per invoice" or "separate by customer name"' />
+          <div class="form-hint">Be specific — the more detail, the better the result.</div>
+        </div>
+        <div class="btn-row"><button class="btn btn-primary" id="aisplit-analyze"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>Analyze with AI</button></div>
+      </div>
+      <div class="result-box" id="aisplit-result"></div>
+      <div id="aisplit-plan-section" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem"><div class="card-title" style="margin-bottom:0">Proposed Split Plan</div><div style="font-size:.75rem;color:var(--muted)">Edit filenames as needed</div></div>
+        <div class="split-plan" id="aisplit-plan-list"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="aisplit-apply"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Apply &amp; Download All</button>
+          <button class="btn btn-secondary" id="aisplit-reanalyze">Re-analyze</button>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row" style="margin-top:1rem"><button class="btn btn-ghost" id="aisplit-clear">Clear</button></div>
+  </div>
+
+  <!-- EDIT PDF -->
+  <div class="panel" id="panel-editpdf">
+    <div class="page-header"><h1>Edit PDF</h1><p>Delete pages, reorder pages, and add text overlays — all in your browser.</p></div>
+    <div class="drop-zone" id="edit-drop"><input type="file" id="edit-file" accept=".pdf" /><div class="drop-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div><div class="drop-title">Drop your PDF here</div><div class="drop-sub">or click to browse</div></div>
+    <div class="file-list" id="edit-file-list"></div>
+    <div id="edit-options" style="display:none">
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem">
+          <div class="card-title" style="margin-bottom:0">Pages <span id="edit-page-count" style="color:var(--accent-bright);font-weight:800"></span></div>
+          <div style="display:flex;gap:.5rem">
+            <button class="btn btn-ghost" id="edit-select-all" style="font-size:.75rem;padding:.3rem .7rem">Select All</button>
+            <button class="btn btn-ghost" id="edit-delete-selected" style="font-size:.75rem;padding:.3rem .7rem;color:var(--red);border-color:rgba(248,113,113,.3)">Delete Selected</button>
+          </div>
+        </div>
+        <div class="page-thumb-list" id="edit-page-list"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Add Text Overlay</div>
+        <div class="form-row">
+          <div class="form-group" style="max-width:100px"><label class="form-label">Page #</label><input class="form-input" type="number" id="edit-text-page" value="1" min="1" /></div>
+          <div class="form-group" style="flex:3"><label class="form-label">Text</label><input class="form-input" type="text" id="edit-text-content" placeholder="Enter text to overlay" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">X (pts)</label><input class="form-input" type="number" id="edit-text-x" value="50" /></div>
+          <div class="form-group"><label class="form-label">Y (pts)</label><input class="form-input" type="number" id="edit-text-y" value="50" /></div>
+          <div class="form-group"><label class="form-label">Size (pt)</label><input class="form-input" type="number" id="edit-text-size" value="14" min="6" max="120" /></div>
+          <div class="form-group"><label class="form-label">Color</label><input type="color" id="edit-text-color" value="#000000" style="width:100%;height:38px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--bg2);cursor:pointer" /></div>
+        </div>
+        <button class="btn btn-secondary" id="edit-add-text"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Queue Text Overlay</button>
+        <div id="edit-text-queue" style="font-size:.75rem;color:var(--muted);margin-top:.5rem"></div>
+      </div>
+      <div class="result-box" id="edit-result"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="edit-save"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Save &amp; Download</button>
+        <button class="btn btn-secondary" id="edit-clear">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONVERT PDF -->
+  <div class="panel" id="panel-convert">
+    <div class="page-header"><h1>Convert PDF</h1><p>Convert PDF pages to images, or assemble images into a PDF.</p></div>
+    <div class="tab-bar">
+      <button class="tab-btn active" data-tab="pdf2img">PDF → Images</button>
+      <button class="tab-btn" data-tab="img2pdf">Images → PDF</button>
+    </div>
+    <div class="tab-pane active" id="tab-pdf2img">
+      <div class="drop-zone" id="p2i-drop"><input type="file" id="p2i-file" accept=".pdf" /><div class="drop-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div><div class="drop-title">Drop your PDF here</div><div class="drop-sub">Each page becomes a separate image file</div></div>
+      <div class="file-list" id="p2i-file-list"></div>
+      <div id="p2i-options" style="display:none">
+        <div class="card"><div class="card-title">Image Settings</div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Format</label><select class="form-select" id="p2i-format"><option value="png">PNG (lossless)</option><option value="jpeg">JPEG (smaller)</option></select></div>
+            <div class="form-group"><label class="form-label">Scale &nbsp;<strong id="p2i-scale-val">2×</strong></label><input type="range" id="p2i-scale" min="1" max="4" value="2" step="0.5" style="width:100%;accent-color:var(--accent)" /><div class="form-hint">1× ≈ 72dpi &nbsp;·&nbsp; 2× ≈ 144dpi &nbsp;·&nbsp; 4× ≈ 288dpi</div></div>
+          </div>
+        </div>
+        <div class="result-box" id="p2i-result"></div>
+        <div class="btn-row"><button class="btn btn-primary" id="p2i-run"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>Convert to Images</button><button class="btn btn-secondary" id="p2i-clear">Clear</button></div>
+      </div>
+    </div>
+    <div class="tab-pane" id="tab-img2pdf">
+      <div class="drop-zone" id="i2p-drop"><input type="file" id="i2p-files" accept="image/*" multiple /><div class="drop-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="drop-title">Drop images here</div><div class="drop-sub">PNG, JPEG, WebP — multiple files; order shown = page order</div></div>
+      <div class="file-list" id="i2p-file-list"></div>
+      <div id="i2p-options" style="display:none">
+        <div class="form-row"><div class="form-group"><label class="form-label">Output filename</label><input class="form-input" type="text" id="i2p-name" value="images.pdf" /></div></div>
+        <div class="result-box" id="i2p-result"></div>
+        <div class="btn-row"><button class="btn btn-primary" id="i2p-run"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>Build PDF</button><button class="btn btn-secondary" id="i2p-clear">Clear</button></div>
+      </div>
+    </div>
+  </div>
+
 </main>
 </div>
 
@@ -456,6 +595,9 @@ const firebaseConfig = {
 const app  = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db   = getFirestore(app);
+
+// ── Update to your Railway backend URL ────────────────────────────
+const API = 'https://YOUR_RAILWAY_URL';
 
 const Stats = {
   get:()=>JSON.parse(localStorage.getItem('nyx_stats')||'{"processed":0,"saved":0}'),
@@ -740,6 +882,169 @@ async function loadPdfjsLib(){
     card.innerHTML=`<div style="font-size:.82rem;font-weight:700;color:var(--text2);margin-bottom:.5rem">${c.title}</div><div class="code-pill" style="width:100%;margin-bottom:.4rem"><span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.cmd}</span><button class="copy-btn" data-copy="${c.cmd.replace(/"/g,'&quot;')}" title="Copy"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div><div style="font-size:.775rem;color:var(--muted)">${c.desc}</div>`;
     container.appendChild(card);
   });
+}
+
+// AI SMART SPLIT
+{
+  let aiFile=null,aiPlan=null;
+  const dropEl=document.getElementById('aisplit-drop'),input=document.getElementById('aisplit-file'),listEl=document.getElementById('aisplit-file-list'),optsEl=document.getElementById('aisplit-options'),resultEl=document.getElementById('aisplit-result'),planSection=document.getElementById('aisplit-plan-section'),planList=document.getElementById('aisplit-plan-list');
+  setupDrop(dropEl,input,f=>{aiFile=f[0];listEl.innerHTML='';listEl.appendChild(renderFileItem(aiFile,()=>{aiFile=null;aiPlan=null;optsEl.style.display='none';planSection.style.display='none';}));optsEl.style.display='block';});
+  async function doAnalyze(){
+    if(!aiFile)return toast('Select a PDF first','error');
+    const criteria=document.getElementById('aisplit-criteria').value.trim();
+    if(!criteria)return toast('Describe how to split the PDF','error');
+    const token=await auth.currentUser?.getIdToken(true);
+    if(!token)return toast('Please sign in again','error');
+    const btn=document.getElementById('aisplit-analyze');btn.disabled=true;
+    btn.innerHTML='<span class="inline-spinner"></span>Extracting text\u2026';
+    planSection.style.display='none';resultEl.className='result-box';
+    try{
+      const pdfjs=await loadPdfjsLib();const bytes=await aiFile.arrayBuffer();const pdf=await pdfjs.getDocument({data:bytes}).promise;
+      let pdfText='';
+      for(let i=1;i<=pdf.numPages;i++){const page=await pdf.getPage(i);const c=await page.getTextContent();pdfText+=`--- Page ${i} ---\n${c.items.map(it=>it.str).join(' ')}\n\n`;}
+      btn.innerHTML='<span class="inline-spinner"></span>Asking Claude\u2026';
+      const res=await fetch(`${API}/api/ai-split`,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({pdfText,criteria,filename:aiFile.name,pageCount:pdf.numPages})});
+      const data=await res.json();
+      if(!res.ok)throw new Error(data.error||`Server error ${res.status}`);
+      aiPlan=data.splits;
+      planList.innerHTML='';
+      aiPlan.forEach((item,idx)=>{const card=document.createElement('div');card.className='plan-card';card.innerHTML=`<div class="plan-card-num">${idx+1}</div><div class="plan-card-body"><input class="plan-card-name" type="text" value="${item.filename.replace(/"/g,'&quot;')}" /><div class="plan-card-pages">Pages\u00a0${item.pages.join(', ')}\u00a0\u00b7\u00a0${item.pages.length}\u00a0page${item.pages.length!==1?'s':''}</div></div>`;card.querySelector('.plan-card-name').addEventListener('input',e=>{aiPlan[idx].filename=e.target.value;});planList.appendChild(card);});
+      planSection.style.display='block';
+      showResult(resultEl,'success',`AI suggested ${aiPlan.length} output file${aiPlan.length!==1?'s':''}. Review filenames then click Apply.`);toast(`AI plan ready — ${aiPlan.length} files`);
+    }catch(err){showResult(resultEl,'error','Error: '+err.message);toast(err.message,'error');}
+    btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg> Analyze with AI';
+  }
+  document.getElementById('aisplit-analyze').addEventListener('click',doAnalyze);
+  document.getElementById('aisplit-reanalyze').addEventListener('click',doAnalyze);
+  document.getElementById('aisplit-apply').addEventListener('click',async()=>{
+    if(!aiFile||!aiPlan)return;
+    const btn=document.getElementById('aisplit-apply');btn.disabled=true;btn.innerHTML='<span class="inline-spinner"></span>Splitting\u2026';
+    try{
+      const{PDFDocument}=await loadPdfLib();const srcBytes=await aiFile.arrayBuffer();const srcDoc=await PDFDocument.load(srcBytes);
+      for(const item of aiPlan){const newDoc=await PDFDocument.create();const idxs=item.pages.map(p=>p-1).filter(i=>i>=0&&i<srcDoc.getPageCount());const pages=await newDoc.copyPages(srcDoc,idxs);pages.forEach(p=>newDoc.addPage(p));const out=await newDoc.save();triggerDownload(new Blob([out],{type:'application/pdf'}),item.filename||`part_${aiPlan.indexOf(item)+1}.pdf`);await new Promise(r=>setTimeout(r,150));}
+      Stats.inc(0);showResult(resultEl,'success',`Downloaded ${aiPlan.length} files.`);toast(`Done \u2014 ${aiPlan.length} files!`);
+    }catch(err){showResult(resultEl,'error','Error: '+err.message);toast(err.message,'error');}
+    btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Apply &amp; Download All';
+  });
+  document.getElementById('aisplit-clear').addEventListener('click',()=>{aiFile=null;aiPlan=null;listEl.innerHTML='';optsEl.style.display='none';planSection.style.display='none';resultEl.className='result-box';input.value='';});
+}
+
+// EDIT PDF
+{
+  let editFile=null,editPageOrder=[],pendingTexts=[];
+  const dropEl=document.getElementById('edit-drop'),input=document.getElementById('edit-file'),listEl=document.getElementById('edit-file-list'),optsEl=document.getElementById('edit-options'),resultEl=document.getElementById('edit-result');
+  async function loadForEdit(file){
+    editFile=file;editPageOrder=[];pendingTexts=[];listEl.innerHTML='';
+    listEl.appendChild(renderFileItem(file,()=>{editFile=null;editPageOrder=[];pendingTexts=[];optsEl.style.display='none';resultEl.className='result-box';}));
+    optsEl.style.display='block';
+    const pdfjs=await loadPdfjsLib();const bytes=await file.arrayBuffer();const pdf=await pdfjs.getDocument({data:bytes}).promise;
+    editPageOrder=Array.from({length:pdf.numPages},(_,i)=>i+1);
+    document.getElementById('edit-page-count').textContent=`(${pdf.numPages} pages)`;
+    const pageListEl=document.getElementById('edit-page-list');pageListEl.innerHTML='<div style="font-size:.78rem;color:var(--muted);padding:.5rem">Loading previews\u2026</div>';
+    pageListEl.innerHTML='';
+    for(const pgNum of editPageOrder){
+      const page=await pdf.getPage(pgNum);const vp=page.getViewport({scale:0.18});
+      const canvas=document.createElement('canvas');canvas.width=vp.width;canvas.height=vp.height;canvas.className='page-thumb-canvas';
+      await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
+      const row=document.createElement('div');row.className='page-thumb-row';row.dataset.page=String(pgNum);
+      const cb=document.createElement('input');cb.type='checkbox';
+      const label=document.createElement('span');label.className='page-thumb-label';label.textContent=`Page ${pgNum}`;
+      const btns=document.createElement('div');btns.className='page-thumb-btns';
+      const upBtn=document.createElement('button');upBtn.textContent='\u2191';upBtn.title='Move up';
+      const dnBtn=document.createElement('button');dnBtn.textContent='\u2193';dnBtn.title='Move down';
+      upBtn.addEventListener('click',()=>{const idx=editPageOrder.indexOf(pgNum);if(idx>0){[editPageOrder[idx-1],editPageOrder[idx]]=[editPageOrder[idx],editPageOrder[idx-1]];const prev=row.previousElementSibling;if(prev)pageListEl.insertBefore(row,prev);}});
+      dnBtn.addEventListener('click',()=>{const idx=editPageOrder.indexOf(pgNum);if(idx<editPageOrder.length-1){[editPageOrder[idx],editPageOrder[idx+1]]=[editPageOrder[idx+1],editPageOrder[idx]];const next=row.nextElementSibling;if(next)pageListEl.insertBefore(next,row);}});
+      cb.addEventListener('change',()=>row.classList.toggle('selected',cb.checked));
+      btns.append(upBtn,dnBtn);row.append(cb,canvas,label,btns);pageListEl.appendChild(row);
+    }
+  }
+  setupDrop(dropEl,input,f=>loadForEdit(f[0]));
+  document.getElementById('edit-select-all').addEventListener('click',()=>{document.querySelectorAll('#edit-page-list input[type=checkbox]').forEach(cb=>{cb.checked=true;cb.closest('.page-thumb-row').classList.add('selected');});});
+  document.getElementById('edit-delete-selected').addEventListener('click',()=>{
+    const toRemove=[];document.querySelectorAll('#edit-page-list .page-thumb-row').forEach(row=>{if(row.querySelector('input').checked){toRemove.push(parseInt(row.dataset.page));row.remove();}});
+    editPageOrder=editPageOrder.filter(p=>!toRemove.includes(p));document.getElementById('edit-page-count').textContent=`(${editPageOrder.length} pages)`;
+    if(toRemove.length)toast(`${toRemove.length} page${toRemove.length!==1?'s':''} removed`);
+  });
+  document.getElementById('edit-add-text').addEventListener('click',()=>{
+    const pageN=parseInt(document.getElementById('edit-text-page').value);const text=document.getElementById('edit-text-content').value.trim();
+    if(!text)return toast('Enter text to add','error');
+    if(!editPageOrder.includes(pageN))return toast('Invalid page number','error');
+    pendingTexts.push({page:pageN,text,x:parseInt(document.getElementById('edit-text-x').value)||50,y:parseInt(document.getElementById('edit-text-y').value)||50,size:parseInt(document.getElementById('edit-text-size').value)||14,color:document.getElementById('edit-text-color').value});
+    const qEl=document.getElementById('edit-text-queue');qEl.textContent=`${pendingTexts.length} text overlay${pendingTexts.length!==1?'s':''} queued`;document.getElementById('edit-text-content').value='';toast(`Text queued for page ${pageN}`);
+  });
+  document.getElementById('edit-save').addEventListener('click',async()=>{
+    if(!editFile||!editPageOrder.length)return toast('No pages to save','error');
+    const btn=document.getElementById('edit-save');btn.disabled=true;btn.textContent='Saving\u2026';
+    try{
+      const{PDFDocument,rgb,StandardFonts}=await loadPdfLib();const srcBytes=await editFile.arrayBuffer();const srcDoc=await PDFDocument.load(srcBytes);
+      const newDoc=await PDFDocument.create();const font=await newDoc.embedFont(StandardFonts.Helvetica);
+      const copiedPages=await newDoc.copyPages(srcDoc,editPageOrder.map(p=>p-1));copiedPages.forEach(p=>newDoc.addPage(p));
+      const newPages=newDoc.getPages();
+      for(const pt of pendingTexts){const pageIdx=editPageOrder.indexOf(pt.page);if(pageIdx<0)continue;const hex=pt.color.replace('#','');const r=parseInt(hex.slice(0,2),16)/255,g=parseInt(hex.slice(2,4),16)/255,b=parseInt(hex.slice(4,6),16)/255;newPages[pageIdx].drawText(pt.text,{x:pt.x,y:pt.y,size:pt.size,font,color:rgb(r,g,b)});}
+      const out=await newDoc.save();triggerDownload(new Blob([out],{type:'application/pdf'}),editFile.name.replace(/\.pdf$/i,'_edited.pdf'));
+      Stats.inc(0);showResult(resultEl,'success',`Saved ${newDoc.getPageCount()} pages.`);toast('PDF saved!');
+    }catch(err){showResult(resultEl,'error','Error: '+err.message);toast(err.message,'error');}
+    btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Save &amp; Download';
+  });
+  document.getElementById('edit-clear').addEventListener('click',()=>{editFile=null;editPageOrder=[];pendingTexts=[];listEl.innerHTML='';optsEl.style.display='none';resultEl.className='result-box';document.getElementById('edit-page-list').innerHTML='';document.getElementById('edit-text-queue').textContent='';input.value='';});
+}
+
+// CONVERT PDF
+{
+  // Tab switching
+  document.querySelectorAll('.tab-btn').forEach(btn=>btn.addEventListener('click',()=>{const tab=btn.dataset.tab;document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));document.querySelectorAll('.tab-pane').forEach(p=>p.classList.toggle('active',p.id==='tab-'+tab));}));
+  // PDF -> Images
+  {
+    let p2iFile=null;
+    const dropEl=document.getElementById('p2i-drop'),input=document.getElementById('p2i-file'),listEl=document.getElementById('p2i-file-list'),optsEl=document.getElementById('p2i-options'),resultEl=document.getElementById('p2i-result');
+    document.getElementById('p2i-scale').addEventListener('input',e=>document.getElementById('p2i-scale-val').textContent=e.target.value+'\u00d7');
+    setupDrop(dropEl,input,f=>{p2iFile=f[0];listEl.innerHTML='';listEl.appendChild(renderFileItem(p2iFile,()=>{p2iFile=null;optsEl.style.display='none';resultEl.className='result-box';}));optsEl.style.display='block';});
+    document.getElementById('p2i-run').addEventListener('click',async()=>{
+      if(!p2iFile)return toast('Select a PDF first','error');
+      const btn=document.getElementById('p2i-run');btn.disabled=true;btn.innerHTML='<span class="inline-spinner"></span>Converting\u2026';
+      try{
+        const pdfjs=await loadPdfjsLib();const bytes=await p2iFile.arrayBuffer();const pdf=await pdfjs.getDocument({data:bytes}).promise;
+        const scale=parseFloat(document.getElementById('p2i-scale').value)||2;const fmt=document.getElementById('p2i-format').value;
+        const mime=fmt==='jpeg'?'image/jpeg':'image/png';const ext=fmt==='jpeg'?'jpg':'png';const stem=p2iFile.name.replace(/\.pdf$/i,'');
+        if(pdf.numPages===1){
+          const page=await pdf.getPage(1);const vp=page.getViewport({scale});const canvas=document.createElement('canvas');canvas.width=vp.width;canvas.height=vp.height;await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
+          canvas.toBlob(blob=>triggerDownload(blob,`${stem}.${ext}`),mime,0.92);Stats.inc(0);showResult(resultEl,'success',`Converted 1 page to ${ext.toUpperCase()}.`);toast('Done!');
+        }else{
+          btn.innerHTML='<span class="inline-spinner"></span>Loading JSZip\u2026';
+          const JSZip=await new Promise((res,rej)=>{if(window.JSZip)return res(window.JSZip);const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';s.onload=()=>res(window.JSZip);s.onerror=rej;document.head.appendChild(s);});
+          const zip=new JSZip();const pad=String(pdf.numPages).length;
+          for(let i=1;i<=pdf.numPages;i++){btn.innerHTML=`<span class="inline-spinner"></span>Page ${i}/${pdf.numPages}\u2026`;const page=await pdf.getPage(i);const vp=page.getViewport({scale});const canvas=document.createElement('canvas');canvas.width=vp.width;canvas.height=vp.height;await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;const b64=canvas.toDataURL(mime,0.92).split(',')[1];zip.file(`${stem}_page${String(i).padStart(pad,'0')}.${ext}`,b64,{base64:true});}
+          const blob=await zip.generateAsync({type:'blob'});triggerDownload(blob,`${stem}_images.zip`);Stats.inc(0);showResult(resultEl,'success',`Converted ${pdf.numPages} pages \u2014 downloading ZIP.`);toast(`${pdf.numPages} pages converted!`);
+        }
+      }catch(err){showResult(resultEl,'error','Error: '+err.message);toast(err.message,'error');}
+      btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Convert to Images';
+    });
+    document.getElementById('p2i-clear').addEventListener('click',()=>{p2iFile=null;listEl.innerHTML='';optsEl.style.display='none';resultEl.className='result-box';input.value='';});
+  }
+  // Images -> PDF
+  {
+    let i2pFiles=[];
+    const dropEl=document.getElementById('i2p-drop'),input=document.getElementById('i2p-files'),listEl=document.getElementById('i2p-file-list'),optsEl=document.getElementById('i2p-options'),resultEl=document.getElementById('i2p-result');
+    function addImgs(files){files.forEach(f=>{i2pFiles.push(f);listEl.appendChild(renderFileItem(f,()=>{i2pFiles=i2pFiles.filter(x=>x!==f);if(!i2pFiles.length)optsEl.style.display='none';}));});optsEl.style.display=i2pFiles.length?'block':'none';}
+    setupDrop(dropEl,input,addImgs);
+    document.getElementById('i2p-run').addEventListener('click',async()=>{
+      if(!i2pFiles.length)return toast('Add images first','error');
+      const btn=document.getElementById('i2p-run');btn.disabled=true;btn.innerHTML='<span class="inline-spinner"></span>Building PDF\u2026';
+      try{
+        const{PDFDocument}=await loadPdfLib();const pdfDoc=await PDFDocument.create();
+        for(const file of i2pFiles){
+          const url=URL.createObjectURL(file);const img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=url;});
+          const canvas=document.createElement('canvas');canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;canvas.getContext('2d').drawImage(img,0,0);URL.revokeObjectURL(url);
+          const pngBlob=await new Promise(res=>canvas.toBlob(res,'image/png'));const pngBytes=await pngBlob.arrayBuffer();
+          const embedded=await pdfDoc.embedPng(pngBytes);const page=pdfDoc.addPage([embedded.width,embedded.height]);page.drawImage(embedded,{x:0,y:0,width:embedded.width,height:embedded.height});
+        }
+        const out=await pdfDoc.save();const name=document.getElementById('i2p-name').value||'images.pdf';triggerDownload(new Blob([out],{type:'application/pdf'}),name.endsWith('.pdf')?name:name+'.pdf');
+        Stats.inc(0);showResult(resultEl,'success',`Built PDF with ${i2pFiles.length} page${i2pFiles.length!==1?'s':''}.`);toast('PDF created!');
+      }catch(err){showResult(resultEl,'error','Error: '+err.message);toast(err.message,'error');}
+      btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Build PDF';
+    });
+    document.getElementById('i2p-clear').addEventListener('click',()=>{i2pFiles=[];listEl.innerHTML='';optsEl.style.display='none';resultEl.className='result-box';input.value='';});
+  }
 }
 
 // GLOBAL COPY BUTTONS

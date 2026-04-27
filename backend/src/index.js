@@ -6,10 +6,11 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
 import pool          from './db/index.js';
-import contactRouter from './routes/contact.js';
-import stripeRouter  from './routes/stripe.js';
-import licenseRouter from './routes/license.js';
-import userRouter    from './routes/user.js';
+import contactRouter  from './routes/contact.js';
+import stripeRouter   from './routes/stripe.js';
+import licenseRouter  from './routes/license.js';
+import userRouter     from './routes/user.js';
+import aiSplitRouter  from './routes/ai-split.js';
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -40,10 +41,11 @@ app.use(express.json());
 app.get('/health', (_req, res) => res.json({ ok: true, service: 'nyxprism-api' }));
 
 // ── Routes ────────────────────────────────────────────────────────────────
-app.use('/api/contact', contactRouter);
-app.use('/api/stripe',  stripeRouter);
-app.use('/api/license', licenseRouter);
-app.use('/api/user',    userRouter);
+app.use('/api/contact',   contactRouter);
+app.use('/api/stripe',    stripeRouter);
+app.use('/api/license',   licenseRouter);
+app.use('/api/user',      userRouter);
+app.use('/api/ai-split',  aiSplitRouter);
 
 // ── 404 catch-all ────────────────────────────────────────────────────────
 app.use((_req, res) => res.status(404).json({ error: 'Not found.' }));
