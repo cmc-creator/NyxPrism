@@ -52,6 +52,12 @@ app.use((_req, res) => res.status(404).json({ error: 'Not found.' }));
 
 // ── Startup ───────────────────────────────────────────────────────────────
 async function start() {
+  // Bind the port first so Railway's healthcheck can hit /health immediately.
+  await new Promise(resolve => app.listen(PORT, () => {
+    console.log(`✓ NyxPrism API listening on port ${PORT}`);
+    resolve();
+  }));
+
   // Apply schema (idempotent — uses IF NOT EXISTS)
   try {
     const __dir   = dirname(fileURLToPath(import.meta.url));
@@ -62,10 +68,6 @@ async function start() {
     console.error('✗ Schema migration error:', err.message);
     process.exit(1);
   }
-
-  app.listen(PORT, () => {
-    console.log(`✓ NyxPrism API listening on port ${PORT}`);
-  });
 }
 
 start();
