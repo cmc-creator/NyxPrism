@@ -4,7 +4,11 @@ import rateLimit from 'express-rate-limit';
 import pool from '../db/index.js';
 
 const router = express.Router();
-const resend = new Resend(process.env.RESEND_API_KEY);
+
+function getResend() {
+  if (!process.env.RESEND_API_KEY) throw new Error('RESEND_API_KEY is not configured.');
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
 // 5 submissions per IP per 15 minutes
 const limiter = rateLimit({
@@ -46,7 +50,7 @@ router.post('/', limiter, async (req, res) => {
       [safe.firstName, safe.lastName, safe.email, safe.subject, safe.message],
     );
 
-    await resend.emails.send({
+    await getResend().emails.send({
       from:    'NyxPrism Contact <noreply@nyxprism.com>',
       to:      process.env.CONTACT_EMAIL,
       replyTo: safe.email,

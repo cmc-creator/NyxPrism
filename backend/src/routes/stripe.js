@@ -4,7 +4,11 @@ import pool from '../db/index.js';
 import { requireAuth } from '../middleware/auth.js';
 
 const router = express.Router();
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+function getStripe() {
+  if (!process.env.STRIPE_SECRET_KEY) throw new Error('STRIPE_SECRET_KEY is not configured.');
+  return new Stripe(process.env.STRIPE_SECRET_KEY);
+}
 
 const PRICES = {
   monthly: process.env.STRIPE_PRICE_ID_MONTHLY,
@@ -21,6 +25,7 @@ router.post('/create-checkout', requireAuth, async (req, res) => {
   const { uid, email } = req.user;
 
   try {
+    const stripe = getStripe();
     // Upsert user row and retrieve stripe_customer_id
     let { rows } = await pool.query(
       'SELECT stripe_customer_id FROM users WHERE firebase_uid = $1',
@@ -69,6 +74,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
   let event;
 
   try {
+    const stripe = getStripe();
     event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
   } catch (err) {
     console.error('Webhook signature verification failed:', err.message);
