@@ -305,6 +305,10 @@
     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
     Account Settings
   </button>
+  <button class="nav-item" id="sidebar-signout-btn" style="color:var(--red);margin-top:.25rem">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    Sign Out
+  </button>
 </aside>
 
 <main class="main" id="main-content" style="display:none">
@@ -731,7 +735,9 @@ onAuthStateChanged(auth,async user=>{
   if(window.__checkoutSuccess){window.__checkoutSuccess=false;setTimeout(()=>toast('Subscription activated — welcome to NyxPrism Professional! 🎉','success'),400);}
 });
 
-document.getElementById('signout-btn').addEventListener('click',async()=>{await signOut(auth);window.location.replace('login.html');});
+const _doSignOut=async()=>{await signOut(auth);window.location.replace('login.html');};
+document.getElementById('signout-btn').addEventListener('click',_doSignOut);
+document.getElementById('sidebar-signout-btn').addEventListener('click',_doSignOut);
 
 async function startCheckout(plan,btn){
   const orig=btn.innerHTML;btn.disabled=true;btn.textContent='Redirecting…';
