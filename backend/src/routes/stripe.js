@@ -51,8 +51,8 @@ router.post('/create-checkout', requireAuth, async (req, res) => {
       customer:   customerId,
       mode:       'subscription',
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${process.env.FRONTEND_URL}/login.html?checkout=success`,
-      cancel_url:  `${process.env.FRONTEND_URL}/login.html?checkout=cancel`,
+      success_url: `${process.env.FRONTEND_URL}/dashboard.html?checkout=success`,
+      cancel_url:  `${process.env.FRONTEND_URL}/dashboard.html`,
       allow_promotion_codes: true,
       subscription_data: {
         trial_period_days: 14,
@@ -64,6 +64,31 @@ router.post('/create-checkout', requireAuth, async (req, res) => {
   } catch (err) {
     console.error('Checkout error:', err);
     res.status(500).json({ error: 'Failed to create checkout session.' });
+  }
+});
+
+// ── POST /api/stripe/create-portal ──────────────────────────────────────
+// Creates a Stripe Customer Portal session so the user can manage billing.
+router.post('/create-portal', requireAuth, async (req, res) => {
+  const { uid } = req.user;
+  try {
+    const stripe = getStripe();
+    const { rows } = await pool.query(
+      'SELECT stripe_customer_id FROM users WHERE firebase_uid = $1',
+      [uid],
+    );
+    const customerId = rows[0]?.stripe_customer_id;
+    if (!customerId) {
+      return res.status(400).json({ error: 'No billing account found. Please subscribe first.' });
+    }
+    const session = await stripe.billingPortal.sessions.create({
+      customer: customerId,
+      return_url: `${process.env.FRONTEND_URL}/dashboard.html`,
+    });
+    res.json({ url: session.url });
+  } catch (err) {
+    console.error('Portal error:', err);
+    res.status(500).json({ error: 'Failed to open billing portal.' });
   }
 });
 
