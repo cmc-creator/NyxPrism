@@ -911,6 +911,33 @@ async function loadPdfjsLib(){
     div.innerHTML='<span class="inline-spinner"></span>\u00a0Claude is thinking\u2026';
     msgsEl.appendChild(div);msgsEl.scrollTop=msgsEl.scrollHeight;return div;
   }
+  async function loadTesseract(){
+    if(window.Tesseract)return window.Tesseract;
+    return new Promise((resolve,reject)=>{
+      const s=document.createElement('script');
+      s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+      s.onload=()=>resolve(window.Tesseract);
+      s.onerror=()=>reject(new Error('Failed to load Tesseract.js'));
+      document.head.appendChild(s);
+    });
+  }
+  async function ocrPdf(pdf,typingEl){
+    const T=await loadTesseract();
+    const worker=await T.createWorker('eng');
+    let text='';
+    for(let i=1;i<=pdf.numPages;i++){
+      if(typingEl)typingEl.innerHTML=`<span class="inline-spinner"></span>\u00a0OCR scanning page ${i} of ${pdf.numPages}\u2026`;
+      const page=await pdf.getPage(i);
+      const viewport=page.getViewport({scale:2});
+      const canvas=document.createElement('canvas');
+      canvas.width=viewport.width;canvas.height=viewport.height;
+      await page.render({canvasContext:canvas.getContext('2d'),viewport}).promise;
+      const result=await worker.recognize(canvas);
+      text+=`--- Page ${i} ---\n${result.data.text}\n\n`;
+    }
+    await worker.terminate();
+    return text;
+  }
   function renderPlan(plan){
     aiPlan=plan;planList.innerHTML='';
     plan.forEach((item,idx)=>{
@@ -948,8 +975,19 @@ async function loadPdfjsLib(){
       const pdfjs=await loadPdfjsLib();const bytes=await file.arrayBuffer();const pdf=await pdfjs.getDocument({data:bytes}).promise;
       aiPageCount=pdf.numPages;let text='';
       for(let i=1;i<=pdf.numPages;i++){const page=await pdf.getPage(i);const c=await page.getTextContent();text+=`--- Page ${i} ---\n${c.items.map(it=>it.str).join(' ')}\n\n`;}
+      // Detect scanned PDF: if < 30 meaningful chars/page on average, run OCR
+      const meaningfulChars=text.replace(/--- Page \d+ ---\n/g,'').replace(/\s+/g,'').length;
+      if(meaningfulChars/pdf.numPages<30){
+        typing.innerHTML='<span class="inline-spinner"></span>\u00a0Scanned PDF detected \u2014 running OCR on page 1 of '+pdf.numPages+'\u2026';
+        try{
+          text=await ocrPdf(pdf,typing);
+        }catch(ocrErr){
+          // OCR failed — tell Claude it\'s a scanned doc so it can still help by page count
+          text=`This is a scanned PDF with ${pdf.numPages} pages. Text could not be extracted via OCR (${ocrErr.message}).`;
+        }
+      }
       aiPdfText=text;
-    }catch(err){typing.remove();addBubble('Could not read PDF text: '+err.message,'ai');return;}
+    }catch(err){typing.remove();addBubble('Could not read PDF: '+err.message,'ai');return;}
     typing.remove();
     // Synthetic first turn so Claude opens the conversation
     aiMessages=[{role:'user',content:'I just uploaded my PDF.'}];
