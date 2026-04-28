@@ -19,7 +19,14 @@ const PORT = process.env.PORT || 3000;
 app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
 
 // ── CORS ─────────────────────────────────────────────────────────────────
+// Always allow these regardless of env var:
+const HARDCODED_ORIGINS = [
+  'https://nyxprism.com',
+  'https://www.nyxprism.com',
+];
+
 const allowedOrigins = [
+  ...HARDCODED_ORIGINS,
   process.env.FRONTEND_URL,
   'http://localhost:5500',
   'http://127.0.0.1:5500',
@@ -29,13 +36,15 @@ app.use(cors({
   origin: (origin, cb) => {
     // Allow requests with no origin (e.g. curl, Postman, CLI)
     if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    // Also allow any *.nyxprism.com subdomain and *.vercel.app preview URLs
+    if (/\.nyxprism\.com$/.test(origin) || /\.vercel\.app$/.test(origin)) return cb(null, true);
     cb(new Error(`CORS: origin ${origin} not allowed`));
   },
-  methods: ['GET', 'POST'],
+  methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: '2mb' }));
 
 // ── Health check ─────────────────────────────────────────────────────────
 app.get('/health', (_req, res) => res.json({ ok: true, service: 'nyxprism-api' }));
