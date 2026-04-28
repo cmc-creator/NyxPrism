@@ -11,6 +11,7 @@ import stripeRouter   from './routes/stripe.js';
 import licenseRouter  from './routes/license.js';
 import userRouter     from './routes/user.js';
 import aiSplitRouter  from './routes/ai-split.js';
+import apiKeysRouter  from './routes/api-keys.js';
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -55,6 +56,7 @@ app.use('/api/stripe',    stripeRouter);
 app.use('/api/license',   licenseRouter);
 app.use('/api/user',      userRouter);
 app.use('/api/ai-split',  aiSplitRouter);
+app.use('/api/keys',      apiKeysRouter);
 
 // ── 404 catch-all ────────────────────────────────────────────────────────
 app.use((_req, res) => res.status(404).json({ error: 'Not found.' }));

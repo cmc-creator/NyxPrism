@@ -28,3 +28,13 @@ CREATE TABLE IF NOT EXISTS contact_messages (
   read       BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS api_keys (
+  id           SERIAL PRIMARY KEY,
+  user_id      INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  label        TEXT NOT NULL DEFAULT 'My API Key',
+  key_prefix   TEXT NOT NULL,
+  key_hash     TEXT NOT NULL UNIQUE,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  last_used_at TIMESTAMPTZ
+);
