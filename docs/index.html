@@ -427,6 +427,33 @@
     details[open] summary::after { content: '\2212'; color: var(--accent-bright); }
     details p { color: var(--muted); font-size: .9rem; margin-top: .85rem; line-height: 1.7; }
 
+    /* ── DEVELOPER API SECTION ───────────────────────────────────────── */
+    .dev-grid { display: grid; grid-template-columns: 1fr 1.1fr; gap: 4rem; align-items: start; }
+    @media (max-width: 860px) { .dev-grid { grid-template-columns: 1fr; } }
+    .dev-feature-list { list-style: none; margin: 1.5rem 0 2rem; display: flex; flex-direction: column; gap: .65rem; }
+    .dev-feature-list li { display: flex; align-items: flex-start; gap: .75rem; font-size: .92rem; color: var(--text2); line-height: 1.5; }
+    .dev-feature-list li::before { content: ''; display: block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent-bright); margin-top: .45rem; flex-shrink: 0; }
+    .code-window {
+      background: var(--code-bg); border: 1px solid var(--border); border-radius: var(--radius-lg);
+      overflow: hidden; font-family: 'JetBrains Mono', monospace; font-size: .765rem;
+      box-shadow: 0 32px 80px rgba(0,0,0,.5);
+    }
+    .cw-bar {
+      background: #0c1220; padding: .65rem 1.1rem;
+      display: flex; gap: .45rem; align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .cw-bar .tdot { width: 11px; height: 11px; border-radius: 50%; }
+    .cw-title { color: var(--muted2); font-size: .7rem; margin-left: .5rem; }
+    .cw-body { padding: 1.4rem 1.6rem; line-height: 2; }
+    .cw-comment { color: #2d4a5c; }
+    .cw-cmd    { color: var(--accent-bright); font-weight: 500; }
+    .cw-key    { color: #facc15; }
+    .cw-url    { color: #60a5fa; }
+    .cw-ok     { color: var(--green); }
+    .cw-str    { color: #a3e635; }
+    .cw-label  { color: var(--muted); }
+
     /* ── CTA BAND ─────────────────────────────────────────────────────── */
     .cta-band {
       background: linear-gradient(135deg, #120828 0%, #0e0520 50%, #0b0f18 100%);
@@ -802,6 +829,7 @@
     <a class="hide-md" href="#product">Product</a>
     <a class="hide-md" href="#features">Features</a>
     <a class="hide-md" href="#pricing">Pricing</a>
+    <a class="hide-md" href="#developers">API</a>
     <a class="hide-md" href="#faq">FAQ</a>
   </div>
   <div class="nav-sep"></div>
@@ -1357,6 +1385,58 @@
 
 <hr class="divider" />
 
+<!-- DEVELOPER API -->
+<section class="section" id="developers" style="padding-bottom:5.5rem">
+  <div class="s-eyebrow">For developers</div>
+  <h2 class="s-title">REST API</h2>
+  <p class="s-sub">Automate PDF workflows from your own code with the NyxPrism REST API — authenticated by the keys you generate in the dashboard.</p>
+  <div class="dev-grid" style="margin-top:3.5rem">
+    <div>
+      <h3 style="font-size:1.2rem;font-weight:700;letter-spacing:-.02em;margin-bottom:.5rem">Everything the dashboard can do, as an API</h3>
+      <p style="color:var(--text3);font-size:.95rem;line-height:1.7">Generate an API key from your dashboard, then call the same backend that powers the web app — with full subscription gating and per-key tracking.</p>
+      <ul class="dev-feature-list">
+        <li>Keys use the format <code>nyx_&lt;64 hex chars&gt;</code> — never exposed after generation</li>
+        <li>SHA-256 hashed at rest, never stored in plaintext</li>
+        <li>Each key tracks <em>last_used_at</em> so you can audit access</li>
+        <li>Subscription gating enforced on every request — inactive accounts are rejected</li>
+        <li>Up to 5 active keys per account — rotate freely</li>
+      </ul>
+      <a class="btn btn-primary" href="dashboard.html" style="display:inline-flex;align-items:center;gap:.55rem;text-decoration:none;padding:.75rem 1.5rem">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        Get your API key
+      </a>
+    </div>
+    <div>
+      <div class="code-window">
+        <div class="cw-bar">
+          <div class="tdot" style="background:#ff5f57"></div>
+          <div class="tdot" style="background:#febc2e"></div>
+          <div class="tdot" style="background:#28c840"></div>
+          <span class="cw-title">curl example</span>
+        </div>
+        <div class="cw-body">
+<span class="cw-comment"># 1. Generate a key in the dashboard, then:</span>
+<span class="cw-cmd">export</span> <span class="cw-key">NYX_KEY</span>=<span class="cw-str">nyx_your_key_here</span>
+
+<span class="cw-comment"># 2. Call any API endpoint</span>
+<span class="cw-cmd">curl</span> <span class="cw-url">https://nyxprism-production.up.railway.app/api/user/me</span> \
+  -H <span class="cw-str">"Authorization: Bearer $NYX_KEY"</span>
+
+<span class="cw-comment"># Response</span>
+<span class="cw-ok">{</span>
+  <span class="cw-label">"email"</span>:  <span class="cw-str">"you@example.com"</span>,
+  <span class="cw-label">"plan"</span>:   <span class="cw-str">"pro"</span>,
+  <span class="cw-label">"status"</span>: <span class="cw-str">"active"</span>
+<span class="cw-ok">}</span>
+        </div>
+      </div>
+      <p style="font-size:.78rem;color:var(--muted);margin-top:.9rem;line-height:1.6">Base URL: <code>https://nyxprism-production.up.railway.app</code><br/>Authentication: <code>Authorization: Bearer nyx_...</code></p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
 <!-- CTA BAND -->
 <section class="cta-band">
   <h2>The PDF Toolkit<br>Your Workflow Deserves.</h2>
@@ -1385,8 +1465,9 @@
     </div>
     <div class="footer-col">
       <h4>Developers</h4>
+      <a href="#developers">REST API</a>
+      <a href="dashboard.html">API Keys</a>
       <a href="https://pypi.org/project/nyxprism/" target="_blank" rel="noopener">PyPI</a>
-      <a href="https://pypi.org/project/nyxprism/" target="_blank" rel="noopener">Documentation</a>
       <a href="contact.html">Report a Bug</a>
     </div>
     <div class="footer-col">

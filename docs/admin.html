@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NyxPrism Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;0,14..32,900;1,14..32,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:            #06080d;
+      --bg2:           #0b0f18;
+      --surface:       #0f1724;
+      --surface2:      #141e2e;
+      --border:        #1b2840;
+      --border2:       #253548;
+      --accent:        #7c3aed;
+      --accent-bright: #a78bfa;
+      --accent-glow:   rgba(124,58,237,.14);
+      --muted:         #5a7194;
+      --muted2:        #3a4f6a;
+      --text:          #e8edf5;
+      --text2:         #bbc8da;
+      --text3:         #7f96b2;
+      --green:         #22c55e;
+      --red:           #f87171;
+      --yellow:        #facc15;
+      --blue:          #60a5fa;
+      --radius:        .55rem;
+      --radius-sm:     .35rem;
+      --radius-lg:     1rem;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { color-scheme: dark; }
+    body {
+      font-family: Inter, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── LOCK SCREEN ─────────────────────────────────────────────── */
+    #lock-screen {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .lock-card {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem 2.25rem;
+      width: 100%;
+      max-width: 380px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+    .lock-title { font-size: 1.25rem; font-weight: 700; }
+    .lock-sub   { font-size: .875rem; color: var(--text3); }
+    .lock-input {
+      width: 100%;
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .875rem;
+      padding: .65rem .85rem;
+      outline: none;
+    }
+    .lock-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    .lock-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: .875rem;
+      font-weight: 600;
+      padding: .7rem 1.5rem;
+      cursor: pointer;
+      width: 100%;
+    }
+    .lock-btn:hover { background: #6d28d9; }
+    .lock-error { font-size: .8rem; color: var(--red); display: none; }
+
+    /* ── ADMIN SHELL ─────────────────────────────────────────────── */
+    #admin-shell { display: none; flex: 1; flex-direction: column; }
+    header.admin-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: .85rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .admin-wordmark { font-size: 1.05rem; font-weight: 800; letter-spacing: -.01em; }
+    .admin-wordmark em { font-style: normal; color: var(--accent-bright); }
+    .admin-badge { font-size: .7rem; background: rgba(124,58,237,.18); color: var(--accent-bright); border-radius: 999px; padding: .2rem .65rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+    .admin-logout { background: none; border: 1px solid var(--border2); color: var(--text3); border-radius: var(--radius-sm); font-size: .8rem; padding: .35rem .85rem; cursor: pointer; }
+    .admin-logout:hover { color: var(--text); border-color: var(--border3); }
+
+    .admin-body { flex: 1; padding: 2rem; max-width: 1200px; margin: 0 auto; width: 100%; }
+
+    /* ── TABS ────────────────────────────────────────────────────── */
+    .tab-row { display: flex; gap: .5rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0; }
+    .tab { background: none; border: none; color: var(--text3); font-size: .875rem; font-weight: 600; padding: .6rem 1rem; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+    .tab.active { color: var(--accent-bright); border-bottom-color: var(--accent-bright); }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    /* ── STAT CARDS ──────────────────────────────────────────────── */
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; }
+    .stat-label { font-size: .72rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: .4rem; }
+    .stat-value { font-size: 2rem; font-weight: 800; line-height: 1; }
+    .stat-value.green { color: var(--green); }
+    .stat-value.accent { color: var(--accent-bright); }
+    .stat-value.blue { color: var(--blue); }
+    .stat-value.yellow { color: var(--yellow); }
+
+    /* ── PLAN BREAKDOWN ──────────────────────────────────────────── */
+    .plan-list { display: flex; flex-wrap: wrap; gap: .75rem; margin-bottom: 2rem; }
+    .plan-pill {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 999px;
+      padding: .4rem 1rem;
+      font-size: .875rem;
+    }
+    .plan-pill .pill-name { font-weight: 600; text-transform: capitalize; }
+    .plan-pill .pill-count { color: var(--accent-bright); font-weight: 700; }
+
+    /* ── TABLES ──────────────────────────────────────────────────── */
+    .tbl-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: .84rem; }
+    th { text-align: left; color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .07em; padding: .6rem .75rem; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    td { padding: .65rem .75rem; border-bottom: 1px solid var(--border); color: var(--text2); vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--surface); }
+    .badge {
+      display: inline-block;
+      font-size: .7rem;
+      font-weight: 700;
+      padding: .15rem .55rem;
+      border-radius: 999px;
+      text-transform: capitalize;
+    }
+    .badge-active   { background: rgba(34,197,94,.12);  color: var(--green); }
+    .badge-trial    { background: rgba(96,165,250,.12);  color: var(--blue); }
+    .badge-inactive { background: rgba(248,113,113,.12); color: var(--red); }
+    .badge-pro      { background: var(--accent-glow);    color: var(--accent-bright); }
+    .badge-free     { background: rgba(90,113,148,.12);  color: var(--muted); }
+
+    /* ── PAGINATION ──────────────────────────────────────────────── */
+    .pager { display: flex; align-items: center; gap: 1rem; margin-top: 1.5rem; }
+    .pager-btn { background: var(--surface2); border: 1px solid var(--border2); color: var(--text2); border-radius: var(--radius-sm); font-size: .8rem; padding: .45rem .9rem; cursor: pointer; }
+    .pager-btn:disabled { opacity: .35; cursor: default; }
+    .pager-btn:not(:disabled):hover { border-color: var(--border3); color: var(--text); }
+    .pager-info { font-size: .8rem; color: var(--muted); }
+
+    /* ── LOADING / ERROR ─────────────────────────────────────────── */
+    .loading { color: var(--muted); font-size: .875rem; padding: 2rem 0; }
+    .err-msg  { color: var(--red); font-size: .875rem; padding: 1rem 0; }
+
+    /* ── MESSAGE CARD ────────────────────────────────────────────── */
+    .msg-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+    .msg-meta { display: flex; align-items: center; gap: .75rem; margin-bottom: .75rem; flex-wrap: wrap; }
+    .msg-name  { font-weight: 600; font-size: .9rem; }
+    .msg-email { font-size: .8rem; color: var(--text3); }
+    .msg-date  { font-size: .75rem; color: var(--muted); margin-left: auto; }
+    .msg-subject { font-size: .875rem; font-weight: 600; margin-bottom: .5rem; color: var(--text); }
+    .msg-body  { font-size: .84rem; color: var(--text2); line-height: 1.65; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+
+<!-- ── LOCK SCREEN ───────────────────────────────────────────────────── -->
+<div id="lock-screen">
+  <div class="lock-card">
+    <div>
+      <div class="lock-title"><em style="font-style:normal;color:#a78bfa">Nyx</em>Prism Admin</div>
+      <div class="lock-sub" style="margin-top:.4rem">Enter your admin secret to continue.</div>
+    </div>
+    <input class="lock-input" type="password" id="secret-input" placeholder="Admin secret" autocomplete="off" />
+    <button class="lock-btn" id="unlock-btn">Unlock</button>
+    <div class="lock-error" id="lock-error">Incorrect secret — check the ADMIN_SECRET env var.</div>
+  </div>
+</div>
+
+<!-- ── ADMIN SHELL ───────────────────────────────────────────────────── -->
+<div id="admin-shell">
+  <header class="admin-header">
+    <div style="display:flex;align-items:center;gap:.75rem">
+      <div class="admin-wordmark"><em>Nyx</em>Prism</div>
+      <div class="admin-badge">Admin</div>
+    </div>
+    <button class="admin-logout" id="logout-btn">Log Out</button>
+  </header>
+
+  <div class="admin-body">
+    <div class="tab-row">
+      <button class="tab active" data-tab="overview">Overview</button>
+      <button class="tab" data-tab="users">Users</button>
+      <button class="tab" data-tab="messages">Messages</button>
+    </div>
+
+    <!-- Overview tab -->
+    <div class="tab-pane active" id="tab-overview">
+      <div class="stat-grid" id="stat-grid">
+        <div class="loading">Loading stats…</div>
+      </div>
+      <div id="plan-breakdown"></div>
+    </div>
+
+    <!-- Users tab -->
+    <div class="tab-pane" id="tab-users">
+      <div class="tbl-wrap">
+        <table id="users-table">
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Name</th>
+              <th>Plan</th>
+              <th>Status</th>
+              <th>Trial</th>
+              <th>Period End</th>
+              <th>Joined</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody"><tr><td colspan="7" class="loading">Loading…</td></tr></tbody>
+        </table>
+      </div>
+      <div class="pager" id="users-pager" style="display:none">
+        <button class="pager-btn" id="users-prev" disabled>← Prev</button>
+        <span class="pager-info" id="users-info"></span>
+        <button class="pager-btn" id="users-next">Next →</button>
+      </div>
+    </div>
+
+    <!-- Messages tab -->
+    <div class="tab-pane" id="tab-messages">
+      <div id="messages-list"><div class="loading">Loading…</div></div>
+      <div class="pager" id="messages-pager" style="display:none">
+        <button class="pager-btn" id="msgs-prev" disabled>← Prev</button>
+        <span class="pager-info" id="msgs-info"></span>
+        <button class="pager-btn" id="msgs-next">Next →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'https://nyxprism-production.up.railway.app';
+let adminSecret = '';
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+async function apiFetch(path, opts = {}) {
+  const res = await fetch(`${API}${path}`, {
+    ...opts,
+    headers: { 'x-admin-secret': adminSecret, 'Content-Type': 'application/json', ...(opts.headers || {}) },
+  });
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+  return res.json();
+}
+
+function fmt(dateStr) {
+  if (!dateStr) return '—';
+  return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+function planBadge(plan) {
+  const cls = { pro: 'badge-pro', trial: 'badge-trial', free: 'badge-free', inactive: 'badge-inactive' }[plan] || 'badge-free';
+  return `<span class="badge ${cls}">${plan || 'free'}</span>`;
+}
+
+function statusBadge(status) {
+  const cls = { active: 'badge-active', trialing: 'badge-trial', canceled: 'badge-inactive', past_due: 'badge-inactive', inactive: 'badge-inactive' }[status] || 'badge-inactive';
+  return `<span class="badge ${cls}">${status || 'inactive'}</span>`;
+}
+
+// ── Lock screen ───────────────────────────────────────────────────────────
+document.getElementById('unlock-btn').addEventListener('click', tryUnlock);
+document.getElementById('secret-input').addEventListener('keydown', e => { if (e.key === 'Enter') tryUnlock(); });
+
+async function tryUnlock() {
+  const secret = document.getElementById('secret-input').value.trim();
+  if (!secret) return;
+  adminSecret = secret;
+  try {
+    await apiFetch('/api/admin/stats');
+    document.getElementById('lock-screen').style.display = 'none';
+    document.getElementById('admin-shell').style.display = 'flex';
+    loadOverview();
+  } catch {
+    document.getElementById('lock-error').style.display = 'block';
+    adminSecret = '';
+  }
+}
+
+document.getElementById('logout-btn').addEventListener('click', () => {
+  adminSecret = '';
+  document.getElementById('admin-shell').style.display = 'none';
+  document.getElementById('lock-screen').style.display = 'flex';
+  document.getElementById('secret-input').value = '';
+});
+
+// ── Tabs ──────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+    if (btn.dataset.tab === 'users') loadUsers(1);
+    if (btn.dataset.tab === 'messages') loadMessages(1);
+  });
+});
+
+// ── Overview ──────────────────────────────────────────────────────────────
+async function loadOverview() {
+  try {
+    const data = await apiFetch('/api/admin/stats');
+    const grid = document.getElementById('stat-grid');
+    grid.innerHTML = `
+      <div class="stat-card"><div class="stat-label">Total Users</div><div class="stat-value accent">${data.totalUsers}</div></div>
+      <div class="stat-card"><div class="stat-label">API Keys</div><div class="stat-value blue">${data.totalApiKeys}</div></div>
+      <div class="stat-card"><div class="stat-label">Contact Messages</div><div class="stat-value yellow">${data.totalMessages}</div></div>
+    `;
+    const bp = document.getElementById('plan-breakdown');
+    bp.innerHTML = `<div style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.75rem">Plan Breakdown</div>
+      <div class="plan-list">${data.plans.map(p => `<div class="plan-pill"><span class="pill-name">${p.plan}</span><span class="pill-count">${p.count}</span></div>`).join('')}</div>`;
+  } catch (err) {
+    document.getElementById('stat-grid').innerHTML = `<p class="err-msg">Failed to load stats: ${err.message}</p>`;
+  }
+}
+
+// ── Users ─────────────────────────────────────────────────────────────────
+let usersPage = 1;
+let userTotal = 0;
+const USERS_LIMIT = 50;
+
+async function loadUsers(page) {
+  usersPage = page;
+  document.getElementById('users-tbody').innerHTML = '<tr><td colspan="7" class="loading">Loading…</td></tr>';
+  try {
+    const data = await apiFetch(`/api/admin/users?page=${page}&limit=${USERS_LIMIT}`);
+    userTotal = data.total;
+    document.getElementById('users-tbody').innerHTML = data.users.map(u => `
+      <tr>
+        <td>${u.email}</td>
+        <td>${[u.first_name, u.last_name].filter(Boolean).join(' ') || '—'}</td>
+        <td>${planBadge(u.plan)}</td>
+        <td>${statusBadge(u.subscription_status)}</td>
+        <td>${u.trial_active ? '<span class="badge badge-trial">Active</span>' : '—'}</td>
+        <td>${fmt(u.current_period_end)}</td>
+        <td>${fmt(u.created_at)}</td>
+      </tr>
+    `).join('') || '<tr><td colspan="7" style="color:var(--muted)">No users yet.</td></tr>';
+
+    const pager = document.getElementById('users-pager');
+    pager.style.display = 'flex';
+    document.getElementById('users-prev').disabled = page <= 1;
+    document.getElementById('users-next').disabled = page * USERS_LIMIT >= userTotal;
+    document.getElementById('users-info').textContent = `Showing ${(page-1)*USERS_LIMIT+1}–${Math.min(page*USERS_LIMIT, userTotal)} of ${userTotal}`;
+  } catch (err) {
+    document.getElementById('users-tbody').innerHTML = `<tr><td colspan="7" class="err-msg">Error: ${err.message}</td></tr>`;
+  }
+}
+
+document.getElementById('users-prev').addEventListener('click', () => loadUsers(usersPage - 1));
+document.getElementById('users-next').addEventListener('click', () => loadUsers(usersPage + 1));
+
+// ── Messages ──────────────────────────────────────────────────────────────
+let msgsPage = 1;
+let msgsTotal = 0;
+const MSGS_LIMIT = 20;
+
+async function loadMessages(page) {
+  msgsPage = page;
+  document.getElementById('messages-list').innerHTML = '<div class="loading">Loading…</div>';
+  try {
+    const data = await apiFetch(`/api/admin/messages?page=${page}&limit=${MSGS_LIMIT}`);
+    msgsTotal = data.total;
+    if (!data.messages.length) {
+      document.getElementById('messages-list').innerHTML = '<p style="color:var(--muted);font-size:.875rem">No messages yet.</p>';
+      document.getElementById('messages-pager').style.display = 'none';
+      return;
+    }
+    document.getElementById('messages-list').innerHTML = data.messages.map(m => `
+      <div class="msg-card">
+        <div class="msg-meta">
+          <span class="msg-name">${escHtml(m.name || '')}</span>
+          <span class="msg-email">${escHtml(m.email || '')}</span>
+          <span class="msg-date">${fmt(m.created_at)}</span>
+        </div>
+        ${m.subject ? `<div class="msg-subject">${escHtml(m.subject)}</div>` : ''}
+        <div class="msg-body">${escHtml(m.message || '')}</div>
+      </div>
+    `).join('');
+
+    const pager = document.getElementById('messages-pager');
+    pager.style.display = 'flex';
+    document.getElementById('msgs-prev').disabled = page <= 1;
+    document.getElementById('msgs-next').disabled = page * MSGS_LIMIT >= msgsTotal;
+    document.getElementById('msgs-info').textContent = `Showing ${(page-1)*MSGS_LIMIT+1}–${Math.min(page*MSGS_LIMIT, msgsTotal)} of ${msgsTotal}`;
+  } catch (err) {
+    document.getElementById('messages-list').innerHTML = `<p class="err-msg">Error: ${err.message}</p>`;
+  }
+}
+
+document.getElementById('msgs-prev').addEventListener('click', () => loadMessages(msgsPage - 1));
+document.getElementById('msgs-next').addEventListener('click', () => loadMessages(msgsPage + 1));
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

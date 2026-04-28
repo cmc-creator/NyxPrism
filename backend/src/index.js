@@ -4,6 +4,7 @@ import cors from 'cors';
 import { readFile } from 'fs/promises';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import rateLimit from 'express-rate-limit';
 
 import pool          from './db/index.js';
 import contactRouter  from './routes/contact.js';
@@ -12,6 +13,7 @@ import licenseRouter  from './routes/license.js';
 import userRouter     from './routes/user.js';
 import aiSplitRouter  from './routes/ai-split.js';
 import apiKeysRouter  from './routes/api-keys.js';
+import adminRouter    from './routes/admin.js';
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -47,6 +49,36 @@ app.use(cors({
 
 app.use(express.json({ limit: '2mb' }));
 
+// ── Rate limiting ─────────────────────────────────────────────────────────
+// General API — 300 requests per 15 minutes per IP
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests. Please slow down.' },
+});
+
+// AI split — expensive Claude calls; 20 per hour per IP
+const aiSplitLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'AI rate limit exceeded. Try again in an hour.' },
+});
+
+// API key creation — 10 per hour per IP
+const keyCreateLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many API key creation requests. Try again later.' },
+});
+
+app.use('/api', generalLimiter);
+
 // ── Health check ─────────────────────────────────────────────────────────
 app.get('/health', (_req, res) => res.json({ ok: true, service: 'nyxprism-api' }));
 
@@ -55,8 +87,10 @@ app.use('/api/contact',   contactRouter);
 app.use('/api/stripe',    stripeRouter);
 app.use('/api/license',   licenseRouter);
 app.use('/api/user',      userRouter);
-app.use('/api/ai-split',  aiSplitRouter);
+app.use('/api/ai-split',  aiSplitLimiter, aiSplitRouter);
+app.post('/api/keys',     keyCreateLimiter);
 app.use('/api/keys',      apiKeysRouter);
+app.use('/api/admin',     adminRouter);
 
 // ── 404 catch-all ────────────────────────────────────────────────────────
 app.use((_req, res) => res.status(404).json({ error: 'Not found.' }));
