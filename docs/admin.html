@@ -1,478 +1,349 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NyxPrism Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;0,14..32,900;1,14..32,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
   <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg:#06080d;--bg2:#0b0f18;--surface:#0f1724;--surface2:#141e2e;
-      --border:#1b2840;--border2:#253548;--border3:#2d4060;
-      --accent:#7c3aed;--accent2:#6d28d9;--accent-bright:#a78bfa;--accent-glow:rgba(124,58,237,.14);
-      --muted:#5a7194;--muted2:#3a4f6a;--text:#e8edf5;--text2:#bbc8da;--text3:#7f96b2;
-      --green:#22c55e;--red:#f87171;--yellow:#facc15;--blue:#60a5fa;
-      --radius:.55rem;--radius-sm:.35rem;--radius-lg:1rem;--sidebar-w:220px;
+      --bg:           #06080d;
+      --surface:      #0d1117;
+      --border:       #1e2432;
+      --text:         #e8eaf0;
+      --text2:        #8b92a8;
+      --muted:        #555e78;
+      --accent:       #7c3aed;
+      --accent-bright:#a78bfa;
+      --accent-glow:  rgba(124,58,237,.15);
+      --green:        #22c55e;
+      --red:          #f87171;
+      --blue:         #60a5fa;
+      --yellow:       #fbbf24;
     }
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    html{color-scheme:dark}
-    body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; }
 
-    /* AUTH SCREENS */
-    .auth-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:1rem}
-    .auth-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:2.5rem 2.25rem;width:100%;max-width:380px;display:flex;flex-direction:column;gap:1.1rem}
-    .auth-title{font-size:1.2rem;font-weight:700}
-    .auth-sub{font-size:.84rem;color:var(--text3)}
-    .field label{display:block;font-size:.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.35rem}
-    .field input{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-size:.875rem;padding:.65rem .85rem;outline:none;font-family:inherit}
-    .field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
-    .btn-primary{background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-size:.875rem;font-weight:600;padding:.7rem 1.5rem;cursor:pointer;width:100%}
-    .btn-primary:hover{background:var(--accent2)}
-    .btn-primary:disabled{opacity:.5;cursor:default}
-    .auth-err{font-size:.8rem;color:var(--red);display:none}
-    .auth-link{font-size:.8rem;color:var(--text3);text-align:center}
-    .auth-link button{background:none;border:none;color:var(--accent-bright);cursor:pointer;font-size:.8rem;text-decoration:underline}
+    /* ── LOCK SCREEN ─────────────────────────────────────────────── */
+    #lock-screen {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh;
+    }
+    .lock-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem 2rem;
+      width: 100%; max-width: 360px;
+      display: flex; flex-direction: column; gap: 1.25rem;
+    }
+    .lock-logo { display: flex; align-items: center; gap: .6rem; font-weight: 700; font-size: 1.1rem; }
+    .lock-logo span { color: var(--accent-bright); }
+    .lock-title { font-size: 1.3rem; font-weight: 700; }
+    .lock-sub { color: var(--text2); font-size: .88rem; }
+    .field label { display: block; font-size: .8rem; font-weight: 600; color: var(--text2); margin-bottom: .4rem; text-transform: uppercase; letter-spacing: .05em; }
+    .field input {
+      width: 100%; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: .65rem .85rem; color: var(--text);
+      font-family: 'JetBrains Mono', monospace; font-size: .9rem; outline: none;
+    }
+    .field input:focus { border-color: var(--accent); }
+    .btn-primary {
+      width: 100%; background: var(--accent); color: #fff; border: none;
+      border-radius: 8px; padding: .75rem; font-size: .95rem; font-weight: 600;
+      cursor: pointer; transition: opacity .15s;
+    }
+    .btn-primary:hover { opacity: .85; }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+    .err-msg { color: var(--red); font-size: .85rem; display: none; }
 
-    /* ADMIN SHELL */
-    #admin-shell{display:none;flex:1}
-    .admin-layout{display:flex;min-height:100vh}
+    /* ── ADMIN SHELL ─────────────────────────────────────────────── */
+    #admin-shell { display: none; }
+    .layout { display: flex; min-height: 100vh; }
+    .sidebar {
+      width: 220px; flex-shrink: 0; background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; padding: 1.5rem 0;
+    }
+    .sidebar-logo { padding: 0 1.25rem 1.5rem; font-weight: 700; font-size: 1rem; color: var(--accent-bright); }
+    .nav-item {
+      display: block; width: 100%; background: none; border: none; text-align: left;
+      padding: .65rem 1.25rem; color: var(--text2); font-size: .9rem; cursor: pointer;
+      transition: background .15s, color .15s; border-radius: 0;
+    }
+    .nav-item:hover { background: var(--accent-glow); color: var(--text); }
+    .nav-item.active { color: var(--accent-bright); background: var(--accent-glow); font-weight: 600; }
+    .sidebar-footer { margin-top: auto; padding: 1rem 1.25rem; }
+    .btn-logout {
+      width: 100%; background: transparent; border: 1px solid var(--border);
+      color: var(--text2); border-radius: 8px; padding: .55rem; font-size: .85rem;
+      cursor: pointer;
+    }
+    .btn-logout:hover { border-color: var(--red); color: var(--red); }
+    .main { flex: 1; padding: 2rem; overflow-y: auto; }
+    .page-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 1.5rem; }
 
-    /* SIDEBAR */
-    .admin-sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
-    .sidebar-brand{padding:1.4rem 1.25rem 1rem;border-bottom:1px solid var(--border)}
-    .sidebar-wordmark{font-size:1rem;font-weight:800;letter-spacing:-.015em}
-    .sidebar-wordmark em{font-style:normal;color:var(--accent-bright)}
-    .sidebar-badge{display:inline-block;margin-top:.35rem;font-size:.65rem;background:var(--accent-glow);color:var(--accent-bright);border-radius:999px;padding:.15rem .55rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase}
-    .sidebar-nav{flex:1;padding:1rem 0}
-    .nav-section-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted2);padding:.5rem 1.25rem .3rem;margin-top:.25rem}
-    .nav-item{display:flex;align-items:center;gap:.7rem;padding:.6rem 1.25rem;font-size:.875rem;font-weight:500;color:var(--text3);cursor:pointer;border-left:2px solid transparent;transition:color .15s,background .15s,border-color .15s;user-select:none}
-    .nav-item:hover{color:var(--text2);background:rgba(255,255,255,.03)}
-    .nav-item.active{color:var(--accent-bright);border-left-color:var(--accent-bright);background:var(--accent-glow)}
-    .nav-item svg{width:15px;height:15px;flex-shrink:0;opacity:.8}
-    .nav-item.active svg{opacity:1}
-    .sidebar-footer{padding:1rem 1.25rem;border-top:1px solid var(--border)}
-    .sidebar-user{font-size:.78rem;color:var(--text3);margin-bottom:.6rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .sidebar-logout{width:100%;background:none;border:1px solid var(--border2);color:var(--text3);border-radius:var(--radius-sm);font-size:.8rem;padding:.5rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem}
-    .sidebar-logout:hover{color:var(--text);border-color:var(--border3)}
+    /* ── TABS ────────────────────────────────────────────────────── */
+    .tabs { display: flex; gap: .5rem; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
+    .tab {
+      background: none; border: none; color: var(--text2); font-size: .9rem;
+      padding: .6rem 1rem .7rem; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--accent-bright); border-bottom-color: var(--accent-bright); font-weight: 600; }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
 
-    /* MAIN */
-    .admin-main{flex:1;display:flex;flex-direction:column;min-width:0}
-    .admin-topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:.9rem 2rem;display:flex;align-items:center;justify-content:space-between}
-    .topbar-title{font-size:1.05rem;font-weight:700}
-    .topbar-sub{font-size:.78rem;color:var(--muted);margin-top:.1rem}
-    .admin-body{flex:1;padding:2rem}
+    /* ── STAT CARDS ──────────────────────────────────────────────── */
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+    .stat-label { font-size: .78rem; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; margin-bottom: .4rem; }
+    .stat-value { font-size: 2rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+    .stat-value.accent { color: var(--accent-bright); }
+    .stat-value.blue   { color: var(--blue); }
+    .stat-value.yellow { color: var(--yellow); }
+    .plan-breakdown { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+    .plan-list { display: flex; flex-direction: column; gap: .5rem; }
+    .plan-pill { display: flex; justify-content: space-between; align-items: center; }
+    .pill-name { color: var(--text2); font-size: .88rem; text-transform: capitalize; }
+    .pill-count { color: var(--accent-bright); font-weight: 700; }
 
-    /* STAT CARDS */
-    .stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem;margin-bottom:2rem}
-    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem}
-    .stat-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.4rem}
-    .stat-value{font-size:2rem;font-weight:800;line-height:1}
-    .stat-value.accent{color:var(--accent-bright)}
-    .stat-value.blue{color:var(--blue)}
-    .stat-value.yellow{color:var(--yellow)}
-
-    /* PLAN PILLS */
-    .plan-list{display:flex;flex-wrap:wrap;gap:.75rem;margin-bottom:2rem}
-    .plan-pill{display:flex;align-items:center;gap:.6rem;background:var(--surface2);border:1px solid var(--border2);border-radius:999px;padding:.4rem 1rem;font-size:.875rem}
-    .plan-pill .pill-name{font-weight:600;text-transform:capitalize}
-    .plan-pill .pill-count{color:var(--accent-bright);font-weight:700}
-
-    /* TABLE */
-    .tbl-wrap{overflow-x:auto}
-    table{width:100%;border-collapse:collapse;font-size:.84rem}
-    th{text-align:left;color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;padding:.6rem .75rem;border-bottom:1px solid var(--border);white-space:nowrap}
-    td{padding:.65rem .75rem;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:top}
-    tr:last-child td{border-bottom:none}
-    tr:hover td{background:rgba(255,255,255,.02)}
-    .badge{display:inline-block;font-size:.7rem;font-weight:700;padding:.15rem .55rem;border-radius:999px;text-transform:capitalize}
-    .badge-active{background:rgba(34,197,94,.12);color:var(--green)}
-    .badge-trial{background:rgba(96,165,250,.12);color:var(--blue)}
-    .badge-inactive{background:rgba(248,113,113,.12);color:var(--red)}
-    .badge-pro{background:var(--accent-glow);color:var(--accent-bright)}
-    .badge-free{background:rgba(90,113,148,.12);color:var(--muted)}
-    .badge-admin{background:rgba(250,204,21,.12);color:var(--yellow)}
-
-    /* PAGINATION */
-    .pager{display:flex;align-items:center;gap:1rem;margin-top:1.5rem}
-    .pager-btn{background:var(--surface2);border:1px solid var(--border2);color:var(--text2);border-radius:var(--radius-sm);font-size:.8rem;padding:.45rem .9rem;cursor:pointer}
-    .pager-btn:disabled{opacity:.35;cursor:default}
-    .pager-btn:not(:disabled):hover{border-color:var(--border3);color:var(--text)}
-    .pager-info{font-size:.8rem;color:var(--muted)}
-
-    /* MISC */
-    .loading{color:var(--muted);font-size:.875rem;padding:2rem 0}
-    .err-msg{color:var(--red);font-size:.875rem;padding:1rem 0}
-
-    /* MESSAGE CARDS */
-    .msg-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:.85rem}
-    .msg-meta{display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem;flex-wrap:wrap}
-    .msg-name{font-weight:600;font-size:.9rem}
-    .msg-email{font-size:.8rem;color:var(--text3)}
-    .msg-date{font-size:.75rem;color:var(--muted);margin-left:auto}
-    .msg-subject{font-size:.875rem;font-weight:600;margin-bottom:.5rem;color:var(--text)}
-    .msg-body{font-size:.84rem;color:var(--text2);line-height:1.65;white-space:pre-wrap}
-
-    /* PANELS */
-    .panel{display:none}
-    .panel.active{display:block}
-
-    @media(max-width:640px){.admin-sidebar{display:none}.admin-body{padding:1rem}}
+    /* ── TABLES ──────────────────────────────────────────────────── */
+    .tbl-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: .84rem; }
+    th { text-align: left; color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .07em; padding: .6rem .75rem; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    td { padding: .65rem .75rem; border-bottom: 1px solid var(--border); color: var(--text2); vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--surface); }
+    .badge { display: inline-block; font-size: .7rem; font-weight: 700; padding: .15rem .55rem; border-radius: 999px; text-transform: capitalize; }
+    .badge-active   { background: rgba(34,197,94,.12);  color: var(--green); }
+    .badge-trial    { background: rgba(96,165,250,.12);  color: var(--blue); }
+    .badge-inactive { background: rgba(248,113,113,.12); color: var(--red); }
+    .badge-pro      { background: var(--accent-glow);    color: var(--accent-bright); }
+    .pagination { display: flex; gap: .5rem; align-items: center; margin-top: 1rem; font-size: .85rem; color: var(--text2); }
+    .pagination button { background: var(--surface); border: 1px solid var(--border); color: var(--text2); border-radius: 6px; padding: .3rem .75rem; cursor: pointer; font-size: .82rem; }
+    .pagination button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent-bright); }
+    .pagination button:disabled { opacity: .35; cursor: not-allowed; }
+    .msg-body { max-width: 400px; white-space: pre-wrap; word-break: break-word; }
+    .unread { color: var(--text); font-weight: 600; }
   </style>
 </head>
 <body>
 
-<!-- ΓöÇΓöÇ SIGN IN SCREEN ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ -->
-<div id="screen-login" class="auth-wrap">
-  <div class="auth-card">
+<!-- ── LOCK SCREEN ─────────────────────────────────────────────────────── -->
+<div id="lock-screen">
+  <div class="lock-card">
+    <div class="lock-logo">&#x25E6;&nbsp;<span>NyxPrism</span> Admin</div>
     <div>
-      <div class="auth-title"><em style="font-style:normal;color:#a78bfa">Nyx</em>Prism Admin</div>
-      <div class="auth-sub" style="margin-top:.35rem">Sign in with your NyxPrism account.</div>
+      <div class="lock-title">Sign in</div>
+      <div class="lock-sub" style="margin-top:.35rem">Enter your admin secret to continue.</div>
     </div>
-    <div class="field"><label>Email</label><input type="email" id="login-email" autocomplete="email" /></div>
-    <div class="field"><label>Password</label><input type="password" id="login-pass" autocomplete="current-password" /></div>
-    <button class="btn-primary" id="login-btn">Sign In</button>
-    <div class="auth-err" id="login-err"></div>
-    <div class="auth-link">Not an admin yet? <button id="go-claim">Activate admin access</button></div>
+    <div class="field">
+      <label>Admin Secret</label>
+      <input type="password" id="secret-input" autocomplete="current-password" placeholder="••••••••••••" />
+    </div>
+    <button class="btn-primary" id="login-btn">Sign in</button>
+    <div class="err-msg" id="login-err"></div>
   </div>
 </div>
 
-<!-- ΓöÇΓöÇ CLAIM ADMIN SCREEN ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ -->
-<div id="screen-claim" class="auth-wrap" style="display:none">
-  <div class="auth-card">
-    <div>
-      <div class="auth-title">Activate Admin</div>
-      <div class="auth-sub" style="margin-top:.35rem">Sign in then enter the <code style="color:var(--accent-bright);font-family:'JetBrains Mono',monospace;font-size:.8rem">ADMIN_SECRET</code> once. After this you only need your email &amp; password.</div>
-    </div>
-    <div class="field"><label>Email</label><input type="email" id="claim-email" autocomplete="email" /></div>
-    <div class="field"><label>Admin Secret <span style="color:var(--muted)">(one-time)</span></label><input type="password" id="claim-secret" autocomplete="off" style="font-family:'JetBrains Mono',monospace" /></div>
-    <button class="btn-primary" id="claim-btn">Activate</button>
-    <div class="auth-err" id="claim-err"></div>
-    <div class="auth-link"><button id="go-login">Back to sign in</button></div>
-  </div>
-</div>
-
-<!-- ΓöÇΓöÇ ADMIN SHELL ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ -->
+<!-- ── ADMIN SHELL ─────────────────────────────────────────────────────── -->
 <div id="admin-shell">
-  <div class="admin-layout">
-    <aside class="admin-sidebar">
-      <div class="sidebar-brand">
-        <div class="sidebar-wordmark"><em>Nyx</em>Prism</div>
-        <div class="sidebar-badge">Admin</div>
-      </div>
-      <nav class="sidebar-nav">
-        <div class="nav-section-label">Dashboard</div>
-        <div class="nav-item active" data-panel="overview">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-          Overview
-        </div>
-        <div class="nav-section-label">Data</div>
-        <div class="nav-item" data-panel="users">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          Users
-          <span id="nav-user-count" style="margin-left:auto;font-size:.72rem;color:var(--muted);font-weight:600"></span>
-        </div>
-        <div class="nav-item" data-panel="messages">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-          Messages
-          <span id="nav-msg-count" style="margin-left:auto;font-size:.72rem;color:var(--muted);font-weight:600"></span>
-        </div>
-      </nav>
+  <div class="layout">
+    <nav class="sidebar">
+      <div class="sidebar-logo">&#x25E6; NyxPrism</div>
+      <button class="nav-item active" data-tab="overview">Overview</button>
+      <button class="nav-item" data-tab="users">Users</button>
+      <button class="nav-item" data-tab="messages">Messages</button>
       <div class="sidebar-footer">
-        <div class="sidebar-user" id="sidebar-email"></div>
-        <button class="sidebar-logout" id="logout-btn">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          Sign Out
-        </button>
+        <button class="btn-logout" id="logout-btn">Sign out</button>
       </div>
-    </aside>
-
-    <div class="admin-main">
-      <div class="admin-topbar">
-        <div>
-          <div class="topbar-title" id="topbar-title">Overview</div>
-          <div class="topbar-sub" id="topbar-sub">Summary of all activity</div>
-        </div>
+    </nav>
+    <main class="main">
+      <div id="tab-overview" class="tab-pane active">
+        <div class="page-title">Overview</div>
+        <div class="stat-grid" id="stat-grid"><p style="color:var(--muted)">Loading…</p></div>
+        <div class="plan-breakdown" id="plan-breakdown"></div>
       </div>
-      <div class="admin-body">
-        <div class="panel active" id="panel-overview">
-          <div class="stat-grid" id="stat-grid"><div class="loading">Loading stats...</div></div>
-          <div id="plan-breakdown"></div>
+      <div id="tab-users" class="tab-pane">
+        <div class="page-title">Users</div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>Email</th><th>Name</th><th>Plan</th><th>Status</th><th>Joined</th>
+            </tr></thead>
+            <tbody id="users-body"></tbody>
+          </table>
         </div>
-        <div class="panel" id="panel-users">
-          <div class="tbl-wrap">
-            <table>
-              <thead><tr><th>Email</th><th>Name</th><th>Plan</th><th>Status</th><th>Admin</th><th>Joined</th></tr></thead>
-              <tbody id="users-tbody"><tr><td colspan="6" class="loading">Loading...</td></tr></tbody>
-            </table>
-          </div>
-          <div class="pager" id="users-pager" style="display:none">
-            <button class="pager-btn" id="users-prev" disabled>Prev</button>
-            <span class="pager-info" id="users-info"></span>
-            <button class="pager-btn" id="users-next">Next</button>
-          </div>
-        </div>
-        <div class="panel" id="panel-messages">
-          <div id="messages-list"><div class="loading">Loading...</div></div>
-          <div class="pager" id="messages-pager" style="display:none">
-            <button class="pager-btn" id="msgs-prev" disabled>Prev</button>
-            <span class="pager-info" id="msgs-info"></span>
-            <button class="pager-btn" id="msgs-next">Next</button>
-          </div>
-        </div>
+        <div class="pagination" id="users-pager"></div>
       </div>
-    </div>
+      <div id="tab-messages" class="tab-pane">
+        <div class="page-title">Contact Messages</div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>From</th><th>Subject</th><th>Message</th><th>Date</th>
+            </tr></thead>
+            <tbody id="messages-body"></tbody>
+          </table>
+        </div>
+        <div class="pagination" id="messages-pager"></div>
+      </div>
+    </main>
   </div>
 </div>
 
-<script type="module">
-import { initializeApp }                    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
-                                             from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-
+<script>
 const API = 'https://nyxprism-production.up.railway.app';
+let adminSecret = '';
 
-const app  = initializeApp({
-  apiKey:            "AIzaSyD7bj__SwM4gE_yDnM9jjmzOgh6mX4NiD0",
-  authDomain:        "nyxprism-2a817.firebaseapp.com",
-  projectId:         "nyxprism-2a817",
-  storageBucket:     "nyxprism-2a817.firebasestorage.app",
-  messagingSenderId: "388040998105",
-  appId:             "1:388040998105:web:8e3fbfd27db0fdd60dd2c8",
-});
-const auth = getAuth(app);
-
-const PANEL_META = {
-  overview: { title:'Overview',  sub:'Summary of all activity' },
-  users:    { title:'Users',     sub:'All registered accounts' },
-  messages: { title:'Messages',  sub:'Contact form submissions' },
-};
-
-// ΓöÇΓöÇ Helpers ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-async function getToken() {
-  const user = auth.currentUser;
-  if (!user) throw new Error('Not signed in.');
-  return user.getIdToken();
+function headers() {
+  return { 'Content-Type': 'application/json', 'x-admin-secret': adminSecret };
 }
 
-async function apiFetch(path, opts = {}) {
-  const token = await getToken();
-  const res = await fetch(`${API}${path}`, {
-    ...opts,
-    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', ...(opts.headers || {}) },
-  });
+async function apiFetch(path) {
+  const res = await fetch(API + path, { headers: headers() });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new Error(body.error || `${res.status} ${res.statusText}`);
+    throw new Error(body.error || `HTTP ${res.status}`);
   }
   return res.json();
 }
 
-function fmt(d) { return d ? new Date(d).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}) : 'ΓÇö'; }
-function esc(s) { return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function planBadge(p)   { const c={pro:'badge-pro',trial:'badge-trial',free:'badge-free'}[p]||'badge-free'; return `<span class="badge ${c}">${p||'free'}</span>`; }
-function statusBadge(s) { const c={active:'badge-active',trialing:'badge-trial',canceled:'badge-inactive',past_due:'badge-inactive',inactive:'badge-inactive'}[s]||'badge-inactive'; return `<span class="badge ${c}">${s||'inactive'}</span>`; }
+// ── Login ─────────────────────────────────────────────────────────────────
+document.getElementById('login-btn').addEventListener('click', tryLogin);
+document.getElementById('secret-input').addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
 
-function showScreen(id) {
-  ['screen-login','screen-claim'].forEach(s => {
-    document.getElementById(s).style.display = s === id ? 'flex' : 'none';
-  });
-  document.getElementById('admin-shell').style.display = 'none';
-}
-
-// ΓöÇΓöÇ Sign-in ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-document.getElementById('login-btn').addEventListener('click', doLogin);
-document.getElementById('login-pass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
-document.getElementById('go-claim').addEventListener('click', () => showScreen('screen-claim'));
-document.getElementById('go-login').addEventListener('click', () => showScreen('screen-login'));
-
-async function doLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const pass  = document.getElementById('login-pass').value;
+async function tryLogin() {
+  const input = document.getElementById('secret-input').value.trim();
   const errEl = document.getElementById('login-err');
   const btn   = document.getElementById('login-btn');
-  if (!email || !pass) return;
+  if (!input) { errEl.textContent = 'Enter the admin secret.'; errEl.style.display = 'block'; return; }
   errEl.style.display = 'none';
-  btn.disabled = true; btn.textContent = 'Signing in...';
+  btn.disabled = true; btn.textContent = 'Verifying…';
+  // Test the secret against the real API
   try {
-    await signInWithEmailAndPassword(auth, email, pass);
-    // onAuthStateChanged will handle the rest
+    adminSecret = input;
+    await apiFetch('/api/admin/stats');
+    // Success
+    sessionStorage.setItem('adminSecret', adminSecret);
+    openShell();
   } catch (err) {
-    errEl.textContent = firebaseErr(err.code);
+    adminSecret = '';
+    errEl.textContent = 'Wrong secret.';
     errEl.style.display = 'block';
   } finally {
-    btn.disabled = false; btn.textContent = 'Sign In';
+    btn.disabled = false; btn.textContent = 'Sign in';
   }
 }
 
-// ΓöÇΓöÇ Claim admin ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-document.getElementById('claim-btn').addEventListener('click', doClaim);
-
-async function doClaim() {
-  const email  = document.getElementById('claim-email').value.trim();
-  const secret = document.getElementById('claim-secret').value.trim();
-  const errEl  = document.getElementById('claim-err');
-  const btn    = document.getElementById('claim-btn');
-  if (!email || !secret) { errEl.textContent = 'Both fields required.'; errEl.style.display = 'block'; return; }
-  errEl.style.display = 'none';
-  btn.disabled = true; btn.textContent = 'Activating...';
-  try {
-    const res = await fetch(`${API}/api/admin/claim`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, secret }),
-    });
-    const body = await res.json();
-    if (!res.ok) throw new Error(body.error || 'Failed');
-    // Admin claimed ΓÇö onAuthStateChanged will open the shell
-    showScreen('screen-login');
-  } catch (err) {
-    errEl.textContent = err.message;
-    errEl.style.display = 'block';
-  } finally {
-    btn.disabled = false; btn.textContent = 'Activate';
-  }
+function openShell() {
+  document.getElementById('lock-screen').style.display = 'none';
+  document.getElementById('admin-shell').style.display = 'block';
+  loadOverview();
 }
 
-// ΓöÇΓöÇ Auth state ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-onAuthStateChanged(auth, async user => {
-  if (!user) { showScreen('screen-login'); return; }
-  // Verify admin status
-  try {
-    await apiFetch('/api/admin/stats'); // will 403 if not admin
-    document.getElementById('screen-login').style.display = 'none';
-    document.getElementById('screen-claim').style.display = 'none';
-    document.getElementById('admin-shell').style.display  = 'block';
-    document.getElementById('sidebar-email').textContent  = user.email;
-    loadOverview();
-  } catch (err) {
-    if (err.message.includes('Not an admin') || err.message.includes('403')) {
-      showScreen('screen-claim');
-      document.getElementById('claim-err').textContent = 'Your account is not an admin yet. Enter the secret to activate.';
-      document.getElementById('claim-err').style.display = 'block';
-    } else {
-      showScreen('screen-login');
-    }
-  }
+// ── Logout ────────────────────────────────────────────────────────────────
+document.getElementById('logout-btn').addEventListener('click', () => {
+  adminSecret = '';
+  sessionStorage.removeItem('adminSecret');
+  document.getElementById('admin-shell').style.display = 'none';
+  document.getElementById('lock-screen').style.display = 'flex';
+  document.getElementById('secret-input').value = '';
 });
 
-// ΓöÇΓöÇ Sign out ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
-
-// ΓöÇΓöÇ Navigation ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-document.querySelectorAll('.nav-item[data-panel]').forEach(item => {
-  item.addEventListener('click', () => switchPanel(item.dataset.panel));
+// ── Tabs ──────────────────────────────────────────────────────────────────
+document.querySelectorAll('.nav-item[data-tab]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    if (btn.dataset.tab === 'users')    loadUsers(1);
+    if (btn.dataset.tab === 'messages') loadMessages(1);
+  });
 });
 
-function switchPanel(name) {
-  document.querySelectorAll('.nav-item').forEach(i => i.classList.toggle('active', i.dataset.panel === name));
-  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === `panel-${name}`));
-  const meta = PANEL_META[name] || {};
-  document.getElementById('topbar-title').textContent = meta.title || name;
-  document.getElementById('topbar-sub').textContent   = meta.sub   || '';
-  if (name === 'users'    && !usersLoaded)   loadUsers(1);
-  if (name === 'messages' && !msgsLoaded)    loadMessages(1);
-}
-
-// ΓöÇΓöÇ Overview ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ── Overview ──────────────────────────────────────────────────────────────
 async function loadOverview() {
   try {
     const data = await apiFetch('/api/admin/stats');
     document.getElementById('stat-grid').innerHTML = `
       <div class="stat-card"><div class="stat-label">Total Users</div><div class="stat-value accent">${data.totalUsers}</div></div>
       <div class="stat-card"><div class="stat-label">API Keys</div><div class="stat-value blue">${data.totalApiKeys}</div></div>
-      <div class="stat-card"><div class="stat-label">Messages</div><div class="stat-value yellow">${data.totalMessages}</div></div>`;
+      <div class="stat-card"><div class="stat-label">Messages</div><div class="stat-value yellow">${data.totalMessages}</div></div>
+    `;
     document.getElementById('plan-breakdown').innerHTML =
-      `<div style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.75rem">Plan Breakdown</div>
-       <div class="plan-list">${data.plans.map(p=>`<div class="plan-pill"><span class="pill-name">${esc(p.plan)}</span><span class="pill-count">${p.count}</span></div>`).join('')}</div>`;
-    document.getElementById('nav-user-count').textContent = data.totalUsers||'';
-    document.getElementById('nav-msg-count').textContent  = data.totalMessages||'';
+      '<div style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.75rem">Plan Breakdown</div>' +
+      '<div class="plan-list">' + data.plans.map(p =>
+        `<div class="plan-pill"><span class="pill-name">${p.plan}</span><span class="pill-count">${p.count}</span></div>`
+      ).join('') + '</div>';
   } catch (err) {
-    document.getElementById('stat-grid').innerHTML = `<p class="err-msg">Failed: ${esc(err.message)}</p>`;
+    document.getElementById('stat-grid').innerHTML = `<p style="color:var(--red)">${err.message}</p>`;
   }
 }
 
-// ΓöÇΓöÇ Users ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-let usersPage=1, userTotal=0, usersLoaded=false;
-const USERS_LIMIT=50;
-
+// ── Users ─────────────────────────────────────────────────────────────────
 async function loadUsers(page) {
-  usersLoaded=true; usersPage=page;
-  document.getElementById('users-tbody').innerHTML = '<tr><td colspan="6" class="loading">Loading...</td></tr>';
+  const tbody = document.getElementById('users-body');
+  const pager = document.getElementById('users-pager');
+  tbody.innerHTML = '<tr><td colspan="5" style="color:var(--muted)">Loading…</td></tr>';
   try {
-    const data = await apiFetch(`/api/admin/users?page=${page}&limit=${USERS_LIMIT}`);
-    userTotal = data.total;
-    document.getElementById('users-tbody').innerHTML = data.users.length
-      ? data.users.map(u=>`<tr>
-          <td>${esc(u.email)}</td>
-          <td>${esc([u.first_name,u.last_name].filter(Boolean).join(' ')||'ΓÇö')}</td>
-          <td>${planBadge(u.plan)}</td>
-          <td>${statusBadge(u.subscription_status)}</td>
-          <td>${u.is_admin?'<span class="badge badge-admin">Admin</span>':'ΓÇö'}</td>
-          <td>${fmt(u.created_at)}</td>
-        </tr>`).join('')
-      : '<tr><td colspan="6" style="color:var(--muted)">No users yet.</td></tr>';
-    const pager = document.getElementById('users-pager');
-    pager.style.display='flex';
-    document.getElementById('users-prev').disabled = page<=1;
-    document.getElementById('users-next').disabled = page*USERS_LIMIT>=userTotal;
-    document.getElementById('users-info').textContent = `${(page-1)*USERS_LIMIT+1}ΓÇô${Math.min(page*USERS_LIMIT,userTotal)} of ${userTotal}`;
-  } catch(err) {
-    document.getElementById('users-tbody').innerHTML = `<tr><td colspan="6" class="err-msg">Error: ${esc(err.message)}</td></tr>`;
+    const data = await apiFetch(`/api/admin/users?page=${page}&limit=50`);
+    if (!data.users.length) { tbody.innerHTML = '<tr><td colspan="5" style="color:var(--muted)">No users yet.</td></tr>'; return; }
+    tbody.innerHTML = data.users.map(u => `
+      <tr>
+        <td>${u.email}</td>
+        <td>${[u.first_name, u.last_name].filter(Boolean).join(' ') || '<span style="color:var(--muted)">—</span>'}</td>
+        <td><span class="badge badge-${u.plan || 'trial'}">${u.plan || 'trial'}</span></td>
+        <td><span class="badge badge-${u.subscription_status === 'active' ? 'active' : u.subscription_status === 'trialing' ? 'trial' : 'inactive'}">${u.subscription_status || '—'}</span></td>
+        <td>${new Date(u.created_at).toLocaleDateString()}</td>
+      </tr>
+    `).join('');
+    const total = data.total;
+    const pages = Math.ceil(total / 50);
+    pager.innerHTML = `
+      <button ${page <= 1 ? 'disabled' : ''} onclick="loadUsers(${page-1})">&#8592; Prev</button>
+      <span>Page ${page} of ${pages} (${total} total)</span>
+      <button ${page >= pages ? 'disabled' : ''} onclick="loadUsers(${page+1})">Next &#8594;</button>
+    `;
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="5" style="color:var(--red)">${err.message}</td></tr>`;
   }
 }
-document.getElementById('users-prev').addEventListener('click', ()=>loadUsers(usersPage-1));
-document.getElementById('users-next').addEventListener('click', ()=>loadUsers(usersPage+1));
 
-// ΓöÇΓöÇ Messages ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-let msgsPage=1, msgsTotal=0, msgsLoaded=false;
-const MSGS_LIMIT=20;
-
+// ── Messages ──────────────────────────────────────────────────────────────
 async function loadMessages(page) {
-  msgsLoaded=true; msgsPage=page;
-  document.getElementById('messages-list').innerHTML='<div class="loading">Loading...</div>';
+  const tbody = document.getElementById('messages-body');
+  const pager = document.getElementById('messages-pager');
+  tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted)">Loading…</td></tr>';
   try {
-    const data = await apiFetch(`/api/admin/messages?page=${page}&limit=${MSGS_LIMIT}`);
-    msgsTotal = data.total;
-    if (!data.messages.length) {
-      document.getElementById('messages-list').innerHTML='<p style="color:var(--muted);font-size:.875rem">No messages yet.</p>';
-      document.getElementById('messages-pager').style.display='none';
-      return;
-    }
-    document.getElementById('messages-list').innerHTML = data.messages.map(m=>`
-      <div class="msg-card">
-        <div class="msg-meta">
-          <span class="msg-name">${esc(((m.first_name||'')+' '+(m.last_name||'')).trim())}</span>
-          <span class="msg-email">${esc(m.email||'')}</span>
-          <span class="msg-date">${fmt(m.created_at)}</span>
-        </div>
-        <div class="msg-subject">${esc(m.subject||'')}</div>
-        <div class="msg-body">${esc(m.message||'')}</div>
-      </div>`).join('');
-    const pager=document.getElementById('messages-pager');
-    pager.style.display='flex';
-    document.getElementById('msgs-prev').disabled=page<=1;
-    document.getElementById('msgs-next').disabled=page*MSGS_LIMIT>=msgsTotal;
-    document.getElementById('msgs-info').textContent=`${(page-1)*MSGS_LIMIT+1}ΓÇô${Math.min(page*MSGS_LIMIT,msgsTotal)} of ${msgsTotal}`;
-  } catch(err) {
-    document.getElementById('messages-list').innerHTML=`<p class="err-msg">Error: ${esc(err.message)}</p>`;
+    const data = await apiFetch(`/api/admin/messages?page=${page}&limit=20`);
+    if (!data.messages.length) { tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted)">No messages yet.</td></tr>'; return; }
+    tbody.innerHTML = data.messages.map(m => `
+      <tr>
+        <td class="${m.read ? '' : 'unread'}">${m.first_name || ''} ${m.last_name || ''}<br><span style="font-size:.78rem;color:var(--muted)">${m.email}</span></td>
+        <td class="${m.read ? '' : 'unread'}">${m.subject || '—'}</td>
+        <td><div class="msg-body">${m.message}</div></td>
+        <td style="white-space:nowrap">${new Date(m.created_at).toLocaleDateString()}</td>
+      </tr>
+    `).join('');
+    const total = data.total;
+    const pages = Math.ceil(total / 20);
+    pager.innerHTML = `
+      <button ${page <= 1 ? 'disabled' : ''} onclick="loadMessages(${page-1})">&#8592; Prev</button>
+      <span>Page ${page} of ${pages} (${total} total)</span>
+      <button ${page >= pages ? 'disabled' : ''} onclick="loadMessages(${page+1})">Next &#8594;</button>
+    `;
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="4" style="color:var(--red)">${err.message}</td></tr>`;
   }
 }
-document.getElementById('msgs-prev').addEventListener('click', ()=>loadMessages(msgsPage-1));
-document.getElementById('msgs-next').addEventListener('click', ()=>loadMessages(msgsPage+1));
 
-// ΓöÇΓöÇ Firebase error codes ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-function firebaseErr(code) {
-  const map = {
-    'auth/invalid-email':'Invalid email address.',
-    'auth/user-not-found':'No account with that email.',
-    'auth/wrong-password':'Incorrect password.',
-    'auth/too-many-requests':'Too many attempts. Try again later.',
-    'auth/invalid-credential':'Invalid email or password.',
-  };
-  return map[code] || 'Sign-in failed. Please try again.';
-}
+// ── Auto-restore session ──────────────────────────────────────────────────
+const saved = sessionStorage.getItem('adminSecret');
+if (saved) { adminSecret = saved; apiFetch('/api/admin/stats').then(() => openShell()).catch(() => { adminSecret = ''; sessionStorage.removeItem('adminSecret'); }); }
 </script>
 </body>
 </html>
