@@ -30,6 +30,7 @@ async function requireAdmin(req, res, next) {
 
 // ── POST /api/admin/claim ─────────────────────────────────────────────────
 // One-time: present Firebase token + ADMIN_SECRET → grants is_admin = true
+// Matches by firebase_uid OR email so existing accounts without firebase_uid work.
 router.post('/claim', async (req, res) => {
   const secret = process.env.ADMIN_SECRET;
   if (!secret) return res.status(503).json({ error: 'ADMIN_SECRET not configured.' });
@@ -39,19 +40,22 @@ router.post('/claim', async (req, res) => {
     return res.status(401).json({ error: 'Wrong secret.' });
   }
 
-  const auth = req.headers['authorization'];
-  if (!auth?.startsWith('Bearer ')) {
+  const authHeader = req.headers['authorization'];
+  if (!authHeader?.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'Missing Firebase token.' });
   }
-  const token = auth.slice(7);
+  const token = authHeader.slice(7);
   try {
     const decoded = await admin.auth().verifyIdToken(token);
     const result  = await pool.query(
-      'UPDATE users SET is_admin = TRUE WHERE firebase_uid = $1 RETURNING email',
-      [decoded.uid]
+      `UPDATE users
+       SET is_admin = TRUE, firebase_uid = $1
+       WHERE firebase_uid = $1 OR email = $2
+       RETURNING email`,
+      [decoded.uid, decoded.email]
     );
     if (!result.rows.length) {
-      return res.status(404).json({ error: 'Account not found. Sign up first.' });
+      return res.status(404).json({ error: 'No NyxPrism account found for that email. Sign up first at nyxprism.com.' });
     }
     res.json({ ok: true, email: result.rows[0].email });
   } catch {
@@ -67,7 +71,7 @@ router.get('/stats', async (_req, res) => {
   try {
     const [users, plans, keys, messages] = await Promise.all([
       pool.query('SELECT COUNT(*) AS total FROM users'),
-      pool.query(`SELECT plan, COUNT(*) AS count FROM users GROUP BY plan ORDER BY count DESC`),
+      pool.query('SELECT plan, COUNT(*) AS count FROM users GROUP BY plan ORDER BY count DESC'),
       pool.query('SELECT COUNT(*) AS total FROM api_keys'),
       pool.query('SELECT COUNT(*) AS total FROM contact_messages'),
     ]);
