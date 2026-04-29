@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -123,7 +123,7 @@
 </head>
 <body>
 
-<!-- ── SIGN IN SCREEN ─────────────────────────────────────────────────── -->
+<!-- ΓöÇΓöÇ SIGN IN SCREEN ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ -->
 <div id="screen-login" class="auth-wrap">
   <div class="auth-card">
     <div>
@@ -138,7 +138,7 @@
   </div>
 </div>
 
-<!-- ── CLAIM ADMIN SCREEN ─────────────────────────────────────────────── -->
+<!-- ΓöÇΓöÇ CLAIM ADMIN SCREEN ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ -->
 <div id="screen-claim" class="auth-wrap" style="display:none">
   <div class="auth-card">
     <div>
@@ -146,7 +146,6 @@
       <div class="auth-sub" style="margin-top:.35rem">Sign in then enter the <code style="color:var(--accent-bright);font-family:'JetBrains Mono',monospace;font-size:.8rem">ADMIN_SECRET</code> once. After this you only need your email &amp; password.</div>
     </div>
     <div class="field"><label>Email</label><input type="email" id="claim-email" autocomplete="email" /></div>
-    <div class="field"><label>Password</label><input type="password" id="claim-pass" autocomplete="current-password" /></div>
     <div class="field"><label>Admin Secret <span style="color:var(--muted)">(one-time)</span></label><input type="password" id="claim-secret" autocomplete="off" style="font-family:'JetBrains Mono',monospace" /></div>
     <button class="btn-primary" id="claim-btn">Activate</button>
     <div class="auth-err" id="claim-err"></div>
@@ -154,7 +153,7 @@
   </div>
 </div>
 
-<!-- ── ADMIN SHELL ────────────────────────────────────────────────────── -->
+<!-- ΓöÇΓöÇ ADMIN SHELL ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ -->
 <div id="admin-shell">
   <div class="admin-layout">
     <aside class="admin-sidebar">
@@ -250,7 +249,7 @@ const PANEL_META = {
   messages: { title:'Messages',  sub:'Contact form submissions' },
 };
 
-// ── Helpers ────────────────────────────────────────────────────────────────
+// ΓöÇΓöÇ Helpers ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 async function getToken() {
   const user = auth.currentUser;
   if (!user) throw new Error('Not signed in.');
@@ -270,7 +269,7 @@ async function apiFetch(path, opts = {}) {
   return res.json();
 }
 
-function fmt(d) { return d ? new Date(d).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}) : '—'; }
+function fmt(d) { return d ? new Date(d).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}) : 'ΓÇö'; }
 function esc(s) { return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function planBadge(p)   { const c={pro:'badge-pro',trial:'badge-trial',free:'badge-free'}[p]||'badge-free'; return `<span class="badge ${c}">${p||'free'}</span>`; }
 function statusBadge(s) { const c={active:'badge-active',trialing:'badge-trial',canceled:'badge-inactive',past_due:'badge-inactive',inactive:'badge-inactive'}[s]||'badge-inactive'; return `<span class="badge ${c}">${s||'inactive'}</span>`; }
@@ -282,7 +281,7 @@ function showScreen(id) {
   document.getElementById('admin-shell').style.display = 'none';
 }
 
-// ── Sign-in ────────────────────────────────────────────────────────────────
+// ΓöÇΓöÇ Sign-in ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 document.getElementById('login-btn').addEventListener('click', doLogin);
 document.getElementById('login-pass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
 document.getElementById('go-claim').addEventListener('click', () => showScreen('screen-claim'));
@@ -307,29 +306,26 @@ async function doLogin() {
   }
 }
 
-// ── Claim admin ────────────────────────────────────────────────────────────
+// ΓöÇΓöÇ Claim admin ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 document.getElementById('claim-btn').addEventListener('click', doClaim);
 
 async function doClaim() {
   const email  = document.getElementById('claim-email').value.trim();
-  const pass   = document.getElementById('claim-pass').value;
   const secret = document.getElementById('claim-secret').value.trim();
   const errEl  = document.getElementById('claim-err');
   const btn    = document.getElementById('claim-btn');
-  if (!email || !pass || !secret) { errEl.textContent = 'All fields required.'; errEl.style.display = 'block'; return; }
+  if (!email || !secret) { errEl.textContent = 'Both fields required.'; errEl.style.display = 'block'; return; }
   errEl.style.display = 'none';
   btn.disabled = true; btn.textContent = 'Activating...';
   try {
-    const cred = await signInWithEmailAndPassword(auth, email, pass);
-    const token = await cred.user.getIdToken();
     const res = await fetch(`${API}/api/admin/claim`, {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ secret }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, secret }),
     });
     const body = await res.json();
     if (!res.ok) throw new Error(body.error || 'Failed');
-    // Admin claimed — onAuthStateChanged will open the shell
+    // Admin claimed ΓÇö onAuthStateChanged will open the shell
     showScreen('screen-login');
   } catch (err) {
     errEl.textContent = err.message;
@@ -339,7 +335,7 @@ async function doClaim() {
   }
 }
 
-// ── Auth state ─────────────────────────────────────────────────────────────
+// ΓöÇΓöÇ Auth state ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 onAuthStateChanged(auth, async user => {
   if (!user) { showScreen('screen-login'); return; }
   // Verify admin status
@@ -361,10 +357,10 @@ onAuthStateChanged(auth, async user => {
   }
 });
 
-// ── Sign out ───────────────────────────────────────────────────────────────
+// ΓöÇΓöÇ Sign out ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
 
-// ── Navigation ─────────────────────────────────────────────────────────────
+// ΓöÇΓöÇ Navigation ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 document.querySelectorAll('.nav-item[data-panel]').forEach(item => {
   item.addEventListener('click', () => switchPanel(item.dataset.panel));
 });
@@ -379,7 +375,7 @@ function switchPanel(name) {
   if (name === 'messages' && !msgsLoaded)    loadMessages(1);
 }
 
-// ── Overview ───────────────────────────────────────────────────────────────
+// ΓöÇΓöÇ Overview ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 async function loadOverview() {
   try {
     const data = await apiFetch('/api/admin/stats');
@@ -397,7 +393,7 @@ async function loadOverview() {
   }
 }
 
-// ── Users ──────────────────────────────────────────────────────────────────
+// ΓöÇΓöÇ Users ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 let usersPage=1, userTotal=0, usersLoaded=false;
 const USERS_LIMIT=50;
 
@@ -410,10 +406,10 @@ async function loadUsers(page) {
     document.getElementById('users-tbody').innerHTML = data.users.length
       ? data.users.map(u=>`<tr>
           <td>${esc(u.email)}</td>
-          <td>${esc([u.first_name,u.last_name].filter(Boolean).join(' ')||'—')}</td>
+          <td>${esc([u.first_name,u.last_name].filter(Boolean).join(' ')||'ΓÇö')}</td>
           <td>${planBadge(u.plan)}</td>
           <td>${statusBadge(u.subscription_status)}</td>
-          <td>${u.is_admin?'<span class="badge badge-admin">Admin</span>':'—'}</td>
+          <td>${u.is_admin?'<span class="badge badge-admin">Admin</span>':'ΓÇö'}</td>
           <td>${fmt(u.created_at)}</td>
         </tr>`).join('')
       : '<tr><td colspan="6" style="color:var(--muted)">No users yet.</td></tr>';
@@ -421,7 +417,7 @@ async function loadUsers(page) {
     pager.style.display='flex';
     document.getElementById('users-prev').disabled = page<=1;
     document.getElementById('users-next').disabled = page*USERS_LIMIT>=userTotal;
-    document.getElementById('users-info').textContent = `${(page-1)*USERS_LIMIT+1}–${Math.min(page*USERS_LIMIT,userTotal)} of ${userTotal}`;
+    document.getElementById('users-info').textContent = `${(page-1)*USERS_LIMIT+1}ΓÇô${Math.min(page*USERS_LIMIT,userTotal)} of ${userTotal}`;
   } catch(err) {
     document.getElementById('users-tbody').innerHTML = `<tr><td colspan="6" class="err-msg">Error: ${esc(err.message)}</td></tr>`;
   }
@@ -429,7 +425,7 @@ async function loadUsers(page) {
 document.getElementById('users-prev').addEventListener('click', ()=>loadUsers(usersPage-1));
 document.getElementById('users-next').addEventListener('click', ()=>loadUsers(usersPage+1));
 
-// ── Messages ───────────────────────────────────────────────────────────────
+// ΓöÇΓöÇ Messages ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 let msgsPage=1, msgsTotal=0, msgsLoaded=false;
 const MSGS_LIMIT=20;
 
@@ -458,7 +454,7 @@ async function loadMessages(page) {
     pager.style.display='flex';
     document.getElementById('msgs-prev').disabled=page<=1;
     document.getElementById('msgs-next').disabled=page*MSGS_LIMIT>=msgsTotal;
-    document.getElementById('msgs-info').textContent=`${(page-1)*MSGS_LIMIT+1}–${Math.min(page*MSGS_LIMIT,msgsTotal)} of ${msgsTotal}`;
+    document.getElementById('msgs-info').textContent=`${(page-1)*MSGS_LIMIT+1}ΓÇô${Math.min(page*MSGS_LIMIT,msgsTotal)} of ${msgsTotal}`;
   } catch(err) {
     document.getElementById('messages-list').innerHTML=`<p class="err-msg">Error: ${esc(err.message)}</p>`;
   }
@@ -466,7 +462,7 @@ async function loadMessages(page) {
 document.getElementById('msgs-prev').addEventListener('click', ()=>loadMessages(msgsPage-1));
 document.getElementById('msgs-next').addEventListener('click', ()=>loadMessages(msgsPage+1));
 
-// ── Firebase error codes ───────────────────────────────────────────────────
+// ΓöÇΓöÇ Firebase error codes ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 function firebaseErr(code) {
   const map = {
     'auth/invalid-email':'Invalid email address.',

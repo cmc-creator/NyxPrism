@@ -4,42 +4,8 @@ import admin from '../firebase.js';
 
 const router = Router();
 
-// ── Auth middleware: verify Firebase ID token + is_admin flag ─────────────
+// ── Auth middleware ───────────────────────────────────────────────────────
 async function requireAdmin(req, res, next) {
-  const auth = req.headers['authorization'];
-  if (!auth?.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'Missing Firebase token.' });
-  }
-  const token = auth.slice(7);
-  try {
-    const decoded = await admin.auth().verifyIdToken(token);
-    const result  = await pool.query(
-      'SELECT id, email, is_admin FROM users WHERE firebase_uid = $1',
-      [decoded.uid]
-    );
-    const user = result.rows[0];
-    if (!user?.is_admin) {
-      return res.status(403).json({ error: 'Not an admin.' });
-    }
-    req.adminUser = user;
-    next();
-  } catch (err) {
-    return res.status(401).json({ error: 'Invalid or expired token.' });
-  }
-}
-
-// ── POST /api/admin/claim ─────────────────────────────────────────────────
-// One-time: present Firebase token + ADMIN_SECRET → grants is_admin = true
-// Matches by firebase_uid OR email so existing accounts without firebase_uid work.
-router.post('/claim', async (req, res) => {
-  const secret = process.env.ADMIN_SECRET;
-  if (!secret) return res.status(503).json({ error: 'ADMIN_SECRET not configured.' });
-
-  const provided = req.body?.secret;
-  if (!provided || provided !== secret) {
-    return res.status(401).json({ error: 'Wrong secret.' });
-  }
-
   const authHeader = req.headers['authorization'];
   if (!authHeader?.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'Missing Firebase token.' });
@@ -47,25 +13,62 @@ router.post('/claim', async (req, res) => {
   const token = authHeader.slice(7);
   try {
     const decoded = await admin.auth().verifyIdToken(token);
-    // Step 1: try to update an existing row (match by email OR firebase_uid)
-    let result = await pool.query(
-      `UPDATE users SET is_admin = TRUE, firebase_uid = $1
-       WHERE email = $2 OR firebase_uid = $1
-       RETURNING email`,
+    const result = await pool.query(
+      `SELECT id, email, is_admin FROM users WHERE firebase_uid = $1 OR email = $2 LIMIT 1`,
       [decoded.uid, decoded.email]
     );
-    // Step 2: if no existing row at all, create one
+    const user = result.rows[0];
+    if (!user?.is_admin) {
+      return res.status(403).json({ error: 'Not an admin.' });
+    }
+    // Backfill firebase_uid if missing
+    pool.query(
+      `UPDATE users SET firebase_uid = $1 WHERE email = $2 AND (firebase_uid IS NULL OR firebase_uid != $1)`,
+      [decoded.uid, decoded.email]
+    ).catch(() => {});
+    req.adminUser = user;
+    next();
+  } catch {
+    return res.status(401).json({ error: 'Invalid or expired token.' });
+  }
+}
+
+// ── POST /api/admin/claim ─────────────────────────────────────────────────
+// One-time bootstrap: only needs ADMIN_SECRET + email in the body.
+// No Firebase token required — avoids all uid/row-mismatch issues.
+router.post('/claim', async (req, res) => {
+  const secret = process.env.ADMIN_SECRET;
+  if (!secret) return res.status(503).json({ error: 'ADMIN_SECRET not configured on server.' });
+
+  const { secret: provided, email } = req.body || {};
+  if (!provided || provided !== secret) {
+    return res.status(401).json({ error: 'Wrong secret.' });
+  }
+  if (!email) {
+    return res.status(400).json({ error: 'Email is required.' });
+  }
+
+  const normalised = email.toLowerCase().trim();
+  try {
+    // Try to update an existing row first
+    let result = await pool.query(
+      `UPDATE users SET is_admin = TRUE WHERE email = $1 RETURNING email`,
+      [normalised]
+    );
+    // No row yet — insert one (e.g. owner hasn't gone through normal signup)
     if (!result.rows.length) {
       result = await pool.query(
         `INSERT INTO users (firebase_uid, email, plan, subscription_status, trial_start, is_admin)
-         VALUES ($1, $2, 'trial', 'trialing', NOW(), TRUE)
+         VALUES ('bootstrap-' || gen_random_uuid(), $1, 'trial', 'trialing', NOW(), TRUE)
+         ON CONFLICT (email) DO UPDATE SET is_admin = TRUE
          RETURNING email`,
-        [decoded.uid, decoded.email]
+        [normalised]
       );
     }
-    res.json({ ok: true, email: result.rows[0]?.email || decoded.email });
-  } catch {
-    return res.status(401).json({ error: 'Invalid or expired token.' });
+    res.json({ ok: true, email: result.rows[0]?.email || normalised });
+  } catch (err) {
+    console.error('admin/claim error:', err.message);
+    res.status(500).json({ error: err.message });
   }
 });
 
