@@ -85,7 +85,7 @@ router.get('/messages', async (req, res) => {
   try {
     const [rows, count] = await Promise.all([
       pool.query(
-        `SELECT id, name, email, subject, message, created_at
+        `SELECT id, first_name, last_name, email, subject, message, read, created_at
          FROM contact_messages
          ORDER BY created_at DESC
          LIMIT $1 OFFSET $2`,
