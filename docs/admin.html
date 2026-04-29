@@ -9,154 +9,154 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;0,14..32,900;1,14..32,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg:            #06080d;
-      --bg2:           #0b0f18;
-      --surface:       #0f1724;
-      --surface2:      #141e2e;
-      --surface3:      #1a2535;
-      --border:        #1b2840;
-      --border2:       #253548;
-      --border3:       #2d4060;
-      --accent:        #7c3aed;
-      --accent2:       #6d28d9;
-      --accent-bright: #a78bfa;
-      --accent-glow:   rgba(124,58,237,.14);
-      --muted:         #5a7194;
-      --muted2:        #3a4f6a;
-      --text:          #e8edf5;
-      --text2:         #bbc8da;
-      --text3:         #7f96b2;
-      --green:         #22c55e;
-      --red:           #f87171;
-      --yellow:        #facc15;
-      --blue:          #60a5fa;
-      --radius:        .55rem;
-      --radius-sm:     .35rem;
-      --radius-lg:     1rem;
-      --sidebar-w:     220px;
+      --bg:#06080d;--bg2:#0b0f18;--surface:#0f1724;--surface2:#141e2e;
+      --border:#1b2840;--border2:#253548;--border3:#2d4060;
+      --accent:#7c3aed;--accent2:#6d28d9;--accent-bright:#a78bfa;--accent-glow:rgba(124,58,237,.14);
+      --muted:#5a7194;--muted2:#3a4f6a;--text:#e8edf5;--text2:#bbc8da;--text3:#7f96b2;
+      --green:#22c55e;--red:#f87171;--yellow:#facc15;--blue:#60a5fa;
+      --radius:.55rem;--radius-sm:.35rem;--radius-lg:1rem;--sidebar-w:220px;
     }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { color-scheme: dark; }
-    body { font-family: Inter, system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{color-scheme:dark}
+    body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
 
-    /* LOCK SCREEN */
-    #lock-screen { flex: 1; display: flex; align-items: center; justify-content: center; }
-    .lock-card { background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius-lg); padding: 2.5rem 2.25rem; width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 1.2rem; }
-    .lock-title { font-size: 1.25rem; font-weight: 700; }
-    .lock-sub   { font-size: .875rem; color: var(--text3); }
-    .lock-input { width: 100%; background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--radius-sm); color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: .875rem; padding: .65rem .85rem; outline: none; }
-    .lock-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
-    .lock-btn { background: var(--accent); color: #fff; border: none; border-radius: var(--radius-sm); font-size: .875rem; font-weight: 600; padding: .7rem 1.5rem; cursor: pointer; width: 100%; }
-    .lock-btn:hover { background: var(--accent2); }
-    .lock-error { font-size: .8rem; color: var(--red); display: none; }
+    /* AUTH SCREENS */
+    .auth-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:1rem}
+    .auth-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:2.5rem 2.25rem;width:100%;max-width:380px;display:flex;flex-direction:column;gap:1.1rem}
+    .auth-title{font-size:1.2rem;font-weight:700}
+    .auth-sub{font-size:.84rem;color:var(--text3)}
+    .field label{display:block;font-size:.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.35rem}
+    .field input{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-size:.875rem;padding:.65rem .85rem;outline:none;font-family:inherit}
+    .field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+    .btn-primary{background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-size:.875rem;font-weight:600;padding:.7rem 1.5rem;cursor:pointer;width:100%}
+    .btn-primary:hover{background:var(--accent2)}
+    .btn-primary:disabled{opacity:.5;cursor:default}
+    .auth-err{font-size:.8rem;color:var(--red);display:none}
+    .auth-link{font-size:.8rem;color:var(--text3);text-align:center}
+    .auth-link button{background:none;border:none;color:var(--accent-bright);cursor:pointer;font-size:.8rem;text-decoration:underline}
 
     /* ADMIN SHELL */
-    #admin-shell { display: none; flex: 1; }
-    .admin-layout { display: flex; min-height: 100vh; }
+    #admin-shell{display:none;flex:1}
+    .admin-layout{display:flex;min-height:100vh}
 
     /* SIDEBAR */
-    .admin-sidebar { width: var(--sidebar-w); flex-shrink: 0; background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
-    .sidebar-brand { padding: 1.4rem 1.25rem 1rem; border-bottom: 1px solid var(--border); }
-    .sidebar-wordmark { font-size: 1rem; font-weight: 800; letter-spacing: -.015em; }
-    .sidebar-wordmark em { font-style: normal; color: var(--accent-bright); }
-    .sidebar-badge { display: inline-block; margin-top: .35rem; font-size: .65rem; background: var(--accent-glow); color: var(--accent-bright); border-radius: 999px; padding: .15rem .55rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
-    .sidebar-nav { flex: 1; padding: 1rem 0; }
-    .nav-section-label { font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--muted2); padding: .5rem 1.25rem .3rem; margin-top: .25rem; }
-    .nav-item { display: flex; align-items: center; gap: .7rem; padding: .6rem 1.25rem; font-size: .875rem; font-weight: 500; color: var(--text3); cursor: pointer; border-left: 2px solid transparent; transition: color .15s, background .15s, border-color .15s; user-select: none; }
-    .nav-item:hover { color: var(--text2); background: rgba(255,255,255,.03); }
-    .nav-item.active { color: var(--accent-bright); border-left-color: var(--accent-bright); background: var(--accent-glow); }
-    .nav-item svg { width: 15px; height: 15px; flex-shrink: 0; opacity: .8; }
-    .nav-item.active svg { opacity: 1; }
-    .sidebar-footer { padding: 1rem 1.25rem; border-top: 1px solid var(--border); }
-    .sidebar-logout { width: 100%; background: none; border: 1px solid var(--border2); color: var(--text3); border-radius: var(--radius-sm); font-size: .8rem; padding: .5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: .5rem; }
-    .sidebar-logout:hover { color: var(--text); border-color: var(--border3); }
+    .admin-sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+    .sidebar-brand{padding:1.4rem 1.25rem 1rem;border-bottom:1px solid var(--border)}
+    .sidebar-wordmark{font-size:1rem;font-weight:800;letter-spacing:-.015em}
+    .sidebar-wordmark em{font-style:normal;color:var(--accent-bright)}
+    .sidebar-badge{display:inline-block;margin-top:.35rem;font-size:.65rem;background:var(--accent-glow);color:var(--accent-bright);border-radius:999px;padding:.15rem .55rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase}
+    .sidebar-nav{flex:1;padding:1rem 0}
+    .nav-section-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted2);padding:.5rem 1.25rem .3rem;margin-top:.25rem}
+    .nav-item{display:flex;align-items:center;gap:.7rem;padding:.6rem 1.25rem;font-size:.875rem;font-weight:500;color:var(--text3);cursor:pointer;border-left:2px solid transparent;transition:color .15s,background .15s,border-color .15s;user-select:none}
+    .nav-item:hover{color:var(--text2);background:rgba(255,255,255,.03)}
+    .nav-item.active{color:var(--accent-bright);border-left-color:var(--accent-bright);background:var(--accent-glow)}
+    .nav-item svg{width:15px;height:15px;flex-shrink:0;opacity:.8}
+    .nav-item.active svg{opacity:1}
+    .sidebar-footer{padding:1rem 1.25rem;border-top:1px solid var(--border)}
+    .sidebar-user{font-size:.78rem;color:var(--text3);margin-bottom:.6rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .sidebar-logout{width:100%;background:none;border:1px solid var(--border2);color:var(--text3);border-radius:var(--radius-sm);font-size:.8rem;padding:.5rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem}
+    .sidebar-logout:hover{color:var(--text);border-color:var(--border3)}
 
     /* MAIN */
-    .admin-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-    .admin-topbar { background: var(--bg2); border-bottom: 1px solid var(--border); padding: .9rem 2rem; display: flex; align-items: center; justify-content: space-between; }
-    .topbar-title { font-size: 1.05rem; font-weight: 700; }
-    .topbar-sub { font-size: .78rem; color: var(--muted); margin-top: .1rem; }
-    .admin-body { flex: 1; padding: 2rem; }
+    .admin-main{flex:1;display:flex;flex-direction:column;min-width:0}
+    .admin-topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:.9rem 2rem;display:flex;align-items:center;justify-content:space-between}
+    .topbar-title{font-size:1.05rem;font-weight:700}
+    .topbar-sub{font-size:.78rem;color:var(--muted);margin-top:.1rem}
+    .admin-body{flex:1;padding:2rem}
 
     /* STAT CARDS */
-    .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; }
-    .stat-label { font-size: .72rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: .4rem; }
-    .stat-value { font-size: 2rem; font-weight: 800; line-height: 1; }
-    .stat-value.accent { color: var(--accent-bright); }
-    .stat-value.blue   { color: var(--blue); }
-    .stat-value.yellow { color: var(--yellow); }
+    .stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem;margin-bottom:2rem}
+    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem}
+    .stat-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.4rem}
+    .stat-value{font-size:2rem;font-weight:800;line-height:1}
+    .stat-value.accent{color:var(--accent-bright)}
+    .stat-value.blue{color:var(--blue)}
+    .stat-value.yellow{color:var(--yellow)}
 
     /* PLAN PILLS */
-    .plan-list { display: flex; flex-wrap: wrap; gap: .75rem; margin-bottom: 2rem; }
-    .plan-pill { display: flex; align-items: center; gap: .6rem; background: var(--surface2); border: 1px solid var(--border2); border-radius: 999px; padding: .4rem 1rem; font-size: .875rem; }
-    .plan-pill .pill-name { font-weight: 600; text-transform: capitalize; }
-    .plan-pill .pill-count { color: var(--accent-bright); font-weight: 700; }
+    .plan-list{display:flex;flex-wrap:wrap;gap:.75rem;margin-bottom:2rem}
+    .plan-pill{display:flex;align-items:center;gap:.6rem;background:var(--surface2);border:1px solid var(--border2);border-radius:999px;padding:.4rem 1rem;font-size:.875rem}
+    .plan-pill .pill-name{font-weight:600;text-transform:capitalize}
+    .plan-pill .pill-count{color:var(--accent-bright);font-weight:700}
 
     /* TABLE */
-    .tbl-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: .84rem; }
-    th { text-align: left; color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .07em; padding: .6rem .75rem; border-bottom: 1px solid var(--border); white-space: nowrap; }
-    td { padding: .65rem .75rem; border-bottom: 1px solid var(--border); color: var(--text2); vertical-align: top; }
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: rgba(255,255,255,.02); }
-    .badge { display: inline-block; font-size: .7rem; font-weight: 700; padding: .15rem .55rem; border-radius: 999px; text-transform: capitalize; }
-    .badge-active   { background: rgba(34,197,94,.12);  color: var(--green); }
-    .badge-trial    { background: rgba(96,165,250,.12);  color: var(--blue); }
-    .badge-inactive { background: rgba(248,113,113,.12); color: var(--red); }
-    .badge-pro      { background: var(--accent-glow);    color: var(--accent-bright); }
-    .badge-free     { background: rgba(90,113,148,.12);  color: var(--muted); }
+    .tbl-wrap{overflow-x:auto}
+    table{width:100%;border-collapse:collapse;font-size:.84rem}
+    th{text-align:left;color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;padding:.6rem .75rem;border-bottom:1px solid var(--border);white-space:nowrap}
+    td{padding:.65rem .75rem;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:top}
+    tr:last-child td{border-bottom:none}
+    tr:hover td{background:rgba(255,255,255,.02)}
+    .badge{display:inline-block;font-size:.7rem;font-weight:700;padding:.15rem .55rem;border-radius:999px;text-transform:capitalize}
+    .badge-active{background:rgba(34,197,94,.12);color:var(--green)}
+    .badge-trial{background:rgba(96,165,250,.12);color:var(--blue)}
+    .badge-inactive{background:rgba(248,113,113,.12);color:var(--red)}
+    .badge-pro{background:var(--accent-glow);color:var(--accent-bright)}
+    .badge-free{background:rgba(90,113,148,.12);color:var(--muted)}
+    .badge-admin{background:rgba(250,204,21,.12);color:var(--yellow)}
 
     /* PAGINATION */
-    .pager { display: flex; align-items: center; gap: 1rem; margin-top: 1.5rem; }
-    .pager-btn { background: var(--surface2); border: 1px solid var(--border2); color: var(--text2); border-radius: var(--radius-sm); font-size: .8rem; padding: .45rem .9rem; cursor: pointer; }
-    .pager-btn:disabled { opacity: .35; cursor: default; }
-    .pager-btn:not(:disabled):hover { border-color: var(--border3); color: var(--text); }
-    .pager-info { font-size: .8rem; color: var(--muted); }
+    .pager{display:flex;align-items:center;gap:1rem;margin-top:1.5rem}
+    .pager-btn{background:var(--surface2);border:1px solid var(--border2);color:var(--text2);border-radius:var(--radius-sm);font-size:.8rem;padding:.45rem .9rem;cursor:pointer}
+    .pager-btn:disabled{opacity:.35;cursor:default}
+    .pager-btn:not(:disabled):hover{border-color:var(--border3);color:var(--text)}
+    .pager-info{font-size:.8rem;color:var(--muted)}
 
     /* MISC */
-    .loading { color: var(--muted); font-size: .875rem; padding: 2rem 0; }
-    .err-msg  { color: var(--red); font-size: .875rem; padding: 1rem 0; }
+    .loading{color:var(--muted);font-size:.875rem;padding:2rem 0}
+    .err-msg{color:var(--red);font-size:.875rem;padding:1rem 0}
 
     /* MESSAGE CARDS */
-    .msg-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: .85rem; }
-    .msg-meta { display: flex; align-items: center; gap: .75rem; margin-bottom: .75rem; flex-wrap: wrap; }
-    .msg-name  { font-weight: 600; font-size: .9rem; }
-    .msg-email { font-size: .8rem; color: var(--text3); }
-    .msg-date  { font-size: .75rem; color: var(--muted); margin-left: auto; }
-    .msg-subject { font-size: .875rem; font-weight: 600; margin-bottom: .5rem; color: var(--text); }
-    .msg-body  { font-size: .84rem; color: var(--text2); line-height: 1.65; white-space: pre-wrap; }
+    .msg-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:.85rem}
+    .msg-meta{display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem;flex-wrap:wrap}
+    .msg-name{font-weight:600;font-size:.9rem}
+    .msg-email{font-size:.8rem;color:var(--text3)}
+    .msg-date{font-size:.75rem;color:var(--muted);margin-left:auto}
+    .msg-subject{font-size:.875rem;font-weight:600;margin-bottom:.5rem;color:var(--text)}
+    .msg-body{font-size:.84rem;color:var(--text2);line-height:1.65;white-space:pre-wrap}
 
     /* PANELS */
-    .panel { display: none; }
-    .panel.active { display: block; }
+    .panel{display:none}
+    .panel.active{display:block}
 
-    @media (max-width: 640px) {
-      .admin-sidebar { display: none; }
-      .admin-body { padding: 1rem; }
-    }
+    @media(max-width:640px){.admin-sidebar{display:none}.admin-body{padding:1rem}}
   </style>
 </head>
 <body>
 
-<!-- LOCK SCREEN -->
-<div id="lock-screen">
-  <div class="lock-card">
+<!-- ── SIGN IN SCREEN ─────────────────────────────────────────────────── -->
+<div id="screen-login" class="auth-wrap">
+  <div class="auth-card">
     <div>
-      <div class="lock-title"><em style="font-style:normal;color:#a78bfa">Nyx</em>Prism Admin</div>
-      <div class="lock-sub" style="margin-top:.4rem">Enter your admin secret to continue.</div>
+      <div class="auth-title"><em style="font-style:normal;color:#a78bfa">Nyx</em>Prism Admin</div>
+      <div class="auth-sub" style="margin-top:.35rem">Sign in with your NyxPrism account.</div>
     </div>
-    <input class="lock-input" type="password" id="secret-input" placeholder="Admin secret" autocomplete="off" />
-    <button class="lock-btn" id="unlock-btn">Unlock</button>
-    <div class="lock-error" id="lock-error">Incorrect secret or server not configured.</div>
+    <div class="field"><label>Email</label><input type="email" id="login-email" autocomplete="email" /></div>
+    <div class="field"><label>Password</label><input type="password" id="login-pass" autocomplete="current-password" /></div>
+    <button class="btn-primary" id="login-btn">Sign In</button>
+    <div class="auth-err" id="login-err"></div>
+    <div class="auth-link">Not an admin yet? <button id="go-claim">Activate admin access</button></div>
   </div>
 </div>
 
-<!-- ADMIN SHELL -->
+<!-- ── CLAIM ADMIN SCREEN ─────────────────────────────────────────────── -->
+<div id="screen-claim" class="auth-wrap" style="display:none">
+  <div class="auth-card">
+    <div>
+      <div class="auth-title">Activate Admin</div>
+      <div class="auth-sub" style="margin-top:.35rem">Sign in then enter the <code style="color:var(--accent-bright);font-family:'JetBrains Mono',monospace;font-size:.8rem">ADMIN_SECRET</code> once. After this you only need your email &amp; password.</div>
+    </div>
+    <div class="field"><label>Email</label><input type="email" id="claim-email" autocomplete="email" /></div>
+    <div class="field"><label>Password</label><input type="password" id="claim-pass" autocomplete="current-password" /></div>
+    <div class="field"><label>Admin Secret <span style="color:var(--muted)">(one-time)</span></label><input type="password" id="claim-secret" autocomplete="off" style="font-family:'JetBrains Mono',monospace" /></div>
+    <button class="btn-primary" id="claim-btn">Activate</button>
+    <div class="auth-err" id="claim-err"></div>
+    <div class="auth-link"><button id="go-login">Back to sign in</button></div>
+  </div>
+</div>
+
+<!-- ── ADMIN SHELL ────────────────────────────────────────────────────── -->
 <div id="admin-shell">
   <div class="admin-layout">
-
-    <!-- Sidebar -->
     <aside class="admin-sidebar">
       <div class="sidebar-brand">
         <div class="sidebar-wordmark"><em>Nyx</em>Prism</div>
@@ -181,14 +181,14 @@
         </div>
       </nav>
       <div class="sidebar-footer">
+        <div class="sidebar-user" id="sidebar-email"></div>
         <button class="sidebar-logout" id="logout-btn">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          Log Out
+          Sign Out
         </button>
       </div>
     </aside>
 
-    <!-- Main -->
     <div class="admin-main">
       <div class="admin-topbar">
         <div>
@@ -197,21 +197,15 @@
         </div>
       </div>
       <div class="admin-body">
-
-        <!-- Overview panel -->
         <div class="panel active" id="panel-overview">
           <div class="stat-grid" id="stat-grid"><div class="loading">Loading stats...</div></div>
           <div id="plan-breakdown"></div>
         </div>
-
-        <!-- Users panel -->
         <div class="panel" id="panel-users">
           <div class="tbl-wrap">
             <table>
-              <thead>
-                <tr><th>Email</th><th>Name</th><th>Plan</th><th>Status</th><th>Trial</th><th>Period End</th><th>Joined</th></tr>
-              </thead>
-              <tbody id="users-tbody"><tr><td colspan="7" class="loading">Loading...</td></tr></tbody>
+              <thead><tr><th>Email</th><th>Name</th><th>Plan</th><th>Status</th><th>Admin</th><th>Joined</th></tr></thead>
+              <tbody id="users-tbody"><tr><td colspan="6" class="loading">Loading...</td></tr></tbody>
             </table>
           </div>
           <div class="pager" id="users-pager" style="display:none">
@@ -220,8 +214,6 @@
             <button class="pager-btn" id="users-next">Next</button>
           </div>
         </div>
-
-        <!-- Messages panel -->
         <div class="panel" id="panel-messages">
           <div id="messages-list"><div class="loading">Loading...</div></div>
           <div class="pager" id="messages-pager" style="display:none">
@@ -230,72 +222,149 @@
             <button class="pager-btn" id="msgs-next">Next</button>
           </div>
         </div>
-
       </div>
     </div>
   </div>
 </div>
 
-<script>
+<script type="module">
+import { initializeApp }                    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+                                             from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
 const API = 'https://nyxprism-production.up.railway.app';
-let adminSecret = '';
+
+const app  = initializeApp({
+  apiKey:            "AIzaSyD7bj__SwM4gE_yDnM9jjmzOgh6mX4NiD0",
+  authDomain:        "nyxprism-2a817.firebaseapp.com",
+  projectId:         "nyxprism-2a817",
+  storageBucket:     "nyxprism-2a817.firebasestorage.app",
+  messagingSenderId: "388040998105",
+  appId:             "1:388040998105:web:8e3fbfd27db0fdd60dd2c8",
+});
+const auth = getAuth(app);
 
 const PANEL_META = {
-  overview: { title: 'Overview',  sub: 'Summary of all activity' },
-  users:    { title: 'Users',     sub: 'All registered accounts' },
-  messages: { title: 'Messages',  sub: 'Contact form submissions' },
+  overview: { title:'Overview',  sub:'Summary of all activity' },
+  users:    { title:'Users',     sub:'All registered accounts' },
+  messages: { title:'Messages',  sub:'Contact form submissions' },
 };
 
-async function apiFetch(path) {
-  const res = await fetch(`${API}${path}`, { headers: { 'x-admin-secret': adminSecret } });
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+// ── Helpers ────────────────────────────────────────────────────────────────
+async function getToken() {
+  const user = auth.currentUser;
+  if (!user) throw new Error('Not signed in.');
+  return user.getIdToken();
+}
+
+async function apiFetch(path, opts = {}) {
+  const token = await getToken();
+  const res = await fetch(`${API}${path}`, {
+    ...opts,
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', ...(opts.headers || {}) },
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || `${res.status} ${res.statusText}`);
+  }
   return res.json();
 }
-function fmt(d) {
-  if (!d) return '—';
-  return new Date(d).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
-}
-function esc(s) {
-  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function planBadge(p) {
-  const c = { pro:'badge-pro', trial:'badge-trial', free:'badge-free' }[p] || 'badge-free';
-  return `<span class="badge ${c}">${p||'free'}</span>`;
-}
-function statusBadge(s) {
-  const c = { active:'badge-active', trialing:'badge-trial', canceled:'badge-inactive', past_due:'badge-inactive', inactive:'badge-inactive' }[s] || 'badge-inactive';
-  return `<span class="badge ${c}">${s||'inactive'}</span>`;
+
+function fmt(d) { return d ? new Date(d).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}) : '—'; }
+function esc(s) { return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function planBadge(p)   { const c={pro:'badge-pro',trial:'badge-trial',free:'badge-free'}[p]||'badge-free'; return `<span class="badge ${c}">${p||'free'}</span>`; }
+function statusBadge(s) { const c={active:'badge-active',trialing:'badge-trial',canceled:'badge-inactive',past_due:'badge-inactive',inactive:'badge-inactive'}[s]||'badge-inactive'; return `<span class="badge ${c}">${s||'inactive'}</span>`; }
+
+function showScreen(id) {
+  ['screen-login','screen-claim'].forEach(s => {
+    document.getElementById(s).style.display = s === id ? 'flex' : 'none';
+  });
+  document.getElementById('admin-shell').style.display = 'none';
 }
 
-// Lock screen
-document.getElementById('unlock-btn').addEventListener('click', tryUnlock);
-document.getElementById('secret-input').addEventListener('keydown', e => { if (e.key === 'Enter') tryUnlock(); });
+// ── Sign-in ────────────────────────────────────────────────────────────────
+document.getElementById('login-btn').addEventListener('click', doLogin);
+document.getElementById('login-pass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+document.getElementById('go-claim').addEventListener('click', () => showScreen('screen-claim'));
+document.getElementById('go-login').addEventListener('click', () => showScreen('screen-login'));
 
-async function tryUnlock() {
-  const secret = document.getElementById('secret-input').value.trim();
-  if (!secret) return;
-  adminSecret = secret;
-  const errEl = document.getElementById('lock-error');
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-err');
+  const btn   = document.getElementById('login-btn');
+  if (!email || !pass) return;
   errEl.style.display = 'none';
+  btn.disabled = true; btn.textContent = 'Signing in...';
   try {
-    await apiFetch('/api/admin/stats');
-    document.getElementById('lock-screen').style.display = 'none';
-    document.getElementById('admin-shell').style.display = 'block';
-    loadOverview();
-  } catch {
+    await signInWithEmailAndPassword(auth, email, pass);
+    // onAuthStateChanged will handle the rest
+  } catch (err) {
+    errEl.textContent = firebaseErr(err.code);
     errEl.style.display = 'block';
-    adminSecret = '';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Sign In';
   }
 }
 
-document.getElementById('logout-btn').addEventListener('click', () => {
-  adminSecret = '';
-  document.getElementById('admin-shell').style.display = 'none';
-  document.getElementById('lock-screen').style.display = 'flex';
-  document.getElementById('secret-input').value = '';
+// ── Claim admin ────────────────────────────────────────────────────────────
+document.getElementById('claim-btn').addEventListener('click', doClaim);
+
+async function doClaim() {
+  const email  = document.getElementById('claim-email').value.trim();
+  const pass   = document.getElementById('claim-pass').value;
+  const secret = document.getElementById('claim-secret').value.trim();
+  const errEl  = document.getElementById('claim-err');
+  const btn    = document.getElementById('claim-btn');
+  if (!email || !pass || !secret) { errEl.textContent = 'All fields required.'; errEl.style.display = 'block'; return; }
+  errEl.style.display = 'none';
+  btn.disabled = true; btn.textContent = 'Activating...';
+  try {
+    const cred = await signInWithEmailAndPassword(auth, email, pass);
+    const token = await cred.user.getIdToken();
+    const res = await fetch(`${API}/api/admin/claim`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret }),
+    });
+    const body = await res.json();
+    if (!res.ok) throw new Error(body.error || 'Failed');
+    // Admin claimed — onAuthStateChanged will open the shell
+    showScreen('screen-login');
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Activate';
+  }
+}
+
+// ── Auth state ─────────────────────────────────────────────────────────────
+onAuthStateChanged(auth, async user => {
+  if (!user) { showScreen('screen-login'); return; }
+  // Verify admin status
+  try {
+    await apiFetch('/api/admin/stats'); // will 403 if not admin
+    document.getElementById('screen-login').style.display = 'none';
+    document.getElementById('screen-claim').style.display = 'none';
+    document.getElementById('admin-shell').style.display  = 'block';
+    document.getElementById('sidebar-email').textContent  = user.email;
+    loadOverview();
+  } catch (err) {
+    if (err.message.includes('Not an admin') || err.message.includes('403')) {
+      showScreen('screen-claim');
+      document.getElementById('claim-err').textContent = 'Your account is not an admin yet. Enter the secret to activate.';
+      document.getElementById('claim-err').style.display = 'block';
+    } else {
+      showScreen('screen-login');
+    }
+  }
 });
 
-// Navigation
+// ── Sign out ───────────────────────────────────────────────────────────────
+document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+
+// ── Navigation ─────────────────────────────────────────────────────────────
 document.querySelectorAll('.nav-item[data-panel]').forEach(item => {
   item.addEventListener('click', () => switchPanel(item.dataset.panel));
 });
@@ -310,7 +379,7 @@ function switchPanel(name) {
   if (name === 'messages' && !msgsLoaded)    loadMessages(1);
 }
 
-// Overview
+// ── Overview ───────────────────────────────────────────────────────────────
 async function loadOverview() {
   try {
     const data = await apiFetch('/api/admin/stats');
@@ -321,84 +390,93 @@ async function loadOverview() {
     document.getElementById('plan-breakdown').innerHTML =
       `<div style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.75rem">Plan Breakdown</div>
        <div class="plan-list">${data.plans.map(p=>`<div class="plan-pill"><span class="pill-name">${esc(p.plan)}</span><span class="pill-count">${p.count}</span></div>`).join('')}</div>`;
-    document.getElementById('nav-user-count').textContent = data.totalUsers || '';
-    document.getElementById('nav-msg-count').textContent  = data.totalMessages || '';
+    document.getElementById('nav-user-count').textContent = data.totalUsers||'';
+    document.getElementById('nav-msg-count').textContent  = data.totalMessages||'';
   } catch (err) {
     document.getElementById('stat-grid').innerHTML = `<p class="err-msg">Failed: ${esc(err.message)}</p>`;
   }
 }
 
-// Users
-let usersPage = 1, userTotal = 0, usersLoaded = false;
-const USERS_LIMIT = 50;
+// ── Users ──────────────────────────────────────────────────────────────────
+let usersPage=1, userTotal=0, usersLoaded=false;
+const USERS_LIMIT=50;
 
 async function loadUsers(page) {
-  usersLoaded = true;
-  usersPage = page;
-  document.getElementById('users-tbody').innerHTML = '<tr><td colspan="7" class="loading">Loading...</td></tr>';
+  usersLoaded=true; usersPage=page;
+  document.getElementById('users-tbody').innerHTML = '<tr><td colspan="6" class="loading">Loading...</td></tr>';
   try {
     const data = await apiFetch(`/api/admin/users?page=${page}&limit=${USERS_LIMIT}`);
     userTotal = data.total;
     document.getElementById('users-tbody').innerHTML = data.users.length
-      ? data.users.map(u => `<tr>
+      ? data.users.map(u=>`<tr>
           <td>${esc(u.email)}</td>
           <td>${esc([u.first_name,u.last_name].filter(Boolean).join(' ')||'—')}</td>
           <td>${planBadge(u.plan)}</td>
           <td>${statusBadge(u.subscription_status)}</td>
-          <td>${u.trial_active?'<span class="badge badge-trial">Yes</span>':'—'}</td>
-          <td>${fmt(u.current_period_end)}</td>
+          <td>${u.is_admin?'<span class="badge badge-admin">Admin</span>':'—'}</td>
           <td>${fmt(u.created_at)}</td>
         </tr>`).join('')
-      : '<tr><td colspan="7" style="color:var(--muted)">No users yet.</td></tr>';
+      : '<tr><td colspan="6" style="color:var(--muted)">No users yet.</td></tr>';
     const pager = document.getElementById('users-pager');
-    pager.style.display = 'flex';
-    document.getElementById('users-prev').disabled = page <= 1;
-    document.getElementById('users-next').disabled = page * USERS_LIMIT >= userTotal;
+    pager.style.display='flex';
+    document.getElementById('users-prev').disabled = page<=1;
+    document.getElementById('users-next').disabled = page*USERS_LIMIT>=userTotal;
     document.getElementById('users-info').textContent = `${(page-1)*USERS_LIMIT+1}–${Math.min(page*USERS_LIMIT,userTotal)} of ${userTotal}`;
-  } catch (err) {
-    document.getElementById('users-tbody').innerHTML = `<tr><td colspan="7" class="err-msg">Error: ${esc(err.message)}</td></tr>`;
+  } catch(err) {
+    document.getElementById('users-tbody').innerHTML = `<tr><td colspan="6" class="err-msg">Error: ${esc(err.message)}</td></tr>`;
   }
 }
-document.getElementById('users-prev').addEventListener('click', () => loadUsers(usersPage - 1));
-document.getElementById('users-next').addEventListener('click', () => loadUsers(usersPage + 1));
+document.getElementById('users-prev').addEventListener('click', ()=>loadUsers(usersPage-1));
+document.getElementById('users-next').addEventListener('click', ()=>loadUsers(usersPage+1));
 
-// Messages
-let msgsPage = 1, msgsTotal = 0, msgsLoaded = false;
-const MSGS_LIMIT = 20;
+// ── Messages ───────────────────────────────────────────────────────────────
+let msgsPage=1, msgsTotal=0, msgsLoaded=false;
+const MSGS_LIMIT=20;
 
 async function loadMessages(page) {
-  msgsLoaded = true;
-  msgsPage = page;
-  document.getElementById('messages-list').innerHTML = '<div class="loading">Loading...</div>';
+  msgsLoaded=true; msgsPage=page;
+  document.getElementById('messages-list').innerHTML='<div class="loading">Loading...</div>';
   try {
     const data = await apiFetch(`/api/admin/messages?page=${page}&limit=${MSGS_LIMIT}`);
     msgsTotal = data.total;
     if (!data.messages.length) {
-      document.getElementById('messages-list').innerHTML = '<p style="color:var(--muted);font-size:.875rem">No messages yet.</p>';
-      document.getElementById('messages-pager').style.display = 'none';
+      document.getElementById('messages-list').innerHTML='<p style="color:var(--muted);font-size:.875rem">No messages yet.</p>';
+      document.getElementById('messages-pager').style.display='none';
       return;
     }
-    document.getElementById('messages-list').innerHTML = data.messages.map(m => `
+    document.getElementById('messages-list').innerHTML = data.messages.map(m=>`
       <div class="msg-card">
         <div class="msg-meta">
-          <span class="msg-name">${esc((m.first_name||'')+' '+(m.last_name||'')).trim()}</span>
+          <span class="msg-name">${esc(((m.first_name||'')+' '+(m.last_name||'')).trim())}</span>
           <span class="msg-email">${esc(m.email||'')}</span>
           <span class="msg-date">${fmt(m.created_at)}</span>
         </div>
         <div class="msg-subject">${esc(m.subject||'')}</div>
         <div class="msg-body">${esc(m.message||'')}</div>
       </div>`).join('');
-    const pager = document.getElementById('messages-pager');
-    pager.style.display = 'flex';
-    document.getElementById('msgs-prev').disabled = page <= 1;
-    document.getElementById('msgs-next').disabled = page * MSGS_LIMIT >= msgsTotal;
-    document.getElementById('msgs-info').textContent = `${(page-1)*MSGS_LIMIT+1}–${Math.min(page*MSGS_LIMIT,msgsTotal)} of ${msgsTotal}`;
-  } catch (err) {
-    document.getElementById('messages-list').innerHTML = `<p class="err-msg">Error: ${esc(err.message)}</p>`;
+    const pager=document.getElementById('messages-pager');
+    pager.style.display='flex';
+    document.getElementById('msgs-prev').disabled=page<=1;
+    document.getElementById('msgs-next').disabled=page*MSGS_LIMIT>=msgsTotal;
+    document.getElementById('msgs-info').textContent=`${(page-1)*MSGS_LIMIT+1}–${Math.min(page*MSGS_LIMIT,msgsTotal)} of ${msgsTotal}`;
+  } catch(err) {
+    document.getElementById('messages-list').innerHTML=`<p class="err-msg">Error: ${esc(err.message)}</p>`;
   }
 }
-document.getElementById('msgs-prev').addEventListener('click', () => loadMessages(msgsPage - 1));
-document.getElementById('msgs-next').addEventListener('click', () => loadMessages(msgsPage + 1));
+document.getElementById('msgs-prev').addEventListener('click', ()=>loadMessages(msgsPage-1));
+document.getElementById('msgs-next').addEventListener('click', ()=>loadMessages(msgsPage+1));
+
+// ── Firebase error codes ───────────────────────────────────────────────────
+function firebaseErr(code) {
+  const map = {
+    'auth/invalid-email':'Invalid email address.',
+    'auth/user-not-found':'No account with that email.',
+    'auth/wrong-password':'Incorrect password.',
+    'auth/too-many-requests':'Too many attempts. Try again later.',
+    'auth/invalid-credential':'Invalid email or password.',
+  };
+  return map[code] || 'Sign-in failed. Please try again.';
+}
 </script>
 </body>
 </html>

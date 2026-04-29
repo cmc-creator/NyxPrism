@@ -44,7 +44,7 @@ app.use(cors({
     cb(new Error(`CORS: origin ${origin} not allowed`));
   },
   methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-admin-secret'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 app.use(express.json({ limit: '2mb' }));

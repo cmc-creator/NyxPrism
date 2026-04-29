@@ -14,9 +14,13 @@ CREATE TABLE IF NOT EXISTS users (
   trial_start            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   trial_active           BOOLEAN NOT NULL DEFAULT TRUE,
   current_period_end     TIMESTAMPTZ,
+  is_admin               BOOLEAN NOT NULL DEFAULT FALSE,
   created_at             TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at             TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Add is_admin to pre-existing deployments
+ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT FALSE;
 
 CREATE TABLE IF NOT EXISTS contact_messages (
   id         SERIAL PRIMARY KEY,
