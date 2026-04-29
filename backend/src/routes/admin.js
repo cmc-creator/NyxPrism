@@ -47,17 +47,20 @@ router.post('/claim', async (req, res) => {
   const token = authHeader.slice(7);
   try {
     const decoded = await admin.auth().verifyIdToken(token);
+    // Upsert: create the row if it doesn't exist, then set is_admin = TRUE
     const result  = await pool.query(
-      `UPDATE users
-       SET is_admin = TRUE, firebase_uid = $1
-       WHERE firebase_uid = $1 OR email = $2
+      `INSERT INTO users (firebase_uid, email, plan, subscription_status, trial_start, is_admin)
+       VALUES ($1, $2, 'trial', 'trialing', NOW(), TRUE)
+       ON CONFLICT (firebase_uid) DO UPDATE SET is_admin = TRUE, email = EXCLUDED.email
        RETURNING email`,
       [decoded.uid, decoded.email]
     );
-    if (!result.rows.length) {
-      return res.status(404).json({ error: 'No NyxPrism account found for that email. Sign up first at nyxprism.com.' });
-    }
-    res.json({ ok: true, email: result.rows[0].email });
+    // Also handle the case where the row exists with a matching email but different/null firebase_uid
+    await pool.query(
+      `UPDATE users SET is_admin = TRUE, firebase_uid = $1 WHERE email = $2 AND firebase_uid != $1`,
+      [decoded.uid, decoded.email]
+    );
+    res.json({ ok: true, email: result.rows[0]?.email || decoded.email });
   } catch {
     return res.status(401).json({ error: 'Invalid or expired token.' });
   }
