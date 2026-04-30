@@ -976,12 +976,20 @@ function renderStats(s){
 
 const loading=document.getElementById('loading-screen'),content=document.getElementById('main-content');
 
+// Safety-net: force-hide spinner after 12s if JS hangs
+const _loadTimeout=setTimeout(()=>{
+  if(loading&&loading.style.display!=='none'){
+    loading.style.opacity='0';
+    setTimeout(()=>{loading.style.display='none';if(content)content.style.display='block';},300);
+  }
+},12000);
+
 // Handle Stripe redirect back to dashboard
 const _urlP=new URLSearchParams(window.location.search);
 if(_urlP.get('checkout')==='success'){window.__checkoutSuccess=true;history.replaceState({},'',window.location.pathname);}
 
 onAuthStateChanged(auth,async user=>{
-  if(!user){window.location.replace('login.html');return;}
+  if(!user){clearTimeout(_loadTimeout);window.location.replace('login.html');return;}
   let firstName='',plan='trial',trialStart=null,subscriptionStatus=null,currentPeriodEnd=null,createdAt=null;
   // Primary: backend API (reflects latest Stripe state)
   try{
@@ -1019,6 +1027,7 @@ onAuthStateChanged(auth,async user=>{
   if(accPR&&accPD&&currentPeriodEnd){accPR.style.display='flex';accPD.textContent=currentPeriodEnd.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});}
   const accUpBtn=document.getElementById('acc-upgrade-btn');if(accUpBtn&&window.__nyxBlocked)accUpBtn.style.display='inline-flex';
   renderStats(Stats.get());
+  clearTimeout(_loadTimeout);
   loading.style.opacity='0';
   setTimeout(()=>loading.style.display='none',300);
   content.style.display='block';
