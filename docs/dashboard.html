@@ -450,7 +450,7 @@
 
   <!-- PROTECT -->
   <div class="panel" id="panel-protect">
-    <div class="page-header"><h1>Protect PDF</h1><p>Encrypt your PDF — generates the CLI command since browser encryption is not supported by pdf-lib.</p></div>
+    <div class="page-header"><h1>Protect PDF</h1><p>Password-protect your PDF — encrypted entirely in your browser.</p></div>
     <div class="drop-zone" id="protect-drop"><input type="file" id="protect-file" accept=".pdf" /><div class="drop-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div><div class="drop-title">Drop your PDF here</div><div class="drop-sub">or click to browse</div></div>
     <div class="file-list" id="protect-file-list"></div>
     <div id="protect-options" style="display:none">
@@ -461,7 +461,7 @@
         </div>
       </div>
       <div class="result-box" id="protect-result"></div>
-      <div class="btn-row"><button class="btn btn-primary" id="protect-run"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>Generate CLI Command</button><button class="btn btn-secondary" id="protect-clear">Clear</button></div>
+      <div class="btn-row"><button class="btn btn-primary" id="protect-run"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>Protect PDF</button><button class="btn btn-secondary" id="protect-clear">Clear</button></div>
     </div>
   </div>
 
@@ -485,22 +485,19 @@
 
   <!-- OCR -->
   <div class="panel" id="panel-ocr">
-    <div class="page-header"><h1>OCR Scan</h1><p>Extract text from scanned PDFs or image-based documents.</p></div>
-    <div class="result-box info visible" style="margin-bottom:1.25rem">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      <div class="rtext">OCR requires <strong>Tesseract</strong> installed locally. Drop your file to get the CLI command to copy and run.</div>
-    </div>
-    <div class="drop-zone" id="ocr-drop"><input type="file" id="ocr-file" accept=".pdf" /><div class="drop-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2"/><rect x="7" y="7" width="10" height="10"/></svg></div><div class="drop-title">Drop your scanned PDF here</div><div class="drop-sub">Generates the CLI command for you to run locally</div></div>
+    <div class="page-header"><h1>OCR Scan</h1><p>Extract text from scanned PDFs or image-based documents — processed entirely in your browser.</p></div>
+    <div class="drop-zone" id="ocr-drop"><input type="file" id="ocr-file" accept=".pdf" /><div class="drop-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2"/><rect x="7" y="7" width="10" height="10"/></svg></div><div class="drop-title">Drop your scanned PDF here</div><div class="drop-sub">or click to browse — text extracted in-browser, nothing uploaded</div></div>
     <div class="file-list" id="ocr-file-list"></div>
     <div id="ocr-options" style="display:none">
       <div class="card"><div class="card-title">OCR Settings</div>
         <div class="form-row">
-          <div class="form-group"><label class="form-label">Language</label><select class="form-select" id="ocr-lang"><option value="eng">English</option><option value="fra">French</option><option value="deu">German</option><option value="spa">Spanish</option><option value="ita">Italian</option><option value="por">Portuguese</option><option value="chi_sim">Chinese (Simplified)</option><option value="jpn">Japanese</option><option value="ara">Arabic</option><option value="rus">Russian</option></select></div>
-          <div class="form-group"><label class="form-label">DPI</label><select class="form-select" id="ocr-dpi"><option value="150">150 (fast)</option><option value="200">200</option><option value="300" selected>300 (recommended)</option><option value="400">400 (high quality)</option></select></div>
+          <div class="form-group"><label class="form-label">Language</label><select class="form-select" id="ocr-lang"><option value="eng">English</option><option value="fra">French</option><option value="deu">German</option><option value="spa">Spanish</option><option value="ita">Italian</option><option value="por">Portuguese</option><option value="jpn">Japanese</option><option value="ara">Arabic</option><option value="rus">Russian</option></select></div>
+          <div class="form-group"><label class="form-label">Scale (quality)</label><select class="form-select" id="ocr-dpi"><option value="1.5">1.5× (fast)</option><option value="2" selected>2× (recommended)</option><option value="3">3× (high quality)</option><option value="4">4× (maximum)</option></select></div>
         </div>
       </div>
-      <div class="card-title" style="margin-bottom:.6rem">Your CLI Command</div>
-      <div class="code-pill" style="margin-bottom:1.25rem;width:100%"><span id="ocr-cmd" style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">nyx ocr scan.pdf --lang eng --dpi 300</span><button class="copy-btn" id="ocr-copy-cmd" title="Copy command"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+      <div class="result-box" id="ocr-result"></div>
+      <div id="ocr-text-wrap" style="display:none;margin-bottom:1rem"><textarea id="ocr-text-out" readonly style="width:100%;min-height:200px;padding:1rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.85rem;resize:vertical;font-family:inherit"></textarea></div>
+      <div class="btn-row"><button class="btn btn-primary" id="ocr-run"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2"/><rect x="7" y="7" width="10" height="10"/></svg>Run OCR</button><button class="btn btn-secondary" id="ocr-download-txt" style="display:none">Download .txt</button><button class="btn btn-secondary" id="ocr-clear">Clear</button></div>
     </div>
   </div>
 
@@ -847,11 +844,15 @@ function setupDrop(dropEl,input,onFiles){
 
 async function loadPdfLib(){
   if(window.PDFLib)return window.PDFLib;
-  return new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js';s.onload=()=>resolve(window.PDFLib);s.onerror=reject;document.head.appendChild(s);});
+  return new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://unpkg.com/@cantoo/pdf-lib/dist/pdf-lib.min.js';s.onload=()=>resolve(window.PDFLib);s.onerror=reject;document.head.appendChild(s);});
 }
 async function loadPdfjsLib(){
   if(window.pdfjsLib)return window.pdfjsLib;
   return new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';s.onload=()=>{window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';resolve(window.pdfjsLib);};s.onerror=reject;document.head.appendChild(s);});
+}
+async function loadTesseract(){
+  if(window.Tesseract)return window.Tesseract;
+  return new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://unpkg.com/tesseract.js@5/dist/tesseract.min.js';s.onload=()=>resolve(window.Tesseract);s.onerror=reject;document.head.appendChild(s);});
 }
 
 // SPLIT
@@ -917,7 +918,7 @@ async function loadPdfjsLib(){
       const pct=Math.round((1-out.byteLength/bytes.byteLength)*100);
       triggerDownload(new Blob([out],{type:'application/pdf'}),cFile.name.replace('.pdf','_compressed.pdf'));
       Stats.inc(Math.max(0,Math.round((bytes.byteLength-out.byteLength)/1048576*10)/10));
-      showResult(resultEl,'success',`${fmtSize(bytes.byteLength)} &rarr; ${fmtSize(out.byteLength)} (${pct>=0?pct+'% smaller':'no change — try the CLI for deeper compression'})`);
+      showResult(resultEl,'success',`${fmtSize(bytes.byteLength)} &rarr; ${fmtSize(out.byteLength)} (${pct>=0?pct+'% smaller':'already optimized'})`);
       toast('Compression complete!');
     }catch(err){showResult(resultEl,'error','Error: '+err.message);toast(err.message,'error');}
     btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Compress PDF';
@@ -954,13 +955,27 @@ async function loadPdfjsLib(){
   let pFile=null;
   const dropEl=document.getElementById('protect-drop'),input=document.getElementById('protect-file'),listEl=document.getElementById('protect-file-list'),optsEl=document.getElementById('protect-options'),resultEl=document.getElementById('protect-result');
   setupDrop(dropEl,input,f=>{pFile=f[0];listEl.innerHTML='';listEl.appendChild(renderFileItem(pFile,()=>{pFile=null;optsEl.style.display='none';resultEl.className='result-box';}));optsEl.style.display='block';});
-  document.getElementById('protect-run').addEventListener('click',()=>{
+  document.getElementById('protect-run').addEventListener('click',async()=>{
     if(!pFile)return toast('Select a PDF first','error');
-    const pass=document.getElementById('protect-pass').value;if(!pass)return toast('Enter a password','error');
-    const owner=document.getElementById('protect-owner').value||pass;
-    const cmd=`nyx protect "${pFile.name}" --password "${pass}" --owner-password "${owner}"`;
-    showResult(resultEl,'info',`PDF encryption requires the CLI. Copy and run this command:<br><br><code style="font-family:monospace;font-size:.8rem">${cmd}</code>`);
-    navigator.clipboard.writeText(cmd).then(()=>toast('CLI command copied!'));
+    const pass=document.getElementById('protect-pass').value.trim();if(!pass)return toast('Enter a password','error');
+    const owner=document.getElementById('protect-owner').value.trim()||pass;
+    const btn=document.getElementById('protect-run');btn.disabled=true;btn.innerHTML='<span class="inline-spinner"></span>Encrypting…';
+    try{
+      const{PDFDocument}=await loadPdfLib();
+      const bytes=await pFile.arrayBuffer();
+      const pdfDoc=await PDFDocument.load(bytes);
+      const out=await pdfDoc.save({
+        encryption:{
+          userPassword:pass,
+          ownerPassword:owner,
+          permissions:{printing:'highResolution',modifying:false,copying:false,annotating:false,fillingForms:false,contentAccessibility:true,documentAssembly:false}
+        }
+      });
+      triggerDownload(new Blob([out],{type:'application/pdf'}),pFile.name.replace(/\.pdf$/i,'_protected.pdf'));
+      showResult(resultEl,'success',`PDF protected — password-encrypted and ready to download.`);
+      toast('PDF protected!');
+    }catch(err){showResult(resultEl,'error','Encryption error: '+err.message);toast(err.message,'error');}
+    btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> Protect PDF';
   });
   document.getElementById('protect-clear').addEventListener('click',()=>{pFile=null;listEl.innerHTML='';optsEl.style.display='none';resultEl.className='result-box';input.value='';});
 }
@@ -988,13 +1003,49 @@ async function loadPdfjsLib(){
 
 // OCR
 {
-  let oFile=null;
-  const dropEl=document.getElementById('ocr-drop'),input=document.getElementById('ocr-file'),listEl=document.getElementById('ocr-file-list'),optsEl=document.getElementById('ocr-options'),cmdEl=document.getElementById('ocr-cmd');
-  function updateCmd(){const fname=oFile?`"${oFile.name}"`:'scan.pdf';const lang=document.getElementById('ocr-lang').value;const dpi=document.getElementById('ocr-dpi').value;cmdEl.textContent=`nyx ocr ${fname} --lang ${lang} --dpi ${dpi}`;}
-  setupDrop(dropEl,input,f=>{oFile=f[0];listEl.innerHTML='';listEl.appendChild(renderFileItem(oFile,()=>{oFile=null;optsEl.style.display='none';updateCmd();}));optsEl.style.display='block';updateCmd();});
-  document.getElementById('ocr-lang').addEventListener('change',updateCmd);
-  document.getElementById('ocr-dpi').addEventListener('change',updateCmd);
-  document.getElementById('ocr-copy-cmd').addEventListener('click',()=>{navigator.clipboard.writeText(cmdEl.textContent).then(()=>toast('Command copied!'));});
+  let oFile=null,ocrText='';
+  const dropEl=document.getElementById('ocr-drop'),input=document.getElementById('ocr-file'),listEl=document.getElementById('ocr-file-list'),optsEl=document.getElementById('ocr-options'),resultEl=document.getElementById('ocr-result'),textWrap=document.getElementById('ocr-text-wrap'),textOut=document.getElementById('ocr-text-out'),dlBtn=document.getElementById('ocr-download-txt');
+  setupDrop(dropEl,input,f=>{oFile=f[0];listEl.innerHTML='';listEl.appendChild(renderFileItem(oFile,()=>{oFile=null;optsEl.style.display='none';resultEl.className='result-box';textWrap.style.display='none';dlBtn.style.display='none';ocrText='';}));optsEl.style.display='block';});
+  document.getElementById('ocr-run').addEventListener('click',async()=>{
+    if(!oFile)return toast('Select a PDF first','error');
+    const btn=document.getElementById('ocr-run');btn.disabled=true;btn.innerHTML='<span class="inline-spinner"></span>Loading OCR engine…';
+    textWrap.style.display='none';dlBtn.style.display='none';ocrText='';resultEl.className='result-box';
+    try{
+      const scale=parseFloat(document.getElementById('ocr-dpi').value)||2;
+      const lang=document.getElementById('ocr-lang').value;
+      const pdfjs=await loadPdfjsLib();
+      const bytes=await oFile.arrayBuffer();
+      const pdf=await pdfjs.getDocument({data:new Uint8Array(bytes)}).promise;
+      const Tesseract=await loadTesseract();
+      btn.innerHTML='<span class="inline-spinner"></span>Starting OCR engine…';
+      const worker=await Tesseract.createWorker(lang,1,{
+        workerPath:'https://unpkg.com/tesseract.js@5/dist/worker.min.js',
+        corePath:'https://unpkg.com/tesseract.js-core@5/tesseract-core-simd-lstm.wasm.js',
+        langPath:'https://tessdata.projectnaptha.com/4.0.0_best',
+      });
+      const lines=[];
+      for(let i=1;i<=pdf.numPages;i++){
+        btn.innerHTML=`<span class="inline-spinner"></span>OCR page ${i}/${pdf.numPages}…`;
+        const page=await pdf.getPage(i);const vp=page.getViewport({scale});
+        const canvas=document.createElement('canvas');canvas.width=vp.width;canvas.height=vp.height;
+        await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
+        const{data:{text}}=await worker.recognize(canvas);
+        if(pdf.numPages>1)lines.push(`--- Page ${i} ---`);
+        lines.push(text.trim());
+      }
+      await worker.terminate();
+      ocrText=lines.join('
+
+');
+      textOut.value=ocrText;textWrap.style.display='block';dlBtn.style.display='';
+      Stats.inc(0);
+      showResult(resultEl,'success',`OCR complete — ${pdf.numPages} page${pdf.numPages!==1?'s':''} processed.`);
+      toast('OCR complete!');
+    }catch(err){showResult(resultEl,'error','OCR error: '+err.message);toast(err.message,'error');}
+    btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2"/><rect x="7" y="7" width="10" height="10"/></svg> Run OCR';
+  });
+  document.getElementById('ocr-download-txt').addEventListener('click',()=>{if(!ocrText)return;triggerDownload(new Blob([ocrText],{type:'text/plain'}),oFile.name.replace(/\.pdf$/i,'.txt'));});
+  document.getElementById('ocr-clear').addEventListener('click',()=>{oFile=null;listEl.innerHTML='';optsEl.style.display='none';resultEl.className='result-box';textWrap.style.display='none';dlBtn.style.display='none';ocrText='';input.value='';});
 }
 
 // ROTATE
