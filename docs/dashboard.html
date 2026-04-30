@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -1315,9 +1315,7 @@ async function loadTesseract(){
         lines.push(text.trim());
       }
       await worker.terminate();
-      ocrText=lines.join('
-
-');
+      ocrText=lines.join('\n\n');
       textOut.value=ocrText;textWrap.style.display='block';dlBtn.style.display='';
       Stats.inc(0);
       showResult(resultEl,'success',`OCR complete — ${pdf.numPages} page${pdf.numPages!==1?'s':''} processed.`);
