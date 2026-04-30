@@ -167,8 +167,9 @@
 <div id="lockScreen">
   <div class="lock-box">
     <h1>NyxPrism Admin</h1>
-    <p>Enter your admin secret to continue</p>
-    <input type="password" id="secretInput" placeholder="Admin secret" autocomplete="off"/>
+    <p>Sign in with your admin account</p>
+    <input type="email" id="adminEmail" placeholder="Email address" autocomplete="email" style="margin-bottom:10px"/>
+    <input type="password" id="adminPassword" placeholder="Password" autocomplete="current-password"/>
     <button onclick="doLogin()">Sign In</button>
     <div class="lock-err" id="lockErr"></div>
   </div>
@@ -264,59 +265,98 @@
   </div>
 </div>
 
-<script>
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+const firebaseConfig = {
+  apiKey:            "AIzaSyD7bj__SwM4gE_yDnM9jjmzOgh6mX4NiD0",
+  authDomain:        "nyxprism-2a817.firebaseapp.com",
+  projectId:         "nyxprism-2a817",
+  storageBucket:     "nyxprism-2a817.firebasestorage.app",
+  messagingSenderId: "388040998105",
+  appId:             "1:388040998105:web:8e3fbfd27db0fdd60dd2c8"
+};
+const fbApp  = initializeApp(firebaseConfig);
+const fbAuth = getAuth(fbApp);
+
 const API = 'https://nyxprism-production.up.railway.app/api/admin';
-let adminSecret = '';
+let _idToken = '';
 let currentTab = 'dashboard';
 let editingUserId = null;
 let state = { users: {page:1,search:'',plan:'',status:''}, keys: {page:1}, msgs: {page:1,unread:false} };
 
 // ── Auth ──────────────────────────────────────────────────────────────────
-function headers() { return { 'Content-Type':'application/json', 'x-admin-secret': adminSecret }; }
+function headers() { return { 'Content-Type':'application/json', 'Authorization': 'Bearer ' + _idToken }; }
 
-async function doLogin() {
-  const secret = document.getElementById('secretInput').value.trim();
-  if (!secret) return;
-  document.getElementById('lockErr').textContent = '';
-  try {
-    const r = await fetch(API + '/stats', { headers: { 'x-admin-secret': secret } });
-    if (r.ok) {
-      adminSecret = secret;
-      sessionStorage.setItem('adminSecret', secret);
-      document.getElementById('lockScreen').style.display = 'none';
-      document.getElementById('sidebar').style.display = 'flex';
-      document.getElementById('main').style.display = 'flex';
-      showTab('dashboard');
-    } else {
-      document.getElementById('lockErr').textContent = 'Invalid secret.';
-    }
-  } catch { document.getElementById('lockErr').textContent = 'Connection failed.'; }
+async function refreshToken() {
+  const user = fbAuth.currentUser;
+  if (user) _idToken = await user.getIdToken(true);
+  return _idToken;
 }
 
-function logout() {
-  sessionStorage.removeItem('adminSecret');
-  adminSecret = '';
+window.doLogin = async function() {
+  const email    = document.getElementById('adminEmail').value.trim();
+  const password = document.getElementById('adminPassword').value;
+  if (!email || !password) return;
+  document.getElementById('lockErr').textContent = '';
+  const btn = document.querySelector('#lockScreen button');
+  btn.textContent = 'Signing in...'; btn.disabled = true;
+  try {
+    await signInWithEmailAndPassword(fbAuth, email, password);
+    // onAuthStateChanged handles the rest
+  } catch (err) {
+    const msgs = {
+      'auth/user-not-found': 'No account with that email.',
+      'auth/wrong-password': 'Incorrect password.',
+      'auth/invalid-credential': 'Incorrect email or password.',
+      'auth/too-many-requests': 'Too many attempts — wait a moment.',
+    };
+    document.getElementById('lockErr').textContent = msgs[err.code] || 'Sign-in failed.';
+    btn.textContent = 'Sign In'; btn.disabled = false;
+  }
+};
+
+window.logout = async function() {
+  await signOut(fbAuth);
+  _idToken = '';
   document.getElementById('lockScreen').style.display = 'flex';
   document.getElementById('sidebar').style.display = 'none';
   document.getElementById('main').style.display = 'none';
-  document.getElementById('secretInput').value = '';
-}
+  document.getElementById('adminEmail').value = '';
+  document.getElementById('adminPassword').value = '';
+};
 
-document.getElementById('secretInput').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+document.getElementById('adminPassword').addEventListener('keydown', e => { if (e.key === 'Enter') window.doLogin(); });
+document.getElementById('adminEmail').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('adminPassword').focus(); });
 
-// Check session on load
-window.addEventListener('DOMContentLoaded', () => {
-  const saved = sessionStorage.getItem('adminSecret');
-  if (saved) {
-    adminSecret = saved;
-    fetch(API + '/stats', { headers: { 'x-admin-secret': adminSecret } }).then(r => {
+// Check session on load via Firebase
+onAuthStateChanged(fbAuth, async user => {
+  if (user) {
+    try {
+      _idToken = await user.getIdToken();
+      const r = await fetch(API + '/stats', { headers: headers() });
       if (r.ok) {
         document.getElementById('lockScreen').style.display = 'none';
         document.getElementById('sidebar').style.display = 'flex';
         document.getElementById('main').style.display = 'flex';
         showTab('dashboard');
-      } else { sessionStorage.removeItem('adminSecret'); }
-    }).catch(() => {});
+      } else if (r.status === 403) {
+        document.getElementById('lockErr').textContent = 'Your account does not have admin access.';
+        document.getElementById('lockScreen').style.display = 'flex';
+        await signOut(fbAuth);
+      } else {
+        document.getElementById('lockScreen').style.display = 'flex';
+      }
+    } catch {
+      document.getElementById('lockScreen').style.display = 'flex';
+    }
+    const btn = document.querySelector('#lockScreen button');
+    if (btn) { btn.textContent = 'Sign In'; btn.disabled = false; }
+  } else {
+    document.getElementById('lockScreen').style.display = 'flex';
+    document.getElementById('sidebar').style.display = 'none';
+    document.getElementById('main').style.display = 'none';
   }
 });
 
