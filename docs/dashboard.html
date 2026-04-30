@@ -184,6 +184,17 @@
     .account-badge-trial{display:inline-block;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.3);color:var(--accent-bright);font-size:.7rem;font-weight:700;padding:.18rem .5rem;border-radius:999px;text-transform:uppercase;letter-spacing:.05em}
     .account-badge-inactive{display:inline-block;background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.3);color:var(--red);font-size:.7rem;font-weight:700;padding:.18rem .5rem;border-radius:999px;text-transform:uppercase;letter-spacing:.05em}
     @media(max-width:760px){.sidebar{display:none}.main{padding:1.25rem}}
+    /* ── AI Assist strips (embedded in every tool panel) ─────────────────── */
+    .ai-assist-strip{margin-top:1.5rem;padding-top:1.1rem;border-top:1px solid var(--border2)}
+    .ai-assist-toggle{display:inline-flex;align-items:center;gap:.4rem;background:none;border:1px solid rgba(167,139,250,.3);color:var(--accent-bright);border-radius:7px;padding:.42rem .9rem;font-size:.8rem;font-weight:600;cursor:pointer;transition:background .15s,border-color .15s}
+    .ai-assist-toggle:hover{background:rgba(124,58,237,.13);border-color:var(--accent)}
+    .ai-assist-toggle svg{flex-shrink:0;width:13px;height:13px}
+    .ai-assist-area{margin-top:.8rem;border:1px solid rgba(124,58,237,.22);border-radius:10px;background:var(--bg2);overflow:hidden}
+    .ai-assist-area .chat-messages{max-height:220px;overflow-y:auto;padding:.8rem;display:flex;flex-direction:column;gap:.45rem}
+    .ai-assist-area .chat-input-row{border-top:1px solid var(--border2);padding:.55rem;display:flex;gap:.42rem}
+    .ai-assist-area .chat-input{flex:1;background:var(--bg);border:1px solid var(--border2);border-radius:6px;padding:.42rem .7rem;color:var(--text);font-size:.82rem;outline:none;transition:border-color .15s}
+    .ai-assist-area .chat-input:focus{border-color:var(--accent)}
+    .ai-assist-area .chat-send-btn{padding:.4rem .58rem;min-width:34px;height:34px;display:flex;align-items:center;justify-content:center}
   </style>
 </head>
 <body>
@@ -646,6 +657,7 @@
     <div class="tab-bar">
       <button class="tab-btn active" data-tab="pdf2img">PDF → Images</button>
       <button class="tab-btn" data-tab="img2pdf">Images → PDF</button>
+      <button class="tab-btn" data-tab="pdf2text">PDF → Text</button>
     </div>
     <div class="tab-pane active" id="tab-pdf2img">
       <div class="drop-zone" id="p2i-drop"><input type="file" id="p2i-file" accept=".pdf" /><div class="drop-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div><div class="drop-title">Drop your PDF here</div><div class="drop-sub">Each page becomes a separate image file</div></div>
@@ -669,6 +681,24 @@
         <div class="result-box" id="i2p-result"></div>
         <div class="btn-row"><button class="btn btn-primary" id="i2p-run"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>Build PDF</button><button class="btn btn-secondary" id="i2p-clear">Clear</button></div>
       </div>
+    <div class="tab-pane" id="tab-pdf2text">
+      <div class="drop-zone" id="p2t-drop"><input type="file" id="p2t-file" accept=".pdf" /><div class="drop-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div><div class="drop-title">Drop your PDF here</div><div class="drop-sub">Text is extracted instantly. Scanned &amp; image-only PDFs are OCR&#39;d automatically.</div></div>
+      <div class="file-list" id="p2t-file-list"></div>
+      <div id="p2t-options" style="display:none">
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem"><div class="card-title" style="margin-bottom:0">Extracted Text</div><span id="p2t-stats" style="font-size:.72rem;color:var(--muted)"></span></div>
+          <textarea id="p2t-text" rows="10" style="width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:.75rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;resize:vertical;outline:none;line-height:1.6;transition:border-color .15s" placeholder="Extracted text will appear here — you can edit it before downloading…" spellcheck="false"></textarea>
+          <div style="font-size:.72rem;color:var(--muted);margin-top:.35rem">Tip: scanned &amp; image-only PDFs are OCR’d automatically using Tesseract.js — no upload required.</div>
+        </div>
+        <div class="result-box" id="p2t-result"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="p2t-run"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>Extract Text</button>
+          <button class="btn btn-secondary" id="p2t-copy"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>Copy</button>
+          <button class="btn btn-secondary" id="p2t-dl"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download .txt</button>
+          <button class="btn btn-ghost" id="p2t-clear">Clear</button>
+        </div>
+      </div>
+    </div>
     </div>
   </div>
 
@@ -1668,6 +1698,163 @@ async function loadTesseract(){
     });
     document.getElementById('i2p-clear').addEventListener('click',()=>{i2pFiles=[];listEl.innerHTML='';optsEl.style.display='none';resultEl.className='result-box';input.value='';});
   }
+    // PDF → Text (extracts text from PDF; auto-OCRs image/scanned PDFs)
+  {
+    let p2tFile=null;
+    const dropEl=document.getElementById('p2t-drop'),input=document.getElementById('p2t-file'),listEl=document.getElementById('p2t-file-list'),optsEl=document.getElementById('p2t-options'),resultEl=document.getElementById('p2t-result'),textArea=document.getElementById('p2t-text');
+    setupDrop(dropEl,input,f=>{
+      p2tFile=f[0];listEl.innerHTML='';
+      listEl.appendChild(renderFileItem(p2tFile,()=>{p2tFile=null;optsEl.style.display='none';resultEl.className='result-box';textArea.value='';document.getElementById('p2t-stats').textContent='';}));
+      optsEl.style.display='block';
+    });
+    document.getElementById('p2t-run').addEventListener('click',async()=>{
+      if(!p2tFile)return toast('Select a PDF first','error');
+      const btn=document.getElementById('p2t-run');btn.disabled=true;btn.innerHTML='<span class="inline-spinner"></span>Extracting…';
+      textArea.value='';document.getElementById('p2t-stats').textContent='';resultEl.className='result-box';
+      try{
+        const pdfjs=await loadPdfjsLib();const bytes=await p2tFile.arrayBuffer();const pdf=await pdfjs.getDocument({data:bytes}).promise;
+        let text='';
+        for(let i=1;i<=pdf.numPages;i++){
+          btn.innerHTML=`<span class="inline-spinner"></span>Page ${i}/${pdf.numPages}…`;
+          const page=await pdf.getPage(i);const c=await page.getTextContent();
+          text+=(pdf.numPages>1?`--- Page ${i} ---\n`:'')+c.items.map(it=>it.str).join(' ').trim()+'\n\n';
+        }
+        const meaningful=text.replace(/--- Page \d+ ---\n/g,'').replace(/\s+/g,'').length;
+        if(meaningful/pdf.numPages<30){
+          showResult(resultEl,'info','Image PDF detected — running OCR. This may take a moment…');
+          btn.innerHTML='<span class="inline-spinner"></span>Loading OCR…';
+          const T=await loadTesseract();const worker=await T.createWorker('eng');
+          text='';
+          for(let i=1;i<=pdf.numPages;i++){
+            btn.innerHTML=`<span class="inline-spinner"></span>OCR ${i}/${pdf.numPages}…`;
+            const page=await pdf.getPage(i);const vp=page.getViewport({scale:2});
+            const canvas=document.createElement('canvas');canvas.width=vp.width;canvas.height=vp.height;
+            await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
+            const{data:{text:t}}=await worker.recognize(canvas);
+            text+=(pdf.numPages>1?`--- Page ${i} ---\n`:'')+t.trim()+'\n\n';
+          }
+          await worker.terminate();
+        }
+        textArea.value=text.trim();
+        const words=text.trim().split(/\s+/).filter(Boolean).length;
+        document.getElementById('p2t-stats').textContent=`${pdf.numPages} page${pdf.numPages!==1?'s':''} · ${words.toLocaleString()} words`;
+        showResult(resultEl,'success',`Text extracted from ${pdf.numPages} page${pdf.numPages!==1?'s':''}.`);
+        toast('Text extracted!');Stats.inc(0);
+      }catch(err){showResult(resultEl,'error','Error: '+err.message);toast(err.message,'error');}
+      btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Extract Text';
+    });
+    document.getElementById('p2t-copy').addEventListener('click',()=>{
+      if(!textArea.value)return toast('Nothing to copy','error');
+      navigator.clipboard.writeText(textArea.value).then(()=>toast('Copied!')).catch(()=>toast('Copy failed','error'));
+    });
+    document.getElementById('p2t-dl').addEventListener('click',()=>{
+      if(!textArea.value||!p2tFile)return toast('Extract text first','error');
+      triggerDownload(new Blob([textArea.value],{type:'text/plain;charset=utf-8'}),p2tFile.name.replace(/\.pdf$/i,'.txt'));
+    });
+    document.getElementById('p2t-clear').addEventListener('click',()=>{
+      p2tFile=null;listEl.innerHTML='';optsEl.style.display='none';resultEl.className='result-box';
+      textArea.value='';document.getElementById('p2t-stats').textContent='';input.value='';
+    });
+  }
+}
+
+// AI ASSIST — embedded chat helper on every tool panel
+{
+  const _aiSessions={};
+  const _SEND_ICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>';
+  const _SPARK_ICON='<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>';
+
+  const _AI_PANELS=[
+    {p:'split',      tip:'Ask: "My PDF has 80 pages — help me split it by chapter" or "split every 5 pages"'},
+    {p:'merge',      tip:'Ask: "I have 3 reports, what order should I merge them?" or "combine alphabetically"'},
+    {p:'compress',   tip:'Ask: "What quality should I pick for emailing this PDF?" or "make it under 1 MB"'},
+    {p:'watermark',  tip:'Ask: "What text should I watermark on a draft contract?" or "where to place it"'},
+    {p:'protect',    tip:'Ask: "Is my password strong enough?" or "what level of encryption do I need?"'},
+    {p:'extract',    tip:'Ask: "How do I extract just the appendix?" or "pull out pages 10–20"'},
+    {p:'ocr',        tip:'Ask: "My scan is blurry, will OCR work?" or "which language should I pick?"'},
+    {p:'rotate',     tip:'Ask: "Some pages are sideways, what angle?" or "which pages need rotating?"'},
+    {p:'editpdf',    tip:'Ask: "I need to remove blank pages" or "how do I reorder pages?"'},
+    {p:'convert',    tip:'Ask: "PNG or JPEG for my presentation?" or "how do I get editable text from a scan?"'},
+    {p:'sign',       tip:'Ask: "Where should I place my signature?" or "what size looks professional?"'},
+    {p:'annotate',   tip:'Ask: "What annotations are useful for a legal review?" or "how to mark corrections"'},
+    {p:'pagemanager',tip:'Ask: "How do I fix my page order?" or "remove the cover and back page"'},
+    {p:'number',     tip:'Ask: "Should I skip page 1?" or "what format for a report: 1/20 or just 1?"'},
+    {p:'redact',     tip:'Ask: "What sensitive info should I black out?" or "how do I verify nothing slipped through?"'},
+    {p:'batch',      tip:'Ask: "Best quality for 50 scanned pages?" or "will this preserve my PDF bookmarks?"'},
+  ];
+
+  _AI_PANELS.forEach(({p,tip})=>{
+    const panelEl=document.getElementById('panel-'+p);
+    if(!panelEl)return;
+    const strip=document.createElement('div');
+    strip.className='ai-assist-strip';
+    strip.innerHTML=
+      `<button class="ai-assist-toggle" data-ai-tool="${p}">${_SPARK_ICON}\u00a0Ask AI</button>`+
+      `<div class="ai-assist-area" id="ai-area-${p}" style="display:none">`+
+        `<div class="chat-messages" id="ai-msgs-${p}"><div style="font-size:.77rem;color:var(--muted);padding:.05rem 0">${tip}</div></div>`+
+        `<div class="chat-input-row">`+
+          `<input class="chat-input" id="ai-input-${p}" placeholder="Ask anything\u2026" autocomplete="off"/>`+
+          `<button class="btn btn-primary chat-send-btn" id="ai-send-${p}">${_SEND_ICON}</button>`+
+        `</div>`+
+      `</div>`;
+    panelEl.appendChild(strip);
+  });
+
+  async function _runAiAssist(toolName){
+    const msgsEl=document.getElementById('ai-msgs-'+toolName);
+    const inputEl=document.getElementById('ai-input-'+toolName);
+    const sendEl=document.getElementById('ai-send-'+toolName);
+    if(!msgsEl||!inputEl)return;
+    const msg=inputEl.value.trim();if(!msg||sendEl.disabled)return;
+    inputEl.value='';
+    if(!_aiSessions[toolName])_aiSessions[toolName]=[];
+    const userDiv=document.createElement('div');userDiv.className='chat-bubble user';userDiv.textContent=msg;
+    msgsEl.appendChild(userDiv);msgsEl.scrollTop=msgsEl.scrollHeight;
+    _aiSessions[toolName].push({role:'user',content:msg});
+    const typing=document.createElement('div');typing.className='chat-bubble ai typing';
+    typing.innerHTML='<span class="inline-spinner"></span>\u00a0Claude is thinking\u2026';
+    msgsEl.appendChild(typing);msgsEl.scrollTop=msgsEl.scrollHeight;
+    sendEl.disabled=true;inputEl.disabled=true;
+    try{
+      const token=await auth.currentUser?.getIdToken(true);
+      if(!token)throw new Error('Please sign in again');
+      const res=await fetch(`${API}/api/ai-assist`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},
+        body:JSON.stringify({tool:toolName,messages:_aiSessions[toolName]})
+      });
+      const data=await res.json();
+      if(!res.ok)throw new Error(data.error||`Error ${res.status}`);
+      typing.remove();
+      const reply=data.reply||'';
+      _aiSessions[toolName].push({role:'assistant',content:reply});
+      const aiDiv=document.createElement('div');aiDiv.className='chat-bubble ai';aiDiv.textContent=reply;
+      msgsEl.appendChild(aiDiv);msgsEl.scrollTop=msgsEl.scrollHeight;
+    }catch(err){
+      typing.remove();
+      const errDiv=document.createElement('div');errDiv.className='chat-bubble ai';errDiv.textContent='Sorry: '+err.message;
+      msgsEl.appendChild(errDiv);toast(err.message,'error');
+    }
+    sendEl.disabled=false;inputEl.disabled=false;inputEl.focus();
+  }
+
+  document.querySelectorAll('.ai-assist-toggle').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const tool=btn.dataset.aiTool;
+      const area=document.getElementById('ai-area-'+tool);
+      if(!area)return;
+      const open=area.style.display!=='none';
+      area.style.display=open?'none':'block';
+      if(!open){const inp=document.getElementById('ai-input-'+tool);if(inp)inp.focus();}
+    });
+  });
+
+  _AI_PANELS.forEach(({p})=>{
+    const s=document.getElementById('ai-send-'+p);
+    const i=document.getElementById('ai-input-'+p);
+    if(s)s.addEventListener('click',()=>_runAiAssist(p));
+    if(i)i.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();_runAiAssist(p);}});
+  });
 }
 
 // ═══════════════════════════════════════════════════════

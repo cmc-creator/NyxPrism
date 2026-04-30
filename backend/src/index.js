@@ -12,6 +12,7 @@ import stripeRouter   from './routes/stripe.js';
 import licenseRouter  from './routes/license.js';
 import userRouter     from './routes/user.js';
 import aiSplitRouter  from './routes/ai-split.js';
+import aiAssistRouter from './routes/ai-assist.js';
 import apiKeysRouter  from './routes/api-keys.js';
 import adminRouter    from './routes/admin.js';
 
@@ -88,6 +89,7 @@ app.use('/api/stripe',    stripeRouter);
 app.use('/api/license',   licenseRouter);
 app.use('/api/user',      userRouter);
 app.use('/api/ai-split',  aiSplitLimiter, aiSplitRouter);
+app.use('/api/ai-assist', aiSplitLimiter, aiAssistRouter);
 app.post('/api/keys',     keyCreateLimiter);
 app.use('/api/keys',      apiKeysRouter);
 app.use('/api/admin',     adminRouter);
