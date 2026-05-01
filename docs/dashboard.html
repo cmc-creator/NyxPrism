@@ -183,7 +183,16 @@
     .account-badge-active{display:inline-block;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.3);color:var(--green);font-size:.7rem;font-weight:700;padding:.18rem .5rem;border-radius:999px;text-transform:uppercase;letter-spacing:.05em}
     .account-badge-trial{display:inline-block;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.3);color:var(--accent-bright);font-size:.7rem;font-weight:700;padding:.18rem .5rem;border-radius:999px;text-transform:uppercase;letter-spacing:.05em}
     .account-badge-inactive{display:inline-block;background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.3);color:var(--red);font-size:.7rem;font-weight:700;padding:.18rem .5rem;border-radius:999px;text-transform:uppercase;letter-spacing:.05em}
-    @media(max-width:760px){.sidebar{display:none}.main{padding:1.25rem}}
+    .hamburger-btn{display:none;background:none;border:none;cursor:pointer;padding:.45rem .5rem;border-radius:6px;color:var(--text);transition:background .15s;flex-shrink:0}
+    .hamburger-btn:hover{background:var(--surface)}
+    @media(max-width:760px){
+      .hamburger-btn{display:flex;align-items:center;justify-content:center}
+      .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:200;transform:translateX(-100%);transition:transform .25s cubic-bezier(.4,0,.2,1);box-shadow:4px 0 24px rgba(0,0,0,.4)}
+      .sidebar.open{transform:translateX(0)}
+      .sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:199;display:none}
+      .sidebar-overlay.open{display:block}
+      .main{padding:1.25rem}
+    }
     /* ── AI Assist strips (embedded in every tool panel) ─────────────────── */
     .ai-assist-strip{margin-top:1.5rem;padding-top:1.1rem;border-top:1px solid var(--border2)}
     .ai-assist-toggle{display:inline-flex;align-items:center;gap:.4rem;background:none;border:1px solid rgba(167,139,250,.3);color:var(--accent-bright);border-radius:7px;padding:.42rem .9rem;font-size:.8rem;font-weight:600;cursor:pointer;transition:background .15s,border-color .15s}
@@ -218,6 +227,7 @@
 </div>
 
 <nav>
+  <button class="hamburger-btn" id="hamburger-btn" aria-label="Open menu" style="margin-right:.5rem"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
   <div class="nav-brand">
     <div class="nav-brand-logo">
       <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
@@ -255,6 +265,7 @@
 </nav>
 
 <div class="app-shell">
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
 <aside class="sidebar">
   <div class="sidebar-section">Overview</div>
   <button class="nav-item active" data-panel="home">
@@ -658,6 +669,7 @@
       <button class="tab-btn active" data-tab="pdf2img">PDF → Images</button>
       <button class="tab-btn" data-tab="img2pdf">Images → PDF</button>
       <button class="tab-btn" data-tab="pdf2text">PDF → Text</button>
+      <button class="tab-btn" data-tab="pdf2search">PDF → Searchable</button>
     </div>
     <div class="tab-pane active" id="tab-pdf2img">
       <div class="drop-zone" id="p2i-drop"><input type="file" id="p2i-file" accept=".pdf" /><div class="drop-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div><div class="drop-title">Drop your PDF here</div><div class="drop-sub">Each page becomes a separate image file</div></div>
@@ -696,6 +708,21 @@
           <button class="btn btn-secondary" id="p2t-copy"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>Copy</button>
           <button class="btn btn-secondary" id="p2t-dl"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download .txt</button>
           <button class="btn btn-ghost" id="p2t-clear">Clear</button>
+        </div>
+      </div>
+    </div>
+    <div class="tab-pane" id="tab-pdf2search">
+      <div class="drop-zone" id="p2s-drop"><input type="file" id="p2s-file" accept=".pdf" /><div class="drop-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><circle cx="11" cy="13" r="3"/><path d="M13.5 15.5L17 19"/></svg></div><div class="drop-title">Drop your PDF here</div><div class="drop-sub">Embeds an invisible OCR text layer — makes scanned &amp; image PDFs fully searchable.</div></div>
+      <div class="file-list" id="p2s-file-list"></div>
+      <div id="p2s-options" style="display:none">
+        <div class="card"><div class="card-title">OCR Language</div>
+          <div class="form-row"><div class="form-group"><label class="form-label">Language</label><select class="form-select" id="p2s-lang"><option value="eng">English</option><option value="fra">French</option><option value="deu">German</option><option value="spa">Spanish</option><option value="por">Portuguese</option><option value="chi_sim">Chinese (Simplified)</option><option value="jpn">Japanese</option><option value="kor">Korean</option><option value="ara">Arabic</option><option value="rus">Russian</option></select></div></div>
+          <div style="font-size:.72rem;color:var(--muted);margin-top:.5rem">The invisible text layer lets you copy, search, and highlight text in any PDF viewer without changing the visual appearance.</div>
+        </div>
+        <div class="result-box" id="p2s-result"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="p2s-run"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>Make Searchable PDF</button>
+          <button class="btn btn-ghost" id="p2s-clear">Clear</button>
         </div>
       </div>
     </div>
@@ -1756,6 +1783,75 @@ async function loadTesseract(){
       textArea.value='';document.getElementById('p2t-stats').textContent='';input.value='';
     });
   }
+  // PDF -> Searchable PDF (invisible OCR text layer)
+  {
+    let p2sFile=null;
+    var p2sDrop=document.getElementById('p2s-drop');
+    var p2sInput=document.getElementById('p2s-file');
+    var p2sList=document.getElementById('p2s-file-list');
+    var p2sOpts=document.getElementById('p2s-options');
+    var p2sRes=document.getElementById('p2s-result');
+    setupDrop(p2sDrop,p2sInput,function(f){
+      p2sFile=f[0];p2sList.innerHTML='';
+      p2sList.appendChild(renderFileItem(p2sFile,function(){p2sFile=null;p2sOpts.style.display='none';p2sRes.className='result-box';}));
+      p2sOpts.style.display='block';
+    });
+    p2sInput&&p2sInput.addEventListener('change',function(){
+      if(this.files[0]){p2sFile=this.files[0];p2sList.innerHTML='';p2sList.appendChild(renderFileItem(p2sFile,function(){p2sFile=null;p2sOpts.style.display='none';p2sRes.className='result-box';}));p2sOpts.style.display='block';}
+    });
+    document.getElementById('p2s-clear')&&document.getElementById('p2s-clear').addEventListener('click',function(){p2sFile=null;p2sInput.value='';p2sList.innerHTML='';p2sOpts.style.display='none';p2sRes.className='result-box';});
+    document.getElementById('p2s-run')&&document.getElementById('p2s-run').addEventListener('click',async function(){
+      if(!p2sFile)return toast('Select a PDF first','error');
+      var btn=document.getElementById('p2s-run');
+      btn.disabled=true;btn.innerHTML='<span class="inline-spinner"></span> Processing...';
+      var lang=document.getElementById('p2s-lang').value;
+      showResult(p2sRes,'info','Loading PDF...');p2sRes.style.display='block';
+      try{
+        var pdfLibMod=await loadPdfLib();
+        var PDFDocument=pdfLibMod.PDFDocument,rgb=pdfLibMod.rgb,StandardFonts=pdfLibMod.StandardFonts;
+        var pdfjsLib=await loadPdfjsLib();
+        var T=await loadTesseract();
+        var ab=await p2sFile.arrayBuffer();
+        var pdfDoc=await PDFDocument.load(ab.slice(0));
+        var pdfjsDoc=await pdfjsLib.getDocument({data:ab}).promise;
+        var numPages=pdfjsDoc.numPages;
+        var font=await pdfDoc.embedFont(StandardFonts.Helvetica);
+        var pdfPages=pdfDoc.getPages();
+        var worker=await T.createWorker(lang);
+        for(var i=1;i<=numPages;i++){
+          btn.innerHTML='<span class="inline-spinner"></span> OCR '+i+'/'+numPages+'...';
+          showResult(p2sRes,'info','OCR page '+i+' of '+numPages+'...');
+          var page=await pdfjsDoc.getPage(i);
+          var vp=page.getViewport({scale:2.0});
+          var canvas=document.createElement('canvas');canvas.width=vp.width;canvas.height=vp.height;
+          await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
+          var ocr=await worker.recognize(canvas);
+          var data=ocr.data;
+          var pdfPage=pdfPages[i-1];
+          var sz=pdfPage.getSize();var pdfW=sz.width,pdfH=sz.height;
+          var scaleX=pdfW/vp.width,scaleY=pdfH/vp.height;
+          var words=data.words||[];
+          for(var wi=0;wi<words.length;wi++){
+            var word=words[wi];
+            if(!word.text.trim()||word.confidence<30)continue;
+            var wx=word.bbox.x0*scaleX;
+            var wordH=(word.bbox.y1-word.bbox.y0)*scaleY;
+            var wy=pdfH-word.bbox.y1*scaleY;
+            var fontSize=Math.max(1,wordH*0.9);
+            try{pdfPage.drawText(word.text,{x:wx,y:wy,size:fontSize,font:font,color:rgb(1,1,1),opacity:0.01});}catch(e2){}
+          }
+        }
+        await worker.terminate();
+        var out=await pdfDoc.save();
+        var outName=p2sFile.name.replace(/\.pdf$/i,'')+'-searchable.pdf';
+        triggerDownload(new Blob([out],{type:'application/pdf'}),outName);
+        Stats.inc(p2sFile.size/1048576);
+        showResult(p2sRes,'success','Searchable PDF created from '+numPages+' page'+(numPages!==1?'s':'')+'! Download started.');
+        toast('Searchable PDF ready!');
+      }catch(err){showResult(p2sRes,'error','Error: '+err.message);toast(err.message,'error');}
+      btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Make Searchable PDF';
+    });
+  }
 }
 
 // AI ASSIST — embedded chat helper on every tool panel
@@ -2430,6 +2526,18 @@ document.addEventListener('click',e=>{
   if(!text)return;
   navigator.clipboard.writeText(text).then(()=>{btn.style.color='var(--green)';setTimeout(()=>btn.style.color='',1500);toast('Copied!');});
 });
+
+// Mobile sidebar toggle
+{
+  var _ham=document.getElementById('hamburger-btn');
+  var _sidebarEl=document.querySelector('aside.sidebar');
+  var _overlayEl=document.getElementById('sidebar-overlay');
+  function _closeSidebar(){if(_sidebarEl)_sidebarEl.classList.remove('open');if(_overlayEl)_overlayEl.classList.remove('open');}
+  function _toggleSidebar(){if(!_sidebarEl)return;var open=_sidebarEl.classList.contains('open');_sidebarEl.classList.toggle('open',!open);if(_overlayEl)_overlayEl.classList.toggle('open',!open);}
+  if(_ham)_ham.addEventListener('click',_toggleSidebar);
+  if(_overlayEl)_overlayEl.addEventListener('click',_closeSidebar);
+  document.querySelectorAll('.nav-item').forEach(function(btn){btn.addEventListener('click',function(){if(window.innerWidth<=760)_closeSidebar();});});
+}
 </script>
 </body>
 </html>
