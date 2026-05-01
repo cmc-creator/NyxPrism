@@ -8,3 +8,11 @@ dist/
 build/
 *.egg
 .eggs/
+
+# Firebase / service account credentials — NEVER commit these
+*adminsdk*.json
+*service-account*.json
+firebase-*.json
+.env
+.env.local
+.env.*.local

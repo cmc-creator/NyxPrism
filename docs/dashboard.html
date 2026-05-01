@@ -18,6 +18,23 @@
       --red:#f87171;--red-bg:rgba(248,113,113,.08);--blue:#60a5fa;--blue-bg:rgba(96,165,250,.08);
       --radius-sm:6px;--radius:10px;--radius-lg:14px;--shadow:0 4px 24px rgba(0,0,0,.5);
     }
+    body.light {
+      --bg:#f8fafc;--bg2:#f1f5f9;--surface:#ffffff;--surface2:#f8fafc;--surface3:#f1f5f9;
+      --border:#e2e8f0;--border2:#cbd5e1;--border3:#94a3b8;
+      --text:#0f172a;--text2:#334155;--text3:#64748b;--muted:#94a3b8;--muted2:#cbd5e1;
+      --shadow:0 4px 24px rgba(0,0,0,.08);
+      --accent-glow:rgba(124,58,237,.1);
+    }
+    body.light nav{background:rgba(248,250,252,.95);border-bottom-color:var(--border)}
+    body.light .sidebar{background:var(--surface);border-right-color:var(--border)}
+    body.light .drop-zone{background:var(--surface2)}
+    body.light .drop-zone:hover{background:var(--surface3)}
+    body.light .card{background:var(--surface)}
+    body.light .result-box.info{background:#eff6ff;border-color:#bfdbfe;color:#1e40af}
+    body.light .result-box.success{background:#f0fdf4;border-color:#bbf7d0;color:#166534}
+    body.light .result-box.error{background:#fef2f2;border-color:#fecaca;color:#991b1b}
+    body.light #loading-screen{background:#f8fafc}
+
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     body{background:var(--bg);color:var(--text);font-family:'Inter',-apple-system,sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh}
     a{color:inherit;text-decoration:none} button{font-family:inherit;cursor:pointer} input,select,textarea{font-family:inherit}
@@ -31,6 +48,18 @@
     .nav-brand-name{font-size:.95rem;font-weight:800;letter-spacing:-.025em}
     .nav-brand-name em{color:var(--accent-bright);font-style:normal}
     .nav-sep{flex:1}
+    .theme-toggle{background:none;border:1px solid var(--border2);color:var(--muted);width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+    .theme-toggle:hover{background:var(--surface2);color:var(--text);border-color:var(--border3)}
+    .theme-toggle svg{width:16px;height:16px;pointer-events:none}
+    body:not(.light) .theme-icon-sun{display:none}
+    body.light .theme-icon-moon{display:none}
+    .recent-file-row{display:flex;align-items:center;gap:.6rem;padding:.55rem .6rem;border-radius:8px;border:1px solid var(--border);margin-bottom:.45rem;background:var(--surface);transition:background .12s;cursor:pointer}
+    .recent-file-row:hover{background:var(--surface2)}
+    .recent-file-row svg{width:16px;height:16px;flex-shrink:0;color:var(--muted)}
+    .recent-fname{flex:1;font-size:.8rem;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .recent-meta{font-size:.7rem;color:var(--muted);white-space:nowrap}
+    .recent-tool-badge{font-size:.65rem;font-weight:600;padding:.1rem .4rem;border-radius:4px;background:var(--accent-glow);color:var(--accent-bright);white-space:nowrap}
+
     .nav-plan{font-size:.72rem;font-weight:700;letter-spacing:.06em;padding:.28rem .65rem;border-radius:999px;background:var(--accent-glow);border:1px solid rgba(124,58,237,.3);color:var(--accent-bright);text-transform:uppercase}
     .nav-avatar{width:32px;height:32px;border-radius:50%;border:1px solid var(--border2);background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:var(--accent-bright);cursor:pointer;position:relative}
     .nav-dropdown{position:absolute;top:42px;right:0;min-width:180px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;display:none;z-index:600}
@@ -205,6 +234,11 @@
     .ai-assist-area .chat-input:focus{border-color:var(--accent)}
     .ai-assist-area .chat-send-btn{padding:.4rem .58rem;min-width:34px;height:34px;display:flex;align-items:center;justify-content:center}
   </style>
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://nyxprism.com/dashboard.html" />
+  <meta property="og:title" content="NyxPrism Dashboard — PDF Tools" />
+  <meta property="og:description" content="Professional PDF tools: split, merge, compress, OCR, watermark, sign, annotate and more." />
 </head>
 <body>
 <div id="loading-screen"><div class="spinner"></div></div>
@@ -235,6 +269,10 @@
     <span class="nav-brand-name"><em>Nyx</em>Prism&#8482;</span>
   </div>
   <div class="nav-sep"></div>
+  <button class="theme-toggle" id="theme-toggle" title="Toggle dark/light mode (D)">
+    <svg class="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+    <svg class="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+  </button>
   <span class="nav-plan" id="nav-plan-badge">Professional</span>
   <div class="nav-avatar" id="nav-avatar" tabindex="0">
     <span id="nav-initial">?</span>
@@ -420,6 +458,13 @@
       <span class="label">CLI &nbsp;›</span>
       <div class="code-pill"><span>pip install nyxprism</span><button class="copy-btn" data-copy="pip install nyxprism" title="Copy"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
       <div class="code-pill"><span>nyx --help</span><button class="copy-btn" data-copy="nyx --help" title="Copy"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+    </div>
+    <div style="margin-top:1.75rem">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+        <div class="card-title" style="margin-bottom:0">Recent Files</div>
+        <button id="recent-clear-btn" style="font-size:.72rem;color:var(--muted);background:none;border:none;cursor:pointer;padding:.2rem .4rem;border-radius:4px" title="Clear history">Clear</button>
+      </div>
+      <div id="recent-files-list"><p style="color:var(--muted);font-size:.82rem;padding:.35rem 0">No files processed yet — download a result to see it here.</p></div>
     </div>
   </div>
 
@@ -670,6 +715,7 @@
       <button class="tab-btn" data-tab="img2pdf">Images → PDF</button>
       <button class="tab-btn" data-tab="pdf2text">PDF → Text</button>
       <button class="tab-btn" data-tab="pdf2search">PDF → Searchable</button>
+      <button class="tab-btn" data-tab="pdf2qr">PDF + QR Code</button>
     </div>
     <div class="tab-pane active" id="tab-pdf2img">
       <div class="drop-zone" id="p2i-drop"><input type="file" id="p2i-file" accept=".pdf" /><div class="drop-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div><div class="drop-title">Drop your PDF here</div><div class="drop-sub">Each page becomes a separate image file</div></div>
@@ -723,6 +769,55 @@
         <div class="btn-row">
           <button class="btn btn-primary" id="p2s-run"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>Make Searchable PDF</button>
           <button class="btn btn-ghost" id="p2s-clear">Clear</button>
+        </div>
+      </div>
+    </div>
+    <div class="tab-pane" id="tab-pdf2qr">
+      <div class="drop-zone" id="p2q-drop"><input type="file" id="p2q-file" accept=".pdf" /><div class="drop-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="17" y="17" width="1" height="1"/><rect x="14" y="14" width="1" height="1"/><rect x="20" y="14" width="1" height="1"/><rect x="14" y="20" width="1" height="1"/><rect x="20" y="20" width="1" height="1"/></svg></div><div class="drop-title">Drop your PDF here</div><div class="drop-sub">A QR code will be stamped onto each page</div></div>
+      <div class="file-list" id="p2q-file-list"></div>
+      <div id="p2q-options" style="display:none">
+        <div class="card">
+          <div class="card-title">QR Code Settings</div>
+          <div class="form-row">
+            <div class="form-group" style="flex:2">
+              <label class="form-label">URL or Text to Encode</label>
+              <input class="form-input" type="text" id="p2q-text" placeholder="https://example.com" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Position</label>
+              <select class="form-select" id="p2q-position">
+                <option value="br">Bottom-right</option>
+                <option value="bl">Bottom-left</option>
+                <option value="tr">Top-right</option>
+                <option value="tl">Top-left</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Size (pt)</label>
+              <input class="form-input" type="number" id="p2q-size" value="80" min="30" max="250" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Margin (pt)</label>
+              <input class="form-input" type="number" id="p2q-margin" value="16" min="0" max="100" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Apply to Pages</label>
+              <select class="form-select" id="p2q-pages">
+                <option value="all">All pages</option>
+                <option value="first">First page only</option>
+                <option value="last">Last page only</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="result-box" id="p2q-result"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="p2q-run"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>Add QR Code</button>
+          <button class="btn btn-ghost" id="p2q-clear">Clear</button>
         </div>
       </div>
     </div>
@@ -1130,10 +1225,27 @@ document.getElementById('nav-manage-billing-btn').addEventListener('click',funct
 
 window.__nyxGetToken=()=>auth.currentUser?.getIdToken();
 
+// ── THEME TOGGLE ──
+(function(){
+  var THEME_KEY = "nyx_theme";
+  function applyTheme(mode){
+    if(mode === "light") document.body.classList.add("light");
+    else document.body.classList.remove("light");
+  }
+  var saved = localStorage.getItem(THEME_KEY);
+  if(saved) applyTheme(saved);
+  var toggleBtn = document.getElementById("theme-toggle");
+  if(toggleBtn) toggleBtn.addEventListener("click", function(){
+    var isLight = document.body.classList.toggle("light");
+    localStorage.setItem(THEME_KEY, isLight ? "light" : "dark");
+  });
+})();
+
 const avatar=document.getElementById('nav-avatar');
 document.addEventListener('click',e=>{if(avatar.contains(e.target)){avatar.classList.toggle('open');}else{avatar.classList.remove('open');}});
 
 function switchPanel(name){
+  window.__nyxCurrentPanel=name;
   if(window.__nyxBlocked&&!['home','account','apikeys'].includes(name)){document.getElementById('upgrade-modal').style.display='flex';return;}
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
@@ -1191,6 +1303,16 @@ async function loadPdfjsLib(){
 async function loadTesseract(){
   if(window.Tesseract)return window.Tesseract;
   return new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://unpkg.com/tesseract.js@5/dist/tesseract.min.js';s.onload=()=>resolve(window.Tesseract);s.onerror=reject;document.head.appendChild(s);});
+}
+async function loadQRCode(){
+  if(window.QRCode)return window.QRCode;
+  return new Promise((resolve,reject)=>{
+    const s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js';
+    s.onload=()=>resolve(window.QRCode);
+    s.onerror=reject;
+    document.head.appendChild(s);
+  });
 }
 
 // SPLIT
@@ -1852,6 +1974,85 @@ async function loadTesseract(){
       btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Make Searchable PDF';
     });
   }
+}
+
+// ═══════════════════════════════════════════════════════
+// PDF + QR CODE STAMP
+{
+  let p2qFile = null;
+  const p2qDrop = document.getElementById('p2q-drop');
+  const p2qInput = document.getElementById('p2q-file');
+  const p2qList = document.getElementById('p2q-file-list');
+  const p2qOpts = document.getElementById('p2q-options');
+  const p2qRes = document.getElementById('p2q-result');
+  function p2qSetFile(file) {
+    p2qFile = file;
+    p2qList.innerHTML = '';
+    p2qList.appendChild(renderFileItem(file, () => { p2qFile = null; p2qOpts.style.display = 'none'; p2qRes.className = 'result-box'; }));
+    p2qOpts.style.display = 'block';
+  }
+  if(p2qDrop) setupDrop(p2qDrop, p2qInput, fs => { if(fs[0]) p2qSetFile(fs[0]); });
+  document.getElementById('p2q-clear') && document.getElementById('p2q-clear').addEventListener('click', () => {
+    p2qFile = null; p2qList.innerHTML = ''; p2qOpts.style.display = 'none'; p2qRes.className = 'result-box';
+    document.getElementById('p2q-text').value = '';
+  });
+  document.getElementById('p2q-run') && document.getElementById('p2q-run').addEventListener('click', async () => {
+    if(!p2qFile) return toast('Select a PDF first', 'error');
+    const qrText = (document.getElementById('p2q-text').value || '').trim();
+    if(!qrText) return toast('Enter a URL or text to encode in the QR', 'error');
+    const btn = document.getElementById('p2q-run');
+    btn.disabled = true; btn.innerHTML = '<span class="inline-spinner"></span> Stamping...';
+    showResult(p2qRes, 'info', 'Generating QR code...'); p2qRes.style.display = 'block';
+    try {
+      const QRCode = await loadQRCode();
+      const size = parseInt(document.getElementById('p2q-size').value) || 80;
+      const margin = parseInt(document.getElementById('p2q-margin').value) || 16;
+      const pos = document.getElementById('p2q-position').value;
+      const pages = document.getElementById('p2q-pages').value;
+      // Generate QR as data URL via canvas
+      const qrDataUrl = await QRCode.toDataURL(qrText, { width: 256, margin: 1, errorCorrectionLevel: 'M' });
+      // Fetch as Uint8Array for pdf-lib
+      const qrResp = await fetch(qrDataUrl);
+      const qrBytes = new Uint8Array(await qrResp.arrayBuffer());
+      showResult(p2qRes, 'info', 'Embedding QR into PDF...');
+      const { PDFDocument } = await loadPdfLib();
+      const srcBytes = await p2qFile.arrayBuffer();
+      const pdfDoc = await PDFDocument.load(srcBytes);
+      const qrImage = await pdfDoc.embedPng(qrBytes);
+      const pdfPages = pdfDoc.getPages();
+      const total = pdfPages.length;
+      let indices = [];
+      if(pages === 'first') indices = [0];
+      else if(pages === 'last') indices = [total - 1];
+      else indices = Array.from({length: total}, (_, i) => i);
+      indices.forEach(idx => {
+        const pg = pdfPages[idx];
+        const { width, height } = pg.getSize();
+        let x, y;
+        if(pos === 'br')      { x = width  - size - margin; y = margin; }
+        else if(pos === 'bl') { x = margin;                 y = margin; }
+        else if(pos === 'tr') { x = width  - size - margin; y = height - size - margin; }
+        else                  { x = margin;                 y = height - size - margin; } // tl
+        pg.drawImage(qrImage, { x, y, width: size, height: size });
+      });
+      const out = await pdfDoc.save();
+      const outName = p2qFile.name.replace(/\.pdf$/i, '') + '-qr.pdf';
+      triggerDownload(new Blob([out], { type: 'application/pdf' }), outName);
+      Stats.inc(p2qFile.size / 1048576);
+      showResult(p2qRes, 'success', 'QR code stamped on ' + indices.length + ' page' + (indices.length !== 1 ? 's' : '') + '! Download started.');
+    } catch(err) { showResult(p2qRes, 'error', 'Error: ' + err.message); }
+    finally { btn.disabled = false; btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>Add QR Code'; }
+  });
+  // Tab switching for convert panel
+  document.querySelectorAll('#panel-convert .tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#panel-convert .tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#panel-convert .tab-pane').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      const pane = document.getElementById('tab-' + btn.dataset.tab);
+      if(pane) pane.classList.add('active');
+    });
+  });
 }
 
 // AI ASSIST — embedded chat helper on every tool panel
@@ -2527,6 +2728,75 @@ document.addEventListener('click',e=>{
   navigator.clipboard.writeText(text).then(()=>{btn.style.color='var(--green)';setTimeout(()=>btn.style.color='',1500);toast('Copied!');});
 });
 
+// ── RECENT FILES ──
+var NyxRecents = (function(){
+  var KEY = "nyx_recents_v1";
+  var TOOL_LABELS = {
+    split:"Split",merge:"Merge",compress:"Compress",watermark:"Watermark",protect:"Protect",
+    extract:"Extract",ocr:"OCR",rotate:"Rotate",editpdf:"Edit",convert:"Convert",sign:"Sign",
+    annotate:"Annotate",pagemanager:"Pages",number:"Number",redact:"Redact",batch:"Batch",
+    aisplit:"AI Split",pdf2qr:"QR Stamp"
+  };
+  function get(){ try{ return JSON.parse(localStorage.getItem(KEY))||[]; }catch(e){ return []; } }
+  function add(name, tool, sizeBytes){
+    var arr = get();
+    arr.unshift({name:name, tool:tool||"unknown", size:sizeBytes||0, date:Date.now()});
+    arr = arr.slice(0,10);
+    try{ localStorage.setItem(KEY, JSON.stringify(arr)); }catch(e){}
+    render();
+  }
+  function fmtDate(ts){
+    var d = new Date(ts);
+    return d.toLocaleDateString(undefined,{month:"short",day:"numeric"})+" "+d.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"});
+  }
+  function fmtSize(b){
+    if(!b||b===0) return "";
+    if(b<1024) return b+" B";
+    if(b<1048576) return (b/1024).toFixed(0)+" KB";
+    return (b/1048576).toFixed(1)+" MB";
+  }
+  function render(){
+    var el = document.getElementById("recent-files-list"); if(!el) return;
+    var items = get();
+    if(!items.length){ el.innerHTML = "<p style=\"color:var(--muted);font-size:.82rem;padding:.35rem 0\">No files processed yet — download a result to see it here.</p>"; return; }
+    el.innerHTML = "";
+    items.forEach(function(it){
+      var row = document.createElement("div");
+      row.className = "recent-file-row";
+      row.title = "Go to " + (TOOL_LABELS[it.tool]||it.tool) + " tool";
+      var svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+      var sz = fmtSize(it.size);
+      var meta = fmtDate(it.date) + (sz ? " · "+sz : "");
+      var badge = TOOL_LABELS[it.tool] || it.tool;
+      row.innerHTML = svg +
+        '<span class="recent-fname">' + it.name + '</span>' +
+        '<span class="recent-tool-badge">' + badge + '</span>' +
+        '<span class="recent-meta">' + meta + '</span>';
+      row.addEventListener("click", function(){ if(typeof switchPanel==="function") switchPanel(it.tool); });
+      el.appendChild(row);
+    });
+  }
+  function clear(){ try{ localStorage.removeItem(KEY); }catch(e){} render(); }
+  return {add:add, get:get, render:render, clear:clear};
+})();
+
+// Wire clear button
+var _rclearBtn = document.getElementById("recent-clear-btn");
+if(_rclearBtn) _rclearBtn.addEventListener("click", function(){ NyxRecents.clear(); });
+
+// Render on home panel activation
+document.addEventListener("nyx:panel-changed", function(e){ if(e.detail==="home") NyxRecents.render(); });
+NyxRecents.render();
+
+// Wrap triggerDownload to record recent file
+(function(){
+  var _orig = window.triggerDownload;
+  window.triggerDownload = function(blob, name){
+    _orig(blob, name);
+    NyxRecents.add(name, window.__nyxCurrentPanel||"unknown", blob ? blob.size : 0);
+  };
+})();
+
 // Mobile sidebar toggle
 {
   var _ham=document.getElementById('hamburger-btn');
@@ -2538,6 +2808,50 @@ document.addEventListener('click',e=>{
   if(_overlayEl)_overlayEl.addEventListener('click',_closeSidebar);
   document.querySelectorAll('.nav-item').forEach(function(btn){btn.addEventListener('click',function(){if(window.innerWidth<=760)_closeSidebar();});});
 }
+
+// ── KEYBOARD SHORTCUTS ──
+document.addEventListener("keydown", function(e){
+  var tag = document.activeElement ? document.activeElement.tagName : "";
+  var inInput = (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || document.activeElement.isContentEditable);
+  // Escape: close upgrade modal, then sidebar
+  if(e.key === "Escape"){
+    var modal = document.getElementById("upgrade-modal");
+    if(modal && modal.style.display !== "none" && modal.style.display !== ""){
+      modal.style.display = "none"; return;
+    }
+    if(typeof _closeSidebar === "function") _closeSidebar();
+    return;
+  }
+  // Skip all other shortcuts if typing in a form field
+  if(inInput) return;
+  // D — toggle dark/light theme
+  if(e.key === "d" || e.key === "D"){
+    var tb = document.getElementById("theme-toggle");
+    if(tb) tb.click();
+    return;
+  }
+  // H — go home
+  if(e.key === "h" || e.key === "H"){
+    if(typeof switchPanel === "function") switchPanel("home");
+    return;
+  }
+  // ? — show shortcuts hint
+  if(e.key === "?"){
+    if(typeof toast === "function") toast("Shortcuts: H=home  D=dark\/light  Esc=close modal", "success");
+    return;
+  }
+});
+
+// ── BEFOREUNLOAD WARNING ──
+window.addEventListener("beforeunload", function(e){
+  var hasWork = Array.from(document.querySelectorAll("input[type=file]")).some(function(inp){
+    return inp.files && inp.files.length > 0;
+  });
+  if(hasWork){
+    e.preventDefault();
+    e.returnValue = "";
+  }
+});
 </script>
 </body>
 </html>
