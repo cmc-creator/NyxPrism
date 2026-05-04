@@ -197,6 +197,14 @@
     .tab-btn.active{background:var(--accent);color:#fff}
     .tab-pane{display:none}
     .tab-pane.active{display:block}
+    .prog-wrap{display:none;margin:.75rem 0}
+    .prog-track{height:6px;background:var(--border2,#1e2d3d);border-radius:3px;overflow:hidden}
+    .prog-bar{height:100%;background:var(--accent);border-radius:3px;transition:width .2s ease}
+    .prog-status{font-size:.78rem;color:var(--text-muted,#94a3b8);margin-top:.35rem}
+    .diff-three-up{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem;margin-top:.75rem}
+    .diff-three-up canvas{width:100%;display:block;border:1px solid var(--border);border-radius:4px}
+    .diff-label{font-size:.78rem;color:var(--text-muted,#94a3b8);margin-bottom:.4rem;text-align:center;font-weight:600}
+    .diff-drop-pair{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
     .pm-thumb{transition:transform .12s,border-color .12s,box-shadow .12s}
 .pm-thumb.pm-drag-over{border:2px solid var(--accent)!important;box-shadow:0 0 0 3px rgba(124,58,237,.35);transform:scale(1.04)}
 .inline-spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:inline-block;vertical-align:middle;margin-right:.4rem}
@@ -382,6 +390,10 @@
     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v-1a3 3 0 013-3h10a3 3 0 013 3v1"/><polyline points="15 9 12 6 9 9"/><rect x="2" y="14" width="20" height="6" rx="2"/></svg>
     Batch Compress
   </button>
+  <button class="nav-item" data-panel="diff">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="9" height="18" rx="2"/><rect x="13" y="3" width="9" height="18" rx="2"/><line x1="11" y1="8" x2="13" y2="8"/><line x1="11" y1="12" x2="13" y2="12"/><line x1="11" y1="16" x2="13" y2="16"/></svg>
+    PDF Diff
+  </button>
   <div class="sidebar-section">Developer</div>
   <button class="nav-item" data-panel="apikeys">
     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
@@ -518,6 +530,7 @@
     <div class="file-list" id="compress-file-list"></div>
     <div id="compress-options" style="display:none">
       <div class="card"><div class="card-title">Compression Settings</div><div class="form-row"><div class="form-group"><label class="form-label">Image Quality &nbsp;<strong id="quality-val">75</strong>%</label><input type="range" id="compress-quality" min="10" max="95" value="75" style="width:100%;accent-color:var(--accent)" /><div class="form-hint">Lower = smaller file, higher = better image quality. 65–80 recommended.</div></div></div></div>
+      <div class="prog-wrap" id="compress-progress"><div class="prog-track"><div class="prog-bar" id="compress-bar"></div></div><div class="prog-status" id="compress-status"></div></div>
       <div class="result-box" id="compress-result"></div>
       <div class="btn-row"><button class="btn btn-primary" id="compress-run"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>Compress PDF</button><button class="btn btn-secondary" id="compress-clear">Clear</button></div>
     </div>
@@ -589,6 +602,7 @@
           <div class="form-group"><label class="form-label">Scale (quality)</label><select class="form-select" id="ocr-dpi"><option value="1.5">1.5× (fast)</option><option value="2" selected>2× (recommended)</option><option value="3">3× (high quality)</option><option value="4">4× (maximum)</option></select></div>
         </div>
       </div>
+      <div class="prog-wrap" id="ocr-progress"><div class="prog-track"><div class="prog-bar" id="ocr-bar"></div></div><div class="prog-status" id="ocr-status"></div></div>
       <div class="result-box" id="ocr-result"></div>
       <div id="ocr-text-wrap" style="display:none;margin-bottom:1rem"><textarea id="ocr-text-out" readonly style="width:100%;min-height:200px;padding:1rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.85rem;resize:vertical;font-family:inherit"></textarea></div>
       <div class="btn-row"><button class="btn btn-primary" id="ocr-run"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2"/><rect x="7" y="7" width="10" height="10"/></svg>Run OCR</button><button class="btn btn-secondary" id="ocr-download-txt" style="display:none">Download .txt</button><button class="btn btn-secondary" id="ocr-clear">Clear</button></div>
@@ -767,6 +781,7 @@
           <div class="form-row"><div class="form-group"><label class="form-label">Language</label><select class="form-select" id="p2s-lang"><option value="eng">English</option><option value="fra">French</option><option value="deu">German</option><option value="spa">Spanish</option><option value="por">Portuguese</option><option value="chi_sim">Chinese (Simplified)</option><option value="jpn">Japanese</option><option value="kor">Korean</option><option value="ara">Arabic</option><option value="rus">Russian</option></select></div></div>
           <div style="font-size:.72rem;color:var(--muted);margin-top:.5rem">The invisible text layer lets you copy, search, and highlight text in any PDF viewer without changing the visual appearance.</div>
         </div>
+        <div class="prog-wrap" id="p2s-progress"><div class="prog-track"><div class="prog-bar" id="p2s-bar"></div></div><div class="prog-status" id="p2s-status"></div></div>
         <div class="result-box" id="p2s-result"></div>
         <div class="btn-row">
           <button class="btn btn-primary" id="p2s-run"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>Make Searchable PDF</button>
@@ -1059,6 +1074,17 @@
             <option value="low">Low - maximum compression</option>
           </select>
         </div>
+        <div class="form-group">
+          <label class="form-label">Output filename pattern</label>
+          <input class="form-input" id="batch-rename" value="{name}-compressed" />
+          <div class="form-hint">Variables: <code>{name}</code> original &bull; <code>{date}</code> YYYY-MM-DD &bull; <code>{i}</code> index</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">ZIP password <span style="color:var(--text-muted);font-size:.75rem">(optional — AES-256)</span></label>
+          <input class="form-input" type="password" id="batch-zip-pass" placeholder="Leave blank for unprotected ZIP" autocomplete="new-password" />
+        </div>
       </div>
       <div class="btn-row">
         <button class="btn btn-primary" id="batch-apply-btn">Compress All and Download ZIP</button>
@@ -1070,6 +1096,41 @@
         <p id="batch-status" style="font-size:.85rem;color:var(--text-muted);margin-top:.5rem"></p>
       </div>
       <div class="result-box" id="batch-result" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- PDF DIFF VIEWER -->
+  <div class="panel" id="panel-diff">
+    <div class="page-header"><h1>PDF Diff Viewer</h1><p>Compare two PDF versions side by side — pixel differences highlighted in red. Processed entirely in your browser.</p></div>
+    <div class="diff-drop-pair">
+      <div>
+        <p class="form-label" style="margin-bottom:.5rem">Original PDF</p>
+        <div class="drop-zone" id="diff-drop-a"><input type="file" id="diff-file-a" accept=".pdf" /><div class="drop-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="drop-title">Original PDF</div><div class="drop-sub">or click to browse</div></div>
+        <div class="file-list" id="diff-list-a"></div>
+      </div>
+      <div>
+        <p class="form-label" style="margin-bottom:.5rem">Revised PDF</p>
+        <div class="drop-zone" id="diff-drop-b"><input type="file" id="diff-file-b" accept=".pdf" /><div class="drop-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg></div><div class="drop-title">Revised PDF</div><div class="drop-sub">or click to browse</div></div>
+        <div class="file-list" id="diff-list-b"></div>
+      </div>
+    </div>
+    <div id="diff-options" style="display:none">
+      <div class="btn-row"><button class="btn btn-primary" id="diff-run"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Compare PDFs</button><button class="btn btn-secondary" id="diff-clear">Clear</button></div>
+    </div>
+    <div id="diff-viewer" style="display:none">
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;margin-bottom:.75rem">
+          <button class="btn btn-secondary" id="diff-prev" disabled>&larr; Prev</button>
+          <span id="diff-page-info" style="font-size:.9rem;color:var(--text-muted)">Page 1 / 1</span>
+          <button class="btn btn-secondary" id="diff-next">Next &rarr;</button>
+          <span id="diff-summary" style="margin-left:auto;font-size:.88rem;font-weight:600"></span>
+        </div>
+        <div class="diff-three-up">
+          <div><p class="diff-label">Original</p><canvas id="diff-canvas-a"></canvas></div>
+          <div><p class="diff-label">Revised</p><canvas id="diff-canvas-b"></canvas></div>
+          <div><p class="diff-label">Differences (red = changed)</p><canvas id="diff-canvas-diff"></canvas></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1467,6 +1528,7 @@ async function loadQRCode(){
 {
   let oFile=null,ocrText='';
   const dropEl=document.getElementById('ocr-drop'),input=document.getElementById('ocr-file'),listEl=document.getElementById('ocr-file-list'),optsEl=document.getElementById('ocr-options'),resultEl=document.getElementById('ocr-result'),textWrap=document.getElementById('ocr-text-wrap'),textOut=document.getElementById('ocr-text-out'),dlBtn=document.getElementById('ocr-download-txt');
+  const ocrWrap=document.getElementById('ocr-progress'),ocrBar=document.getElementById('ocr-bar'),ocrStat=document.getElementById('ocr-status');
   setupDrop(dropEl,input,f=>{oFile=f[0];listEl.innerHTML='';listEl.appendChild(renderFileItem(oFile,()=>{oFile=null;optsEl.style.display='none';resultEl.className='result-box';textWrap.style.display='none';dlBtn.style.display='none';ocrText='';}));optsEl.style.display='block';});
   document.getElementById('ocr-run').addEventListener('click',async()=>{
     if(!oFile)return toast('Select a PDF first','error');
@@ -1488,6 +1550,7 @@ async function loadQRCode(){
       const lines=[];
       for(let i=1;i<=pdf.numPages;i++){
         btn.innerHTML=`<span class="inline-spinner"></span>OCR page ${i}/${pdf.numPages}…`;
+        ocrWrap.style.display='block';ocrBar.style.width=Math.round(i/pdf.numPages*100)+'%';ocrStat.textContent='Page '+i+' of '+pdf.numPages;
         const page=await pdf.getPage(i);const vp=page.getViewport({scale});
         const canvas=document.createElement('canvas');canvas.width=vp.width;canvas.height=vp.height;
         await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
@@ -1915,6 +1978,7 @@ async function loadQRCode(){
     var p2sList=document.getElementById('p2s-file-list');
     var p2sOpts=document.getElementById('p2s-options');
     var p2sRes=document.getElementById('p2s-result');
+    var p2sWrap=document.getElementById('p2s-progress'),p2sBar=document.getElementById('p2s-bar'),p2sStat=document.getElementById('p2s-status');
     setupDrop(p2sDrop,p2sInput,function(f){
       p2sFile=f[0];p2sList.innerHTML='';
       p2sList.appendChild(renderFileItem(p2sFile,function(){p2sFile=null;p2sOpts.style.display='none';p2sRes.className='result-box';}));
@@ -1945,6 +2009,7 @@ async function loadQRCode(){
         for(var i=1;i<=numPages;i++){
           btn.innerHTML='<span class="inline-spinner"></span> OCR '+i+'/'+numPages+'...';
           showResult(p2sRes,'info','OCR page '+i+' of '+numPages+'...');
+          p2sWrap.style.display='block';p2sBar.style.width=Math.round(i/numPages*100)+'%';p2sStat.textContent='Page '+i+' of '+numPages;
           var page=await pdfjsDoc.getPage(i);
           var vp=page.getViewport({scale:2.0});
           var canvas=document.createElement('canvas');canvas.width=vp.width;canvas.height=vp.height;
@@ -2754,33 +2819,164 @@ async function loadQRCode(){
     showResult(resultEl, 'info', 'Starting batch compression...'); resultEl.style.display = 'block';
     try {
       const { PDFDocument } = await loadPdfLib();
-      if (!window.JSZip) {
-        await new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
-      }
-      const zip = new window.JSZip();
+      const zipPass = document.getElementById('batch-zip-pass').value.trim();
+      const renamePat = (document.getElementById('batch-rename').value || '{name}-compressed').trim();
+      const todayStr = new Date().toISOString().slice(0, 10);
+      const collectedFiles = [];
       let totalSaved = 0;
       for (let i = 0; i < batchFiles.length; i++) {
         const f = batchFiles[i];
         statusEl.textContent = 'Compressing ' + f.name + '... (' + (i+1) + '/' + batchFiles.length + ')';
-        barEl.style.width = ((i / batchFiles.length) * 100) + '%';
+        barEl.style.width = ((i / batchFiles.length) * 85) + '%';
         const ab = await f.arrayBuffer();
         const pdfDoc = await PDFDocument.load(ab, { ignoreEncryption: true });
         const out = await pdfDoc.save({ useObjectStreams: true });
         totalSaved += ab.byteLength - out.byteLength;
-        zip.file(f.name.replace(/.pdf$/i, '') + '-compressed.pdf', out);
+        const fname = renamePat.replace('{name}', f.name.replace(/\.pdf$/i, '')).replace('{date}', todayStr).replace('{i}', String(i + 1)) + '.pdf';
+        collectedFiles.push({ name: fname, data: out });
+      }
+      barEl.style.width = '92%';
+      statusEl.textContent = 'Creating ZIP archive' + (zipPass ? ' (encrypting...)' : '...');
+      let zipBlob;
+      if (zipPass) {
+        if (!window.zip) {
+          await new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/@zip.js/zip.js@2.7.32/dist/zip.min.js'; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
+        }
+        const zipWrt = new window.zip.ZipWriter(new window.zip.BlobWriter('application/zip'), { password: zipPass, encryptionStrength: 3 });
+        for (const cf of collectedFiles) {
+          await zipWrt.add(cf.name, new window.zip.BlobReader(new Blob([cf.data], { type: 'application/pdf' })));
+        }
+        zipBlob = await zipWrt.close();
+      } else {
+        if (!window.JSZip) {
+          await new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
+        }
+        const zip = new window.JSZip();
+        for (const cf of collectedFiles) { zip.file(cf.name, cf.data); }
+        zipBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
       }
       barEl.style.width = '100%';
-      statusEl.textContent = 'Creating ZIP archive...';
-      const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
       triggerDownload(zipBlob, 'compressed-pdfs.zip');
       Stats.inc(batchFiles.reduce((s,f) => s + f.size,0) / 1048576);
       const savedStr = totalSaved > 0 ? fmtSize(totalSaved) + ' saved' : 'already optimized';
-      showResult(resultEl, 'success', batchFiles.length + ' PDFs compressed (' + savedStr + ')! Download started.');
+      const pwdNote = zipPass ? ' (AES-256 encrypted)' : '';
+      showResult(resultEl, 'success', batchFiles.length + ' PDFs compressed (' + savedStr + ')! Download started.' + pwdNote);
     } catch(e) { showResult(resultEl, 'error', 'Error: ' + e.message); }
     finally { btn.innerHTML = 'Compress All and Download ZIP'; btn.disabled = false; progressEl.style.display = 'none'; }
   });
 }
 
+
+// PDF DIFF VIEWER
+{
+  let diffA = null, diffB = null, diffPdfA = null, diffPdfB = null, diffPageIdx = 0, diffPageCount = 0;
+  const diffAListEl = document.getElementById('diff-list-a'), diffBListEl = document.getElementById('diff-list-b');
+  const diffOptsEl = document.getElementById('diff-options'), diffViewerEl = document.getElementById('diff-viewer');
+  const diffCanvA = document.getElementById('diff-canvas-a'), diffCanvB = document.getElementById('diff-canvas-b'), diffCanvDiff = document.getElementById('diff-canvas-diff');
+  const diffPageInfo = document.getElementById('diff-page-info'), diffSummary = document.getElementById('diff-summary');
+
+  function diffCheckBoth() { if (diffA && diffB) diffOptsEl.style.display = 'block'; }
+  function diffOnRemoveA() { diffA = null; diffAListEl.innerHTML = ''; diffOptsEl.style.display = 'none'; diffViewerEl.style.display = 'none'; }
+  function diffOnRemoveB() { diffB = null; diffBListEl.innerHTML = ''; diffOptsEl.style.display = 'none'; diffViewerEl.style.display = 'none'; }
+
+  setupDrop(document.getElementById('diff-drop-a'), document.getElementById('diff-file-a'), function(f) {
+    diffA = f[0]; diffAListEl.innerHTML = ''; diffAListEl.appendChild(renderFileItem(diffA, diffOnRemoveA)); diffCheckBoth();
+  });
+  setupDrop(document.getElementById('diff-drop-b'), document.getElementById('diff-file-b'), function(f) {
+    diffB = f[0]; diffBListEl.innerHTML = ''; diffBListEl.appendChild(renderFileItem(diffB, diffOnRemoveB)); diffCheckBoth();
+  });
+  document.getElementById('diff-file-a').addEventListener('change', function() {
+    if (this.files[0]) { diffA = this.files[0]; diffAListEl.innerHTML = ''; diffAListEl.appendChild(renderFileItem(diffA, diffOnRemoveA)); diffCheckBoth(); }
+  });
+  document.getElementById('diff-file-b').addEventListener('change', function() {
+    if (this.files[0]) { diffB = this.files[0]; diffBListEl.innerHTML = ''; diffBListEl.appendChild(renderFileItem(diffB, diffOnRemoveB)); diffCheckBoth(); }
+  });
+
+  async function renderDiffPage(idx) {
+    diffPageIdx = idx;
+    var scale = 1.0;
+    var pA = await diffPdfA.getPage(idx + 1);
+    var vpA = pA.getViewport({ scale: scale });
+    diffCanvA.width = vpA.width; diffCanvA.height = vpA.height;
+    var ctxA = diffCanvA.getContext('2d');
+    ctxA.fillStyle = '#ffffff'; ctxA.fillRect(0, 0, vpA.width, vpA.height);
+    await pA.render({ canvasContext: ctxA, viewport: vpA }).promise;
+
+    var changed = 0, total = 0;
+    if (idx < diffPdfB.numPages) {
+      var pB = await diffPdfB.getPage(idx + 1);
+      var vpB = pB.getViewport({ scale: scale });
+      diffCanvB.width = vpB.width; diffCanvB.height = vpB.height;
+      var ctxB = diffCanvB.getContext('2d');
+      ctxB.fillStyle = '#ffffff'; ctxB.fillRect(0, 0, vpB.width, vpB.height);
+      await pB.render({ canvasContext: ctxB, viewport: vpB }).promise;
+      var w = Math.min(diffCanvA.width, diffCanvB.width);
+      var h = Math.min(diffCanvA.height, diffCanvB.height);
+      diffCanvDiff.width = w; diffCanvDiff.height = h;
+      var ctxD = diffCanvDiff.getContext('2d');
+      ctxD.fillStyle = '#ffffff'; ctxD.fillRect(0, 0, w, h);
+      var dA = ctxA.getImageData(0, 0, w, h).data;
+      var dB = ctxB.getImageData(0, 0, w, h).data;
+      var outImg = ctxD.createImageData(w, h);
+      total = w * h;
+      for (var p = 0; p < dA.length; p += 4) {
+        var diff = Math.abs(dA[p] - dB[p]) + Math.abs(dA[p+1] - dB[p+1]) + Math.abs(dA[p+2] - dB[p+2]);
+        if (diff > 30) {
+          outImg.data[p] = 220; outImg.data[p+1] = 38; outImg.data[p+2] = 38; outImg.data[p+3] = 220;
+          changed++;
+        } else {
+          outImg.data[p] = dA[p]; outImg.data[p+1] = dA[p+1]; outImg.data[p+2] = dA[p+2]; outImg.data[p+3] = 60;
+        }
+      }
+      ctxD.putImageData(outImg, 0, 0);
+    } else {
+      diffCanvB.width = diffCanvA.width; diffCanvB.height = diffCanvA.height;
+      diffCanvDiff.width = diffCanvA.width; diffCanvDiff.height = diffCanvA.height;
+      var ctxB2 = diffCanvB.getContext('2d'); ctxB2.fillStyle = '#1e293b'; ctxB2.fillRect(0, 0, diffCanvB.width, diffCanvB.height);
+      ctxB2.fillStyle = '#94a3b8'; ctxB2.font = '14px sans-serif'; ctxB2.textAlign = 'center'; ctxB2.fillText('(page not in revised PDF)', diffCanvB.width / 2, diffCanvB.height / 2);
+      var ctxD2 = diffCanvDiff.getContext('2d'); ctxD2.fillStyle = '#dc2626'; ctxD2.fillRect(0, 0, diffCanvDiff.width, diffCanvDiff.height);
+      total = 1; changed = 1;
+    }
+
+    diffPageInfo.textContent = 'Page ' + (idx + 1) + ' / ' + diffPageCount;
+    var pct = total > 0 ? Math.round(changed / total * 100) : 0;
+    diffSummary.textContent = pct + '% of pixels changed';
+    diffSummary.style.color = pct > 10 ? 'var(--red)' : pct > 1 ? 'var(--yellow)' : 'var(--green)';
+    document.getElementById('diff-prev').disabled = idx === 0;
+    document.getElementById('diff-next').disabled = idx >= diffPageCount - 1;
+  }
+
+  document.getElementById('diff-run').addEventListener('click', async function() {
+    if (!diffA || !diffB) return toast('Select both PDFs', 'error');
+    var btn = document.getElementById('diff-run');
+    btn.disabled = true; btn.innerHTML = '<span class="inline-spinner"></span> Comparing...';
+    try {
+      var pdfjsLib = await loadPdfjsLib();
+      diffPdfA = await pdfjsLib.getDocument({ data: await diffA.arrayBuffer() }).promise;
+      diffPdfB = await pdfjsLib.getDocument({ data: await diffB.arrayBuffer() }).promise;
+      diffPageCount = Math.max(diffPdfA.numPages, diffPdfB.numPages);
+      diffViewerEl.style.display = 'block';
+      await renderDiffPage(0);
+      toast('Comparison ready — ' + diffPageCount + ' page' + (diffPageCount !== 1 ? 's' : ''));
+    } catch(e) { toast('Error: ' + e.message, 'error'); }
+    btn.disabled = false; btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Compare PDFs';
+  });
+
+  document.getElementById('diff-prev').addEventListener('click', async function() {
+    if (diffPageIdx > 0) await renderDiffPage(diffPageIdx - 1);
+  });
+  document.getElementById('diff-next').addEventListener('click', async function() {
+    if (diffPageIdx < diffPageCount - 1) await renderDiffPage(diffPageIdx + 1);
+  });
+
+  document.getElementById('diff-clear').addEventListener('click', function() {
+    diffA = null; diffB = null; diffPdfA = null; diffPdfB = null;
+    diffAListEl.innerHTML = ''; diffBListEl.innerHTML = '';
+    diffOptsEl.style.display = 'none'; diffViewerEl.style.display = 'none';
+    document.getElementById('diff-file-a').value = '';
+    document.getElementById('diff-file-b').value = '';
+  });
+}
 // GLOBAL COPY BUTTONS
 document.addEventListener('click',e=>{
   const btn=e.target.closest('.copy-btn');if(!btn)return;
