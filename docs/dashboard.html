@@ -208,6 +208,30 @@
     .pm-thumb{transition:transform .12s,border-color .12s,box-shadow .12s}
 .pm-thumb.pm-drag-over{border:2px solid var(--accent)!important;box-shadow:0 0 0 3px rgba(124,58,237,.35);transform:scale(1.04)}
 .inline-spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:inline-block;vertical-align:middle;margin-right:.4rem}
+    .fthumb{width:34px;height:44px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(124,58,237,.08);border-radius:4px;overflow:hidden;border:1px solid var(--border2)}
+    .fthumb svg{width:18px;height:18px;color:var(--accent-bright)}
+    .cmd-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);z-index:9500;display:flex;align-items:flex-start;justify-content:center;padding-top:10vh}
+    .cmd-box{background:var(--surface);border:1px solid var(--border2);border-radius:14px;width:min(560px,92vw);box-shadow:0 24px 60px rgba(0,0,0,.55);overflow:hidden;animation:cmdIn .14s ease}
+    @keyframes cmdIn{from{transform:translateY(-14px) scale(.97);opacity:0}to{transform:none;opacity:1}}
+    .cmd-search-wrap{display:flex;align-items:center;gap:.75rem;padding:.85rem 1rem;border-bottom:1px solid var(--border2)}
+    .cmd-search-icon{flex-shrink:0;color:var(--text-muted,#94a3b8);display:flex}
+    .cmd-search-input{flex:1;background:none;border:none;outline:none;color:var(--text);font-size:1rem;font-family:inherit}
+    .cmd-search-input::placeholder{color:var(--text-muted,#94a3b8)}
+    .cmd-results{max-height:340px;overflow-y:auto;padding:.4rem}
+    .cmd-item{display:flex;align-items:center;gap:.85rem;padding:.6rem .8rem;border-radius:8px;cursor:pointer;transition:background .1s}
+    .cmd-item:hover,.cmd-item.cmd-active{background:var(--surface2)}
+    .cmd-item-icon{width:32px;height:32px;border-radius:8px;background:rgba(124,58,237,.12);color:var(--accent-bright);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .cmd-item-icon svg{width:16px;height:16px}
+    .cmd-item-label{font-size:.9rem;font-weight:600;color:var(--text)}
+    .cmd-item-desc{font-size:.78rem;color:var(--text-muted,#94a3b8);margin-top:.1rem}
+    .cmd-empty{text-align:center;padding:1.5rem;color:var(--text-muted);font-size:.875rem}
+    .cmd-footer{padding:.5rem 1rem;border-top:1px solid var(--border2);display:flex;gap:1.25rem;font-size:.72rem;color:var(--text-muted);align-items:center}
+    .cmd-footer kbd{background:var(--surface2);border:1px solid var(--border2);border-radius:4px;padding:.1rem .4rem;font-family:inherit;font-size:.7rem}
+    .shortcuts-modal{background:var(--surface);border:1px solid var(--border2);border-radius:14px;width:min(440px,92vw);padding:1.5rem;box-shadow:0 24px 60px rgba(0,0,0,.55);animation:cmdIn .14s ease}
+    .shortcuts-modal h2{font-size:1.05rem;font-weight:700;margin-bottom:1rem;color:var(--text)}
+    .shortcuts-grid{display:grid;grid-template-columns:auto 1fr;gap:.45rem .85rem;align-items:center}
+    .shortcuts-grid kbd{background:var(--surface2);border:1px solid var(--border2);border-radius:5px;padding:.2rem .5rem;font-size:.8rem;color:var(--text);font-family:inherit;white-space:nowrap;text-align:center}
+    .shortcuts-grid span{font-size:.85rem;color:var(--text3)}
     /* Upgrade modal */
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);z-index:8000;display:flex;align-items:center;justify-content:center;padding:1.5rem}
     .modal-box{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:2rem 2rem 1.75rem;max-width:420px;width:100%;text-align:center;box-shadow:var(--shadow)}
@@ -253,6 +277,36 @@
 <body>
 <div id="loading-screen"><div class="spinner"></div></div>
 <div id="toast-container"></div>
+
+<!-- COMMAND PALETTE -->
+<div id="cmd-overlay" class="cmd-overlay" style="display:none" role="dialog" aria-modal="true">
+  <div class="cmd-box">
+    <div class="cmd-search-wrap">
+      <span class="cmd-search-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+      <input class="cmd-search-input" id="cmd-input" placeholder="Search tools..." autocomplete="off" spellcheck="false" />
+    </div>
+    <div class="cmd-results" id="cmd-results"></div>
+    <div class="cmd-footer"><kbd>&uarr;</kbd><kbd>&darr;</kbd> navigate &nbsp; <kbd>Enter</kbd> select &nbsp; <kbd>Esc</kbd> close &nbsp; <kbd>Ctrl K</kbd> open</div>
+  </div>
+</div>
+
+<!-- SHORTCUTS MODAL -->
+<div id="shortcuts-overlay" class="cmd-overlay" style="display:none" role="dialog" aria-modal="true">
+  <div class="shortcuts-modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+      <h2 style="margin:0">Keyboard Shortcuts</h2>
+      <button id="shortcuts-close" style="background:none;border:none;color:var(--text3);cursor:pointer;padding:.25rem"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="shortcuts-grid">
+      <kbd>Ctrl K</kbd><span>Open command palette</span>
+      <kbd>H</kbd><span>Go to Home</span>
+      <kbd>D</kbd><span>Toggle dark / light mode</span>
+      <kbd>?</kbd><span>Show this shortcuts reference</span>
+      <kbd>Esc</kbd><span>Close modal / sidebar</span>
+    </div>
+    <div style="margin-top:1.25rem;font-size:.75rem;color:var(--text-muted)">Shortcuts are disabled while typing in a form field.</div>
+  </div>
+</div>
 
 <!-- UPGRADE MODAL -->
 <div id="upgrade-modal" class="modal-overlay" style="display:none">
@@ -449,7 +503,7 @@
         <div class="stat-icon" style="background:rgba(251,191,36,.08);color:var(--yellow)">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         </div>
-        <div class="stat-num">11</div>
+        <div class="stat-num" id="stat-tools">20</div>
         <div class="stat-label">Tools Available</div>
       </div>
     </div>
@@ -1184,9 +1238,19 @@ const Stats = {
   get:()=>JSON.parse(localStorage.getItem('nyx_stats')||'{"processed":0,"saved":0}'),
   inc(savedMB=0){const s=this.get();s.processed++;s.saved=Math.round((s.saved+savedMB)*10)/10;localStorage.setItem('nyx_stats',JSON.stringify(s));renderStats(s);}
 };
+function countUp(el,target,dur){
+  if(!el)return;
+  var start=parseFloat(el.textContent)||0;
+  var isFloat=String(target).indexOf('.')!==-1;
+  if(start===target){el.textContent=isFloat?target.toFixed(1):target;return;}
+  var t0=null;
+  function step(ts){if(!t0)t0=ts;var p=Math.min((ts-t0)/dur,1);var e2=1-Math.pow(1-p,3);var cur=start+(target-start)*e2;
+    el.textContent=isFloat?cur.toFixed(1):Math.round(cur);if(p<1)requestAnimationFrame(step);}
+  requestAnimationFrame(step);
+}
 function renderStats(s){
-  const a=document.getElementById('stat-processed'),b=document.getElementById('stat-saved');
-  if(a)a.textContent=s.processed; if(b)b.textContent=s.saved;
+  var a=document.getElementById('stat-processed'),b=document.getElementById('stat-saved');
+  countUp(a,s.processed,900); countUp(b,s.saved,900);
 }
 
 const loading=document.getElementById('loading-screen'),content=document.getElementById('main-content');
@@ -1332,8 +1396,26 @@ function fmtSize(b){if(b<1024)return b+' B';if(b<1048576)return (b/1024).toFixed
 
 function renderFileItem(file,onRemove){
   const el=document.createElement('div');el.className='file-item';
-  el.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span class="fname">${file.name}</span><span class="fsize">${fmtSize(file.size)}</span><button class="fremove" title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
+  el.innerHTML='<span class="fthumb"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>' +
+    '<span class="fname">' + file.name + '</span><span class="fsize">' + fmtSize(file.size) + '</span>' +
+    '<button class="fremove" title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
   el.querySelector('.fremove').addEventListener('click',()=>{el.remove();onRemove();});
+  if(file.name.toLowerCase().endsWith('.pdf')){
+    loadPdfjsLib().then(function(pdfjsLib){
+      return file.arrayBuffer().then(function(ab){
+        return pdfjsLib.getDocument({data:new Uint8Array(ab)}).promise;
+      }).then(function(pdf){ return pdf.getPage(1); })
+      .then(function(page){
+        var vp=page.getViewport({scale:0.2});
+        var cv=document.createElement('canvas');cv.width=vp.width;cv.height=vp.height;
+        cv.style.cssText='width:100%;height:100%;display:block;border-radius:3px';
+        return page.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise.then(function(){ return cv; });
+      }).then(function(cv){
+        var thumb=el.querySelector('.fthumb');
+        if(thumb){thumb.innerHTML='';thumb.appendChild(cv);}
+      });
+    }).catch(function(){});
+  }
   return el;
 }
 
@@ -3045,12 +3127,30 @@ if(_rclearBtn) _rclearBtn.addEventListener("click", function(){ NyxRecents.clear
 document.addEventListener("nyx:panel-changed", function(e){ if(e.detail==="home") NyxRecents.render(); });
 NyxRecents.render();
 
-// Wrap triggerDownload to record recent file
+// Wrap triggerDownload to record recent file + fire confetti
 (function(){
   var _orig = window.triggerDownload;
+  var _lastConfetti = 0;
+  function _loadConfetti() {
+    if (window.confetti) return Promise.resolve();
+    return new Promise(function(res) {
+      var s = document.createElement("script");
+      s.src = "https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js";
+      s.onload = res; document.head.appendChild(s);
+    });
+  }
   window.triggerDownload = function(blob, name){
     _orig(blob, name);
     NyxRecents.add(name, window.__nyxCurrentPanel||"unknown", blob ? blob.size : 0);
+    var now = Date.now();
+    if (now - _lastConfetti > 2500) {
+      _lastConfetti = now;
+      _loadConfetti().then(function() {
+        if (!window.confetti) return;
+        window.confetti({ particleCount: 70, spread: 65, origin: { y: 0.72 },
+          colors: ["#7c3aed","#a78bfa","#34d399","#60a5fa","#fbbf24"] });
+      });
+    }
   };
 })();
 
@@ -3070,11 +3170,19 @@ NyxRecents.render();
 document.addEventListener("keydown", function(e){
   var tag = document.activeElement ? document.activeElement.tagName : "";
   var inInput = (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || document.activeElement.isContentEditable);
-  // Escape: close upgrade modal, then sidebar
+  // Escape: close upgrade modal, shortcuts modal, cmd palette, then sidebar
   if(e.key === "Escape"){
     var modal = document.getElementById("upgrade-modal");
     if(modal && modal.style.display !== "none" && modal.style.display !== ""){
       modal.style.display = "none"; return;
+    }
+    var shortcutsOv = document.getElementById("shortcuts-overlay");
+    if(shortcutsOv && shortcutsOv.style.display !== "none" && shortcutsOv.style.display !== ""){
+      shortcutsOv.style.display = "none"; return;
+    }
+    var cmdOv = document.getElementById("cmd-overlay");
+    if(cmdOv && cmdOv.style.display !== "none" && cmdOv.style.display !== ""){
+      nyxCmdClose(); return;
     }
     if(typeof _closeSidebar === "function") _closeSidebar();
     return;
@@ -3092,13 +3200,126 @@ document.addEventListener("keydown", function(e){
     if(typeof switchPanel === "function") switchPanel("home");
     return;
   }
-  // ? — show shortcuts hint
+  // ? — show shortcuts modal
   if(e.key === "?"){
-    if(typeof toast === "function") toast("Shortcuts: H=home  D=dark\/light  Esc=close modal", "success");
+    document.getElementById("shortcuts-overlay").style.display = "flex";
+    return;
+  }
+  // Ctrl+K / Cmd+K — command palette
+  if((e.ctrlKey || e.metaKey) && (e.key === "k" || e.key === "K")){
+    e.preventDefault();
+    nyxCmdOpen();
     return;
   }
 });
 
+
+// ── COMMAND PALETTE ──
+(function(){
+  var CMDS = [
+    {panel:"split",label:"Split PDF",desc:"Extract pages or split by range or every N pages"},
+    {panel:"aisplit",label:"AI Smart Split",desc:"Describe how to split — Claude plans it for you"},
+    {panel:"merge",label:"Merge PDFs",desc:"Combine multiple PDFs into one document"},
+    {panel:"compress",label:"Compress PDF",desc:"Reduce file size using object stream compression"},
+    {panel:"watermark",label:"Watermark PDF",desc:"Stamp diagonal text across every page"},
+    {panel:"protect",label:"Protect PDF",desc:"Add password protection and access controls"},
+    {panel:"extract",label:"Extract Pages",desc:"Pull specific pages out as a new PDF"},
+    {panel:"ocr",label:"OCR Text Extraction",desc:"Extract text from scanned / image PDFs"},
+    {panel:"rotate",label:"Rotate Pages",desc:"Rotate specific pages or the entire document"},
+    {panel:"editpdf",label:"Edit PDF",desc:"Add text overlays, images, and annotations"},
+    {panel:"convert",label:"Convert",desc:"PDF to images, images to PDF, searchable PDF, QR stamp"},
+    {panel:"sign",label:"Sign PDF",desc:"Draw or type a handwritten signature"},
+    {panel:"annotate",label:"Annotate PDF",desc:"Highlight, underline, and add comments"},
+    {panel:"pagemanager",label:"Page Manager",desc:"Drag-and-drop page reordering and deletion"},
+    {panel:"number",label:"Page Numbers",desc:"Stamp page numbers onto every page"},
+    {panel:"redact",label:"Redact PDF",desc:"Permanently black out sensitive text"},
+    {panel:"batch",label:"Batch Compress",desc:"Compress many PDFs at once with rename templates"},
+    {panel:"diff",label:"PDF Diff Viewer",desc:"Compare two PDFs — pixel differences shown in red"},
+    {panel:"apikeys",label:"API Keys",desc:"Manage programmatic API access"},
+    {panel:"account",label:"Account Settings",desc:"Profile, subscription, and billing"},
+    {panel:"home",label:"Home",desc:"Dashboard overview and recent files"},
+  ];
+
+  var overlay = document.getElementById("cmd-overlay");
+  var input = document.getElementById("cmd-input");
+  var results = document.getElementById("cmd-results");
+  var activeIdx = 0;
+
+  function highlight(q, text) {
+    if (!q) return text;
+    var idx = text.toLowerCase().indexOf(q.toLowerCase());
+    if (idx === -1) return text;
+    return text.slice(0, idx) + '<mark style="background:rgba(124,58,237,.35);color:inherit;border-radius:2px">' + text.slice(idx, idx + q.length) + '</mark>' + text.slice(idx + q.length);
+  }
+
+  function render(q) {
+    var filtered = q ? CMDS.filter(function(c) {
+      return c.label.toLowerCase().indexOf(q.toLowerCase()) !== -1 ||
+             c.desc.toLowerCase().indexOf(q.toLowerCase()) !== -1;
+    }) : CMDS;
+    results.innerHTML = "";
+    if (!filtered.length) { results.innerHTML = '<div class="cmd-empty">No tools found</div>'; return; }
+    filtered.forEach(function(c, i) {
+      var item = document.createElement("div");
+      item.className = "cmd-item" + (i === 0 ? " cmd-active" : "");
+      item.dataset.panel = c.panel;
+      item.innerHTML = '<div class="cmd-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>' +
+        '<div><div class="cmd-item-label">' + highlight(q, c.label) + '</div><div class="cmd-item-desc">' + c.desc + '</div></div>';
+      item.addEventListener("click", function() { nyxCmdClose(); switchPanel(c.panel); });
+      item.addEventListener("mouseover", function() {
+        results.querySelectorAll(".cmd-item").forEach(function(el) { el.classList.remove("cmd-active"); });
+        item.classList.add("cmd-active");
+        activeIdx = i;
+      });
+      results.appendChild(item);
+    });
+    activeIdx = 0;
+    window._nyxCmdFiltered = filtered;
+  }
+
+  window.nyxCmdOpen = function() {
+    overlay.style.display = "flex";
+    input.value = "";
+    render("");
+    setTimeout(function() { input.focus(); }, 30);
+  };
+  window.nyxCmdClose = function() {
+    overlay.style.display = "none";
+    input.value = "";
+  };
+
+  input.addEventListener("input", function() { render(input.value.trim()); });
+
+  input.addEventListener("keydown", function(e) {
+    var items = results.querySelectorAll(".cmd-item");
+    if (!items.length) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      items[activeIdx].classList.remove("cmd-active");
+      activeIdx = (activeIdx + 1) % items.length;
+      items[activeIdx].classList.add("cmd-active");
+      items[activeIdx].scrollIntoView({ block: "nearest" });
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      items[activeIdx].classList.remove("cmd-active");
+      activeIdx = (activeIdx - 1 + items.length) % items.length;
+      items[activeIdx].classList.add("cmd-active");
+      items[activeIdx].scrollIntoView({ block: "nearest" });
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      var filtered = window._nyxCmdFiltered || CMDS;
+      if (filtered[activeIdx]) { nyxCmdClose(); switchPanel(filtered[activeIdx].panel); }
+    }
+  });
+
+  overlay.addEventListener("click", function(e) { if (e.target === overlay) nyxCmdClose(); });
+
+  // Shortcuts modal close button
+  var scBtn = document.getElementById("shortcuts-close");
+  var scOv = document.getElementById("shortcuts-overlay");
+  if (scBtn) scBtn.addEventListener("click", function() { scOv.style.display = "none"; });
+  if (scOv) scOv.addEventListener("click", function(e) { if (e.target === scOv) scOv.style.display = "none"; });
+})();
 // ── BEFOREUNLOAD WARNING ──
 window.addEventListener("beforeunload", function(e){
   var hasWork = Array.from(document.querySelectorAll("input[type=file]")).some(function(inp){
