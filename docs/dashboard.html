@@ -197,7 +197,9 @@
     .tab-btn.active{background:var(--accent);color:#fff}
     .tab-pane{display:none}
     .tab-pane.active{display:block}
-    .inline-spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:inline-block;vertical-align:middle;margin-right:.4rem}
+    .pm-thumb{transition:transform .12s,border-color .12s,box-shadow .12s}
+.pm-thumb.pm-drag-over{border:2px solid var(--accent)!important;box-shadow:0 0 0 3px rgba(124,58,237,.35);transform:scale(1.04)}
+.inline-spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:inline-block;vertical-align:middle;margin-right:.4rem}
     /* Upgrade modal */
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);z-index:8000;display:flex;align-items:center;justify-content:center;padding:1.5rem}
     .modal-box{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:2rem 2rem 1.75rem;max-width:420px;width:100%;text-align:center;box-shadow:var(--shadow)}
@@ -1969,8 +1971,10 @@ async function loadQRCode(){
         triggerDownload(new Blob([out],{type:'application/pdf'}),outName);
         Stats.inc(p2sFile.size/1048576);
         showResult(p2sRes,'success','Searchable PDF created from '+numPages+' page'+(numPages!==1?'s':'')+'! Download started.');
+        p2sStat.textContent='Done!';
         toast('Searchable PDF ready!');
-      }catch(err){showResult(p2sRes,'error','Error: '+err.message);toast(err.message,'error');}
+      }catch(err){p2sBar.style.width='0%';showResult(p2sRes,'error','Error: '+err.message);toast(err.message,'error');}
+      finally{setTimeout(()=>{p2sWrap.style.display='none';p2sBar.style.width='0%';},1500);}
       btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Make Searchable PDF';
     });
   }
@@ -2432,14 +2436,14 @@ async function loadQRCode(){
       pmThumbs.innerHTML = '';
       for (let i = 0; i < n; i++) {
         const pg = await pdfJsDoc.getPage(i + 1);
-        const vp = pg.getViewport({ scale: 0.25 });
+        const vp = pg.getViewport({ scale: 0.35 });
         const c = document.createElement('canvas');
         c.width = vp.width; c.height = vp.height;
         await pg.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
         const thumb = document.createElement('div');
         thumb.dataset.idx = String(i);
         thumb.draggable = true;
-        thumb.style.cssText = 'display:inline-block;text-align:center;cursor:grab;position:relative;border:2px solid var(--border);border-radius:6px;padding:4px;background:var(--surface2)';
+        thumb.className = 'pm-thumb'; thumb.style.cssText = 'display:inline-block;text-align:center;cursor:grab;position:relative;border:2px solid var(--border);border-radius:6px;padding:4px;background:var(--surface2)';
         const delBtn = document.createElement('button');
         delBtn.style.cssText = 'position:absolute;top:2px;right:2px;background:#dc2626;color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;line-height:1';
         delBtn.title = 'Delete page';
@@ -2462,9 +2466,11 @@ async function loadQRCode(){
       pmThumbs.querySelectorAll('[draggable]').forEach(el => {
         el.addEventListener('dragstart', () => { pmDragSrc = el; el.style.opacity = '0.5'; });
         el.addEventListener('dragend', () => el.style.opacity = '1');
-        el.addEventListener('dragover', e => e.preventDefault());
+        el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('pm-drag-over'); });
+        el.addEventListener('dragleave', () => el.classList.remove('pm-drag-over'));
         el.addEventListener('drop', e => {
           e.preventDefault();
+          el.classList.remove('pm-drag-over');
           if (pmDragSrc === el) return;
           const fromIdx = parseInt(pmDragSrc.dataset.idx);
           const toIdx = parseInt(el.dataset.idx);
@@ -2472,9 +2478,64 @@ async function loadQRCode(){
           const ti = pmOrder.indexOf(toIdx);
           pmOrder.splice(fi, 1);
           pmOrder.splice(ti, 0, fromIdx);
-          pmThumbs.insertBefore(pmDragSrc, el.nextSibling);
+          pmThumbs.insertBefore(pmDragSrc, el);
         });
       });
+      // Touch drag-to-reorder
+      (function addTouchDrag() {
+        let touchSrc = null, touchClone = null;
+        function getThumbAt(x, y) {
+          const els = pmThumbs.querySelectorAll("[draggable]");
+          for (const t of els) {
+            const r = t.getBoundingClientRect();
+            if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return t;
+          }
+          return null;
+        }
+        pmThumbs.querySelectorAll("[draggable]").forEach(el => {
+          el.addEventListener("touchstart", e => {
+            e.preventDefault();
+            touchSrc = el;
+            el.style.opacity = "0.5";
+            touchClone = el.cloneNode(true);
+            touchClone.style.cssText = "position:fixed;pointer-events:none;opacity:.7;z-index:9999;border:2px solid var(--accent);border-radius:6px;";
+            const r = el.getBoundingClientRect();
+            touchClone.style.width = r.width + "px";
+            touchClone.style.height = r.height + "px";
+            document.body.appendChild(touchClone);
+          }, { passive: false });
+          el.addEventListener("touchmove", e => {
+            e.preventDefault();
+            if (!touchSrc || !touchClone) return;
+            const t = e.touches[0];
+            touchClone.style.left = (t.clientX - parseInt(touchClone.style.width) / 2) + "px";
+            touchClone.style.top = (t.clientY - parseInt(touchClone.style.height) / 2) + "px";
+            pmThumbs.querySelectorAll("[draggable]").forEach(x => x.classList.remove("pm-drag-over"));
+            const over = getThumbAt(t.clientX, t.clientY);
+            if (over && over !== touchSrc) over.classList.add("pm-drag-over");
+          }, { passive: false });
+          el.addEventListener("touchend", e => {
+            e.preventDefault();
+            if (touchClone) { touchClone.remove(); touchClone = null; }
+            if (!touchSrc) return;
+            touchSrc.style.opacity = "1";
+            const t = e.changedTouches[0];
+            const target = getThumbAt(t.clientX, t.clientY);
+            pmThumbs.querySelectorAll("[draggable]").forEach(x => x.classList.remove("pm-drag-over"));
+            if (target && target !== touchSrc) {
+              const fromIdx = parseInt(touchSrc.dataset.idx);
+              const toIdx = parseInt(target.dataset.idx);
+              const fi = pmOrder.indexOf(fromIdx);
+              const ti = pmOrder.indexOf(toIdx);
+              pmOrder.splice(fi, 1);
+              pmOrder.splice(ti, 0, fromIdx);
+              pmThumbs.insertBefore(touchSrc, target);
+            }
+            touchSrc = null;
+          }, { passive: false });
+        });
+      })();
+
       document.getElementById('pm-grid').style.display = 'block';
       resultEl.style.display = 'none';
     } catch(e) { showResult(resultEl, 'error', 'Error: ' + e.message); }
