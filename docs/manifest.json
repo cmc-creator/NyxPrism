@@ -1,0 +1,26 @@
+{
+  "name": "NyxPrism PDF Tools",
+  "short_name": "NyxPrism",
+  "description": "Professional PDF tools — split, merge, compress, OCR, watermark and more.",
+  "start_url": "/dashboard.html",
+  "display": "standalone",
+  "background_color": "#06080d",
+  "theme_color": "#7c3aed",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%237c3aed'/><text x='50%25' y='58%25' dominant-baseline='middle' text-anchor='middle' font-size='110' font-family='Arial,sans-serif'>&#x2756;</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%237c3aed'/><text x='50%25' y='58%25' dominant-baseline='middle' text-anchor='middle' font-size='300' font-family='Arial,sans-serif'>&#x2756;</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "lang": "en-US"
+}

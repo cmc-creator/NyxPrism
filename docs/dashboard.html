@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NyxPrism&#8482; — PDF Tools</title>
   <meta name="robots" content="noindex, nofollow" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#7c3aed" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -232,6 +235,14 @@
     .shortcuts-grid{display:grid;grid-template-columns:auto 1fr;gap:.45rem .85rem;align-items:center}
     .shortcuts-grid kbd{background:var(--surface2);border:1px solid var(--border2);border-radius:5px;padding:.2rem .5rem;font-size:.8rem;color:var(--text);font-family:inherit;white-space:nowrap;text-align:center}
     .shortcuts-grid span{font-size:.85rem;color:var(--text3)}
+    .sidebar-search{padding:.5rem .75rem .25rem}
+    .sidebar-search-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:.82rem;padding:.35rem .6rem;outline:none;font-family:inherit}
+    .sidebar-search-input::placeholder{color:var(--muted)}
+    .sidebar-search-input:focus{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-glow)}
+    @keyframes cardIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+    .tool-grid .tool-card{animation:cardIn .35s ease both}
+    .tool-grid .tool-card:nth-child(1){animation-delay:.02s}.tool-grid .tool-card:nth-child(2){animation-delay:.05s}.tool-grid .tool-card:nth-child(3){animation-delay:.08s}.tool-grid .tool-card:nth-child(4){animation-delay:.11s}.tool-grid .tool-card:nth-child(5){animation-delay:.14s}.tool-grid .tool-card:nth-child(6){animation-delay:.17s}.tool-grid .tool-card:nth-child(7){animation-delay:.2s}.tool-grid .tool-card:nth-child(8){animation-delay:.23s}.tool-grid .tool-card:nth-child(9){animation-delay:.26s}.tool-grid .tool-card:nth-child(10){animation-delay:.29s}.tool-grid .tool-card:nth-child(11){animation-delay:.32s}.tool-grid .tool-card:nth-child(12){animation-delay:.35s}.tool-grid .tool-card:nth-child(13){animation-delay:.38s}.tool-grid .tool-card:nth-child(14){animation-delay:.41s}.tool-grid .tool-card:nth-child(15){animation-delay:.44s}.tool-grid .tool-card:nth-child(16){animation-delay:.47s}
+    .fchip-pages{font-size:.68rem;background:rgba(124,58,237,.12);color:var(--accent-bright);border:1px solid rgba(124,58,237,.25);border-radius:4px;padding:.05rem .3rem;margin-left:.3rem;white-space:nowrap;flex-shrink:0}
     /* Upgrade modal */
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);z-index:8000;display:flex;align-items:center;justify-content:center;padding:1.5rem}
     .modal-box{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:2rem 2rem 1.75rem;max-width:420px;width:100%;text-align:center;box-shadow:var(--shadow)}
@@ -369,6 +380,9 @@
 <div class="app-shell">
 <div class="sidebar-overlay" id="sidebar-overlay"></div>
 <aside class="sidebar">
+  <div class="sidebar-search">
+    <input class="sidebar-search-input" id="sidebar-search" placeholder="Filter tools…" />
+  </div>
   <div class="sidebar-section">Overview</div>
   <button class="nav-item active" data-panel="home">
     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
@@ -448,6 +462,18 @@
     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="9" height="18" rx="2"/><rect x="13" y="3" width="9" height="18" rx="2"/><line x1="11" y1="8" x2="13" y2="8"/><line x1="11" y1="12" x2="13" y2="12"/><line x1="11" y1="16" x2="13" y2="16"/></svg>
     PDF Diff
   </button>
+  <button class="nav-item" data-panel="meta">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="11" y2="17"/></svg>
+    PDF Metadata
+  </button>
+  <button class="nav-item" data-panel="headerfooter">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
+    Header &amp; Footer
+  </button>
+  <button class="nav-item" data-panel="flatten">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><polyline points="8 3 8 21"/><polyline points="3 9 8 9"/><polyline points="3 15 8 15"/></svg>
+    Flatten PDF
+  </button>
   <div class="sidebar-section">Developer</div>
   <button class="nav-item" data-panel="apikeys">
     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
@@ -503,7 +529,7 @@
         <div class="stat-icon" style="background:rgba(251,191,36,.08);color:var(--yellow)">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         </div>
-        <div class="stat-num" id="stat-tools">20</div>
+        <div class="stat-num" id="stat-tools">23</div>
         <div class="stat-label">Tools Available</div>
       </div>
     </div>
@@ -521,6 +547,8 @@
 
       <div class="tool-card" data-launch="editpdf"><div class="tool-card-icon" style="background:rgba(251,191,36,.08);color:var(--yellow)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div><h3>Edit PDF</h3><p>Delete, reorder pages and add text overlays</p></div>
       <div class="tool-card" data-launch="convert"><div class="tool-card-icon" style="background:rgba(52,211,153,.08);color:var(--green)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg></div><h3>Convert PDF</h3><p>PDF to images or images to PDF</p></div>
+      <div class="tool-card" data-launch="headerfooter"><div class="tool-card-icon" style="background:rgba(96,165,250,.08);color:var(--blue)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg></div><h3>Header &amp; Footer</h3><p>Stamp custom text on every page header and footer</p></div>
+      <div class="tool-card" data-launch="flatten"><div class="tool-card-icon" style="background:rgba(52,211,153,.08);color:var(--green)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><polyline points="8 3 8 21"/><polyline points="3 9 8 9"/><polyline points="3 15 8 15"/></svg></div><h3>Flatten PDF</h3><p>Flatten form fields and annotations to static content</p></div>
     </div>
     <div class="install-strip">
       <span class="label">CLI &nbsp;›</span>
@@ -1188,6 +1216,84 @@
     </div>
   </div>
 
+  <!-- PDF METADATA EDITOR -->
+  <div class="panel" id="panel-meta">
+    <div class="page-header"><h1>PDF Metadata</h1><p>View and edit title, author, subject, keywords and more.</p></div>
+    <div class="drop-zone" id="meta-drop"><input type="file" id="meta-file" accept=".pdf" /><div class="drop-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="drop-title">Drop a PDF to read metadata</div><div class="drop-sub">or click to browse</div></div>
+    <div id="meta-editor" style="display:none">
+      <div class="card">
+        <div class="card-title">Document Properties</div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Title</label><input class="form-input" id="meta-title" placeholder="Document title" /></div>
+          <div class="form-group"><label class="form-label">Author</label><input class="form-input" id="meta-author" placeholder="Author name" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Subject</label><input class="form-input" id="meta-subject" placeholder="Subject" /></div>
+          <div class="form-group"><label class="form-label">Keywords</label><input class="form-input" id="meta-keywords" placeholder="keyword1, keyword2" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Creator App</label><input class="form-input" id="meta-creator" placeholder="Creator application" /></div>
+          <div class="form-group"><label class="form-label">Pages</label><input class="form-input" id="meta-pages" readonly /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Created</label><input class="form-input" id="meta-created" readonly /></div>
+          <div class="form-group"><label class="form-label">Modified</label><input class="form-input" id="meta-modified" readonly /></div>
+        </div>
+        <div class="form-row"><div class="form-group"><label class="form-label">File Size</label><input class="form-input" id="meta-filesize" readonly /></div></div>
+      </div>
+      <div class="result-box" id="meta-result"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="meta-save-btn"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save Metadata &amp; Download</button>
+      </div>
+    </div>
+  </div>
+  <!-- HEADER & FOOTER -->
+  <div class="panel" id="panel-headerfooter">
+    <div class="page-header"><h1>Header &amp; Footer</h1><p>Add custom header and footer text to every page. Use <code>{page}</code> and <code>{total}</code> for page numbers.</p></div>
+    <div class="drop-zone" id="hf-drop"><input type="file" id="hf-file" accept=".pdf" /><div class="drop-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div><div class="drop-title">Drop your PDF here</div><div class="drop-sub">or click to browse</div></div>
+    <div class="file-list" id="hf-file-list"></div>
+    <div id="hf-options" style="display:none">
+      <div class="card">
+        <div class="card-title">Header</div>
+        <div class="form-row">
+          <div class="form-group" style="flex:2"><label class="form-label">Header Text</label><input class="form-input" id="hf-header" placeholder="e.g. CONFIDENTIAL — {page} of {total}" /></div>
+          <div class="form-group"><label class="form-label">Size (pt)</label><input class="form-input" type="number" id="hf-header-size" value="11" min="6" max="72" /></div>
+          <div class="form-group"><label class="form-label">Margin (pt)</label><input class="form-input" type="number" id="hf-header-margin" value="20" min="5" max="200" /></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Footer</div>
+        <div class="form-row">
+          <div class="form-group" style="flex:2"><label class="form-label">Footer Text</label><input class="form-input" id="hf-footer" placeholder="e.g. Page {page} of {total}" /></div>
+          <div class="form-group"><label class="form-label">Size (pt)</label><input class="form-input" type="number" id="hf-footer-size" value="10" min="6" max="72" /></div>
+          <div class="form-group"><label class="form-label">Margin (pt)</label><input class="form-input" type="number" id="hf-footer-margin" value="18" min="5" max="200" /></div>
+        </div>
+      </div>
+      <div class="result-box" id="hf-result"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="hf-run"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>Apply &amp; Download</button>
+        <button class="btn btn-secondary" id="hf-clear">Clear</button>
+      </div>
+    </div>
+  </div>
+  <!-- FLATTEN PDF -->
+  <div class="panel" id="panel-flatten">
+    <div class="page-header"><h1>Flatten PDF</h1><p>Flatten interactive form fields and annotations to static, uneditable content.</p></div>
+    <div class="drop-zone" id="fl-drop"><input type="file" id="fl-file" accept=".pdf" /><div class="drop-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div><div class="drop-title">Drop your PDF here</div><div class="drop-sub">or click to browse</div></div>
+    <div class="file-list" id="fl-file-list"></div>
+    <div id="fl-options" style="display:none">
+      <div class="card">
+        <div class="card-title">Options</div>
+        <label class="form-label" style="display:flex;align-items:center;gap:.5rem;cursor:pointer;margin-bottom:.5rem"><input type="checkbox" id="fl-forms" checked style="width:auto;accent-color:var(--accent)" /> Flatten form fields (make fields static)</label>
+        <label class="form-label" style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox" id="fl-clean" checked style="width:auto;accent-color:var(--accent)" /> Re-save as optimised clean copy</label>
+      </div>
+      <div class="result-box" id="fl-result"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="fl-run"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>Flatten &amp; Download</button>
+        <button class="btn btn-secondary" id="fl-clear">Clear</button>
+      </div>
+    </div>
+  </div>
   <!-- ACCOUNT SETTINGS -->
   <div class="panel" id="panel-account">
     <div class="page-header"><h1>Account Settings</h1><p>Your profile and subscription details.</p></div>
@@ -3447,6 +3553,92 @@ document.addEventListener("paste", function(e) {
     }
   });
 })();
+
+// ── HEADER & FOOTER ──
+(function(){
+  var hfFile=null;
+  var dropEl=document.getElementById("hf-drop");
+  var fileIn=document.getElementById("hf-file");
+  var fileList=document.getElementById("hf-file-list");
+  var options=document.getElementById("hf-options");
+  var resultEl=document.getElementById("hf-result");
+  function setFile(f){hfFile=f;fileList.innerHTML="";fileList.appendChild(renderFileItem(f,function(){hfFile=null;options.style.display="none";fileList.innerHTML="";}));options.style.display="";}
+  if(dropEl){
+    dropEl.addEventListener("dragover",function(e){e.preventDefault();dropEl.classList.add("drag-over");});
+    dropEl.addEventListener("dragleave",function(){dropEl.classList.remove("drag-over");});
+    dropEl.addEventListener("drop",function(e){e.preventDefault();dropEl.classList.remove("drag-over");var fl=Array.from(e.dataTransfer.files).filter(function(f){return f.name.toLowerCase().endsWith(".pdf");});if(fl.length)setFile(fl[0]);});
+    dropEl.addEventListener("click",function(){if(fileIn)fileIn.click();});
+  }
+  if(fileIn)fileIn.addEventListener("change",function(){if(fileIn.files[0])setFile(fileIn.files[0]);});
+  document.getElementById("hf-run").addEventListener("click",async function(){
+    if(!hfFile)return;
+    var hText=document.getElementById("hf-header").value.trim();
+    var fText=document.getElementById("hf-footer").value.trim();
+    if(!hText&&!fText){showResult(resultEl,"error","Enter header or footer text");return;}
+    var hSz=parseFloat(document.getElementById("hf-header-size").value)||11;
+    var fSz=parseFloat(document.getElementById("hf-footer-size").value)||10;
+    var hMg=parseFloat(document.getElementById("hf-header-margin").value)||20;
+    var fMg=parseFloat(document.getElementById("hf-footer-margin").value)||18;
+    var btn=this;btn.disabled=true;
+    showResult(resultEl,"info","Applying…");
+    try{
+      var PDFLib=await loadPdfLib();
+      var ab=await hfFile.arrayBuffer();
+      var doc=await PDFLib.PDFDocument.load(ab);
+      var font=await doc.embedFont(PDFLib.StandardFonts.Helvetica);
+      var pages=doc.getPages();var total=pages.length;
+      pages.forEach(function(page,i){
+        var sz=page.getSize();var pw=sz.width;var ph=sz.height;var pn=String(i+1);
+        if(hText){var ht=hText.replace("{page}",pn).replace("{total}",String(total));page.drawText(ht,{x:hMg,y:ph-hMg-hSz,font:font,size:hSz,color:PDFLib.rgb(0.2,0.2,0.2)});}
+        if(fText){var ft=fText.replace("{page}",pn).replace("{total}",String(total));page.drawText(ft,{x:fMg,y:fMg,font:font,size:fSz,color:PDFLib.rgb(0.2,0.2,0.2)});}
+      });
+      var bytes=await doc.save();
+      var blob=new Blob([bytes],{type:"application/pdf"});
+      var outName=hfFile.name.replace(/\.pdf$/i,"")+"-stamped.pdf";
+      triggerDownload(blob,outName);
+      showResult(resultEl,"success","Applied to "+total+" page"+(total>1?"s":"")+" — downloading "+outName);
+    }catch(err){showResult(resultEl,"error","Error: "+(err.message||err));}
+    btn.disabled=false;
+  });
+  document.getElementById("hf-clear").addEventListener("click",function(){hfFile=null;fileList.innerHTML="";options.style.display="none";resultEl.className="result-box";});
+})();
+
+// ── FLATTEN PDF ──
+(function(){
+  var flFile=null;
+  var dropEl=document.getElementById("fl-drop");
+  var fileIn=document.getElementById("fl-file");
+  var fileList=document.getElementById("fl-file-list");
+  var options=document.getElementById("fl-options");
+  var resultEl=document.getElementById("fl-result");
+  function setFile(f){flFile=f;fileList.innerHTML="";fileList.appendChild(renderFileItem(f,function(){flFile=null;options.style.display="none";fileList.innerHTML="";}));options.style.display="";}
+  if(dropEl){
+    dropEl.addEventListener("dragover",function(e){e.preventDefault();dropEl.classList.add("drag-over");});
+    dropEl.addEventListener("dragleave",function(){dropEl.classList.remove("drag-over");});
+    dropEl.addEventListener("drop",function(e){e.preventDefault();dropEl.classList.remove("drag-over");var fl=Array.from(e.dataTransfer.files).filter(function(f){return f.name.toLowerCase().endsWith(".pdf");});if(fl.length)setFile(fl[0]);});
+    dropEl.addEventListener("click",function(){if(fileIn)fileIn.click();});
+  }
+  if(fileIn)fileIn.addEventListener("change",function(){if(fileIn.files[0])setFile(fileIn.files[0]);});
+  document.getElementById("fl-run").addEventListener("click",async function(){
+    if(!flFile)return;
+    var doForms=document.getElementById("fl-forms").checked;
+    var btn=this;btn.disabled=true;
+    showResult(resultEl,"info","Processing…");
+    try{
+      var PDFLib=await loadPdfLib();
+      var ab=await flFile.arrayBuffer();
+      var doc=await PDFLib.PDFDocument.load(ab,{ignoreEncryption:true});
+      if(doForms){try{doc.getForm().flatten();}catch(fe){}}
+      var bytes=await doc.save();
+      var blob=new Blob([bytes],{type:"application/pdf"});
+      var outName=flFile.name.replace(/\.pdf$/i,"")+"-flat.pdf";
+      triggerDownload(blob,outName);
+      showResult(resultEl,"success","Done — downloading "+outName);
+    }catch(err){showResult(resultEl,"error","Error: "+(err.message||err));}
+    btn.disabled=false;
+  });
+  document.getElementById("fl-clear").addEventListener("click",function(){flFile=null;fileList.innerHTML="";options.style.display="none";resultEl.className="result-box";});
+})();
 // ── BEFOREUNLOAD WARNING ──
 window.addEventListener("beforeunload", function(e){
   var hasWork = Array.from(document.querySelectorAll("input[type=file]")).some(function(inp){
@@ -3458,5 +3650,6 @@ window.addEventListener("beforeunload", function(e){
   }
 });
 </script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}</script>
 </body>
 </html>
