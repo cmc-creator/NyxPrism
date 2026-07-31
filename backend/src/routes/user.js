@@ -9,14 +9,14 @@ const router = express.Router();
 // Creates the Postgres user row if it doesn't exist yet.
 router.post('/sync', requireAuth, async (req, res) => {
   const { uid, email } = req.user;
-  const { firstName, lastName, plan } = req.body ?? {};
+  const { firstName, lastName } = req.body ?? {};
 
   try {
     await pool.query(
       `INSERT INTO users (firebase_uid, email, first_name, last_name, plan, trial_start)
-       VALUES ($1, $2, $3, $4, $5, NOW())
+      VALUES ($1, $2, $3, $4, 'trial', NOW())
        ON CONFLICT (firebase_uid) DO NOTHING`,
-      [uid, email, firstName || null, lastName || null, plan || 'trial'],
+          [uid, email, String(firstName || '').slice(0, 100) || null, String(lastName || '').slice(0, 100) || null],
     );
     res.json({ ok: true });
   } catch (err) {

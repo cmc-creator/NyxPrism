@@ -1,700 +1,427 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>NyxPrism Admin</title>
-<style>
-  :root{--bg:#06080d;--surface:#0d1117;--surface2:#161b22;--border:#21262d;--text:#e6edf3;--muted:#7d8590;--accent:#7c3aed;--accent-bright:#a78bfa;--accent-dim:#4c1d95;--green:#3fb950;--yellow:#d29922;--red:#f85149;--cyan:#58a6ff;}
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;font-size:14px;display:flex;height:100vh;overflow:hidden}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NyxPrism Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;0,14..32,900;1,14..32,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:            #06080d;
+      --bg2:           #0b0f18;
+      --surface:       #0f1724;
+      --surface2:      #141e2e;
+      --border:        #1b2840;
+      --border2:       #253548;
+      --accent:        #7c3aed;
+      --accent-bright: #a78bfa;
+      --accent-glow:   rgba(124,58,237,.14);
+      --muted:         #5a7194;
+      --muted2:        #3a4f6a;
+      --text:          #e8edf5;
+      --text2:         #bbc8da;
+      --text3:         #7f96b2;
+      --green:         #22c55e;
+      --red:           #f87171;
+      --yellow:        #facc15;
+      --blue:          #60a5fa;
+      --radius:        .55rem;
+      --radius-sm:     .35rem;
+      --radius-lg:     1rem;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { color-scheme: dark; }
+    body {
+      font-family: Inter, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
-  /* ── Lock screen ── */
-  #lockScreen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999}
-  .lock-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:48px;width:380px;text-align:center}
-  .lock-box h1{font-size:24px;font-weight:700;margin-bottom:8px;color:var(--accent-bright)}
-  .lock-box p{color:var(--muted);margin-bottom:28px;font-size:13px}
-  .lock-box input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 16px;color:var(--text);font-size:15px;outline:none;letter-spacing:2px;text-align:center}
-  .lock-box input:focus{border-color:var(--accent)}
-  .lock-box button{width:100%;margin-top:16px;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:12px;font-size:15px;font-weight:600;cursor:pointer;transition:opacity .15s}
-  .lock-box button:hover{opacity:.85}
-  .lock-err{color:var(--red);font-size:13px;margin-top:12px;min-height:18px}
+    /* ── LOCK SCREEN ─────────────────────────────────────────────── */
+    #lock-screen {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .lock-card {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem 2.25rem;
+      width: 100%;
+      max-width: 380px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+    .lock-title { font-size: 1.25rem; font-weight: 700; }
+    .lock-sub   { font-size: .875rem; color: var(--text3); }
+    .lock-input {
+      width: 100%;
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .875rem;
+      padding: .65rem .85rem;
+      outline: none;
+    }
+    .lock-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    .lock-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: .875rem;
+      font-weight: 600;
+      padding: .7rem 1.5rem;
+      cursor: pointer;
+      width: 100%;
+    }
+    .lock-btn:hover { background: #6d28d9; }
+    .lock-error { font-size: .8rem; color: var(--red); display: none; }
 
-  /* ── Sidebar ── */
-  #sidebar{width:220px;min-width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;overflow:hidden}
-  .sidebar-logo{padding:24px 20px 16px;border-bottom:1px solid var(--border)}
-  .sidebar-logo h2{font-size:16px;font-weight:700;color:var(--accent-bright);letter-spacing:.5px}
-  .sidebar-logo span{font-size:11px;color:var(--muted);display:block;margin-top:2px}
-  .sidebar-nav{flex:1;padding:12px 8px;overflow-y:auto}
-  .nav-section{font-size:10px;font-weight:600;color:var(--muted);letter-spacing:1px;text-transform:uppercase;padding:12px 12px 4px;margin-top:4px}
-  .nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:6px;cursor:pointer;color:var(--muted);transition:all .15s;user-select:none;margin-bottom:2px}
-  .nav-item:hover{background:var(--surface2);color:var(--text)}
-  .nav-item.active{background:var(--accent-dim);color:var(--accent-bright);font-weight:500}
-  .nav-item .icon{font-size:16px;width:18px;text-align:center;flex-shrink:0}
-  .nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:600;border-radius:10px;padding:1px 6px;min-width:18px;text-align:center;display:none}
-  .nav-badge.show{display:block}
-  .sidebar-footer{padding:12px 16px;border-top:1px solid var(--border);font-size:11px;color:var(--muted)}
-  .sidebar-footer span{color:var(--green)}
+    /* ── ADMIN SHELL ─────────────────────────────────────────────── */
+    #admin-shell { display: none; flex: 1; flex-direction: column; }
+    header.admin-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: .85rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .admin-wordmark { font-size: 1.05rem; font-weight: 800; letter-spacing: -.01em; }
+    .admin-wordmark em { font-style: normal; color: var(--accent-bright); }
+    .admin-badge { font-size: .7rem; background: rgba(124,58,237,.18); color: var(--accent-bright); border-radius: 999px; padding: .2rem .65rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+    .admin-logout { background: none; border: 1px solid var(--border2); color: var(--text3); border-radius: var(--radius-sm); font-size: .8rem; padding: .35rem .85rem; cursor: pointer; }
+    .admin-logout:hover { color: var(--text); border-color: var(--border3); }
 
-  /* ── Main ── */
-  #main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden}
-  #topbar{height:56px;min-height:56px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:var(--surface)}
-  #topbar h3{font-size:15px;font-weight:600;color:var(--text)}
-  .topbar-actions{display:flex;align-items:center;gap:12px}
-  .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:6px;font-size:13px;font-weight:500;border:none;cursor:pointer;transition:opacity .15s}
-  .btn:hover{opacity:.8}
-  .btn-primary{background:var(--accent);color:#fff}
-  .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted)}
-  .btn-ghost:hover{color:var(--text);border-color:var(--muted)}
-  .btn-danger{background:var(--red);color:#fff}
-  .btn-sm{padding:4px 10px;font-size:12px}
-  #content{flex:1;overflow-y:auto;padding:24px}
+    .admin-body { flex: 1; padding: 2rem; max-width: 1200px; margin: 0 auto; width: 100%; }
 
-  /* ── Stat cards ── */
-  .stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-bottom:28px}
-  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px}
-  .stat-card .label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
-  .stat-card .value{font-size:28px;font-weight:700;color:var(--text)}
-  .stat-card .sub{font-size:12px;color:var(--muted);margin-top:4px}
-  .stat-card .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px}
-  .dot-green{background:var(--green)}
-  .dot-yellow{background:var(--yellow)}
-  .dot-red{background:var(--red)}
-  .dot-cyan{background:var(--cyan)}
-  .dot-purple{background:var(--accent-bright)}
+    /* ── TABS ────────────────────────────────────────────────────── */
+    .tab-row { display: flex; gap: .5rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0; }
+    .tab { background: none; border: none; color: var(--text3); font-size: .875rem; font-weight: 600; padding: .6rem 1rem; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+    .tab.active { color: var(--accent-bright); border-bottom-color: var(--accent-bright); }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
 
-  /* ── Section headers ── */
-  .section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-  .section-head h4{font-size:15px;font-weight:600}
+    /* ── STAT CARDS ──────────────────────────────────────────────── */
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; }
+    .stat-label { font-size: .72rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: .4rem; }
+    .stat-value { font-size: 2rem; font-weight: 800; line-height: 1; }
+    .stat-value.green { color: var(--green); }
+    .stat-value.accent { color: var(--accent-bright); }
+    .stat-value.blue { color: var(--blue); }
+    .stat-value.yellow { color: var(--yellow); }
 
-  /* ── Tables ── */
-  .table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:24px}
-  table{width:100%;border-collapse:collapse}
-  thead th{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:10px 16px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
-  tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
-  tbody tr:last-child{border-bottom:none}
-  tbody tr:hover{background:var(--surface2)}
-  tbody td{padding:11px 16px;color:var(--text);vertical-align:middle}
-  .empty-row td{text-align:center;color:var(--muted);padding:32px}
+    /* ── PLAN BREAKDOWN ──────────────────────────────────────────── */
+    .plan-list { display: flex; flex-wrap: wrap; gap: .75rem; margin-bottom: 2rem; }
+    .plan-pill {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 999px;
+      padding: .4rem 1rem;
+      font-size: .875rem;
+    }
+    .plan-pill .pill-name { font-weight: 600; text-transform: capitalize; }
+    .plan-pill .pill-count { color: var(--accent-bright); font-weight: 700; }
 
-  /* ── Badges ── */
-  .badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
-  .badge-trial{background:#1c1a3a;color:var(--accent-bright)}
-  .badge-starter{background:#1a2a1a;color:var(--green)}
-  .badge-pro{background:#2a1a0a;color:var(--yellow)}
-  .badge-enterprise{background:#1a0a0a;color:var(--red)}
-  .badge-active{background:#1a2a1a;color:var(--green)}
-  .badge-trialing{background:#1c1a3a;color:var(--accent-bright)}
-  .badge-past_due{background:#2a1a0a;color:var(--yellow)}
-  .badge-canceled{background:#1e1e1e;color:var(--muted)}
-  .badge-unread{background:#2a0a0a;color:var(--red)}
-  .badge-read{background:#1a2a1a;color:var(--muted)}
+    /* ── TABLES ──────────────────────────────────────────────────── */
+    .tbl-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: .84rem; }
+    th { text-align: left; color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .07em; padding: .6rem .75rem; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    td { padding: .65rem .75rem; border-bottom: 1px solid var(--border); color: var(--text2); vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--surface); }
+    .badge {
+      display: inline-block;
+      font-size: .7rem;
+      font-weight: 700;
+      padding: .15rem .55rem;
+      border-radius: 999px;
+      text-transform: capitalize;
+    }
+    .badge-active   { background: rgba(34,197,94,.12);  color: var(--green); }
+    .badge-trial    { background: rgba(96,165,250,.12);  color: var(--blue); }
+    .badge-inactive { background: rgba(248,113,113,.12); color: var(--red); }
+    .badge-pro      { background: var(--accent-glow);    color: var(--accent-bright); }
+    .badge-free     { background: rgba(90,113,148,.12);  color: var(--muted); }
 
-  /* ── Search/filter bar ── */
-  .filter-bar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
-  .filter-bar input,.filter-bar select{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:7px 12px;color:var(--text);font-size:13px;outline:none}
-  .filter-bar input:focus,.filter-bar select:focus{border-color:var(--accent)}
-  .filter-bar input{flex:1;min-width:180px}
-  .filter-bar select option{background:var(--surface2)}
+    /* ── PAGINATION ──────────────────────────────────────────────── */
+    .pager { display: flex; align-items: center; gap: 1rem; margin-top: 1.5rem; }
+    .pager-btn { background: var(--surface2); border: 1px solid var(--border2); color: var(--text2); border-radius: var(--radius-sm); font-size: .8rem; padding: .45rem .9rem; cursor: pointer; }
+    .pager-btn:disabled { opacity: .35; cursor: default; }
+    .pager-btn:not(:disabled):hover { border-color: var(--border3); color: var(--text); }
+    .pager-info { font-size: .8rem; color: var(--muted); }
 
-  /* ── Pagination ── */
-  .pagination{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-top:1px solid var(--border);font-size:12px;color:var(--muted)}
-  .pagination .page-btns{display:flex;gap:6px}
-  .page-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:4px;padding:4px 10px;cursor:pointer;font-size:12px}
-  .page-btn:disabled{opacity:.4;cursor:default}
-  .page-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+    /* ── LOADING / ERROR ─────────────────────────────────────────── */
+    .loading { color: var(--muted); font-size: .875rem; padding: 2rem 0; }
+    .err-msg  { color: var(--red); font-size: .875rem; padding: 1rem 0; }
 
-  /* ── Modal ── */
-  .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;display:none}
-  .modal-backdrop.open{display:flex}
-  .modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto}
-  .modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border)}
-  .modal-header h3{font-size:16px;font-weight:600}
-  .modal-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:0;line-height:1}
-  .modal-close:hover{color:var(--text)}
-  .modal-body{padding:20px 24px}
-  .modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
-  .field-group{margin-bottom:16px}
-  .field-group label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:500}
-  .field-group select,.field-group input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:9px 12px;color:var(--text);font-size:14px;outline:none}
-  .field-group select:focus,.field-group input:focus{border-color:var(--accent)}
-  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .detail-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
-  .detail-row:last-child{border-bottom:none}
-  .detail-row .key{color:var(--muted)}
-
-  /* ── Charts ── */
-  .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
-  .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px}
-  .chart-card h5{font-size:13px;font-weight:600;margin-bottom:16px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
-  .bar-chart{display:flex;align-items:flex-end;gap:4px;height:80px}
-  .bar{flex:1;background:var(--accent-dim);border-radius:3px 3px 0 0;min-width:4px;position:relative;transition:background .15s;cursor:default}
-  .bar:hover{background:var(--accent)}
-  .bar-label{font-size:9px;color:var(--muted);text-align:center;margin-top:4px;display:none}
-  .donut-row{display:flex;flex-direction:column;gap:8px}
-  .donut-item{display:flex;align-items:center;gap:10px;font-size:13px}
-  .donut-item .d-label{flex:1;color:var(--muted)}
-  .donut-item .d-val{font-weight:600}
-  .donut-item .d-bar-wrap{width:80px;height:4px;background:var(--border);border-radius:2px}
-  .donut-item .d-bar-fill{height:100%;border-radius:2px}
-
-  /* ── Message content ── */
-  .msg-text{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:16px;font-size:13px;line-height:1.6;white-space:pre-wrap;word-break:break-word;margin-top:12px;color:var(--text)}
-
-  /* ── Misc ── */
-  .mono{font-family:'JetBrains Mono',monospace;font-size:12px}
-  .text-muted{color:var(--muted)}
-  .text-red{color:var(--red)}
-  .text-green{color:var(--green)}
-  .text-yellow{color:var(--yellow)}
-  .mt-8{margin-top:8px}
-  .mt-16{margin-top:16px}
-  .refresh-btn{background:none;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:6px 12px;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:6px}
-  .refresh-btn:hover{color:var(--text);border-color:var(--muted)}
-  .spinning{animation:spin .8s linear infinite;display:inline-block}
-  @keyframes spin{to{transform:rotate(360deg)}}
-
-  /* scrollbar */
-  ::-webkit-scrollbar{width:6px;height:6px}
-  ::-webkit-scrollbar-track{background:transparent}
-  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
-  ::-webkit-scrollbar-thumb:hover{background:var(--muted)}
-</style>
+    /* ── MESSAGE CARD ────────────────────────────────────────────── */
+    .msg-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+    .msg-meta { display: flex; align-items: center; gap: .75rem; margin-bottom: .75rem; flex-wrap: wrap; }
+    .msg-name  { font-weight: 600; font-size: .9rem; }
+    .msg-email { font-size: .8rem; color: var(--text3); }
+    .msg-date  { font-size: .75rem; color: var(--muted); margin-left: auto; }
+    .msg-subject { font-size: .875rem; font-weight: 600; margin-bottom: .5rem; color: var(--text); }
+    .msg-body  { font-size: .84rem; color: var(--text2); line-height: 1.65; white-space: pre-wrap; }
+  </style>
 </head>
 <body>
 
-<!-- ══════════ LOCK SCREEN ══════════ -->
-<div id="lockScreen">
-  <div class="lock-box">
-    <h1>NyxPrism Admin</h1>
-    <p>Sign in with your admin account</p>
-    <input type="email" id="adminEmail" placeholder="Email address" autocomplete="email" style="margin-bottom:10px"/>
-    <input type="password" id="adminPassword" placeholder="Password" autocomplete="current-password"/>
-    <button onclick="doLogin()">Sign In</button>
-    <div class="lock-err" id="lockErr"></div>
+<!-- ── LOCK SCREEN ───────────────────────────────────────────────────── -->
+<div id="lock-screen">
+  <div class="lock-card">
+    <div>
+      <div class="lock-title"><em style="font-style:normal;color:#a78bfa">Nyx</em>Prism Admin</div>
+      <div class="lock-sub" style="margin-top:.4rem">Enter your admin secret to continue.</div>
+    </div>
+    <input class="lock-input" type="password" id="secret-input" placeholder="Admin secret" autocomplete="off" />
+    <button class="lock-btn" id="unlock-btn">Unlock</button>
+    <div class="lock-error" id="lock-error">Incorrect secret — check the ADMIN_SECRET env var.</div>
   </div>
 </div>
 
-<!-- ══════════ SIDEBAR ══════════ -->
-<nav id="sidebar" style="display:none">
-  <div class="sidebar-logo">
-    <h2>NyxPrism</h2>
-    <span>Admin Console</span>
-  </div>
-  <div class="sidebar-nav">
-    <div class="nav-section">Overview</div>
-    <div class="nav-item active" onclick="showTab('dashboard')">
-      <span class="icon">📊</span> Dashboard
+<!-- ── ADMIN SHELL ───────────────────────────────────────────────────── -->
+<div id="admin-shell">
+  <header class="admin-header">
+    <div style="display:flex;align-items:center;gap:.75rem">
+      <div class="admin-wordmark"><em>Nyx</em>Prism</div>
+      <div class="admin-badge">Admin</div>
+    </div>
+    <button class="admin-logout" id="logout-btn">Log Out</button>
+  </header>
+
+  <div class="admin-body">
+    <div class="tab-row">
+      <button class="tab active" data-tab="overview">Overview</button>
+      <button class="tab" data-tab="users">Users</button>
+      <button class="tab" data-tab="messages">Messages</button>
     </div>
 
-    <div class="nav-section">User Data</div>
-    <div class="nav-item" onclick="showTab('users')">
-      <span class="icon">👥</span> Users
-    </div>
-    <div class="nav-item" onclick="showTab('subscriptions')">
-      <span class="icon">💳</span> Subscriptions
-    </div>
-    <div class="nav-item" onclick="showTab('apikeys')">
-      <span class="icon">🔑</span> API Keys
+    <!-- Overview tab -->
+    <div class="tab-pane active" id="tab-overview">
+      <div class="stat-grid" id="stat-grid">
+        <div class="loading">Loading stats…</div>
+      </div>
+      <div id="plan-breakdown"></div>
     </div>
 
-    <div class="nav-section">Support</div>
-    <div class="nav-item" onclick="showTab('messages')">
-      <span class="icon">✉️</span> Messages
-      <span class="nav-badge" id="unreadBadge">0</span>
+    <!-- Users tab -->
+    <div class="tab-pane" id="tab-users">
+      <div class="tbl-wrap">
+        <table id="users-table">
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Name</th>
+              <th>Plan</th>
+              <th>Status</th>
+              <th>Trial</th>
+              <th>Period End</th>
+              <th>Joined</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody"><tr><td colspan="7" class="loading">Loading…</td></tr></tbody>
+        </table>
+      </div>
+      <div class="pager" id="users-pager" style="display:none">
+        <button class="pager-btn" id="users-prev" disabled>← Prev</button>
+        <span class="pager-info" id="users-info"></span>
+        <button class="pager-btn" id="users-next">Next →</button>
+      </div>
     </div>
-  </div>
-  <div class="sidebar-footer">
-    <span>● </span>Connected
-  </div>
-</nav>
 
-<!-- ══════════ MAIN ══════════ -->
-<div id="main" style="display:none">
-  <div id="topbar">
-    <h3 id="pageTitle">Dashboard</h3>
-    <div class="topbar-actions">
-      <button class="refresh-btn" onclick="refreshCurrent()" id="refreshBtn">⟳ Refresh</button>
-      <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>
-    </div>
-  </div>
-  <div id="content"></div>
-</div>
-
-<!-- ══════════ USER MODAL ══════════ -->
-<div class="modal-backdrop" id="userModal">
-  <div class="modal">
-    <div class="modal-header">
-      <h3>Edit User</h3>
-      <button class="modal-close" onclick="closeModal('userModal')">×</button>
-    </div>
-    <div class="modal-body" id="userModalBody"></div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('userModal')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveUser()">Save Changes</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════ MESSAGE MODAL ══════════ -->
-<div class="modal-backdrop" id="msgModal">
-  <div class="modal">
-    <div class="modal-header">
-      <h3>Message</h3>
-      <button class="modal-close" onclick="closeModal('msgModal')">×</button>
-    </div>
-    <div class="modal-body" id="msgModalBody"></div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('msgModal')">Close</button>
+    <!-- Messages tab -->
+    <div class="tab-pane" id="tab-messages">
+      <div id="messages-list"><div class="loading">Loading…</div></div>
+      <div class="pager" id="messages-pager" style="display:none">
+        <button class="pager-btn" id="msgs-prev" disabled>← Prev</button>
+        <span class="pager-info" id="msgs-info"></span>
+        <button class="pager-btn" id="msgs-next">Next →</button>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- ══════════ CONFIRM MODAL ══════════ -->
-<div class="modal-backdrop" id="confirmModal">
-  <div class="modal" style="max-width:400px">
-    <div class="modal-header">
-      <h3 id="confirmTitle">Confirm</h3>
-      <button class="modal-close" onclick="closeModal('confirmModal')">×</button>
-    </div>
-    <div class="modal-body" id="confirmBody"></div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('confirmModal')">Cancel</button>
-      <button class="btn btn-danger" id="confirmBtn">Confirm</button>
-    </div>
-  </div>
-</div>
+<script>
+const API = 'https://nyxprism-production.up.railway.app';
+let adminSecret = '';
 
-<script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-
-const firebaseConfig = {
-  apiKey:            "AIzaSyD7bj__SwM4gE_yDnM9jjmzOgh6mX4NiD0",
-  authDomain:        "nyxprism-2a817.firebaseapp.com",
-  projectId:         "nyxprism-2a817",
-  storageBucket:     "nyxprism-2a817.firebasestorage.app",
-  messagingSenderId: "388040998105",
-  appId:             "1:388040998105:web:8e3fbfd27db0fdd60dd2c8"
-};
-const fbApp  = initializeApp(firebaseConfig);
-const fbAuth = getAuth(fbApp);
-
-const API = 'https://nyxprism-production.up.railway.app/api/admin';
-let _idToken = '';
-let currentTab = 'dashboard';
-let editingUserId = null;
-let state = { users: {page:1,search:'',plan:'',status:''}, keys: {page:1}, msgs: {page:1,unread:false} };
-
-// ── Auth ──────────────────────────────────────────────────────────────────
-function headers() { return { 'Content-Type':'application/json', 'Authorization': 'Bearer ' + _idToken }; }
-
-async function refreshToken() {
-  const user = fbAuth.currentUser;
-  if (user) _idToken = await user.getIdToken(true);
-  return _idToken;
+// ── Helpers ───────────────────────────────────────────────────────────────
+async function apiFetch(path, opts = {}) {
+  const res = await fetch(`${API}${path}`, {
+    ...opts,
+    headers: { 'x-admin-secret': adminSecret, 'Content-Type': 'application/json', ...(opts.headers || {}) },
+  });
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+  return res.json();
 }
 
-window.doLogin = async function() {
-  const email    = document.getElementById('adminEmail').value.trim();
-  const password = document.getElementById('adminPassword').value;
-  if (!email || !password) return;
-  document.getElementById('lockErr').textContent = '';
-  const btn = document.querySelector('#lockScreen button');
-  btn.textContent = 'Signing in...'; btn.disabled = true;
+function fmt(dateStr) {
+  if (!dateStr) return '—';
+  return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+function planBadge(plan) {
+  const cls = { pro: 'badge-pro', trial: 'badge-trial', free: 'badge-free', inactive: 'badge-inactive' }[plan] || 'badge-free';
+  return `<span class="badge ${cls}">${escHtml(plan || 'free')}</span>`;
+}
+
+function statusBadge(status) {
+  const cls = { active: 'badge-active', trialing: 'badge-trial', canceled: 'badge-inactive', past_due: 'badge-inactive', inactive: 'badge-inactive' }[status] || 'badge-inactive';
+  return `<span class="badge ${cls}">${escHtml(status || 'inactive')}</span>`;
+}
+
+// ── Lock screen ───────────────────────────────────────────────────────────
+document.getElementById('unlock-btn').addEventListener('click', tryUnlock);
+document.getElementById('secret-input').addEventListener('keydown', e => { if (e.key === 'Enter') tryUnlock(); });
+
+async function tryUnlock() {
+  const secret = document.getElementById('secret-input').value.trim();
+  if (!secret) return;
+  adminSecret = secret;
   try {
-    await signInWithEmailAndPassword(fbAuth, email, password);
-    // onAuthStateChanged handles the rest
-  } catch (err) {
-    const msgs = {
-      'auth/user-not-found': 'No account with that email.',
-      'auth/wrong-password': 'Incorrect password.',
-      'auth/invalid-credential': 'Incorrect email or password.',
-      'auth/too-many-requests': 'Too many attempts — wait a moment.',
-    };
-    document.getElementById('lockErr').textContent = msgs[err.code] || 'Sign-in failed.';
-    btn.textContent = 'Sign In'; btn.disabled = false;
+    await apiFetch('/api/admin/stats');
+    document.getElementById('lock-screen').style.display = 'none';
+    document.getElementById('admin-shell').style.display = 'flex';
+    loadOverview();
+  } catch {
+    document.getElementById('lock-error').style.display = 'block';
+    adminSecret = '';
   }
-};
+}
 
-window.logout = async function() {
-  await signOut(fbAuth);
-  _idToken = '';
-  document.getElementById('lockScreen').style.display = 'flex';
-  document.getElementById('sidebar').style.display = 'none';
-  document.getElementById('main').style.display = 'none';
-  document.getElementById('adminEmail').value = '';
-  document.getElementById('adminPassword').value = '';
-};
-
-document.getElementById('adminPassword').addEventListener('keydown', e => { if (e.key === 'Enter') window.doLogin(); });
-document.getElementById('adminEmail').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('adminPassword').focus(); });
-
-// Check session on load via Firebase
-onAuthStateChanged(fbAuth, async user => {
-  if (user) {
-    try {
-      _idToken = await user.getIdToken();
-      const r = await fetch(API + '/stats', { headers: headers() });
-      if (r.ok) {
-        document.getElementById('lockScreen').style.display = 'none';
-        document.getElementById('sidebar').style.display = 'flex';
-        document.getElementById('main').style.display = 'flex';
-        showTab('dashboard');
-      } else if (r.status === 403) {
-        document.getElementById('lockErr').textContent = 'Your account does not have admin access.';
-        document.getElementById('lockScreen').style.display = 'flex';
-        await signOut(fbAuth);
-      } else {
-        document.getElementById('lockScreen').style.display = 'flex';
-      }
-    } catch {
-      document.getElementById('lockScreen').style.display = 'flex';
-    }
-    const btn = document.querySelector('#lockScreen button');
-    if (btn) { btn.textContent = 'Sign In'; btn.disabled = false; }
-  } else {
-    document.getElementById('lockScreen').style.display = 'flex';
-    document.getElementById('sidebar').style.display = 'none';
-    document.getElementById('main').style.display = 'none';
-  }
+document.getElementById('logout-btn').addEventListener('click', () => {
+  adminSecret = '';
+  document.getElementById('admin-shell').style.display = 'none';
+  document.getElementById('lock-screen').style.display = 'flex';
+  document.getElementById('secret-input').value = '';
 });
 
-// ── Navigation ────────────────────────────────────────────────────────────
-function showTab(tab) {
-  currentTab = tab;
-  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-  document.querySelector('.nav-item[onclick*="' + tab + '"]')?.classList.add('active');
-  const titles = { dashboard:'Dashboard', users:'Users', subscriptions:'Subscriptions', apikeys:'API Keys', messages:'Messages' };
-  document.getElementById('pageTitle').textContent = titles[tab] || tab;
-  if (tab === 'dashboard') renderDashboard();
-  else if (tab === 'users') renderUsers();
-  else if (tab === 'subscriptions') renderSubscriptions();
-  else if (tab === 'apikeys') renderKeys();
-  else if (tab === 'messages') renderMessages();
-}
+// ── Tabs ──────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+    if (btn.dataset.tab === 'users') loadUsers(1);
+    if (btn.dataset.tab === 'messages') loadMessages(1);
+  });
+});
 
-function refreshCurrent() { showTab(currentTab); }
-
-// ── Modal helpers ─────────────────────────────────────────────────────────
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-
-// ── Utility ───────────────────────────────────────────────────────────────
-function fmtDate(d) {
-  if (!d) return '—';
-  return new Date(d).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
-}
-function fmtDateTime(d) {
-  if (!d) return '—';
-  return new Date(d).toLocaleString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit' });
-}
-function planBadge(p) {
-  const cls = { trial:'badge-trial', starter:'badge-starter', pro:'badge-pro', enterprise:'badge-enterprise' };
-  return '<span class="badge ' + (cls[p] || 'badge-trial') + '">' + (p || 'trial') + '</span>';
-}
-function statusBadge(s) {
-  const cls = { active:'badge-active', trialing:'badge-trialing', past_due:'badge-past_due', canceled:'badge-canceled', incomplete:'badge-canceled' };
-  return '<span class="badge ' + (cls[s] || 'badge-canceled') + '">' + (s || '—') + '</span>';
-}
-
-// ── DASHBOARD ─────────────────────────────────────────────────────────────
-async function renderDashboard() {
-  const c = document.getElementById('content');
-  c.innerHTML = '<div class="text-muted" style="padding:40px;text-align:center">Loading…</div>';
+// ── Overview ──────────────────────────────────────────────────────────────
+async function loadOverview() {
   try {
-    const r = await fetch(API + '/stats', { headers: headers() });
-    const d = await r.json();
-
-    // Update unread badge
-    const ub = document.getElementById('unreadBadge');
-    if (d.unreadMessages > 0) { ub.textContent = d.unreadMessages; ub.classList.add('show'); }
-    else { ub.classList.remove('show'); }
-
-    const planMap = {};
-    (d.plans || []).forEach(p => { planMap[p.plan] = p.count; });
-    const subMap = {};
-    (d.subscriptionStats || []).forEach(s => { subMap[s.status] = s.count; });
-
-    const planColors = { trial:'var(--accent-bright)', starter:'var(--green)', pro:'var(--yellow)', enterprise:'var(--red)' };
-    const planHtml = Object.entries(planMap).map(([plan, cnt]) => {
-      const pct = d.totalUsers > 0 ? Math.round(cnt/d.totalUsers*100) : 0;
-      return '<div class="donut-item"><span class="dot ' + (plan==='trial'?'dot-purple':plan==='starter'?'dot-green':plan==='pro'?'dot-yellow':'dot-red') + '"></span><span class="d-label">' + plan + '</span><div class="d-bar-wrap"><div class="d-bar-fill" style="width:' + pct + '%;background:' + (planColors[plan]||'var(--accent)') + '"></div></div><span class="d-val">' + cnt + '</span></div>';
-    }).join('');
-
-    const subHtml = Object.entries(subMap).map(([st, cnt]) => {
-      const pct = d.totalUsers > 0 ? Math.round(cnt/d.totalUsers*100) : 0;
-      const col = st==='active'?'var(--green)':st==='trialing'?'var(--accent-bright)':st==='past_due'?'var(--yellow)':'var(--muted)';
-      return '<div class="donut-item"><span class="d-label">' + st + '</span><div class="d-bar-wrap"><div class="d-bar-fill" style="width:' + pct + '%;background:' + col + '"></div></div><span class="d-val">' + cnt + '</span></div>';
-    }).join('');
-
-    // Signup sparkline
-    const signups = d.recentSignups || [];
-    const maxSig = signups.reduce((m, s) => Math.max(m, s.count), 1);
-    const barsHtml = signups.map(s => {
-      const h = Math.max(4, Math.round(s.count / maxSig * 76));
-      return '<div class="bar" style="height:' + h + 'px" title="' + s.day + ': ' + s.count + ' signups"></div>';
-    }).join('') || '<div style="color:var(--muted);font-size:12px;align-self:center;width:100%;text-align:center">No signups yet</div>';
-
-    c.innerHTML = '<div class="stat-grid">'
-      + card('Total Users', d.totalUsers, 'All time registrations')
-      + card('API Keys', d.totalApiKeys, 'Keys across all accounts')
-      + card('Messages', d.totalMessages, d.unreadMessages + ' unread', d.unreadMessages > 0 ? 'dot-red' : '')
-      + card('Paying Users', (subMap['active'] || 0), 'Active subscriptions', 'dot-green')
-      + card('Trialing', (subMap['trialing'] || 0), 'In trial period', 'dot-purple')
-      + card('Past Due', (subMap['past_due'] || 0), 'Need attention', subMap['past_due'] > 0 ? 'dot-yellow' : '')
-      + '</div>'
-      + '<div class="charts-grid">'
-      + '<div class="chart-card"><h5>Signups (last 30 days)</h5><div class="bar-chart">' + barsHtml + '</div></div>'
-      + '<div class="chart-card"><h5>Plans</h5><div class="donut-row">' + (planHtml || '<span class="text-muted">No users yet</span>') + '</div></div>'
-      + '<div class="chart-card"><h5>Subscription Status</h5><div class="donut-row">' + (subHtml || '<span class="text-muted">No subscriptions yet</span>') + '</div></div>'
-      + '</div>';
-  } catch(e) {
-    c.innerHTML = '<div class="text-red" style="padding:40px">Failed to load stats: ' + e.message + '</div>';
+    const data = await apiFetch('/api/admin/stats');
+    const grid = document.getElementById('stat-grid');
+    grid.innerHTML = `
+      <div class="stat-card"><div class="stat-label">Total Users</div><div class="stat-value accent">${data.totalUsers}</div></div>
+      <div class="stat-card"><div class="stat-label">API Keys</div><div class="stat-value blue">${data.totalApiKeys}</div></div>
+      <div class="stat-card"><div class="stat-label">Contact Messages</div><div class="stat-value yellow">${data.totalMessages}</div></div>
+    `;
+    const bp = document.getElementById('plan-breakdown');
+    bp.innerHTML = `<div style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.75rem">Plan Breakdown</div>
+      <div class="plan-list">${data.plans.map(p => `<div class="plan-pill"><span class="pill-name">${p.plan}</span><span class="pill-count">${p.count}</span></div>`).join('')}</div>`;
+  } catch (err) {
+    document.getElementById('stat-grid').innerHTML = `<p class="err-msg">Failed to load stats: ${err.message}</p>`;
   }
 }
 
-function card(label, value, sub, dotClass) {
-  return '<div class="stat-card"><div class="label">' + label + '</div><div class="value">' + value + '</div>'
-    + (sub ? '<div class="sub">' + (dotClass ? '<span class="dot ' + dotClass + '"></span>' : '') + sub + '</div>' : '')
-    + '</div>';
-}
+// ── Users ─────────────────────────────────────────────────────────────────
+let usersPage = 1;
+let userTotal = 0;
+const USERS_LIMIT = 50;
 
-// ── USERS ─────────────────────────────────────────────────────────────────
-async function renderUsers(reset) {
-  if (reset) { state.users.page = 1; }
-  const c = document.getElementById('content');
-  const s = state.users;
-
-  let url = API + '/users?page=' + s.page + '&limit=50';
-  if (s.search) url += '&search=' + encodeURIComponent(s.search);
-  if (s.plan)   url += '&plan=' + encodeURIComponent(s.plan);
-  if (s.status) url += '&status=' + encodeURIComponent(s.status);
-
-  c.innerHTML = '<div class="text-muted" style="padding:40px;text-align:center">Loading…</div>';
+async function loadUsers(page) {
+  usersPage = page;
+  document.getElementById('users-tbody').innerHTML = '<tr><td colspan="7" class="loading">Loading…</td></tr>';
   try {
-    const r = await fetch(url, { headers: headers() });
-    const d = await r.json();
+    const data = await apiFetch(`/api/admin/users?page=${page}&limit=${USERS_LIMIT}`);
+    userTotal = data.total;
+    document.getElementById('users-tbody').innerHTML = data.users.map(u => `
+      <tr>
+        <td>${escHtml(u.email)}</td>
+        <td>${escHtml([u.first_name, u.last_name].filter(Boolean).join(' ') || '—')}</td>
+        <td>${planBadge(u.plan)}</td>
+        <td>${statusBadge(u.subscription_status)}</td>
+        <td>${u.trial_active ? '<span class="badge badge-trial">Active</span>' : '—'}</td>
+        <td>${fmt(u.current_period_end)}</td>
+        <td>${fmt(u.created_at)}</td>
+      </tr>
+    `).join('') || '<tr><td colspan="7" style="color:var(--muted)">No users yet.</td></tr>';
 
-    const rows = d.users.map(u => '<tr>'
-      + '<td class="mono" style="color:var(--muted)">' + u.id + '</td>'
-      + '<td>' + u.email + '</td>'
-      + '<td>' + (u.first_name || '') + ' ' + (u.last_name || '') + '</td>'
-      + '<td>' + planBadge(u.plan) + '</td>'
-      + '<td>' + statusBadge(u.subscription_status) + '</td>'
-      + '<td style="color:var(--muted)">' + fmtDate(u.created_at) + '</td>'
-      + '<td><button class="btn btn-ghost btn-sm" onclick="editUser(' + JSON.stringify(u).replace(/"/g,'&quot;') + ')">Edit</button>'
-      + ' <button class="btn btn-danger btn-sm" onclick="deleteUser(' + u.id + ','' + u.email.replace(/'/g,"\'") + '')">Delete</button></td>'
-      + '</tr>'
-    ).join('') || '<tr class="empty-row"><td colspan="7">No users found.</td></tr>';
-
-    c.innerHTML = '<div class="filter-bar">'
-      + '<input type="text" placeholder="Search email, name…" value="' + (s.search||'') + '" id="userSearch" oninput="state.users.search=this.value" onkeydown="if(event.key==='Enter')renderUsers(true)"/>'
-      + '<select id="planFilter" onchange="state.users.plan=this.value;renderUsers(true)">'
-      + '<option value="">All Plans</option><option value="trial">Trial</option><option value="starter">Starter</option><option value="pro">Pro</option><option value="enterprise">Enterprise</option></select>'
-      + '<select id="statusFilter" onchange="state.users.status=this.value;renderUsers(true)">'
-      + '<option value="">All Statuses</option><option value="trialing">Trialing</option><option value="active">Active</option><option value="past_due">Past Due</option><option value="canceled">Canceled</option></select>'
-      + '<button class="btn btn-primary btn-sm" onclick="renderUsers(true)">Search</button>'
-      + '</div>'
-      + '<div class="table-wrap"><table>'
-      + '<thead><tr><th>ID</th><th>Email</th><th>Name</th><th>Plan</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>'
-      + '<tbody>' + rows + '</tbody></table>'
-      + '<div class="pagination"><span>' + d.total + ' total</span>'
-      + '<div class="page-btns">'
-      + '<button class="page-btn" ' + (s.page<=1?'disabled':'') + ' onclick="state.users.page--;renderUsers()">← Prev</button>'
-      + '<span style="padding:4px 8px;font-size:12px">Page ' + s.page + '</span>'
-      + '<button class="page-btn" ' + (s.page*50>=d.total?'disabled':'') + ' onclick="state.users.page++;renderUsers()">Next →</button>'
-      + '</div></div></div>';
-
-    // Restore filter values
-    document.getElementById('planFilter').value = s.plan || '';
-    document.getElementById('statusFilter').value = s.status || '';
-  } catch(e) {
-    c.innerHTML = '<div class="text-red" style="padding:40px">Failed to load users: ' + e.message + '</div>';
+    const pager = document.getElementById('users-pager');
+    pager.style.display = 'flex';
+    document.getElementById('users-prev').disabled = page <= 1;
+    document.getElementById('users-next').disabled = page * USERS_LIMIT >= userTotal;
+    document.getElementById('users-info').textContent = `Showing ${(page-1)*USERS_LIMIT+1}–${Math.min(page*USERS_LIMIT, userTotal)} of ${userTotal}`;
+  } catch (err) {
+    document.getElementById('users-tbody').innerHTML = `<tr><td colspan="7" class="err-msg">Error: ${err.message}</td></tr>`;
   }
 }
 
-function editUser(u) {
-  editingUserId = u.id;
-  document.getElementById('userModalBody').innerHTML = '<div class="detail-row"><span class="key">Email</span><span>' + u.email + '</span></div>'
-    + '<div class="detail-row"><span class="key">Joined</span><span>' + fmtDate(u.created_at) + '</span></div>'
-    + '<div class="detail-row"><span class="key">Stripe Customer</span><span class="mono">' + (u.stripe_customer_id || '—') + '</span></div>'
-    + '<div class="detail-row"><span class="key">Stripe Sub</span><span class="mono">' + (u.stripe_subscription_id || '—') + '</span></div>'
-    + '<div class="mt-16 field-row">'
-    + '<div class="field-group"><label>Plan</label><select id="editPlan"><option value="trial"' + (u.plan==='trial'?' selected':'') + '>Trial</option><option value="starter"' + (u.plan==='starter'?' selected':'') + '>Starter</option><option value="pro"' + (u.plan==='pro'?' selected':'') + '>Pro</option><option value="enterprise"' + (u.plan==='enterprise'?' selected':'') + '>Enterprise</option></select></div>'
-    + '<div class="field-group"><label>Sub Status</label><select id="editStatus"><option value="trialing"' + (u.subscription_status==='trialing'?' selected':'') + '>Trialing</option><option value="active"' + (u.subscription_status==='active'?' selected':'') + '>Active</option><option value="past_due"' + (u.subscription_status==='past_due'?' selected':'') + '>Past Due</option><option value="canceled"' + (u.subscription_status==='canceled'?' selected':'') + '>Canceled</option></select></div>'
-    + '</div>'
-    + '<div class="field-group"><label>Trial Active</label><select id="editTrial"><option value="true"' + (u.trial_active?' selected':'') + '>Yes</option><option value="false"' + (!u.trial_active?' selected':'') + '>No</option></select></div>';
-  openModal('userModal');
-}
+document.getElementById('users-prev').addEventListener('click', () => loadUsers(usersPage - 1));
+document.getElementById('users-next').addEventListener('click', () => loadUsers(usersPage + 1));
 
-async function saveUser() {
-  const plan = document.getElementById('editPlan').value;
-  const subscription_status = document.getElementById('editStatus').value;
-  const trial_active = document.getElementById('editTrial').value === 'true';
+// ── Messages ──────────────────────────────────────────────────────────────
+let msgsPage = 1;
+let msgsTotal = 0;
+const MSGS_LIMIT = 20;
+
+async function loadMessages(page) {
+  msgsPage = page;
+  document.getElementById('messages-list').innerHTML = '<div class="loading">Loading…</div>';
   try {
-    const r = await fetch(API + '/users/' + editingUserId, { method:'PATCH', headers: headers(), body: JSON.stringify({ plan, subscription_status, trial_active }) });
-    if (r.ok) { closeModal('userModal'); renderUsers(); } else { alert('Failed to save.'); }
-  } catch { alert('Request failed.'); }
-}
-
-function deleteUser(id, email) {
-  document.getElementById('confirmTitle').textContent = 'Delete User';
-  document.getElementById('confirmBody').innerHTML = '<p>Permanently delete <strong>' + email + '</strong>? This also deletes their API keys.</p>';
-  document.getElementById('confirmBtn').onclick = async () => {
-    try {
-      await fetch(API + '/users/' + id, { method: 'DELETE', headers: headers() });
-      closeModal('confirmModal'); renderUsers();
-    } catch { alert('Delete failed.'); }
-  };
-  openModal('confirmModal');
-}
-
-// ── SUBSCRIPTIONS ─────────────────────────────────────────────────────────
-async function renderSubscriptions() {
-  const c = document.getElementById('content');
-  c.innerHTML = '<div class="text-muted" style="padding:40px;text-align:center">Loading…</div>';
-  try {
-    const r = await fetch(API + '/users?limit=100', { headers: headers() });
-    const d = await r.json();
-    const subs = d.users.filter(u => u.stripe_subscription_id || u.subscription_status !== 'trialing');
-
-    const rows = d.users.map(u => '<tr>'
-      + '<td>' + u.email + '</td>'
-      + '<td>' + planBadge(u.plan) + '</td>'
-      + '<td>' + statusBadge(u.subscription_status) + '</td>'
-      + '<td class="mono" style="color:var(--muted);font-size:11px">' + (u.stripe_customer_id || '—') + '</td>'
-      + '<td style="color:var(--muted)">' + fmtDate(u.current_period_end) + '</td>'
-      + '<td style="color:var(--muted)">' + (u.trial_active ? '<span class="text-green">Yes</span>' : '<span class="text-muted">No</span>') + '</td>'
-      + '</tr>'
-    ).join('') || '<tr class="empty-row"><td colspan="6">No users.</td></tr>';
-
-    const statR = await fetch(API + '/stats', { headers: headers() });
-    const stats = await statR.json();
-    const subMap = {};
-    (stats.subscriptionStats || []).forEach(s => { subMap[s.status] = s.count; });
-
-    c.innerHTML = '<div class="stat-grid">'
-      + card('Active', subMap['active'] || 0, 'Paying subscribers', 'dot-green')
-      + card('Trialing', subMap['trialing'] || 0, 'In trial period', 'dot-purple')
-      + card('Past Due', subMap['past_due'] || 0, 'Payment failed', (subMap['past_due']||0) > 0 ? 'dot-yellow' : '')
-      + card('Canceled', subMap['canceled'] || 0, 'Churned')
-      + '</div>'
-      + '<div class="table-wrap"><table>'
-      + '<thead><tr><th>Email</th><th>Plan</th><th>Status</th><th>Stripe Customer</th><th>Period End</th><th>Trial Active</th></tr></thead>'
-      + '<tbody>' + rows + '</tbody></table></div>';
-  } catch(e) {
-    c.innerHTML = '<div class="text-red" style="padding:40px">Failed to load: ' + e.message + '</div>';
-  }
-}
-
-// ── API KEYS ──────────────────────────────────────────────────────────────
-async function renderKeys() {
-  const c = document.getElementById('content');
-  const s = state.keys;
-  c.innerHTML = '<div class="text-muted" style="padding:40px;text-align:center">Loading…</div>';
-  try {
-    const r = await fetch(API + '/api-keys?page=' + s.page + '&limit=50', { headers: headers() });
-    const d = await r.json();
-
-    const rows = d.keys.map(k => '<tr>'
-      + '<td class="mono" style="color:var(--muted)">' + k.id + '</td>'
-      + '<td>' + k.label + '</td>'
-      + '<td class="mono">' + k.key_prefix + '…</td>'
-      + '<td>' + k.email + '</td>'
-      + '<td>' + planBadge(k.plan) + '</td>'
-      + '<td style="color:var(--muted)">' + fmtDate(k.created_at) + '</td>'
-      + '<td style="color:var(--muted)">' + (k.last_used_at ? fmtDateTime(k.last_used_at) : '—') + '</td>'
-      + '<td><button class="btn btn-danger btn-sm" onclick="revokeKey(' + k.id + ','' + k.key_prefix + '')">Revoke</button></td>'
-      + '</tr>'
-    ).join('') || '<tr class="empty-row"><td colspan="8">No API keys found.</td></tr>';
-
-    c.innerHTML = '<div class="section-head"><h4>All API Keys</h4><span class="text-muted">' + d.total + ' total</span></div>'
-      + '<div class="table-wrap"><table>'
-      + '<thead><tr><th>ID</th><th>Label</th><th>Key Prefix</th><th>Owner</th><th>Plan</th><th>Created</th><th>Last Used</th><th>Actions</th></tr></thead>'
-      + '<tbody>' + rows + '</tbody></table>'
-      + '<div class="pagination"><span>' + d.total + ' total</span>'
-      + '<div class="page-btns">'
-      + '<button class="page-btn" ' + (s.page<=1?'disabled':'') + ' onclick="state.keys.page--;renderKeys()">← Prev</button>'
-      + '<span style="padding:4px 8px;font-size:12px">Page ' + s.page + '</span>'
-      + '<button class="page-btn" ' + (s.page*50>=d.total?'disabled':'') + ' onclick="state.keys.page++;renderKeys()">Next →</button>'
-      + '</div></div></div>';
-  } catch(e) {
-    c.innerHTML = '<div class="text-red" style="padding:40px">Failed to load API keys: ' + e.message + '</div>';
-  }
-}
-
-function revokeKey(id, prefix) {
-  document.getElementById('confirmTitle').textContent = 'Revoke API Key';
-  document.getElementById('confirmBody').innerHTML = '<p>Revoke key <strong class="mono">' + prefix + '…</strong>? This cannot be undone.</p>';
-  document.getElementById('confirmBtn').onclick = async () => {
-    try {
-      await fetch(API + '/api-keys/' + id, { method: 'DELETE', headers: headers() });
-      closeModal('confirmModal'); renderKeys();
-    } catch { alert('Revoke failed.'); }
-  };
-  openModal('confirmModal');
-}
-
-// ── MESSAGES ──────────────────────────────────────────────────────────────
-async function renderMessages() {
-  const c = document.getElementById('content');
-  const s = state.msgs;
-  c.innerHTML = '<div class="text-muted" style="padding:40px;text-align:center">Loading…</div>';
-  try {
-    let url = API + '/messages?page=' + s.page + '&limit=20';
-    if (s.unread) url += '&unread=true';
-    const r = await fetch(url, { headers: headers() });
-    const d = await r.json();
-
-    const rows = d.messages.map(m => '<tr style="cursor:pointer" onclick="viewMessage(' + JSON.stringify(m).replace(/"/g,'&quot;') + ')">'
-      + '<td>' + (m.read ? '' : '<span style="width:8px;height:8px;background:var(--red);border-radius:50%;display:inline-block;margin-right:6px"></span>') + m.first_name + ' ' + m.last_name + '</td>'
-      + '<td style="color:var(--muted)">' + m.email + '</td>'
-      + '<td>' + m.subject + '</td>'
-      + '<td>' + (m.read ? '<span class="badge badge-read">Read</span>' : '<span class="badge badge-unread">Unread</span>') + '</td>'
-      + '<td style="color:var(--muted)">' + fmtDateTime(m.created_at) + '</td>'
-      + '</tr>'
-    ).join('') || '<tr class="empty-row"><td colspan="5">No messages.</td></tr>';
-
-    c.innerHTML = '<div class="filter-bar">'
-      + '<label style="display:flex;align-items:center;gap:8px;color:var(--muted);cursor:pointer"><input type="checkbox" ' + (s.unread?'checked':'') + ' onchange="state.msgs.unread=this.checked;renderMessages()"/> Show unread only</label>'
-      + '</div>'
-      + '<div class="table-wrap"><table>'
-      + '<thead><tr><th>From</th><th>Email</th><th>Subject</th><th>Status</th><th>Date</th></tr></thead>'
-      + '<tbody>' + rows + '</tbody></table>'
-      + '<div class="pagination"><span>' + d.total + ' total</span>'
-      + '<div class="page-btns">'
-      + '<button class="page-btn" ' + (s.page<=1?'disabled':'') + ' onclick="state.msgs.page--;renderMessages()">← Prev</button>'
-      + '<span style="padding:4px 8px;font-size:12px">Page ' + s.page + '</span>'
-      + '<button class="page-btn" ' + (s.page*20>=d.total?'disabled':'') + ' onclick="state.msgs.page++;renderMessages()">Next →</button>'
-      + '</div></div></div>';
-  } catch(e) {
-    c.innerHTML = '<div class="text-red" style="padding:40px">Failed to load messages: ' + e.message + '</div>';
-  }
-}
-
-async function viewMessage(m) {
-  document.getElementById('msgModalBody').innerHTML = '<div class="detail-row"><span class="key">From</span><span>' + m.first_name + ' ' + m.last_name + '</span></div>'
-    + '<div class="detail-row"><span class="key">Email</span><span>' + m.email + '</span></div>'
-    + '<div class="detail-row"><span class="key">Subject</span><span>' + m.subject + '</span></div>'
-    + '<div class="detail-row"><span class="key">Date</span><span>' + fmtDateTime(m.created_at) + '</span></div>'
-    + '<div class="msg-text">' + escapeHtml(m.message) + '</div>';
-  openModal('msgModal');
-  if (!m.read) {
-    await fetch(API + '/messages/' + m.id + '/read', { method: 'PATCH', headers: headers() }).catch(()=>{});
-    // Update unread badge
-    const badgeR = await fetch(API + '/stats', { headers: headers() }).catch(()=>null);
-    if (badgeR?.ok) {
-      const bd = await badgeR.json();
-      const ub = document.getElementById('unreadBadge');
-      if (bd.unreadMessages > 0) { ub.textContent = bd.unreadMessages; ub.classList.add('show'); }
-      else { ub.classList.remove('show'); }
+    const data = await apiFetch(`/api/admin/messages?page=${page}&limit=${MSGS_LIMIT}`);
+    msgsTotal = data.total;
+    if (!data.messages.length) {
+      document.getElementById('messages-list').innerHTML = '<p style="color:var(--muted);font-size:.875rem">No messages yet.</p>';
+      document.getElementById('messages-pager').style.display = 'none';
+      return;
     }
+    document.getElementById('messages-list').innerHTML = data.messages.map(m => `
+      <div class="msg-card">
+        <div class="msg-meta">
+          <span class="msg-name">${escHtml(m.name || '')}</span>
+          <span class="msg-email">${escHtml(m.email || '')}</span>
+          <span class="msg-date">${fmt(m.created_at)}</span>
+        </div>
+        ${m.subject ? `<div class="msg-subject">${escHtml(m.subject)}</div>` : ''}
+        <div class="msg-body">${escHtml(m.message || '')}</div>
+      </div>
+    `).join('');
+
+    const pager = document.getElementById('messages-pager');
+    pager.style.display = 'flex';
+    document.getElementById('msgs-prev').disabled = page <= 1;
+    document.getElementById('msgs-next').disabled = page * MSGS_LIMIT >= msgsTotal;
+    document.getElementById('msgs-info').textContent = `Showing ${(page-1)*MSGS_LIMIT+1}–${Math.min(page*MSGS_LIMIT, msgsTotal)} of ${msgsTotal}`;
+  } catch (err) {
+    document.getElementById('messages-list').innerHTML = `<p class="err-msg">Error: ${err.message}</p>`;
   }
 }
 
-function escapeHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+document.getElementById('msgs-prev').addEventListener('click', () => loadMessages(msgsPage - 1));
+document.getElementById('msgs-next').addEventListener('click', () => loadMessages(msgsPage + 1));
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 </script>
 </body>

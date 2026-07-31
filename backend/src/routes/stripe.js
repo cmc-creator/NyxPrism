@@ -15,7 +15,7 @@ const PRICES = {
   annual:  process.env.STRIPE_PRICE_ID_ANNUAL,
 };
 
-// ── POST /api/stripe/create-checkout ────────────────────────────────────
+// ΓöÇΓöÇ POST /api/stripe/create-checkout ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 // Requires Firebase auth. Returns a Stripe Checkout URL.
 router.post('/create-checkout', requireAuth, async (req, res) => {
   const { plan } = req.body ?? {};
@@ -67,19 +67,26 @@ router.post('/create-checkout', requireAuth, async (req, res) => {
   }
 });
 
-// ── POST /api/stripe/create-portal ──────────────────────────────────────
+// ΓöÇΓöÇ POST /api/stripe/create-portal ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 // Creates a Stripe Customer Portal session so the user can manage billing.
 router.post('/create-portal', requireAuth, async (req, res) => {
-  const { uid } = req.user;
+  const { uid, email } = req.user;
   try {
     const stripe = getStripe();
-    const { rows } = await pool.query(
-      'SELECT stripe_customer_id FROM users WHERE firebase_uid = $1',
-      [uid],
+    let { rows } = await pool.query(
+      'SELECT stripe_customer_id FROM users WHERE firebase_uid = $1 OR email = $2 LIMIT 1',
+      [uid, email],
     );
-    const customerId = rows[0]?.stripe_customer_id;
+    let customerId = rows[0]?.stripe_customer_id;
     if (!customerId) {
-      return res.status(400).json({ error: 'No billing account found. Please subscribe first.' });
+      const customer = await stripe.customers.create({ email, metadata: { firebase_uid: uid } });
+      customerId = customer.id;
+      await pool.query(
+        `INSERT INTO users (firebase_uid, email, stripe_customer_id)
+         VALUES ($1, $2, $3)
+         ON CONFLICT (firebase_uid) DO UPDATE SET stripe_customer_id = EXCLUDED.stripe_customer_id`,
+        [uid, email, customerId],
+      );
     }
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId,
@@ -92,8 +99,8 @@ router.post('/create-portal', requireAuth, async (req, res) => {
   }
 });
 
-// ── POST /api/stripe/webhook ─────────────────────────────────────────────
-// Raw body required — registered in index.js BEFORE express.json()
+// ΓöÇΓöÇ POST /api/stripe/webhook ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// Raw body required ΓÇö registered in index.js BEFORE express.json()
 router.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   const sig = req.headers['stripe-signature'];
   let event;
@@ -103,7 +110,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
     event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
   } catch (err) {
     console.error('Webhook signature verification failed:', err.message);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
+    return res.status(400).send('Webhook signature verification failed.');
   }
 
   const obj = event.data.object;

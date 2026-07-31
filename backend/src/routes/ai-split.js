@@ -67,7 +67,7 @@ Conversation rules:
     res.json({ reply: raw, plan });
   } catch (err) {
     console.error('AI split error:', err.message);
-    res.status(500).json({ error: err.message });
+    res.status(502).json({ error: 'AI service unavailable. Please try again.' });
   }
 });
 

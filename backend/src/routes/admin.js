@@ -1,41 +1,118 @@
 import { Router } from 'express';
+import { timingSafeEqual } from 'crypto';
+import rateLimit from 'express-rate-limit';
 import pool from '../db/index.js';
+import admin from '../firebase.js';
 
 const router = Router();
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const adminSecretLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many admin authentication attempts. Try again later.' },
+});
 
-function requireAdmin(req, res, next) {
-  const secret = process.env.ADMIN_SECRET;
-  if (!secret) return res.status(503).json({ error: 'ADMIN_SECRET not configured.' });
-  if (req.headers['x-admin-secret'] !== secret) {
-    return res.status(401).json({ error: 'Unauthorized.' });
-  }
-  next();
+function secretsMatch(provided, expected) {
+  if (typeof provided !== 'string' || typeof expected !== 'string') return false;
+  const providedBuffer = Buffer.from(provided);
+  const expectedBuffer = Buffer.from(expected);
+  return providedBuffer.length === expectedBuffer.length && timingSafeEqual(providedBuffer, expectedBuffer);
 }
 
+// ── Auth middleware ───────────────────────────────────────────────────────
+async function requireAdmin(req, res, next) {
+  const configuredSecret = process.env.ADMIN_SECRET;
+  const headerSecret = req.headers['x-admin-secret'];
+  if (configuredSecret && secretsMatch(headerSecret, configuredSecret)) {
+    req.adminUser = { auth: 'admin-secret' };
+    return next();
+  }
+
+  const authHeader = req.headers['authorization'];
+  if (!authHeader?.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Missing Firebase token.' });
+  }
+  const token = authHeader.slice(7);
+  try {
+    const decoded = await admin.auth().verifyIdToken(token);
+    const result = await pool.query(
+      `SELECT id, email, is_admin FROM users WHERE firebase_uid = $1 OR email = $2 LIMIT 1`,
+      [decoded.uid, decoded.email]
+    );
+    const user = result.rows[0];
+    if (!user?.is_admin) {
+      return res.status(403).json({ error: 'Not an admin.' });
+    }
+    // Backfill firebase_uid if missing
+    pool.query(
+      `UPDATE users SET firebase_uid = $1 WHERE email = $2 AND (firebase_uid IS NULL OR firebase_uid != $1)`,
+      [decoded.uid, decoded.email]
+    ).catch(() => {});
+    req.adminUser = user;
+    next();
+  } catch {
+    return res.status(401).json({ error: 'Invalid or expired token.' });
+  }
+}
+
+// ── POST /api/admin/claim ─────────────────────────────────────────────────
+// One-time bootstrap: only needs ADMIN_SECRET + email in the body.
+// No Firebase token required — avoids all uid/row-mismatch issues.
+router.post('/claim', adminSecretLimiter, async (req, res) => {
+  const secret = process.env.ADMIN_SECRET;
+  if (!secret) return res.status(503).json({ error: 'ADMIN_SECRET not configured on server.' });
+
+  const { secret: provided, email } = req.body || {};
+  if (!secretsMatch(provided, secret)) {
+    return res.status(401).json({ error: 'Wrong secret.' });
+  }
+  if (typeof email !== 'string' || email.length > 254 || !EMAIL_RE.test(email)) {
+    return res.status(400).json({ error: 'Email is required.' });
+  }
+
+  const normalised = email.toLowerCase().trim();
+  try {
+    // Try to update an existing row first
+    let result = await pool.query(
+      `UPDATE users SET is_admin = TRUE WHERE email = $1 RETURNING email`,
+      [normalised]
+    );
+    // No row yet — insert one (e.g. owner hasn't gone through normal signup)
+    if (!result.rows.length) {
+      result = await pool.query(
+        `INSERT INTO users (firebase_uid, email, plan, subscription_status, trial_start, is_admin)
+         VALUES ('bootstrap-' || gen_random_uuid(), $1, 'trial', 'trialing', NOW(), TRUE)
+         ON CONFLICT (email) DO UPDATE SET is_admin = TRUE
+         RETURNING email`,
+        [normalised]
+      );
+    }
+    res.json({ ok: true, email: result.rows[0]?.email || normalised });
+  } catch (err) {
+    console.error('admin/claim error:', err.message);
+    res.status(500).json({ error: 'Unable to claim admin access.' });
+  }
+});
+
+// All routes below require admin auth
 router.use(requireAdmin);
 
-// ── GET /api/admin/stats ──────────────────────────────────────────────────
+// GET /api/admin/stats
 router.get('/stats', async (_req, res) => {
   try {
-    const [users, plans, keys, messages, unread, recentSignups, subStatus] = await Promise.all([
+    const [users, plans, keys, messages] = await Promise.all([
       pool.query('SELECT COUNT(*) AS total FROM users'),
       pool.query('SELECT plan, COUNT(*) AS count FROM users GROUP BY plan ORDER BY count DESC'),
       pool.query('SELECT COUNT(*) AS total FROM api_keys'),
       pool.query('SELECT COUNT(*) AS total FROM contact_messages'),
-      pool.query("SELECT COUNT(*) AS total FROM contact_messages WHERE read = FALSE"),
-      pool.query(`SELECT DATE(created_at) AS day, COUNT(*) AS count
-                  FROM users WHERE created_at > NOW() - INTERVAL '30 days'
-                  GROUP BY day ORDER BY day`),
-      pool.query('SELECT subscription_status, COUNT(*) AS count FROM users GROUP BY subscription_status'),
     ]);
     res.json({
-      totalUsers:        Number(users.rows[0].total),
-      plans:             plans.rows.map(r => ({ plan: r.plan, count: Number(r.count) })),
-      totalApiKeys:      Number(keys.rows[0].total),
-      totalMessages:     Number(messages.rows[0].total),
-      unreadMessages:    Number(unread.rows[0].total),
-      recentSignups:     recentSignups.rows.map(r => ({ day: r.day, count: Number(r.count) })),
-      subscriptionStats: subStatus.rows.map(r => ({ status: r.subscription_status, count: Number(r.count) })),
+      totalUsers:    Number(users.rows[0].total),
+      plans:         plans.rows.map(r => ({ plan: r.plan, count: Number(r.count) })),
+      totalApiKeys:  Number(keys.rows[0].total),
+      totalMessages: Number(messages.rows[0].total),
     });
   } catch (err) {
     console.error('admin/stats error:', err.message);
@@ -43,32 +120,20 @@ router.get('/stats', async (_req, res) => {
   }
 });
 
-// ── GET /api/admin/users?page=1&limit=50&search=&plan=&status= ────────────
+// GET /api/admin/users?page=1&limit=50
 router.get('/users', async (req, res) => {
-  const page   = Math.max(1, parseInt(req.query.page)  || 1);
-  const limit  = Math.min(100, parseInt(req.query.limit) || 50);
+  const page  = Math.max(1, parseInt(req.query.page)  || 1);
+  const limit = Math.min(100, parseInt(req.query.limit) || 50);
   const offset = (page - 1) * limit;
-  const search = req.query.search?.trim() || '';
-  const plan   = req.query.plan?.trim() || '';
-  const status = req.query.status?.trim() || '';
-
-  const conditions = [];
-  const params     = [];
-  if (search) { conditions.push(`(email ILIKE $${params.push('%'+search+'%')} OR first_name ILIKE $${params.push('%'+search+'%')} OR last_name ILIKE $${params.push('%'+search+'%')})`); }
-  if (plan)   { conditions.push(`plan = $${params.push(plan)}`); }
-  if (status) { conditions.push(`subscription_status = $${params.push(status)}`); }
-
-  const where = conditions.length ? 'WHERE ' + conditions.join(' AND ') : '';
   try {
     const [rows, count] = await Promise.all([
       pool.query(
         `SELECT id, email, first_name, last_name, plan, subscription_status,
-                trial_active, trial_start, current_period_end, stripe_customer_id,
-                stripe_subscription_id, created_at
-         FROM users ${where} ORDER BY created_at DESC LIMIT $${params.length+1} OFFSET $${params.length+2}`,
-        [...params, limit, offset]
+                trial_active, trial_start, current_period_end, is_admin, created_at
+         FROM users ORDER BY created_at DESC LIMIT $1 OFFSET $2`,
+        [limit, offset]
       ),
-      pool.query(`SELECT COUNT(*) AS total FROM users ${where}`, params),
+      pool.query('SELECT COUNT(*) AS total FROM users'),
     ]);
     res.json({ users: rows.rows, total: Number(count.rows[0].total), page, limit });
   } catch (err) {
@@ -77,105 +142,23 @@ router.get('/users', async (req, res) => {
   }
 });
 
-// ── PATCH /api/admin/users/:id ────────────────────────────────────────────
-router.patch('/users/:id', async (req, res) => {
-  const { plan, subscription_status, trial_active } = req.body || {};
-  const sets = [];
-  const params = [];
-  if (plan !== undefined)                { sets.push(`plan = $${params.push(plan)}`); }
-  if (subscription_status !== undefined) { sets.push(`subscription_status = $${params.push(subscription_status)}`); }
-  if (trial_active !== undefined)        { sets.push(`trial_active = $${params.push(trial_active)}`); }
-  if (!sets.length) return res.status(400).json({ error: 'Nothing to update.' });
-  sets.push(`updated_at = NOW()`);
-  try {
-    const result = await pool.query(
-      `UPDATE users SET ${sets.join(', ')} WHERE id = $${params.push(req.params.id)} RETURNING id, email, plan, subscription_status, trial_active`,
-      params
-    );
-    if (!result.rows.length) return res.status(404).json({ error: 'User not found.' });
-    res.json(result.rows[0]);
-  } catch (err) {
-    console.error('admin/users PATCH error:', err.message);
-    res.status(500).json({ error: 'Database error.' });
-  }
-});
-
-// ── DELETE /api/admin/users/:id ───────────────────────────────────────────
-router.delete('/users/:id', async (req, res) => {
-  try {
-    const result = await pool.query('DELETE FROM users WHERE id = $1 RETURNING id, email', [req.params.id]);
-    if (!result.rows.length) return res.status(404).json({ error: 'User not found.' });
-    res.json({ ok: true, deleted: result.rows[0] });
-  } catch (err) {
-    console.error('admin/users DELETE error:', err.message);
-    res.status(500).json({ error: 'Database error.' });
-  }
-});
-
-// ── GET /api/admin/api-keys?page=1&limit=50 ───────────────────────────────
-router.get('/api-keys', async (req, res) => {
-  const page   = Math.max(1, parseInt(req.query.page) || 1);
-  const limit  = Math.min(100, parseInt(req.query.limit) || 50);
+// GET /api/admin/messages?page=1&limit=20
+router.get('/messages', async (req, res) => {
+  const page  = Math.max(1, parseInt(req.query.page)  || 1);
+  const limit = Math.min(100, parseInt(req.query.limit) || 20);
   const offset = (page - 1) * limit;
   try {
     const [rows, count] = await Promise.all([
       pool.query(
-        `SELECT k.id, k.label, k.key_prefix, k.created_at, k.last_used_at,
-                u.id AS user_id, u.email, u.plan
-         FROM api_keys k JOIN users u ON k.user_id = u.id
-         ORDER BY k.created_at DESC LIMIT $1 OFFSET $2`,
-        [limit, offset]
-      ),
-      pool.query('SELECT COUNT(*) AS total FROM api_keys'),
-    ]);
-    res.json({ keys: rows.rows, total: Number(count.rows[0].total), page, limit });
-  } catch (err) {
-    console.error('admin/api-keys error:', err.message);
-    res.status(500).json({ error: 'Database error.' });
-  }
-});
-
-// ── DELETE /api/admin/api-keys/:id ────────────────────────────────────────
-router.delete('/api-keys/:id', async (req, res) => {
-  try {
-    const result = await pool.query('DELETE FROM api_keys WHERE id = $1 RETURNING id, key_prefix', [req.params.id]);
-    if (!result.rows.length) return res.status(404).json({ error: 'Key not found.' });
-    res.json({ ok: true, deleted: result.rows[0] });
-  } catch (err) {
-    console.error('admin/api-keys DELETE error:', err.message);
-    res.status(500).json({ error: 'Database error.' });
-  }
-});
-
-// ── GET /api/admin/messages?page=1&limit=20&unread= ──────────────────────
-router.get('/messages', async (req, res) => {
-  const page    = Math.max(1, parseInt(req.query.page) || 1);
-  const limit   = Math.min(100, parseInt(req.query.limit) || 20);
-  const offset  = (page - 1) * limit;
-  const unread  = req.query.unread === 'true';
-  const where   = unread ? 'WHERE read = FALSE' : '';
-  try {
-    const [rows, count] = await Promise.all([
-      pool.query(
         `SELECT id, first_name, last_name, email, subject, message, read, created_at
-         FROM contact_messages ${where} ORDER BY created_at DESC LIMIT $1 OFFSET $2`,
+         FROM contact_messages ORDER BY created_at DESC LIMIT $1 OFFSET $2`,
         [limit, offset]
       ),
-      pool.query(`SELECT COUNT(*) AS total FROM contact_messages ${where}`),
+      pool.query('SELECT COUNT(*) AS total FROM contact_messages'),
     ]);
     res.json({ messages: rows.rows, total: Number(count.rows[0].total), page, limit });
   } catch (err) {
     console.error('admin/messages error:', err.message);
-    res.status(500).json({ error: 'Database error.' });
-  }
-});
-
-// ── PATCH /api/admin/messages/:id/read ───────────────────────────────────
-router.patch('/messages/:id/read', async (req, res) => {
-  try {
-    await pool.query('UPDATE contact_messages SET read = TRUE WHERE id = $1', [req.params.id]);
-    res.json({ ok: true });
-  } catch (err) {
     res.status(500).json({ error: 'Database error.' });
   }
 });

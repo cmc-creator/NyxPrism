@@ -5,6 +5,7 @@ import { readFile } from 'fs/promises';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import rateLimit from 'express-rate-limit';
+import aiAssistRouter from './routes/ai-assist.js';
 
 import pool          from './db/index.js';
 import contactRouter  from './routes/contact.js';
@@ -12,7 +13,6 @@ import stripeRouter   from './routes/stripe.js';
 import licenseRouter  from './routes/license.js';
 import userRouter     from './routes/user.js';
 import aiSplitRouter  from './routes/ai-split.js';
-import aiAssistRouter from './routes/ai-assist.js';
 import apiKeysRouter  from './routes/api-keys.js';
 import adminRouter    from './routes/admin.js';
 
@@ -40,12 +40,12 @@ app.use(cors({
   origin: (origin, cb) => {
     // Allow requests with no origin (e.g. curl, Postman, CLI)
     if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
-    // Also allow any *.nyxprism.com subdomain and *.vercel.app preview URLs
-    if (/\.nyxprism\.com$/.test(origin) || /\.vercel\.app$/.test(origin)) return cb(null, true);
+    // Allow only controlled NyxPrism subdomains. Preview deployments must be explicitly configured.
+    if (/^https:\/\/([a-z0-9-]+\.)*nyxprism\.com$/.test(origin)) return cb(null, true);
     cb(new Error(`CORS: origin ${origin} not allowed`));
   },
   methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-admin-secret'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Admin-Secret'],
 }));
 
 app.use(express.json({ limit: '2mb' }));

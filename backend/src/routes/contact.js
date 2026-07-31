@@ -37,10 +37,16 @@ const limiter = rateLimit({
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[char]));
+}
+
 router.post('/', limiter, async (req, res) => {
   const { firstName, lastName, email, subject, message } = req.body ?? {};
 
-  if (!firstName || !lastName || !email || !subject || !message) {
+  if (![firstName, lastName, email, subject, message].every(value => typeof value === 'string' && value.trim())) {
     return res.status(400).json({ error: 'All fields are required.' });
   }
   if (!EMAIL_RE.test(email)) {
@@ -52,11 +58,11 @@ router.post('/', limiter, async (req, res) => {
 
   // Sanitise lengths to prevent DB / email abuse
   const safe = {
-    firstName: firstName.slice(0, 100),
-    lastName:  lastName.slice(0, 100),
-    email:     email.slice(0, 254),
-    subject:   subject.slice(0, 100),
-    message:   message.slice(0, 5000),
+    firstName: firstName.trim().slice(0, 100),
+    lastName:  lastName.trim().slice(0, 100),
+    email:     email.trim().slice(0, 254),
+    subject:   subject.trim().slice(0, 100),
+    message:   message.trim().slice(0, 5000),
   };
 
   try {
@@ -71,10 +77,10 @@ router.post('/', limiter, async (req, res) => {
       replyTo: safe.email,
       subject: `[NyxPrism] ${safe.subject} — ${safe.firstName} ${safe.lastName}`,
       html: `
-        <p><strong>From:</strong> ${safe.firstName} ${safe.lastName} &lt;${safe.email}&gt;</p>
-        <p><strong>Subject:</strong> ${safe.subject}</p>
+        <p><strong>From:</strong> ${escapeHtml(safe.firstName)} ${escapeHtml(safe.lastName)} &lt;${escapeHtml(safe.email)}&gt;</p>
+        <p><strong>Subject:</strong> ${escapeHtml(safe.subject)}</p>
         <hr />
-        <p style="white-space:pre-wrap;">${safe.message}</p>
+        <p style="white-space:pre-wrap;">${escapeHtml(safe.message)}</p>
       `,
     });
 
