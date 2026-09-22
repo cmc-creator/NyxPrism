@@ -19,14 +19,15 @@
 <header><div class="brand"><em>Nyx</em>Prism</div><div class="status" id="status">Loading secure signing link...</div></header>
 <main>
   <section class="card"><div class="viewer-head"><div><h1 id="doc-title">Document</h1><p id="doc-sub">Review each field, complete the required entries, then submit.</p></div><div><button class="btn secondary" id="prev-page">Prev</button> <button class="btn secondary" id="next-page">Next</button></div></div><div class="stage" id="stage"><canvas id="pdf-canvas"></canvas></div></section>
-  <aside class="card side"><h1>Your Fields</h1><p id="recipient-line"></p><div id="field-list" class="field-list"></div><button class="btn" id="complete-btn" style="width:100%;margin-top:1rem">Complete Signing</button><div id="result" class="result"></div></aside>
+  <aside class="card side"><h1>Your Fields</h1><p id="recipient-line"></p><div id="field-list" class="field-list"></div><button class="btn" id="complete-btn" style="width:100%;margin-top:1rem">Complete Signing</button><button class="btn secondary" id="download-signed" style="width:100%;margin-top:.6rem;display:none">Download Signed Copy</button><div id="result" class="result"></div></aside>
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://unpkg.com/@cantoo/pdf-lib/dist/pdf-lib.min.js"></script>
 <script>
 const API='https://nyxprism-production.up.railway.app';
 pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 const token=new URLSearchParams(location.search).get('token');
-const state={pdf:null,page:1,data:null,values:new Map()};
+const state={pdf:null,page:1,data:null,values:new Map(),signedBlob:null};
 const canvas=document.getElementById('pdf-canvas'),ctx=canvas.getContext('2d'),stage=document.getElementById('stage'),result=document.getElementById('result');
 function show(cls,msg){result.className='result '+cls;result.textContent=msg;}
 function valueFor(field){return state.values.get(Number(field.id))||field.value_text||'';}
@@ -35,7 +36,24 @@ function focusField(id){const input=document.querySelector('[data-field-input="'
 function renderFields(){const list=document.getElementById('field-list');list.innerHTML='';state.data.fields.forEach(field=>{const row=document.createElement('div');row.className='field-row';const label=(field.label||field.field_type)+' · page '+field.page_number;row.innerHTML='<strong>'+label+(field.required?' *':'')+'</strong><span>'+field.field_type+'</span><input type="text" data-field-input="'+field.id+'" placeholder="Enter '+field.field_type+'" value="'+String(valueFor(field)).replace(/"/g,'&quot;')+'">';const input=row.querySelector('input');input.addEventListener('input',()=>{state.values.set(Number(field.id),input.value);render();});list.appendChild(row);});}
 async function load(){if(!token){show('err','Missing signing token.');return;}try{const res=await fetch(API+'/api/sign-requests/public/'+token);const data=await res.json();if(!res.ok)throw new Error(data.error||'Unable to load request');state.data=data;document.getElementById('doc-title').textContent=data.request.title;document.getElementById('doc-sub').textContent=data.request.documentName;document.getElementById('recipient-line').textContent='Signing as '+data.recipient.name+' ('+data.recipient.email+')';state.pdf=await pdfjsLib.getDocument({data:Uint8Array.from(atob(data.documentBase64.split(',').pop()),c=>c.charCodeAt(0))}).promise;renderFields();await render();}catch(err){show('err',err.message);}}
 document.getElementById('prev-page').addEventListener('click',()=>{if(state.pdf&&state.page>1){state.page--;render();}});document.getElementById('next-page').addEventListener('click',()=>{if(state.pdf&&state.page<state.pdf.numPages){state.page++;render();}});
-document.getElementById('complete-btn').addEventListener('click',async function(){if(!state.data)return;this.disabled=true;try{const values=state.data.fields.map(f=>({fieldId:f.id,value:valueFor(f)}));const res=await fetch(API+'/api/sign-requests/public/'+token+'/complete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({values})});const data=await res.json();if(!res.ok)throw new Error(data.error||'Unable to complete request');show('ok','Thank you. Your fields are complete.');}catch(err){show('err',err.message);}finally{this.disabled=false;}});
+async function buildSignedPdf(){
+  const PDFLib=window.PDFLib;if(!PDFLib)throw new Error('PDF engine failed to load.');
+  const bytes=Uint8Array.from(atob(state.data.documentBase64.split(',').pop()),c=>c.charCodeAt(0));
+  const doc=await PDFLib.PDFDocument.load(bytes,{ignoreEncryption:true});
+  const font=await doc.embedFont(PDFLib.StandardFonts.Helvetica);
+  const pages=doc.getPages();
+  for(const field of state.data.fields){
+    const value=valueFor(field);if(!value)continue;
+    const page=pages[Number(field.page_number)-1];if(!page)continue;
+    const size=page.getSize();const x=Number(field.x)*size.width;const boxH=Number(field.height)*size.height;const y=size.height-(Number(field.y)*size.height)-boxH+4;
+    const text=field.field_type==='checkbox'?'X':value;
+    const fontSize=Math.max(9,Math.min(18,boxH*.52));
+    page.drawText(text,{x:x+4,y,font,size:fontSize,color:PDFLib.rgb(.08,.09,.12)});
+  }
+  const out=await doc.save();return new Blob([out],{type:'application/pdf'});
+}
+document.getElementById('download-signed').addEventListener('click',()=>{if(!state.signedBlob)return;const a=document.createElement('a');a.href=URL.createObjectURL(state.signedBlob);a.download=(state.data.request.documentName||'signed-document.pdf').replace(/\.pdf$/i,'')+'-signed.pdf';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000);});
+document.getElementById('complete-btn').addEventListener('click',async function(){if(!state.data)return;this.disabled=true;try{const values=state.data.fields.map(f=>({fieldId:f.id,value:valueFor(f)}));const res=await fetch(API+'/api/sign-requests/public/'+token+'/complete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({values})});const data=await res.json();if(!res.ok)throw new Error(data.error||'Unable to complete request');state.signedBlob=await buildSignedPdf();document.getElementById('download-signed').style.display='block';show('ok','Thank you. Your fields are complete. Download your signed copy below.');}catch(err){show('err',err.message);}finally{this.disabled=false;}});
 load();
 </script>
 </body>
