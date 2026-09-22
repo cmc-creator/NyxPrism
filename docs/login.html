@@ -261,6 +261,13 @@
           <div class="auth-error" id="login-error"></div>
           <button type="submit" class="submit-btn">Log In</button>
         </form>
+        <div id="existing-session" style="display:none;margin-top:1rem;padding:.75rem;border:1px solid var(--border2);border-radius:8px;background:var(--surface2);font-size:.82rem">
+          <div style="color:var(--text2);margin-bottom:.55rem">Already signed in as <strong id="existing-session-email"></strong>.</div>
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+            <button type="button" class="btn btn-primary" id="continue-session">Continue to dashboard</button>
+            <button type="button" class="btn btn-secondary" id="switch-session">Use a different account</button>
+          </div>
+        </div>
         <p class="card-foot">No account? <a href="#" onclick="switchTab('trial');return false;">Start your free trial</a></p>
       </div>
 
@@ -389,13 +396,25 @@
     return map[code] || 'Something went wrong. Please try again.';
   }
 
-  /* ── OBSERVE AUTH STATE — redirect to dashboard if already logged in ── */
+  /* ── OBSERVE AUTH STATE — never redirect without an explicit choice ── */
   onAuthStateChanged(auth, user => {
     if (user) {
-      window.location.replace('dashboard.html');
+      document.getElementById('existing-session-email').textContent = user.email || 'this account';
+      document.getElementById('existing-session').style.display = 'block';
+      document.getElementById('login-email').value = user.email || '';
+      document.getElementById('login-password').value = '';
     } else {
       document.body.style.opacity = '1';
+      document.getElementById('existing-session').style.display = 'none';
     }
+  });
+
+  document.getElementById('continue-session').addEventListener('click', () => window.location.replace('dashboard.html'));
+  document.getElementById('switch-session').addEventListener('click', async () => {
+    await signOut(auth);
+    document.getElementById('login-email').value = '';
+    document.getElementById('login-password').value = '';
+    document.getElementById('login-email').focus();
   });
 
   /* ── LOGIN FORM ── */

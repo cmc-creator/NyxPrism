@@ -6,6 +6,22 @@ import { requireAuth } from '../middleware/auth.js';
 const router = Router();
 const MAX_KEYS_PER_USER = 5;
 
+async function findOrCreateUser(decoded) {
+  const existing = await pool.query(
+    'SELECT id FROM users WHERE firebase_uid = $1 OR email = $2 LIMIT 1',
+    [decoded.uid, decoded.email],
+  );
+  if (existing.rows.length) return existing.rows[0].id;
+  const created = await pool.query(
+    `INSERT INTO users (firebase_uid, email, plan, subscription_status, trial_start)
+     VALUES ($1, $2, 'trial', 'trialing', NOW())
+     ON CONFLICT (email) DO UPDATE SET firebase_uid = EXCLUDED.firebase_uid
+     RETURNING id`,
+    [decoded.uid, decoded.email],
+  );
+  return created.rows[0].id;
+}
+
 // Helper: hash a key with SHA-256
 function hashKey(key) {
   return createHash('sha256').update(key).digest('hex');
@@ -14,12 +30,7 @@ function hashKey(key) {
 // GET /api/keys — list all keys for the authenticated user
 router.get('/', requireAuth, async (req, res) => {
   try {
-    const userRes = await pool.query(
-      'SELECT id FROM users WHERE firebase_uid = $1',
-      [req.user.uid]
-    );
-    if (!userRes.rows.length) return res.status(404).json({ error: 'User not found.' });
-    const userId = userRes.rows[0].id;
+    const userId = await findOrCreateUser(req.user);
 
     const result = await pool.query(
       'SELECT id, label, key_prefix, created_at, last_used_at FROM api_keys WHERE user_id = $1 ORDER BY created_at DESC',
@@ -37,12 +48,7 @@ router.post('/', requireAuth, async (req, res) => {
   const label = (req.body.label || 'My API Key').trim().slice(0, 60);
 
   try {
-    const userRes = await pool.query(
-      'SELECT id FROM users WHERE firebase_uid = $1',
-      [req.user.uid]
-    );
-    if (!userRes.rows.length) return res.status(404).json({ error: 'User not found.' });
-    const userId = userRes.rows[0].id;
+    const userId = await findOrCreateUser(req.user);
 
     // Enforce per-user limit
     const countRes = await pool.query(
