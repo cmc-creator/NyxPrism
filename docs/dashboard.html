@@ -51,7 +51,7 @@
     nav{position:sticky;top:0;z-index:500;background:rgba(6,8,13,.72);backdrop-filter:blur(24px) saturate(1.25);border-bottom:1px solid rgba(167,139,250,.16);height:62px;padding:0 1.5rem;display:flex;align-items:center;gap:1rem;box-shadow:0 10px 40px rgba(0,0,0,.22)}
     .nav-brand{display:flex;align-items:center;gap:.5rem;border:0;background:none;color:inherit;padding:0;font:inherit;cursor:pointer}
     .nav-brand-logo{width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 30% 18%,rgba(255,255,255,.16),rgba(5,7,13,.92) 62%);border:1px solid rgba(255,255,255,.18);border-radius:10px;box-shadow:0 0 30px rgba(124,58,237,.38),inset 0 1px 0 rgba(255,255,255,.12)}
-    .nav-brand-logo svg{width:27px;height:27px;filter:drop-shadow(0 0 10px rgba(167,139,250,.52)) drop-shadow(0 0 16px rgba(34,211,238,.18))}
+    .nav-brand-logo canvas{width:28px;height:28px;display:block;filter:drop-shadow(0 0 12px rgba(167,139,250,.58)) drop-shadow(0 0 18px rgba(34,211,238,.24))}
     .nav-brand-name{font-size:.95rem;font-weight:800;letter-spacing:-.025em}
     .nav-brand-name em{color:var(--accent-bright);font-style:normal}
     .nav-sep{flex:1}
@@ -360,7 +360,7 @@
   <button class="hamburger-btn" id="hamburger-btn" aria-label="Open menu" style="margin-right:.5rem"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
   <button class="nav-brand" type="button" data-panel="home" aria-label="Go to dashboard home">
     <div class="nav-brand-logo">
-      <svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="prismTop" x1="17" y1="10" x2="47" y2="24"><stop offset="0" stop-color="#fff2e8"/><stop offset=".38" stop-color="#fac7d6"/><stop offset=".72" stop-color="#6550ff"/><stop offset="1" stop-color="#12d7f4"/></linearGradient><linearGradient id="prismLeft" x1="13" y1="18" x2="33" y2="55"><stop offset="0" stop-color="#ffe9d6" stop-opacity=".95"/><stop offset=".5" stop-color="#6154ff" stop-opacity=".55"/><stop offset="1" stop-color="#00c2ff" stop-opacity=".74"/></linearGradient><linearGradient id="prismRight" x1="34" y1="18" x2="53" y2="54"><stop offset="0" stop-color="#1720a8" stop-opacity=".82"/><stop offset=".45" stop-color="#05c2da" stop-opacity=".65"/><stop offset="1" stop-color="#ffd36b" stop-opacity=".82"/></linearGradient><linearGradient id="rainbow" x1="12" y1="21" x2="51" y2="46"><stop offset="0" stop-color="#ff004c"/><stop offset=".18" stop-color="#ff7a00"/><stop offset=".36" stop-color="#ffe600"/><stop offset=".55" stop-color="#00f56a"/><stop offset=".72" stop-color="#00c8ff"/><stop offset="1" stop-color="#b000ff"/></linearGradient></defs><path d="M31 5 8 50l31 9 18-32L31 5Z" fill="rgba(255,255,255,.05)" stroke="rgba(255,255,255,.72)" stroke-width="2"/><path d="M31 5 8 50 31 20Z" fill="url(#prismLeft)"/><path d="M31 5 31 20 57 27Z" fill="url(#prismTop)"/><path d="M31 20 8 50l31 9Z" fill="rgba(7,15,34,.76)"/><path d="M31 20 39 59 57 27Z" fill="url(#prismRight)"/><path d="M12 50 31 20 55 28" fill="none" stroke="rgba(255,255,255,.84)" stroke-width="1.45"/><path d="M31 7 32 20 40 58" fill="none" stroke="rgba(255,255,255,.52)" stroke-width="1"/><path d="M19 43 30 23" stroke="url(#rainbow)" stroke-width="2.2" stroke-linecap="round"/><path d="M36 52 51 31" stroke="url(#rainbow)" stroke-width="2.1" stroke-linecap="round" opacity=".82"/><path d="M23 15 34 25" stroke="url(#rainbow)" stroke-width="1.6" stroke-linecap="round" opacity=".75"/><circle cx="11" cy="50" r="2" fill="#fff" opacity=".8"/></svg>
+      <canvas id="nyx-prism-logo" width="84" height="84" aria-hidden="true"></canvas>
     </div>
     <span class="nav-brand-name"><em>Nyx</em>Prism&#8482;</span>
   </button>
@@ -1434,6 +1434,26 @@
 <section class="nyx-chat-panel" id="nyx-chat-panel" aria-label="NyxPrism assistant" hidden><header class="nyx-chat-header"><div class="nyx-chat-title"><span aria-hidden="true">✦</span><span>NyxPrism Assistant<small class="nyx-chat-status">Product help, instantly</small></span></div><button class="nyx-chat-close" id="nyx-chat-close" type="button" aria-label="Close chat">×</button></header><div class="nyx-chat-messages" id="nyx-chat-messages" aria-live="polite"><p class="nyx-chat-message assistant">Hi! I can help with NyxPrism’s PDF tools, installation, API, and pricing. What would you like to know?</p></div><form class="nyx-chat-form" id="nyx-chat-form"><textarea class="nyx-chat-input" id="nyx-chat-input" rows="1" maxlength="1500" placeholder="Ask about NyxPrism…" aria-label="Your message"></textarea><button class="nyx-chat-send" id="nyx-chat-send" type="submit">Send</button></form></section>
 
 <script>
+(function(){
+  var canvas=document.getElementById('nyx-prism-logo');if(!canvas)return;
+  var ctx=canvas.getContext('2d'),w=84,h=84;
+  function grad(x1,y1,x2,y2,stops){var g=ctx.createLinearGradient(x1,y1,x2,y2);stops.forEach(function(s){g.addColorStop(s[0],s[1]);});return g;}
+  ctx.clearRect(0,0,w,h);ctx.save();ctx.translate(3,1);ctx.rotate(-0.08);
+  ctx.shadowColor='rgba(0,0,0,.45)';ctx.shadowBlur=10;ctx.shadowOffsetY=4;
+  var A=[38,5],B=[8,60],C=[50,75],D=[75,35],E=[39,24],F=[56,19];
+  function face(points,fill,stroke){ctx.beginPath();points.forEach(function(p,i){if(i)ctx.lineTo(p[0],p[1]);else ctx.moveTo(p[0],p[1]);});ctx.closePath();ctx.fillStyle=fill;ctx.fill();ctx.strokeStyle=stroke||'rgba(255,255,255,.45)';ctx.lineWidth=1.4;ctx.stroke();}
+  face([A,B,E],grad(8,8,42,64,[[0,'rgba(255,238,224,.96)'],[.44,'rgba(255,180,210,.58)'],[1,'rgba(0,188,255,.32)']]),'rgba(255,255,255,.72)');
+  face([A,E,F,D],grad(35,4,78,48,[[0,'rgba(255,255,255,.62)'],[.38,'rgba(104,86,255,.66)'],[.78,'rgba(0,211,244,.52)'],[1,'rgba(255,220,120,.42)']]),'rgba(255,255,255,.62)');
+  face([E,B,C],grad(13,28,51,78,[[0,'rgba(17,28,55,.82)'],[.48,'rgba(11,16,29,.94)'],[1,'rgba(0,194,255,.50)']]),'rgba(167,139,250,.42)');
+  face([E,C,D,F],grad(37,24,76,76,[[0,'rgba(5,194,218,.48)'],[.55,'rgba(124,58,237,.42)'],[1,'rgba(255,210,118,.70)']]),'rgba(255,255,255,.55)');
+  ctx.shadowBlur=0;ctx.globalCompositeOperation='screen';
+  var rainbow=grad(12,52,66,31,[[0,'#ff004c'],[.18,'#ff7a00'],[.34,'#ffe600'],[.53,'#00f56a'],[.72,'#00c8ff'],[1,'#b000ff']]);
+  ctx.strokeStyle=rainbow;ctx.lineWidth=3.2;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(15,57);ctx.lineTo(38,26);ctx.lineTo(69,36);ctx.stroke();
+  ctx.strokeStyle='rgba(255,255,255,.95)';ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);ctx.lineTo(C[0],C[1]);ctx.lineTo(D[0],D[1]);ctx.lineTo(A[0],A[1]);ctx.moveTo(E[0],E[1]);ctx.lineTo(C[0],C[1]);ctx.moveTo(E[0],E[1]);ctx.lineTo(B[0],B[1]);ctx.moveTo(E[0],E[1]);ctx.lineTo(D[0],D[1]);ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,.9)';ctx.beginPath();ctx.arc(9,60,2.5,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+})();
+
 (function(){
   var canvas=document.getElementById('nyx-live-wallpaper');
   if(!canvas)return;
