@@ -1,13 +1,28 @@
 {
   "name": "NyxPrism PDF Tools",
   "short_name": "NyxPrism",
+  "id": "/dashboard.html",
   "description": "Professional PDF tools — split, merge, compress, OCR, watermark and more.",
   "start_url": "/dashboard.html",
+  "scope": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
   "background_color": "#06080d",
   "theme_color": "#7c3aed",
   "orientation": "any",
   "icons": [
+    {
+      "src": "/prism-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/prism-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
     {
       "src": "/prism-icon.svg",
       "sizes": "any",
@@ -15,6 +30,18 @@
       "purpose": "any maskable"
     }
   ],
+  "file_handlers": [
+    {
+      "action": "/dashboard.html?source=file-handler",
+      "accept": {
+        "application/pdf": [".pdf"]
+      },
+      "launch_type": "single-client"
+    }
+  ],
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
   "categories": ["productivity", "utilities"],
   "lang": "en-US"
 }

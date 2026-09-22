@@ -97,3 +97,13 @@ test('dashboard never exposes an unavailable subscription plan', async () => {
   assert.match(source, /plan='account'/);
   assert.match(source, /ownerAccount.*cmc@conniemichelleconsulting\.com/);
 });
+
+test('installed PWA registers and routes PDF files into the editor', async () => {
+  const manifest = JSON.parse(await readRepo('docs/manifest.json'));
+  const handler = manifest.file_handlers?.[0];
+  assert.deepEqual(handler?.accept?.['application/pdf'], ['.pdf']);
+  const dashboard = await readRepo('docs/dashboard.html');
+  assert.match(dashboard, /launchQueue\.setConsumer/);
+  assert.match(dashboard, /window\.__nyxOpenPdf/);
+  assert.match(dashboard, /switchPanel\('editpdf'\)/);
+});

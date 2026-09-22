@@ -9,6 +9,8 @@
   <meta property="og:description" content="Stop wrestling with PDFs. NyxPrism auto-splits batch scans, renames files intelligently, summarizes documents, and extracts structured data." />
   <meta property="og:url" content="https://nyxprism.com/" />
   <meta name="twitter:card" content="summary_large_image" />
+  <link rel="manifest" href="manifest.json?v=5" />
+  <meta name="theme-color" content="#7c3aed" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;0,14..32,900;1,14..32,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -182,6 +184,8 @@
       background: var(--surface); color: var(--text2); border: 1px solid var(--border2);
     }
     .btn-secondary:hover { border-color: var(--border3); color: var(--text); transform: translateY(-1px); }
+    .install-windows-btn { display: none; }
+    .install-windows-btn.available { display: inline-flex; }
     .install-row { display: flex; justify-content: center; }
     .install-pill {
       display: inline-flex; align-items: center; gap: .85rem;
@@ -967,6 +971,7 @@
         Start Free Trial
       </a>
       <a class="btn btn-secondary" href="login.html">Log In</a>
+      <button class="btn btn-secondary install-windows-btn" id="install-windows-btn" type="button" aria-label="Install NyxPrism for Windows"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>Install for Windows</button>
     </div>
   </div>
 </header>
@@ -1622,6 +1627,28 @@
 </footer>
 
 <script>
+  let _installPrompt = null;
+  const _installButton = document.getElementById('install-windows-btn');
+  window.addEventListener('beforeinstallprompt', event => {
+    event.preventDefault();
+    _installPrompt = event;
+    _installButton?.classList.add('available');
+  });
+  _installButton?.addEventListener('click', async () => {
+    if (!_installPrompt) return;
+    _installPrompt.prompt();
+    await _installPrompt.userChoice;
+    _installPrompt = null;
+    _installButton.classList.remove('available');
+  });
+  window.addEventListener('appinstalled', () => {
+    _installPrompt = null;
+    _installButton?.classList.remove('available');
+  });
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+  }
+
   /* ── NAV SHADOW ON SCROLL ── */
   const _nav = document.querySelector('nav');
   window.addEventListener('scroll', () => {

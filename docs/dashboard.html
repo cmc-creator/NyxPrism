@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NyxPrism&#8482; — PDF Tools</title>
   <meta name="robots" content="noindex, nofollow" />
-  <link rel="manifest" href="manifest.json" />
+  <link rel="manifest" href="manifest.json?v=5" />
   <meta name="theme-color" content="#7c3aed" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -59,6 +59,9 @@
     .theme-toggle{background:none;border:1px solid var(--border2);color:var(--muted);width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
     .theme-toggle:hover{background:var(--surface2);color:var(--text);border-color:var(--border3)}
     .theme-toggle svg{width:16px;height:16px;pointer-events:none}
+    .install-app-btn{display:none;align-items:center;gap:.42rem;min-height:32px;padding:.38rem .7rem;border:1px solid rgba(103,232,249,.3);border-radius:8px;background:rgba(8,145,178,.09);color:var(--cyan);font-size:.76rem;font-weight:700;transition:background .16s,border-color .16s,transform .16s}
+    .install-app-btn.available{display:inline-flex}.install-app-btn:hover{background:rgba(8,145,178,.16);border-color:rgba(103,232,249,.52);transform:translateY(-1px)}.install-app-btn svg{width:15px;height:15px}
+    @media(max-width:620px){.install-app-btn span{display:none}.install-app-btn{width:32px;padding:0;justify-content:center}}
     body:not(.light) .theme-icon-sun{display:none}
     body.light .theme-icon-moon{display:none}
     .recent-file-row{display:flex;align-items:center;gap:.6rem;padding:.55rem .6rem;border-radius:8px;border:1px solid var(--border);margin-bottom:.45rem;background:var(--surface);transition:background .12s;cursor:pointer}
@@ -370,6 +373,7 @@
     <svg class="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
     <svg class="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
   </button>
+  <button class="install-app-btn" id="install-app-btn" type="button" title="Install NyxPrism on this computer" aria-label="Install NyxPrism on this computer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg><span>Install</span></button>
   <span class="nav-plan" id="nav-plan-badge">Professional</span>
   <div class="nav-avatar" id="nav-avatar" tabindex="0">
     <span id="nav-initial">?</span>
@@ -1603,6 +1607,27 @@ const db   = getFirestore(app);
 
 // ── Update to your Railway backend URL ────────────────────────────
 const API = 'https://nyxprism-production.up.railway.app';
+window.__nyxLaunchFiles=[];
+window.__nyxDashboardReady=false;
+window.__nyxProcessLaunchFiles=async function(){
+  if(!window.__nyxDashboardReady||!window.__nyxOpenPdf||!window.__nyxLaunchFiles.length)return;
+  const file=window.__nyxLaunchFiles.shift();
+  await window.__nyxOpenPdf(file);
+  if(window.__nyxLaunchFiles.length)toast(`${window.__nyxLaunchFiles.length} additional PDF${window.__nyxLaunchFiles.length===1?' is':'s are'} waiting. Open them one at a time.`,'info');
+};
+
+let deferredInstallPrompt=null;
+const installAppBtn=document.getElementById('install-app-btn');
+window.addEventListener('beforeinstallprompt',event=>{
+  event.preventDefault();deferredInstallPrompt=event;installAppBtn?.classList.add('available');
+});
+installAppBtn?.addEventListener('click',async()=>{
+  if(!deferredInstallPrompt)return;
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt=null;installAppBtn.classList.remove('available');
+});
+window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;installAppBtn?.classList.remove('available');toast('NyxPrism installed. You can now open PDF files with it.','success');});
 
 const Stats = {
   get:()=>JSON.parse(localStorage.getItem('nyx_stats')||'{"processed":0,"saved":0}'),
@@ -1684,6 +1709,8 @@ onAuthStateChanged(auth,async user=>{
   loading.style.opacity='0';
   setTimeout(()=>loading.style.display='none',300);
   content.style.display='block';
+  window.__nyxDashboardReady=true;
+  window.__nyxProcessLaunchFiles();
   if(window.__checkoutSuccess){window.__checkoutSuccess=false;setTimeout(()=>toast('Subscription activated — welcome to NyxPrism Professional! 🎉','success'),400);}
 });
 
@@ -2317,6 +2344,13 @@ async function loadQRCode(){
     }catch(err){showResult(resultEl,'error','Error: '+err.message);toast(err.message,'error');}
     btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Save &amp; Download';
   });
+  window.__nyxOpenPdf=async function(file){
+    if(!file||file.type!=='application/pdf'&&!file.name.toLowerCase().endsWith('.pdf')){toast('NyxPrism can open PDF files only.','error');return;}
+    switchPanel('editpdf');
+    await loadForEdit(file);
+    toast(`Opened ${file.name}`,'success');
+  };
+  window.__nyxProcessLaunchFiles();
   document.getElementById('edit-clear').addEventListener('click',()=>{editFile=null;editPageOrder=[];pendingTexts=[];listEl.innerHTML='';optsEl.style.display='none';resultEl.className='result-box';document.getElementById('edit-page-list').innerHTML='';document.getElementById('edit-text-queue').textContent='';input.value='';});
 }
 
@@ -4035,6 +4069,16 @@ window.addEventListener("beforeunload", function(e){
     e.returnValue = "";
   }
 });
+if('launchQueue' in window){
+  window.launchQueue.setConsumer(async launchParams=>{
+    const files=[];
+    for(const handle of launchParams.files||[]){
+      try{files.push(await handle.getFile());}catch(_error){}
+    }
+    window.__nyxLaunchFiles.push(...files);
+    await window.__nyxProcessLaunchFiles();
+  });
+}
 // ── PRODUCT ASSISTANT ──
 const nyxChatLauncher=document.getElementById('nyx-chat-launcher'),nyxChatPanel=document.getElementById('nyx-chat-panel'),nyxChatClose=document.getElementById('nyx-chat-close'),nyxChatForm=document.getElementById('nyx-chat-form'),nyxChatInput=document.getElementById('nyx-chat-input'),nyxChatSend=document.getElementById('nyx-chat-send'),nyxChatMessages=document.getElementById('nyx-chat-messages'),nyxChatHistory=[];
 function setNyxChatOpen(open){nyxChatPanel.hidden=!open;nyxChatLauncher.setAttribute('aria-expanded',String(open));if(open)nyxChatInput.focus();}function addNyxChatMessage(role,content,isError=false){const message=document.createElement('p');message.className=`nyx-chat-message ${role}${isError?' error':''}`;message.textContent=content;nyxChatMessages.append(message);nyxChatMessages.scrollTop=nyxChatMessages.scrollHeight;return message;}
