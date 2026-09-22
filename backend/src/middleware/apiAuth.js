@@ -1,5 +1,6 @@
 import { createHash } from 'crypto';
 import pool from '../db/index.js';
+import { developerEntitlements } from '../access.js';
 
 /**
  * Express middleware that authenticates requests using a NyxPrism API key.
@@ -31,6 +32,7 @@ export async function requireApiKey(req, res, next) {
     }
 
     const row = result.rows[0];
+    const developer = developerEntitlements(row.email);
 
     // Check that the key owner has an active plan
     const trialExpired =
@@ -38,7 +40,7 @@ export async function requireApiKey(req, res, next) {
       row.trial_start &&
       Date.now() > new Date(row.trial_start).getTime() + 14 * 24 * 60 * 60 * 1000;
 
-    if (row.plan === 'inactive' || trialExpired) {
+    if (!developer && (row.plan === 'inactive' || trialExpired)) {
       return res.status(403).json({ error: 'Your subscription is inactive. Please renew at https://nyxprism.com/dashboard.html' });
     }
 
@@ -46,7 +48,7 @@ export async function requireApiKey(req, res, next) {
       uid:    row.firebase_uid,
       userId: row.user_id,
       email:  row.email,
-      plan:   row.plan,
+      plan:   developer?.plan || row.plan,
     };
 
     // Update last_used_at without blocking the request

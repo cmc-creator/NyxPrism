@@ -1,9 +1,20 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
+import { developerEntitlements } from '../src/access.js';
 
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 const readRepo = path => readFile(new URL(`../../${path}`, import.meta.url), 'utf8');
+
+test('owner account always receives Professional access', () => {
+  assert.deepEqual(developerEntitlements('cmc@conniemichelleconsulting.com'), {
+    plan: 'professional',
+    subscription_status: 'active',
+    trial_active: false,
+    trial_start: null,
+    current_period_end: null,
+  });
+});
 
 test('paid operations enforce active plans on the server', async () => {
   for (const path of [

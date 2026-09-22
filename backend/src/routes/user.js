@@ -34,6 +34,15 @@ router.post('/sync', requireAuth, async (req, res) => {
 // Returns the authenticated user's subscription details.
 router.get('/me', requireAuth, async (req, res) => {
   try {
+    const developer = developerEntitlements(req.user.email);
+    if (developer) {
+      await pool.query(
+        `UPDATE users SET plan = 'professional', subscription_status = 'active',
+           trial_active = FALSE, updated_at = NOW()
+         WHERE firebase_uid = $1`,
+        [req.user.uid],
+      );
+    }
     const { rows } = await pool.query(
       `SELECT firebase_uid, email, first_name, last_name, plan,
               subscription_status, trial_active, trial_start,
@@ -43,7 +52,7 @@ router.get('/me', requireAuth, async (req, res) => {
     );
 
     if (!rows.length) return res.status(404).json({ error: 'User not found.' });
-    res.json({ ...rows[0], ...(developerEntitlements(req.user.email) || {}) });
+    res.json({ ...rows[0], ...(developer || {}) });
   } catch (err) {
     console.error('User /me error:', err);
     res.status(500).json({ error: 'Internal error.' });

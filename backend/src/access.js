@@ -1,5 +1,7 @@
+const ownerEmails = ['cmc@conniemichelleconsulting.com'];
 const developerEmails = new Set(
-  (process.env.DEVELOPER_EMAILS || '')
+  [ownerEmails.join(','), process.env.DEVELOPER_EMAILS || '']
+    .join(',')
     .split(',')
     .map(email => email.trim().toLowerCase())
     .filter(Boolean),
