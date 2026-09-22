@@ -21,6 +21,17 @@ import distributionsRouter from './routes/distributions.js';
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
+app.disable('x-powered-by');
+app.use((_req, res, next) => {
+  res.setHeader('Strict-Transport-Security', 'max-age=63072000; includeSubDomains');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  res.setHeader('Content-Security-Policy', "default-src 'none'; frame-ancestors 'none'; base-uri 'none'");
+  next();
+});
+
 // ── Stripe webhook must receive the RAW body — register BEFORE json() ───
 app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
 
@@ -80,10 +91,27 @@ const keyCreateLimiter = rateLimit({
   message: { error: 'Too many API key creation requests. Try again later.' },
 });
 
+const publicDocumentLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many document-link requests. Try again later.' },
+});
+
 app.use('/api', generalLimiter);
+app.use('/api/sign-requests/public', publicDocumentLimiter);
+app.use('/api/distributions/public', publicDocumentLimiter);
 
 // ── Health check ─────────────────────────────────────────────────────────
-app.get('/health', (_req, res) => res.json({ ok: true, service: 'nyxprism-api' }));
+app.get('/health', async (_req, res) => {
+  try {
+    await pool.query('SELECT 1');
+    res.json({ ok: true, service: 'nyxprism-api', database: 'available' });
+  } catch {
+    res.status(503).json({ ok: false, service: 'nyxprism-api', database: 'unavailable' });
+  }
+});
 
 // ── Routes ────────────────────────────────────────────────────────────────
 app.use('/api/contact',   contactRouter);
@@ -103,23 +131,28 @@ app.use((_req, res) => res.status(404).json({ error: 'Not found.' }));
 
 // ── Startup ───────────────────────────────────────────────────────────────
 async function start() {
-  // Bind the port first so Railway's healthcheck can hit /health immediately.
-  await new Promise(resolve => app.listen(PORT, () => {
-    console.log(`✓ NyxPrism API listening on port ${PORT}`);
-    resolve();
-  }));
+  const required = ['DATABASE_URL', 'FIREBASE_PROJECT_ID', 'FIREBASE_CLIENT_EMAIL', 'FIREBASE_PRIVATE_KEY', 'FRONTEND_URL'];
+  const missing = required.filter(name => !process.env[name]);
+  if (missing.length) throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
 
   // Apply schema (idempotent — uses IF NOT EXISTS)
-  try {
-    const __dir   = dirname(fileURLToPath(import.meta.url));
-    const schema  = await readFile(join(__dir, 'db/schema.sql'), 'utf8');
-    await pool.query(schema);
-    console.log('✓ Database schema applied.');
-  } catch (err) {
-    console.error('✗ Schema migration error (server stays up):', err.message);
-    // Do NOT exit — let the server keep running so /health stays reachable.
-    // DB-dependent routes will fail gracefully; fix DATABASE_URL in env vars.
-  }
+  const __dir   = dirname(fileURLToPath(import.meta.url));
+  const schema  = await readFile(join(__dir, 'db/schema.sql'), 'utf8');
+  await pool.query(schema);
+  console.log('✓ Database schema applied.');
+
+  const purgeExpiredDocuments = async () => {
+    await pool.query("DELETE FROM signature_requests WHERE expires_at < NOW() - INTERVAL '30 days'");
+    await pool.query("DELETE FROM distribution_batches WHERE expires_at < NOW() - INTERVAL '30 days'");
+  };
+  await purgeExpiredDocuments();
+  const cleanupTimer = setInterval(() => purgeExpiredDocuments().catch(error => console.error('Retention cleanup error:', error.message)), 6 * 60 * 60 * 1000);
+  cleanupTimer.unref();
+
+  app.listen(PORT, () => console.log(`✓ NyxPrism API listening on port ${PORT}`));
 }
 
-start();
+start().catch(error => {
+  console.error('✗ NyxPrism API failed to start:', error.message);
+  process.exit(1);
+});

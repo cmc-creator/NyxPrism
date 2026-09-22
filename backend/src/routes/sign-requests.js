@@ -1,14 +1,16 @@
 import { Router } from 'express';
-import { randomBytes } from 'crypto';
+import { createHash, randomBytes } from 'crypto';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import pool from '../db/index.js';
-import { requireAuth } from '../middleware/auth.js';
+import { requireActivePlan, requireAuth } from '../middleware/auth.js';
 
 const router = Router();
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const FIELD_TYPES = new Set(['signature', 'initials', 'name', 'date', 'text', 'checkbox']);
 const MAX_DOCUMENT_BYTES = 8 * 1024 * 1024;
+const MAX_USER_DOCUMENT_BYTES = 100 * 1024 * 1024;
 const REQUEST_DAYS = 30;
+const TOKEN_RE = /^[a-f0-9]{64}$/;
 
 function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, char => ({
@@ -221,9 +223,10 @@ router.get('/:id', requireAuth, async (req, res) => {
       [requestId],
     );
     const base = process.env.FRONTEND_URL || 'https://nyxprism.com';
+    const request = requestResult.rows[0];
     res.json({
-      request: requestResult.rows[0],
-      recipients: recipients.rows.map(row => ({ ...row, url: `${base}/sign-request.html?token=${row.token}` })),
+      request,
+      recipients: recipients.rows.map(row => ({ ...row, ...(request.status !== 'draft' ? { url: `${base}/sign-request.html?token=${row.token}` } : {}) })),
       events: events.rows,
     });
   } catch (err) {
@@ -238,13 +241,14 @@ router.get('/:id/final-pdf', requireAuth, async (req, res) => {
   try {
     const userId = await findOrCreateUser(req.user);
     const requestResult = await pool.query(
-      `SELECT id, title, document_name, document_data
+      `SELECT id, title, document_name, document_data, status
        FROM signature_requests
        WHERE id = $1 AND owner_user_id = $2`,
       [requestId, userId],
     );
     if (!requestResult.rows.length) return res.status(404).json({ error: 'Signature request not found.' });
     const request = requestResult.rows[0];
+    if (request.status !== 'completed') return res.status(409).json({ error: 'The final PDF is available after every signer completes.' });
     const fields = await pool.query(
       `SELECT field_type, page_number, x, y, width, height, value_text
        FROM signature_fields
@@ -269,10 +273,13 @@ router.get('/:id/final-pdf', requireAuth, async (req, res) => {
       page.drawText(text, { x, y, size: fontSize, font, color: rgb(0.08, 0.09, 0.12) });
     }
     const out = await doc.save();
-    await audit(pool, { requestId, eventType: 'final_pdf_downloaded', req });
+    const finalHash = createHash('sha256').update(out).digest('hex');
+    await audit(pool, { requestId, eventType: 'final_pdf_downloaded', detail: `SHA-256 ${finalHash}`, req });
     const fileName = String(request.document_name || 'signed-document.pdf').replace(/\.pdf$/i, '') + '-completed.pdf';
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${fileName.replace(/[^a-zA-Z0-9._-]/g, '_')}"`);
+    res.setHeader('X-Document-SHA256', finalHash);
+    res.setHeader('Cache-Control', 'no-store, max-age=0');
     res.send(Buffer.from(out));
   } catch (err) {
     console.error('sign-requests final PDF error:', err.message);
@@ -280,7 +287,7 @@ router.get('/:id/final-pdf', requireAuth, async (req, res) => {
   }
 });
 
-router.post('/', requireAuth, async (req, res) => {
+router.post('/', requireAuth, requireActivePlan, async (req, res) => {
   let recipients;
   let fields;
   try {
@@ -308,18 +315,27 @@ router.post('/', requireAuth, async (req, res) => {
   try {
     await client.query('BEGIN');
     const userId = await findOrCreateUser(req.user);
+    const usageResult = await client.query(
+      `SELECT COALESCE((SELECT SUM(document_size) FROM signature_requests WHERE owner_user_id = $1), 0) +
+              COALESCE((SELECT SUM(document_size) FROM distribution_batches WHERE owner_user_id = $1), 0) AS bytes`,
+      [userId],
+    );
+    if (Number(usageResult.rows[0].bytes) + documentBuffer.length > MAX_USER_DOCUMENT_BYTES) {
+      await client.query('ROLLBACK');
+      return res.status(413).json({ error: 'Document storage limit reached. Delete older workflows and try again.' });
+    }
     const requestResult = await client.query(
-      `INSERT INTO signature_requests (owner_user_id, title, document_name, document_mime, document_size, document_data, message, status, expires_at)
-       VALUES ($1, $2, $3, 'application/pdf', $4, $5, $6, $7, $8)
+      `INSERT INTO signature_requests (owner_user_id, title, document_name, document_mime, document_size, document_data, document_hash, message, status, expires_at)
+       VALUES ($1, $2, $3, 'application/pdf', $4, $5, $6, $7, $8, $9)
        RETURNING id, title, document_name, status, created_at`,
-      [userId, title, documentName, documentBuffer.length, documentBuffer, message, sendNow ? 'sent' : 'draft', expiresAt],
+      [userId, title, documentName, documentBuffer.length, documentBuffer, createHash('sha256').update(documentBuffer).digest('hex'), message, sendNow ? 'sent' : 'draft', expiresAt],
     );
     request = requestResult.rows[0];
 
     const recipientIds = new Map();
     for (const recipient of recipients) {
       const token = randomBytes(32).toString('hex');
-      const recipientStatus = sendNow && recipient.roleOrder > 1 ? 'waiting' : 'pending';
+      const recipientStatus = !sendNow ? 'draft' : recipient.roleOrder > 1 ? 'waiting' : 'pending';
       const inserted = await client.query(
         `INSERT INTO signature_recipients (request_id, name, email, role_order, token, status)
          VALUES ($1, $2, $3, $4, $5, $6)
@@ -385,10 +401,126 @@ router.post('/', requireAuth, async (req, res) => {
     }
   }
 
-  res.status(201).json({ request, signers: signers.map(({ name, email, url }) => ({ name, email, url })), warning: emailWarning });
+  res.status(201).json({
+    request,
+    signers: signers.map(({ name, email, url }) => ({ name, email, ...(sendNow ? { url } : {}) })),
+    warning: emailWarning,
+  });
+});
+
+router.post('/:id/send', requireAuth, requireActivePlan, async (req, res) => {
+  const requestId = parseInt(req.params.id, 10);
+  if (!Number.isInteger(requestId) || requestId < 1) return res.status(400).json({ error: 'Invalid request ID.' });
+  const client = await pool.connect();
+  let signer;
+  try {
+    await client.query('BEGIN');
+    const userId = await findOrCreateUser(req.user);
+    const requestResult = await client.query(
+      `SELECT id, title, document_name, message
+       FROM signature_requests
+       WHERE id = $1 AND owner_user_id = $2 AND status = 'draft'
+       FOR UPDATE`,
+      [requestId, userId],
+    );
+    if (!requestResult.rows.length) {
+      await client.query('ROLLBACK');
+      return res.status(409).json({ error: 'Only an existing draft can be sent.' });
+    }
+    const request = requestResult.rows[0];
+    const firstResult = await client.query(
+      `SELECT id, name, email, token
+       FROM signature_recipients
+       WHERE request_id = $1
+       ORDER BY role_order, id
+       LIMIT 1`,
+      [requestId],
+    );
+    if (!firstResult.rows.length) {
+      await client.query('ROLLBACK');
+      return res.status(409).json({ error: 'The draft has no recipients.' });
+    }
+    await client.query(
+      `UPDATE signature_recipients
+       SET status = CASE WHEN id = $2 THEN 'pending' ELSE 'waiting' END
+       WHERE request_id = $1 AND status = 'draft'`,
+      [requestId, firstResult.rows[0].id],
+    );
+    await client.query("UPDATE signature_requests SET status = 'sent', sent_at = NOW(), updated_at = NOW() WHERE id = $1", [requestId]);
+    signer = {
+      ...firstResult.rows[0],
+      title: request.title,
+      document_name: request.document_name,
+      message: request.message,
+      url: `${process.env.FRONTEND_URL || 'https://nyxprism.com'}/sign-request.html?token=${firstResult.rows[0].token}`,
+    };
+    await audit(client, { requestId, recipientId: signer.id, eventType: 'sent', detail: 'Draft sent', req });
+    await client.query('COMMIT');
+  } catch (error) {
+    await client.query('ROLLBACK').catch(() => {});
+    console.error('sign-requests send error:', error.message);
+    return res.status(500).json({ error: 'Failed to send signature request.' });
+  } finally {
+    client.release();
+  }
+
+  let warning = null;
+  try {
+    await sendEmail({ to: signer.email, subject: `Signature requested: ${signer.title}`, html: signerEmailHtml({ signer, title: signer.title, documentName: signer.document_name, message: signer.message, ownerEmail: req.user.email }) });
+    await recordNotification(pool, { requestId, recipientId: signer.id, type: 'signature_request_sent', status: 'sent' });
+  } catch (error) {
+    warning = 'Request activated, but email delivery failed.';
+    await recordNotification(pool, { requestId, recipientId: signer.id, type: 'signature_request_sent', status: 'failed', error: error.message });
+  }
+  res.json({ ok: true, warning });
+});
+
+router.post('/:id/void', requireAuth, async (req, res) => {
+  const requestId = parseInt(req.params.id, 10);
+  if (!Number.isInteger(requestId) || requestId < 1) return res.status(400).json({ error: 'Invalid request ID.' });
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const userId = await findOrCreateUser(req.user);
+    const result = await client.query(
+      `UPDATE signature_requests SET status = 'voided', updated_at = NOW()
+       WHERE id = $1 AND owner_user_id = $2 AND status IN ('draft', 'sent', 'in_progress')
+       RETURNING id`,
+      [requestId, userId],
+    );
+    if (!result.rows.length) {
+      await client.query('ROLLBACK');
+      return res.status(409).json({ error: 'This request cannot be voided.' });
+    }
+    await client.query("UPDATE signature_recipients SET status = 'canceled' WHERE request_id = $1 AND status != 'completed'", [requestId]);
+    await audit(client, { requestId, eventType: 'voided', req });
+    await client.query('COMMIT');
+    res.json({ ok: true });
+  } catch (error) {
+    await client.query('ROLLBACK').catch(() => {});
+    console.error('sign-requests void error:', error.message);
+    res.status(500).json({ error: 'Failed to void signature request.' });
+  } finally {
+    client.release();
+  }
+});
+
+router.delete('/:id', requireAuth, async (req, res) => {
+  const requestId = parseInt(req.params.id, 10);
+  if (!Number.isInteger(requestId) || requestId < 1) return res.status(400).json({ error: 'Invalid request ID.' });
+  try {
+    const userId = await findOrCreateUser(req.user);
+    const result = await pool.query('DELETE FROM signature_requests WHERE id = $1 AND owner_user_id = $2', [requestId, userId]);
+    if (!result.rowCount) return res.status(404).json({ error: 'Signature request not found.' });
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('sign-requests delete error:', error.message);
+    res.status(500).json({ error: 'Failed to delete signature request.' });
+  }
 });
 
 router.get('/public/:token', async (req, res) => {
+  if (!TOKEN_RE.test(req.params.token)) return res.status(404).json({ error: 'Signature link not found.' });
   try {
     const recipientResult = await pool.query(
       `SELECT sr.id AS recipient_id, sr.name, sr.email, sr.status AS recipient_status,
@@ -401,7 +533,11 @@ router.get('/public/:token', async (req, res) => {
     );
     if (!recipientResult.rows.length) return res.status(404).json({ error: 'Signature link not found.' });
     const row = recipientResult.rows[0];
+    res.setHeader('Cache-Control', 'no-store, max-age=0');
+    res.setHeader('Pragma', 'no-cache');
     if (row.expires_at && new Date(row.expires_at).getTime() < Date.now()) return res.status(410).json({ error: 'Signature link expired.' });
+    if (row.request_status === 'draft' || row.recipient_status === 'draft') return res.status(404).json({ error: 'Signature link not found.' });
+    if (['declined', 'expired', 'voided'].includes(row.request_status)) return res.status(410).json({ error: 'This signature request is no longer active.' });
     if (row.recipient_status === 'waiting') return res.status(423).json({ error: 'This request is waiting for a previous signer.' });
     if (row.recipient_status === 'declined') return res.status(410).json({ error: 'This signature request was declined.' });
     await pool.query('UPDATE signature_recipients SET viewed_at = COALESCE(viewed_at, NOW()) WHERE id = $1', [row.recipient_id]);
@@ -426,72 +562,146 @@ router.get('/public/:token', async (req, res) => {
 });
 
 router.post('/public/:token/complete', async (req, res) => {
+  if (!TOKEN_RE.test(req.params.token)) return res.status(404).json({ error: 'Signature link not found.' });
+  if (req.body?.consent !== true) return res.status(400).json({ error: 'Electronic-signature consent is required.' });
   const values = Array.isArray(req.body?.values) ? req.body.values : [];
+  if (values.length > 200) return res.status(400).json({ error: 'Too many field values.' });
+  const client = await pool.connect();
+  let nextSigner = null;
   try {
-    const recipientResult = await pool.query('SELECT id, request_id FROM signature_recipients WHERE token = $1 LIMIT 1', [req.params.token]);
-    if (!recipientResult.rows.length) return res.status(404).json({ error: 'Signature link not found.' });
+    await client.query('BEGIN');
+    const recipientResult = await client.query(
+      `SELECT sr.id, sr.request_id, sr.status AS recipient_status,
+              r.status AS request_status, r.expires_at, r.document_hash
+       FROM signature_recipients sr
+       JOIN signature_requests r ON r.id = sr.request_id
+       WHERE sr.token = $1
+       LIMIT 1
+       FOR UPDATE OF sr, r`,
+      [req.params.token],
+    );
+    if (!recipientResult.rows.length) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: 'Signature link not found.' });
+    }
     const recipient = recipientResult.rows[0];
-    const expiry = await pool.query('SELECT expires_at FROM signature_requests WHERE id = $1', [recipient.request_id]);
-    if (expiry.rows[0]?.expires_at && new Date(expiry.rows[0].expires_at).getTime() < Date.now()) return res.status(410).json({ error: 'Signature link expired.' });
+    if (recipient.expires_at && new Date(recipient.expires_at).getTime() < Date.now()) {
+      await client.query('ROLLBACK');
+      return res.status(410).json({ error: 'Signature link expired.' });
+    }
+    if (!['sent', 'in_progress'].includes(recipient.request_status)) {
+      await client.query('ROLLBACK');
+      return res.status(409).json({ error: 'This signature request is not active.' });
+    }
+    if (recipient.recipient_status !== 'pending') {
+      await client.query('ROLLBACK');
+      return res.status(409).json({ error: 'This signer is not currently eligible to complete the request.' });
+    }
 
-    const existing = await pool.query('SELECT id, required FROM signature_fields WHERE recipient_id = $1', [recipient.id]);
+    const existing = await client.query('SELECT id, required FROM signature_fields WHERE recipient_id = $1', [recipient.id]);
     const existingIds = new Set(existing.rows.map(row => Number(row.id)));
     const provided = new Map(values.map(value => [Number(value.fieldId), String(value.value || '').trim().slice(0, 1000)]));
     for (const row of existing.rows) {
-      if (row.required && !provided.get(Number(row.id))) return res.status(400).json({ error: 'Complete all required fields.' });
+      if (row.required && !provided.get(Number(row.id))) {
+        await client.query('ROLLBACK');
+        return res.status(400).json({ error: 'Complete all required fields.' });
+      }
     }
-    for (const [fieldId, value] of provided.entries()) {
-      if (!existingIds.has(fieldId)) continue;
-      await pool.query('UPDATE signature_fields SET value_text = $1, completed_at = NOW() WHERE id = $2 AND recipient_id = $3', [value, fieldId, recipient.id]);
+    const acceptedValues = [...provided.entries()].filter(([fieldId]) => existingIds.has(fieldId));
+    for (const [fieldId, value] of acceptedValues) {
+      await client.query('UPDATE signature_fields SET value_text = $1, completed_at = NOW() WHERE id = $2 AND recipient_id = $3', [value, fieldId, recipient.id]);
     }
-    await pool.query('UPDATE signature_recipients SET status = $1, completed_at = NOW() WHERE id = $2', ['completed', recipient.id]);
-    await audit(pool, { requestId: recipient.request_id, recipientId: recipient.id, eventType: 'completed', req });
+    const completionHash = createHash('sha256').update(JSON.stringify({
+      documentHash: recipient.document_hash,
+      recipientId: recipient.id,
+      values: acceptedValues.sort((a, b) => a[0] - b[0]),
+    })).digest('hex');
+    await client.query("UPDATE signature_recipients SET status = 'completed', completed_at = NOW(), consented_at = NOW(), completion_hash = $1 WHERE id = $2", [completionHash, recipient.id]);
+    await audit(client, { requestId: recipient.request_id, recipientId: recipient.id, eventType: 'completed', detail: `Electronic-signature consent recorded; SHA-256 ${completionHash}`, req });
 
-    const next = await pool.query(
-      `SELECT sr.id, sr.name, sr.email, sr.token, r.title, r.document_name, r.message
+    const next = await client.query(
+      `SELECT sr.id, sr.name, sr.email, sr.token, r.title, r.document_name, r.message, u.email AS owner_email
        FROM signature_recipients sr
        JOIN signature_requests r ON r.id = sr.request_id
+       JOIN users u ON u.id = r.owner_user_id
        WHERE sr.request_id = $1 AND sr.status = 'waiting'
        ORDER BY sr.role_order, sr.id
        LIMIT 1`,
       [recipient.request_id],
     );
     if (next.rows.length) {
-      const signer = { ...next.rows[0], url: `${process.env.FRONTEND_URL || 'https://nyxprism.com'}/sign-request.html?token=${next.rows[0].token}` };
-      await pool.query('UPDATE signature_recipients SET status = $1 WHERE id = $2', ['pending', signer.id]);
-      await audit(pool, { requestId: recipient.request_id, recipientId: signer.id, eventType: 'advanced', detail: 'Sequential signer activated', req });
+      nextSigner = { ...next.rows[0], url: `${process.env.FRONTEND_URL || 'https://nyxprism.com'}/sign-request.html?token=${next.rows[0].token}` };
+      await client.query("UPDATE signature_recipients SET status = 'pending' WHERE id = $1 AND status = 'waiting'", [nextSigner.id]);
+      await client.query("UPDATE signature_requests SET status = 'in_progress', updated_at = NOW() WHERE id = $1", [recipient.request_id]);
+      await audit(client, { requestId: recipient.request_id, recipientId: nextSigner.id, eventType: 'advanced', detail: 'Sequential signer activated', req });
+    } else {
+      await client.query("UPDATE signature_requests SET status = 'completed', completed_at = NOW(), updated_at = NOW() WHERE id = $1", [recipient.request_id]);
+    }
+    await client.query('COMMIT');
+
+    if (nextSigner) {
       try {
-        await sendEmail({ to: signer.email, subject: `Signature requested: ${signer.title}`, html: signerEmailHtml({ signer, title: signer.title, documentName: signer.document_name, message: signer.message, ownerEmail: 'NyxPrism' }) });
-        await recordNotification(pool, { requestId: recipient.request_id, recipientId: signer.id, type: 'signature_request_advanced', status: 'sent' });
-      } catch (err) {
-        await recordNotification(pool, { requestId: recipient.request_id, recipientId: signer.id, type: 'signature_request_advanced', status: 'failed', error: err.message });
+        await sendEmail({
+          to: nextSigner.email,
+          subject: `Signature requested: ${nextSigner.title}`,
+          html: signerEmailHtml({ signer: nextSigner, title: nextSigner.title, documentName: nextSigner.document_name, message: nextSigner.message, ownerEmail: nextSigner.owner_email }),
+        });
+        await recordNotification(pool, { requestId: recipient.request_id, recipientId: nextSigner.id, type: 'signature_request_advanced', status: 'sent' });
+      } catch (error) {
+        await recordNotification(pool, { requestId: recipient.request_id, recipientId: nextSigner.id, type: 'signature_request_advanced', status: 'failed', error: error.message });
       }
     }
-
-    const remaining = await pool.query('SELECT COUNT(*) AS count FROM signature_recipients WHERE request_id = $1 AND status != $2', [recipient.request_id, 'completed']);
-    if (Number(remaining.rows[0].count) === 0) {
-      await pool.query('UPDATE signature_requests SET status = $1, completed_at = NOW(), updated_at = NOW() WHERE id = $2', ['completed', recipient.request_id]);
-    }
-    res.json({ ok: true });
+    res.json({ ok: true, completionHash });
   } catch (err) {
+    await client.query('ROLLBACK').catch(() => {});
     console.error('sign-requests public complete error:', err.message);
     res.status(500).json({ error: 'Failed to complete signature request.' });
+  } finally {
+    client.release();
   }
 });
 
 router.post('/public/:token/decline', async (req, res) => {
+  if (!TOKEN_RE.test(req.params.token)) return res.status(404).json({ error: 'Signature link not found.' });
   const reason = String(req.body?.reason || '').trim().slice(0, 1000) || null;
+  const client = await pool.connect();
   try {
-    const recipientResult = await pool.query('SELECT id, request_id FROM signature_recipients WHERE token = $1 LIMIT 1', [req.params.token]);
-    if (!recipientResult.rows.length) return res.status(404).json({ error: 'Signature link not found.' });
+    await client.query('BEGIN');
+    const recipientResult = await client.query(
+      `SELECT sr.id, sr.request_id, sr.status AS recipient_status,
+              r.status AS request_status, r.expires_at
+       FROM signature_recipients sr
+       JOIN signature_requests r ON r.id = sr.request_id
+       WHERE sr.token = $1
+       LIMIT 1
+       FOR UPDATE OF sr, r`,
+      [req.params.token],
+    );
+    if (!recipientResult.rows.length) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: 'Signature link not found.' });
+    }
     const recipient = recipientResult.rows[0];
-    await pool.query('UPDATE signature_recipients SET status = $1, declined_at = NOW(), decline_reason = $2 WHERE id = $3', ['declined', reason, recipient.id]);
-    await pool.query('UPDATE signature_requests SET status = $1, updated_at = NOW() WHERE id = $2', ['declined', recipient.request_id]);
-    await audit(pool, { requestId: recipient.request_id, recipientId: recipient.id, eventType: 'declined', detail: reason, req });
+    if (recipient.expires_at && new Date(recipient.expires_at).getTime() < Date.now()) {
+      await client.query('ROLLBACK');
+      return res.status(410).json({ error: 'Signature link expired.' });
+    }
+    if (!['sent', 'in_progress'].includes(recipient.request_status) || recipient.recipient_status !== 'pending') {
+      await client.query('ROLLBACK');
+      return res.status(409).json({ error: 'This signer cannot decline the request in its current state.' });
+    }
+    await client.query("UPDATE signature_recipients SET status = 'declined', declined_at = NOW(), decline_reason = $1 WHERE id = $2", [reason, recipient.id]);
+    await client.query("UPDATE signature_recipients SET status = 'canceled' WHERE request_id = $1 AND status IN ('pending', 'waiting')", [recipient.request_id]);
+    await client.query("UPDATE signature_requests SET status = 'declined', updated_at = NOW() WHERE id = $1", [recipient.request_id]);
+    await audit(client, { requestId: recipient.request_id, recipientId: recipient.id, eventType: 'declined', detail: reason, req });
+    await client.query('COMMIT');
     res.json({ ok: true });
   } catch (err) {
+    await client.query('ROLLBACK').catch(() => {});
     console.error('sign-requests public decline error:', err.message);
     res.status(500).json({ error: 'Failed to decline signature request.' });
+  } finally {
+    client.release();
   }
 });
 

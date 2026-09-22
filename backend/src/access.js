@@ -1,5 +1,5 @@
 const developerEmails = new Set(
-  (process.env.DEVELOPER_EMAILS || 'cmc@conniemichelleconsulting.com')
+  (process.env.DEVELOPER_EMAILS || '')
     .split(',')
     .map(email => email.trim().toLowerCase())
     .filter(Boolean),

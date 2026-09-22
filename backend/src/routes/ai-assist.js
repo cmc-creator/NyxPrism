@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import Anthropic from '@anthropic-ai/sdk';
-import { requireAuth } from '../middleware/auth.js';
+import { requireActivePlan, requireAuth } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -25,7 +25,7 @@ const TOOL_PROMPTS = {
 
 const DEFAULT_PROMPT = 'You are a helpful AI assistant in NyxPrism, a browser-based PDF tool suite. Help the user with their PDF task. Be concise and practical.';
 
-router.post('/', requireAuth, async (req, res) => {
+router.post('/', requireAuth, requireActivePlan, async (req, res) => {
   const { tool, messages } = req.body;
 
   if (!Array.isArray(messages) || messages.length === 0) {
@@ -33,6 +33,9 @@ router.post('/', requireAuth, async (req, res) => {
   }
   if (messages.length > 20) {
     return res.status(400).json({ error: 'Too many messages in session.' });
+  }
+  if (messages.some(message => !['user', 'assistant'].includes(message?.role) || typeof message?.content !== 'string' || message.content.length > 4000)) {
+    return res.status(400).json({ error: 'Each message must use a valid role and contain at most 4,000 characters.' });
   }
 
   const systemPrompt = (TOOL_PROMPTS[tool] || DEFAULT_PROMPT) +
@@ -45,7 +48,7 @@ router.post('/', requireAuth, async (req, res) => {
       model: 'claude-opus-4-5',
       max_tokens: 512,
       system: systemPrompt,
-      messages: messages.slice(-10),
+      messages: messages.slice(-10).map(message => ({ role: message.role, content: message.content.trim() })),
     });
 
     const reply = message.content[0]?.text?.trim() || '';

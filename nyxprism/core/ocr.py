@@ -53,21 +53,38 @@ def ocr_pdf(
             "Install it with: pip install pypdfium2"
         ) from exc
 
-    from PIL import Image
-
     source = Path(source)
+    if not 50 <= dpi <= 1200:
+        raise ValueError("dpi must be between 50 and 1200")
     pdf = pdfium.PdfDocument(str(source))
     scale = dpi / 72.0
     parts: list[str] = []
+    requested = set(page_numbers) if page_numbers is not None else None
 
-    for i, page in enumerate(pdf):
-        page_num = i + 1
-        if page_numbers is not None and page_num not in page_numbers:
-            continue
-        bitmap = page.render(scale=scale, rotation=0)
-        pil_img = bitmap.to_pil()
-        text = pytesseract.image_to_string(pil_img, lang=lang)
-        parts.append(f"--- Page {page_num} ---\n{text}")
+    try:
+        total_pages = len(pdf)
+        if requested and any(page < 1 or page > total_pages for page in requested):
+            raise ValueError(f"page_numbers must be between 1 and {total_pages}")
+        for i in range(total_pages):
+            page_num = i + 1
+            if requested is not None and page_num not in requested:
+                continue
+            page = pdf[i]
+            bitmap = None
+            pil_img = None
+            try:
+                bitmap = page.render(scale=scale, rotation=0)
+                pil_img = bitmap.to_pil()
+                text = pytesseract.image_to_string(pil_img, lang=lang)
+                parts.append(f"--- Page {page_num} ---\n{text}")
+            finally:
+                if pil_img is not None:
+                    pil_img.close()
+                if bitmap is not None:
+                    bitmap.close()
+                page.close()
+    finally:
+        pdf.close()
 
     full_text = "\n\n".join(parts)
 

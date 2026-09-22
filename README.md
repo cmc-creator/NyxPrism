@@ -16,7 +16,7 @@
   <a href="https://pypi.org/project/nyxprism/">
     <img src="https://img.shields.io/pypi/pyversions/nyxprism?style=for-the-badge" alt="Python" />
   </a>
-  <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT" />
+  <img src="https://img.shields.io/badge/License-Apache%202.0-green?style=for-the-badge" alt="Apache 2.0" />
 </p>
 
 **Powerful AI-enhanced PDF multi-tool** — split, merge, compress, convert, OCR, watermark, protect, and AI bulk-split with auto-rename, summarize, classify, and structured data extraction.
@@ -263,4 +263,4 @@ nyxprism/
 
 ## License
 
-MIT
+Apache License 2.0. See [LICENSE](LICENSE).

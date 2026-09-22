@@ -9,6 +9,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const adminSecretLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: 5,
+  skipSuccessfulRequests: true,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many admin authentication attempts. Try again later.' },
@@ -96,8 +97,9 @@ router.post('/claim', adminSecretLimiter, async (req, res) => {
   }
 });
 
-// All routes below require admin auth
-router.use(requireAdmin);
+// All routes below require admin auth. Failed attempts are limited while
+// successful requests are excluded so an active admin session remains usable.
+router.use(adminSecretLimiter, requireAdmin);
 
 // GET /api/admin/stats
 router.get('/stats', async (_req, res) => {

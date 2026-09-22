@@ -7,13 +7,21 @@
   <meta name="robots" content="noindex, nofollow" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600;14..32,800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600;14..32,800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     :root{--bg:#05070d;--surface:#0f1724;--border:#213049;--accent:#7c3aed;--text:#f0f4fc;--muted:#8aa0bd;--red:#f87171;--green:#34d399}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:linear-gradient(135deg,#04070d,#07111d 50%,#09070f);font-family:Inter,system-ui,sans-serif;color:var(--text)}header{height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 1.25rem;border-bottom:1px solid rgba(167,139,250,.14);background:rgba(5,7,13,.72);backdrop-filter:blur(22px)}.brand{font-weight:900}.brand em{font-style:normal;color:#a78bfa}main{max-width:1120px;margin:0 auto;padding:1.5rem}.card{background:rgba(15,23,36,.9);border:1px solid rgba(167,139,250,.14);border-radius:14px;padding:1rem;box-shadow:0 18px 60px rgba(0,0,0,.25)}h1{font-size:1.35rem;margin:.2rem 0 .35rem}p{color:var(--muted);font-size:.9rem}.viewer{margin-top:1rem;background:#fff;border-radius:10px;overflow:hidden;display:inline-block;max-width:100%}canvas{display:block;max-width:100%}.btn{border:0;border-radius:7px;padding:.55rem .9rem;background:linear-gradient(135deg,var(--accent),#5b21b6);color:#fff;font-weight:700;cursor:pointer}.btn.secondary{background:#141e2e;border:1px solid var(--border);color:#c8d3e0}.result{margin-top:.75rem;border-radius:8px;padding:.75rem;font-size:.86rem}.err{background:rgba(248,113,113,.1);color:var(--red);border:1px solid rgba(248,113,113,.25)}.ok{background:rgba(52,211,153,.1);color:var(--green);border:1px solid rgba(52,211,153,.25)}
   </style>
+  <link rel="stylesheet" href="nyx-brand.css?v=2" />
+  <script src="nyx-brand.js?v=2" defer></script>
 </head>
 <body>
-<header><div class="brand"><em>Nyx</em>Prism</div><div id="status">Loading document...</div></header>
+<header>
+  <a href="index.html" class="brand nyx-brand-lockup">
+    <span class="nyx-brand-icon"><canvas class="nyx-prism-mark" aria-hidden="true"></canvas></span>
+    <span class="nyx-brand-copy"><span class="nyx-brand-wordmark"><em>Nyx</em>Prism&#8482;</span><span class="nyx-brand-company">by NyxCollective LLC</span></span>
+  </a>
+  <div id="status">Loading document...</div>
+</header>
 <main><section class="card"><div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap"><div><h1 id="doc-title">Shared Document</h1><p id="recipient-line"></p></div><div><button class="btn secondary" id="prev-page">Prev</button> <button class="btn secondary" id="next-page">Next</button> <button class="btn" id="download-btn">Download PDF</button></div></div><div id="result"></div><div class="viewer"><canvas id="pdf-canvas"></canvas></div></section></main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>

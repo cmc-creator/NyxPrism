@@ -127,19 +127,24 @@
     .footer-bottom a { color: var(--muted2); }
     .footer-bottom a:hover { color: var(--muted); }
   </style>
+  <link rel="stylesheet" href="nyx-brand.css?v=2" />
+  <script src="nyx-brand.js?v=2" defer></script>
 </head>
 <body>
 
 <!-- NAV -->
 <nav>
-  <a href="index.html" class="nav-brand">
-    <div class="nav-wordmark"><em>Nyx</em>Prism&#8482;</div>
-    <div class="nav-co">by NyxCollective LLC</div>
+  <a href="index.html" class="nav-brand nyx-brand-lockup">
+    <span class="nyx-brand-icon"><canvas class="nyx-prism-mark" aria-hidden="true"></canvas></span>
+    <span class="nyx-brand-copy">
+      <span class="nav-wordmark nyx-brand-wordmark"><em>Nyx</em>Prism&#8482;</span>
+      <span class="nav-co nyx-brand-company">by NyxCollective LLC</span>
+    </span>
   </a>
   <div class="nav-links">
     <a href="index.html#features">Features</a>
     <a href="index.html#pricing">Pricing</a>
-    <a href="index.html#ai">AI Tools</a>
+    <a href="index.html#capabilities">AI Tools</a>
     <a href="index.html#faq">FAQ</a>
   </div>
   <div class="nav-sep"></div>
@@ -153,56 +158,47 @@
 <div class="legal-hero">
   <div class="legal-eyebrow">Legal</div>
   <h1>Privacy Policy</h1>
-  <p>Effective January 1, 2024 &mdash; NyxCollective LLC</p>
+  <p>Effective September 22, 2026 &mdash; NyxCollective LLC</p>
 </div>
 
 <!-- CONTENT -->
 <div class="legal-wrap">
 
   <div class="notice-box">
-    <strong>Short version:</strong> NyxPrism&#8482; processes your PDF files locally on your machine. We do not collect, transmit, or store your document content. The only exception is if you explicitly configure OpenAI integration, in which case document text is sent to OpenAI's API under your own account.
+    <strong>Short version:</strong> Core browser and command-line PDF tools process files locally. Cloud AI, signature requests, and document distribution transmit document content to our service or designated AI provider as described below. We store cloud-workflow documents until you delete them or the retention period expires.
   </div>
 
   <h2>1. Introduction</h2>
   <p>NyxCollective LLC ("Company", "we", "us", "our") operates NyxPrism&#8482; (the "Software"). This Privacy Policy describes how we handle information in connection with the Software and our website at <a href="https://nyxprism.com/" target="_blank" rel="noopener">nyxprism.com</a>.</p>
   <p>We are committed to minimising data collection and protecting your privacy. This policy is designed to be clear and plain rather than legalistic.</p>
 
-  <h2>2. Information We Do Not Collect</h2>
+  <h2>2. Information We Collect</h2>
   <div class="highlight-box">
-    <strong>Your document contents are never seen by us.</strong> NyxPrism&#8482; processes all PDF files locally on your computer. Neither the file contents, extracted text, nor AI-generated outputs are transmitted to NyxCollective LLC at any point.
+    <strong>Local tools remain local.</strong> Split, merge, compress, rotate, watermark, protect, unlock, OCR, image conversion, annotation, and similar browser or command-line operations do not upload files to NyxCollective LLC unless you choose a cloud workflow.
   </div>
-  <p>The following categories of data are <strong>not</strong> collected by NyxCollective LLC:</p>
+  <p>Depending on the features you use, we collect and process:</p>
   <ul>
-    <li>The contents of any PDF files you process</li>
-    <li>Text extracted from your documents via OCR or the text layer</li>
-    <li>AI summaries, classifications, or extracted key information</li>
-    <li>File names or directory structures on your machine</li>
-    <li>Usage telemetry or analytics about which commands you run</li>
-    <li>Crash reports or error logs (unless you manually submit them)</li>
+    <li>Account name, email address, authentication identifiers, plan, and billing status</li>
+    <li>PDF files, filenames, recipient details, field values, audit events, IP addresses, and user agents used in signature or distribution workflows</li>
+    <li>Extracted document text and prompts submitted to cloud AI features</li>
+    <li>Contact-form messages and delivery metadata</li>
+    <li>Operational logs needed for security, reliability, and abuse prevention</li>
   </ul>
 
   <h2>3. Local Processing</h2>
   <p>All core PDF operations &mdash; split, merge, compress, rotate, watermark, protect, unlock, OCR, image conversion, and heuristic AI analysis &mdash; are executed entirely on your local machine using the libraries installed with the package. No network connection is required or initiated for these operations.</p>
   <p>The <code>--strategy heuristic</code> AI mode also runs entirely locally. It uses pattern-matching and rule-based analysis without any external API calls.</p>
 
-  <h2>4. OpenAI API Integration</h2>
-  <p>NyxPrism&#8482; optionally integrates with the OpenAI API. This feature is activated only when you:</p>
+  <h2>4. AI Processing</h2>
+  <p>The command-line package can optionally use OpenAI when you provide your own API key and select an LLM strategy. The web dashboard uses Anthropic for cloud AI features. In either case, relevant extracted text and prompts are sent to the selected provider for processing.</p>
   <ul>
-    <li>Set the <code>OPENAI_API_KEY</code> environment variable to a valid key, and</li>
-    <li>Use a command with <code>--strategy llm</code> or <code>--strategy auto</code> (when auto-strategy selects LLM)</li>
+    <li>OpenAI processing is governed by <a href="https://openai.com/privacy" target="_blank" rel="noopener">OpenAI's Privacy Policy</a></li>
+    <li>Anthropic processing is governed by <a href="https://www.anthropic.com/legal/privacy" target="_blank" rel="noopener">Anthropic's Privacy Policy</a></li>
+    <li>Do not submit content to cloud AI unless you are authorised to disclose it</li>
   </ul>
-  <p>When this integration is active, extracted text from the relevant pages of your PDF is sent directly from your machine to the OpenAI API endpoint (<code>api.openai.com</code>) using your API key. This transmission:</p>
-  <ul>
-    <li>Is initiated by your own machine, not by any NyxCollective LLC server</li>
-    <li>Uses your personal OpenAI account and API key</li>
-    <li>Is governed by <a href="https://openai.com/privacy" target="_blank" rel="noopener">OpenAI's Privacy Policy</a></li>
-  </ul>
-  <p>NyxCollective LLC does not act as an intermediary for this data transmission and does not receive, store, or process any data sent to OpenAI. You are solely responsible for your compliance with OpenAI's terms when using this integration.</p>
 
-  <h2>5. Website Hosting</h2>
-  <p>Our website (<a href="https://nyxprism.com/" target="_blank" rel="noopener">nyxprism.com</a>) is hosted on Vercel. When you visit our website, Vercel may collect standard server log data (IP address, browser type, referring page, etc.) in accordance with <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener">Vercel's Privacy Policy</a>. NyxCollective LLC does not have access to raw server log data.</p>
-  <p>We do not use any first-party analytics, tracking pixels, or advertising cookies on our website. We do not use Google Analytics or any similar service.</p>
-  <p>Our website uses Google Fonts, which are loaded from Google's servers. Google may log requests in accordance with their privacy policy. Fonts are used solely for visual presentation.</p>
+  <h2>5. Service Providers</h2>
+  <p>We use Vercel for website hosting, Railway and PostgreSQL for API and workflow storage, Firebase for authentication and profile data, Stripe for billing, Brevo for transactional email, Google Fonts for typography, and Anthropic or OpenAI for optional AI processing. These providers process data under their own terms and privacy commitments.</p>
 
   <h2>6. Account Data (Professional and Enterprise Tiers)</h2>
   <p>If you create an account for a paid subscription, we will collect and store:</p>
@@ -212,26 +208,30 @@
     <li>Account preferences and subscription status</li>
   </ul>
   <p>This data is used solely to manage your subscription, provide support, and communicate service updates. We do not sell, rent, or share this data with third parties for marketing purposes.</p>
-  <p><em>Note: The account system is currently in development. This section will be updated when account services launch.</em></p>
+  <p>Billing card details are handled by Stripe and are not stored by NyxCollective LLC.</p>
 
-  <h2>7. Cookies</h2>
-  <p>The NyxPrism&#8482; software itself does not use cookies. Our website may set a session cookie if you log in to an account, solely to maintain your authenticated session. No tracking or advertising cookies are set.</p>
+  <h2>7. Document Storage and Retention</h2>
+  <p>Signature and distribution documents are stored in our database to provide recipient access and completed-document generation. Public links expire after 30 days. Owners can delete stored workflows from the dashboard at any time. Expired workflow records are automatically deleted 30 days after expiration. Transactional and security logs may be retained longer where reasonably necessary for fraud prevention, dispute resolution, or legal obligations.</p>
 
-  <h2>8. Children's Privacy</h2>
+  <h2>8. Authentication and Local Storage</h2>
+  <p>Firebase maintains authentication state using browser storage. NyxPrism also stores non-sensitive interface preferences and local usage counters in your browser. We do not use advertising cookies.</p>
+
+  <h2>9. Children's Privacy</h2>
   <p>NyxPrism&#8482; is not directed at children under the age of 13. We do not knowingly collect personal information from children. If you believe a child has provided us with personal information, please contact us immediately.</p>
 
-  <h2>9. Data Security</h2>
-  <p>Because we do not collect or store your document content, the attack surface for your most sensitive data is limited to your own machine and, where applicable, your OpenAI account. We encourage you to:</p>
+  <h2>10. Data Security</h2>
+  <p>We use encrypted transport, access controls, expiring high-entropy recipient links, and restricted administrative access. No system is completely secure. You should:</p>
   <ul>
-    <li>Store your OpenAI API key securely (environment variable or secrets manager, not in source code)</li>
+    <li>Share signature and distribution links only with their intended recipient</li>
+    <li>Delete cloud workflows when they are no longer needed</li>
     <li>Keep NyxPrism&#8482; updated to benefit from dependency security patches</li>
     <li>Use the <code>protect</code> command to encrypt sensitive PDFs at rest</li>
   </ul>
 
-  <h2>10. Changes to This Policy</h2>
+  <h2>11. Changes to This Policy</h2>
   <p>We may update this Privacy Policy from time to time. When we do, we will update the "Effective" date at the top of this page. For material changes that affect how we handle account data, we will notify paid subscribers via email.</p>
 
-  <h2>11. Contact</h2>
+  <h2>12. Contact</h2>
   <p>If you have questions or concerns about this Privacy Policy, please use our <a href="contact.html">contact form</a> or email us at <a href="mailto:legal@nyxprism.com">legal@nyxprism.com</a>.</p>
 
 </div>
@@ -249,14 +249,14 @@
       <h4>Product</h4>
       <a href="index.html#features">Features</a>
       <a href="index.html#pricing">Pricing</a>
-      <a href="index.html#ai">AI Tools</a>
-      <a href="index.html#commands">Commands</a>
+      <a href="index.html#capabilities">AI Tools</a>
+      <a href="index.html#capabilities">Commands</a>
       <a href="index.html#faq">FAQ</a>
     </div>
     <div class="footer-col">
       <h4>Developers</h4>
       <a href="https://pypi.org/project/nyxprism/" target="_blank" rel="noopener">PyPI</a>
-      <a href="index.html#commands">Commands Reference</a>
+      <a href="index.html#capabilities">Commands Reference</a>
       <a href="contact.html">Report a Bug</a>
     </div>
     <div class="footer-col">
@@ -273,7 +273,7 @@
     <span>
       <a href="terms.html">Terms</a> &nbsp;&middot;&nbsp;
       <a href="privacy.html">Privacy</a> &nbsp;&middot;&nbsp;
-      MIT License
+      Apache 2.0 License
     </span>
   </div>
 </footer>

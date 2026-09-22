@@ -43,8 +43,9 @@
     body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-2;background:linear-gradient(115deg,rgba(124,58,237,.18),transparent 28%),linear-gradient(245deg,rgba(34,197,94,.11),transparent 32%),linear-gradient(180deg,rgba(250,204,21,.06),transparent 45%)}
     body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px);background-size:56px 56px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.65),transparent 78%)}
     a{color:inherit;text-decoration:none} button{font-family:inherit;cursor:pointer} input,select,textarea{font-family:inherit}
-    #nyx-live-wallpaper{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;pointer-events:none;background:#02040a}
+    #nyx-live-wallpaper{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;pointer-events:none;background:#02040a;filter:saturate(1.25) contrast(1.06)}
     .app-shell{position:relative;z-index:1}
+    .app-shell::before{content:"";position:fixed;inset:62px 0 0 226px;z-index:-1;pointer-events:none;background:radial-gradient(ellipse 70% 54% at 52% 34%,transparent 0%,rgba(2,4,10,.16) 58%,rgba(2,4,10,.52) 100%)}
     #loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .3s}
     .spinner{width:36px;height:36px;border-radius:50%;border:3px solid var(--border2);border-top-color:var(--accent-bright);animation:spin .7s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
@@ -304,6 +305,8 @@
   <meta property="og:url" content="https://nyxprism.com/dashboard.html" />
   <meta property="og:title" content="NyxPrism Dashboard — PDF Tools" />
   <meta property="og:description" content="Professional PDF tools: split, merge, compress, OCR, watermark, sign, annotate and more." />
+  <link rel="stylesheet" href="nyx-brand.css?v=2" />
+  <script src="nyx-brand.js?v=2" defer></script>
 </head>
 <body>
 <canvas id="nyx-live-wallpaper" aria-hidden="true"></canvas>
@@ -358,11 +361,9 @@
 
 <nav>
   <button class="hamburger-btn" id="hamburger-btn" aria-label="Open menu" style="margin-right:.5rem"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-  <button class="nav-brand" type="button" data-panel="home" aria-label="Go to dashboard home">
-    <div class="nav-brand-logo">
-      <canvas id="nyx-prism-logo" width="84" height="84" aria-hidden="true"></canvas>
-    </div>
-    <span class="nav-brand-name"><em>Nyx</em>Prism&#8482;</span>
+  <button class="nav-brand nyx-brand-lockup nyx-brand-lockup--compact" type="button" data-panel="home" aria-label="Go to dashboard home">
+    <span class="nav-brand-logo nyx-brand-icon"><canvas class="nyx-prism-mark" aria-hidden="true"></canvas></span>
+    <span class="nav-brand-name nyx-brand-wordmark"><em>Nyx</em>Prism&#8482;</span>
   </button>
   <div class="nav-sep"></div>
   <button class="theme-toggle" id="theme-toggle" title="Toggle dark/light mode (D)">
@@ -1435,57 +1436,149 @@
 
 <script>
 (function(){
-  var canvas=document.getElementById('nyx-prism-logo');if(!canvas)return;
-  var ctx=canvas.getContext('2d'),w=84,h=84;
-  function grad(x1,y1,x2,y2,stops){var g=ctx.createLinearGradient(x1,y1,x2,y2);stops.forEach(function(s){g.addColorStop(s[0],s[1]);});return g;}
-  ctx.clearRect(0,0,w,h);ctx.save();ctx.translate(3,1);ctx.rotate(-0.08);
-  ctx.shadowColor='rgba(0,0,0,.45)';ctx.shadowBlur=10;ctx.shadowOffsetY=4;
-  var A=[38,5],B=[8,60],C=[50,75],D=[75,35],E=[39,24],F=[56,19];
-  function face(points,fill,stroke){ctx.beginPath();points.forEach(function(p,i){if(i)ctx.lineTo(p[0],p[1]);else ctx.moveTo(p[0],p[1]);});ctx.closePath();ctx.fillStyle=fill;ctx.fill();ctx.strokeStyle=stroke||'rgba(255,255,255,.45)';ctx.lineWidth=1.4;ctx.stroke();}
-  face([A,B,E],grad(8,8,42,64,[[0,'rgba(255,238,224,.96)'],[.44,'rgba(255,180,210,.58)'],[1,'rgba(0,188,255,.32)']]),'rgba(255,255,255,.72)');
-  face([A,E,F,D],grad(35,4,78,48,[[0,'rgba(255,255,255,.62)'],[.38,'rgba(104,86,255,.66)'],[.78,'rgba(0,211,244,.52)'],[1,'rgba(255,220,120,.42)']]),'rgba(255,255,255,.62)');
-  face([E,B,C],grad(13,28,51,78,[[0,'rgba(17,28,55,.82)'],[.48,'rgba(11,16,29,.94)'],[1,'rgba(0,194,255,.50)']]),'rgba(167,139,250,.42)');
-  face([E,C,D,F],grad(37,24,76,76,[[0,'rgba(5,194,218,.48)'],[.55,'rgba(124,58,237,.42)'],[1,'rgba(255,210,118,.70)']]),'rgba(255,255,255,.55)');
-  ctx.shadowBlur=0;ctx.globalCompositeOperation='screen';
-  var rainbow=grad(12,52,66,31,[[0,'#ff004c'],[.18,'#ff7a00'],[.34,'#ffe600'],[.53,'#00f56a'],[.72,'#00c8ff'],[1,'#b000ff']]);
-  ctx.strokeStyle=rainbow;ctx.lineWidth=3.2;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(15,57);ctx.lineTo(38,26);ctx.lineTo(69,36);ctx.stroke();
-  ctx.strokeStyle='rgba(255,255,255,.95)';ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);ctx.lineTo(C[0],C[1]);ctx.lineTo(D[0],D[1]);ctx.lineTo(A[0],A[1]);ctx.moveTo(E[0],E[1]);ctx.lineTo(C[0],C[1]);ctx.moveTo(E[0],E[1]);ctx.lineTo(B[0],B[1]);ctx.moveTo(E[0],E[1]);ctx.lineTo(D[0],D[1]);ctx.stroke();
-  ctx.fillStyle='rgba(255,255,255,.9)';ctx.beginPath();ctx.arc(9,60,2.5,0,Math.PI*2);ctx.fill();
-  ctx.restore();
-})();
-
-(function(){
   var canvas=document.getElementById('nyx-live-wallpaper');
   if(!canvas)return;
   var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var ctx=canvas.getContext('2d'),w=0,h=0,dpr=1,shards=[],glints=[],sparkles=[];
-  var palette=[330,286,224,178,148,92,44,8];
+  var ctx=canvas.getContext('2d');
+  var w=0,h=0,dpr=1;
+  var particles=[];
+  var pointerX=0,pointerY=0,targetX=0,targetY=0;
+  var palette=[194,218,252,286,318,34,148];
+
+  function rand(min,max){return Math.random()*(max-min)+min;}
+
   function resize(){
-    dpr=Math.min(window.devicePixelRatio||1,2);w=window.innerWidth;h=window.innerHeight;
-    canvas.width=Math.floor(w*dpr);canvas.height=Math.floor(h*dpr);canvas.style.width=w+'px';canvas.style.height=h+'px';ctx.setTransform(dpr,0,0,dpr,0,0);build();draw(0);
+    dpr=Math.min(window.devicePixelRatio||1,2);
+    w=window.innerWidth;
+    h=window.innerHeight;
+    canvas.width=Math.floor(w*dpr);
+    canvas.height=Math.floor(h*dpr);
+    canvas.style.width=w+'px';
+    canvas.style.height=h+'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    build();
   }
+
   function build(){
-    shards=[];glints=[];sparkles=[];
-    var count=Math.max(18,Math.round(w*h/52000));
+    particles=[];
+    var count=Math.max(18,Math.min(34,Math.round(w*h/42000)));
     for(var i=0;i<count;i++){
-      var cx=Math.random()*w,cy=Math.random()*h,rad=70+Math.random()*135,pts=[],sides=3+Math.floor(Math.random()*3);
-      for(var p=0;p<sides;p++){var a=(Math.PI*2*p/sides)+Math.random()*.55;pts.push({x:Math.cos(a)*rad*(.55+Math.random()*.55),y:Math.sin(a)*rad*(.55+Math.random()*.55)});}
-      shards.push({cx,cy,pts,hue:palette[i%palette.length]+Math.random()*20,phase:Math.random()*6.28,drift:8+Math.random()*18,rot:(Math.random()-.5)*.00008});
+      var depth=rand(.18,1);
+      var radius=rand(34,112)*(.68+depth*.64);
+      var x=rand(-80,w+80);
+      var y=rand(-80,h+80);
+      particles.push({
+        x:x,y:y,depth:depth,radius:radius,
+        hue: palette[i % palette.length] + rand(-12,18),
+        phase: rand(0, Math.PI*2),
+        driftX: rand(-0.08,0.08)*(1+depth),
+        driftY: rand(-0.065,0.065)*(1+depth),
+        spin: rand(-0.00018,0.00018),
+        rot: rand(0, Math.PI*2),
+        alpha: .10+depth*.22,
+        sides: 5+Math.floor(Math.random()*2)
+      });
     }
-    for(var g=0;g<14;g++)glints.push({x:Math.random()*w,y:Math.random()*h,len:90+Math.random()*230,angle:-.95+Math.random()*1.9,hue:palette[g%palette.length],phase:Math.random()*6.28,alpha:.08+Math.random()*.13});
-    for(var s=0;s<34;s++)sparkles.push({x:Math.random()*w,y:Math.random()*h,r:.7+Math.random()*1.8,hue:palette[s%palette.length],phase:Math.random()*6.28});
   }
-  function pathShard(shard,t){var wob=Math.sin(t*.00009+shard.phase)*shard.drift;ctx.beginPath();shard.pts.forEach(function(pt,i){var x=shard.cx+pt.x+Math.cos(t*.00006+shard.phase+i)*wob;var y=shard.cy+pt.y+Math.sin(t*.00005+shard.phase+i)*wob;if(i)ctx.lineTo(x,y);else ctx.moveTo(x,y);});ctx.closePath();}
-  function draw(t){
-    ctx.clearRect(0,0,w,h);ctx.fillStyle='#01030a';ctx.fillRect(0,0,w,h);
+
+  function drawGlassShard(p,t){
+    var parallax=.25+p.depth*1.25;
+    var x=p.x+Math.sin(t*.00016+p.phase)*(12+p.depth*32)+pointerX*parallax;
+    var y=p.y+Math.cos(t*.00014+p.phase*1.3)*(10+p.depth*26)+pointerY*parallax;
+    var r=p.radius;
+    var verts=[];
+    for(var index=0;index<p.sides;index++){
+      var angle=-Math.PI/2+index*Math.PI*2/p.sides;
+      var stretch=index%2?.84:1;
+      verts.push([Math.cos(angle)*stretch,Math.sin(angle)]);
+    }
+
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(p.rot+t*p.spin);
+    ctx.scale(r,r*(1.02+Math.sin(t*.0001+p.phase)*.07));
+
+    ctx.beginPath();
+    verts.forEach(function(v, idx){
+      if(idx===0)ctx.moveTo(v[0],v[1]);
+      else ctx.lineTo(v[0],v[1]);
+    });
+    ctx.closePath();
+
+    var glass=ctx.createLinearGradient(-1,-1,1,1);
+    glass.addColorStop(0,'rgba(255,255,255,'+(p.alpha+.14)+')');
+    glass.addColorStop(.22,'hsla('+(p.hue+32)+',100%,82%,'+(p.alpha+.06)+')');
+    glass.addColorStop(.52,'hsla('+p.hue+',92%,60%,'+(p.alpha*.66)+')');
+    glass.addColorStop(.78,'rgba(255,255,255,'+(p.alpha*.8)+')');
+    glass.addColorStop(1,'hsla('+(p.hue+72)+',100%,48%,'+(p.alpha*.4)+')');
+    ctx.fillStyle=glass;
+    ctx.shadowColor='hsla('+p.hue+',100%,72%,'+(.12+p.depth*.2)+')';
+    ctx.shadowBlur=10+p.depth*20;
+    ctx.fill();
+
+    ctx.lineWidth=.7/r;
+    ctx.strokeStyle='rgba(255,255,255,'+(.24+p.depth*.32)+')';
+    ctx.stroke();
+
     ctx.globalCompositeOperation='screen';
-    shards.forEach(function(shard,i){pathShard(shard,t);var grad=ctx.createLinearGradient(shard.cx-110,shard.cy-110,shard.cx+110,shard.cy+110);grad.addColorStop(0,'hsla('+shard.hue+',100%,66%,.06)');grad.addColorStop(.48,'hsla('+(shard.hue+45)+',100%,58%,.18)');grad.addColorStop(1,'hsla('+(shard.hue+95)+',95%,55%,.04)');ctx.fillStyle=grad;ctx.fill();ctx.strokeStyle='hsla('+(shard.hue+30)+',100%,70%,.22)';ctx.lineWidth=.75;ctx.stroke();if(i%4===0){pathShard(shard,t);ctx.strokeStyle='rgba(255,255,255,.13)';ctx.lineWidth=.9;ctx.stroke();}});
-    glints.forEach(function(g){var drift=Math.sin(t*.00011+g.phase)*34;var x=g.x+drift,y=g.y+Math.cos(t*.00009+g.phase)*22;var dx=Math.cos(g.angle)*g.len,dy=Math.sin(g.angle)*g.len;var grad=ctx.createLinearGradient(x-dx/2,y-dy/2,x+dx/2,y+dy/2);grad.addColorStop(0,'hsla('+g.hue+',100%,72%,0)');grad.addColorStop(.44,'hsla('+g.hue+',100%,72%,'+g.alpha+')');grad.addColorStop(.5,'rgba(255,255,255,'+(g.alpha*.95)+')');grad.addColorStop(.58,'hsla('+(g.hue+90)+',100%,68%,'+(g.alpha*.75)+')');grad.addColorStop(1,'hsla('+(g.hue+150)+',100%,72%,0)');ctx.strokeStyle=grad;ctx.lineWidth=1.1;ctx.beginPath();ctx.moveTo(x-dx/2,y-dy/2);ctx.lineTo(x+dx/2,y+dy/2);ctx.stroke();});
-    sparkles.forEach(function(s){var pulse=(Math.sin(t*.00045+s.phase)+1)/2;ctx.beginPath();ctx.arc(s.x+Math.sin(t*.00008+s.phase)*12,s.y+Math.cos(t*.0001+s.phase)*10,s.r+pulse*1.2,0,Math.PI*2);ctx.fillStyle='hsla('+s.hue+',100%,76%,'+(.08+pulse*.22)+')';ctx.fill();});
-    ctx.globalCompositeOperation='source-over';var vignette=ctx.createRadialGradient(w/2,h/2,Math.min(w,h)*.2,w/2,h/2,Math.max(w,h)*.7);vignette.addColorStop(0,'rgba(0,0,0,0)');vignette.addColorStop(1,'rgba(0,0,0,.62)');ctx.fillStyle=vignette;ctx.fillRect(0,0,w,h);
-    if(!reduce)requestAnimationFrame(draw);
+    ctx.beginPath();
+    ctx.moveTo(verts[0][0],verts[0][1]);
+    ctx.lineTo(0,.08);
+    ctx.lineTo(verts[2][0],verts[2][1]);
+    ctx.moveTo(0,.08);
+    ctx.lineTo(verts[p.sides-1][0],verts[p.sides-1][1]);
+    ctx.strokeStyle='rgba(255,255,255,'+(.16+p.depth*.24)+')';
+    ctx.lineWidth=.5/r;
+    ctx.stroke();
+
+    var spectral=ctx.createLinearGradient(-.85,-.9,.55,.65);
+    spectral.addColorStop(0,'rgba(255,255,255,0)');
+    spectral.addColorStop(.46,'rgba(255,255,255,'+(.22+p.depth*.28)+')');
+    spectral.addColorStop(.52,'hsla('+(p.hue+78)+',100%,78%,'+(.18+p.depth*.24)+')');
+    spectral.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.strokeStyle=spectral;
+    ctx.lineWidth=.052;
+    ctx.beginPath();
+    ctx.moveTo(-.78,-.82);
+    ctx.lineTo(.58,.72);
+    ctx.stroke();
+    ctx.restore();
   }
-  window.addEventListener('resize',resize,{passive:true});resize();
+
+  function draw(t){
+    pointerX+=(targetX-pointerX)*.035;
+    pointerY+=(targetY-pointerY)*.035;
+    ctx.clearRect(0,0,w,h);
+    var base=ctx.createLinearGradient(0,0,w,h);
+    base.addColorStop(0,'#02040a');
+    base.addColorStop(.52,'#080914');
+    base.addColorStop(1,'#020811');
+    ctx.fillStyle=base;
+    ctx.fillRect(0,0,w,h);
+
+    particles.sort(function(a,b){return a.depth-b.depth;});
+    for(var i=0;i<particles.length;i++){
+      var p=particles[i];
+      p.x+=p.driftX;
+      p.y+=p.driftY;
+      if(p.x > w + 180) p.x = -180;
+      if(p.x < -180) p.x = w + 180;
+      if(p.y > h + 180) p.y = -180;
+      if(p.y < -180) p.y = h + 180;
+      drawGlassShard(p,t);
+    }
+
+    if(!reduce) requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('pointermove',function(event){
+    targetX=(event.clientX/w-.5)*18;
+    targetY=(event.clientY/h-.5)*14;
+  },{passive:true});
+  window.addEventListener('resize', resize, { passive: true });
+  resize();
+  if(reduce)draw(0);
+  else requestAnimationFrame(draw);
 })();
 </script>
 
@@ -1531,7 +1624,6 @@ function renderStats(s){
 }
 
 const loading=document.getElementById('loading-screen'),content=document.getElementById('main-content');
-const NYX_DEVELOPER_EMAILS=new Set(['cmc@conniemichelleconsulting.com']);
 
 // Safety-net: force-hide spinner after 12s if JS hangs
 const _loadTimeout=setTimeout(()=>{
@@ -1554,9 +1646,6 @@ onAuthStateChanged(auth,async user=>{
     const r=await fetch(`${API}/api/user/me`,{headers:{Authorization:`Bearer ${token}`}});
     if(r.ok){const d=await r.json();firstName=d.first_name||'';plan=d.plan||'trial';trialStart=d.trial_start?new Date(d.trial_start):null;subscriptionStatus=d.subscription_status||null;currentPeriodEnd=d.current_period_end?new Date(d.current_period_end):null;createdAt=d.created_at?new Date(d.created_at):null;}
   }catch(_){}
-  if(NYX_DEVELOPER_EMAILS.has((user.email||'').toLowerCase())){
-    plan='professional';subscriptionStatus='active';trialStart=null;currentPeriodEnd=null;
-  }
   // Fallback: Firestore for name only
   if(!firstName){try{const snap=await getDoc(doc(db,'users',user.uid));if(snap.exists())firstName=snap.data().firstName||'';}catch(_){}}
   // Trial expiry
@@ -1662,14 +1751,16 @@ function switchPanel(name){
   if(panel)panel.classList.add('active');
   document.querySelectorAll(`[data-panel="${name}"]`).forEach(b=>b.classList.add('active'));
   window.scrollTo(0,0);
-  document.dispatchEvent(new CustomEvent('nyx:panel-changed',{detail:name}));
+  document.dispatchEvent(new CustomEvent('nyx:panel-changed',{detail:{panel:name}}));
 }
 document.querySelectorAll('[data-panel]').forEach(btn=>btn.addEventListener('click',()=>switchPanel(btn.dataset.panel)));
 document.querySelectorAll('[data-launch]').forEach(card=>card.addEventListener('click',()=>switchPanel(card.dataset.launch)));
 
+function escapeHtml(value){return String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));}
+
 function toast(msg,type='success'){
   const t=document.createElement('div');t.className=`toast ${type}`;
-  t.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${type==='success'?'<polyline points="20 6 9 17 4 12"/>':`<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>`}</svg><span>${msg}</span>`;
+  t.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${type==='success'?'<polyline points="20 6 9 17 4 12"/>':`<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>`}</svg><span>${escapeHtml(msg)}</span>`;
   document.getElementById('toast-container').appendChild(t);
   setTimeout(()=>t.remove(),3500);
 }
@@ -1680,7 +1771,7 @@ function renderFileItem(file,onRemove){
   const el=document.createElement('div');el.className='file-item';
   var isPdf=file.name.toLowerCase().endsWith('.pdf');
   el.innerHTML='<span class="fthumb"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>' +
-    '<span class="fname">' + file.name + '</span>' +
+    '<span class="fname">' + escapeHtml(file.name) + '</span>' +
     (isPdf ? '<span class="fchip-pages">…</span>' : '') +
     '<span class="fsize">' + fmtSize(file.size) + '</span>' +
     '<button class="fremove" title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
@@ -1710,7 +1801,7 @@ function renderFileItem(file,onRemove){
 function showResult(el,type,msg){
   const icons={success:'<polyline points="20 6 9 17 4 12"/>',error:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',info:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>'};
   el.className=`result-box ${type} visible`;
-  el.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${icons[type]}</svg><div class="rtext">${msg}</div>`;
+  el.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${icons[type]}</svg><div class="rtext">${escapeHtml(msg)}</div>`;
 }
 
 function triggerDownload(blob,filename){
@@ -2758,12 +2849,13 @@ async function loadQRCode(){
     const list=document.getElementById('sigreq-list');const token=await auth.currentUser?.getIdToken(true);if(!token)return;
     try{const res=await fetch(API+'/api/sign-requests',{headers:{Authorization:'Bearer '+token}});const data=await res.json();if(!res.ok)throw new Error(data.error||'Load failed');
       if(!data.requests.length){list.innerHTML='<div style="color:var(--muted);font-size:.85rem">No signature requests yet.</div>';return;}
-      list.innerHTML='';data.requests.forEach(req=>{const row=document.createElement('div');row.className='recent-file-row';row.innerHTML='<span class="recent-fname">'+req.title+'</span><span class="recent-tool-badge">'+req.status+'</span><button class="btn btn-ghost links" style="font-size:.72rem;padding:.25rem .5rem">Links</button><button class="btn btn-ghost final" style="font-size:.72rem;padding:.25rem .5rem">PDF</button>';row.querySelector('.links').addEventListener('click',()=>loadRequestLinks(req.id));row.querySelector('.final').addEventListener('click',()=>downloadFinalPdf(req.id));list.appendChild(row);});
-    }catch(err){list.innerHTML='<div style="color:var(--red);font-size:.85rem">'+err.message+'</div>';}
+      list.innerHTML='';data.requests.forEach(req=>{const row=document.createElement('div');row.className='recent-file-row';const canVoid=['draft','sent','in_progress'].includes(req.status);row.innerHTML='<span class="recent-fname">'+escapeHtml(req.title)+'</span><span class="recent-tool-badge">'+escapeHtml(req.status)+'</span>'+(req.status==='draft'?'<button class="btn btn-ghost send" style="font-size:.72rem;padding:.25rem .5rem">Send</button>':'<button class="btn btn-ghost links" style="font-size:.72rem;padding:.25rem .5rem">Links</button>')+(req.status==='completed'?'<button class="btn btn-ghost final" style="font-size:.72rem;padding:.25rem .5rem">PDF</button>':'')+(canVoid?'<button class="btn btn-ghost void" style="font-size:.72rem;padding:.25rem .5rem">Void</button>':'')+'<button class="btn btn-ghost delete" style="font-size:.72rem;padding:.25rem .5rem;color:var(--red)">Delete</button>';row.querySelector('.send')?.addEventListener('click',()=>signatureAction(req.id,'send'));row.querySelector('.links')?.addEventListener('click',()=>loadRequestLinks(req.id));row.querySelector('.final')?.addEventListener('click',()=>downloadFinalPdf(req.id));row.querySelector('.void')?.addEventListener('click',()=>signatureAction(req.id,'void'));row.querySelector('.delete').addEventListener('click',()=>signatureAction(req.id,'delete'));list.appendChild(row);});
+    }catch(err){list.innerHTML='<div style="color:var(--red);font-size:.85rem">'+escapeHtml(err.message)+'</div>';}
   }
   async function loadRequestLinks(id){const token=await auth.currentUser?.getIdToken(true);const res=await fetch(API+'/api/sign-requests/'+id,{headers:{Authorization:'Bearer '+token}});const data=await res.json();if(!res.ok)return toast(data.error||'Could not load links','error');showSignerLinks(data.recipients||[]);}
+  async function signatureAction(id,action){if((action==='delete'||action==='void')&&!confirm(action==='delete'?'Permanently delete this request and stored PDF?':'Void this signature request?'))return;const token=await auth.currentUser?.getIdToken(true);const method=action==='delete'?'DELETE':'POST';try{const res=await fetch(API+'/api/sign-requests/'+id+(action==='delete'?'':'/'+action),{method,headers:{Authorization:'Bearer '+token}});const data=await res.json();if(!res.ok)throw new Error(data.error||'Action failed');toast(data.warning||('Request '+(action==='delete'?'deleted':action==='send'?'sent':'voided')),'success');loadRequests();}catch(err){toast(err.message,'error');}}
   async function downloadFinalPdf(id){try{const token=await auth.currentUser?.getIdToken(true);const res=await fetch(API+'/api/sign-requests/'+id+'/final-pdf',{headers:{Authorization:'Bearer '+token}});if(!res.ok){let msg='Final PDF not ready';try{msg=(await res.json()).error||msg;}catch(_){}throw new Error(msg);}const blob=await res.blob();triggerDownload(blob,'signature-request-'+id+'-completed.pdf');}catch(err){toast(err.message,'error');}}
-  function showSignerLinks(signers){const wrap=document.getElementById('sigreq-links');wrap.style.display='block';wrap.innerHTML='<div class="card-title" style="margin-bottom:.5rem">Signer Links</div>';signers.forEach(s=>{const row=document.createElement('div');row.className='code-pill';row.style.cssText='width:100%;margin-bottom:.45rem;white-space:normal';row.innerHTML='<span style="flex:1;word-break:break-all">'+s.email+' — '+s.url+'</span><button class="copy-btn" type="button" title="Copy"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button>';row.querySelector('button').addEventListener('click',()=>{navigator.clipboard.writeText(s.url);toast('Signer link copied','success');});wrap.appendChild(row);});}
+  function showSignerLinks(signers){const wrap=document.getElementById('sigreq-links');wrap.style.display='block';wrap.innerHTML='<div class="card-title" style="margin-bottom:.5rem">Signer Links</div>';signers.filter(s=>s.url).forEach(s=>{const row=document.createElement('div');row.className='code-pill';row.style.cssText='width:100%;margin-bottom:.45rem;white-space:normal';row.innerHTML='<span style="flex:1;word-break:break-all">'+escapeHtml(s.email)+' — '+escapeHtml(s.url)+'</span><button class="copy-btn" type="button" title="Copy"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button>';row.querySelector('button').addEventListener('click',()=>{navigator.clipboard.writeText(s.url);toast('Signer link copied','success');});wrap.appendChild(row);});}
   document.querySelectorAll('.sigreq-field-btn').forEach(btn=>{btn.draggable=true;btn.addEventListener('click',()=>addField(btn.dataset.field));btn.addEventListener('dragstart',e=>e.dataTransfer.setData('text/plain',btn.dataset.field));});
   stage.addEventListener('dragover',e=>e.preventDefault());stage.addEventListener('drop',e=>{e.preventDefault();const type=e.dataTransfer.getData('text/plain');if(!type)return;const r=stage.getBoundingClientRect();addField(type,(e.clientX-r.left)/canvas.offsetWidth,(e.clientY-r.top)/canvas.offsetHeight);});
   setupDrop(drop,fileInput,async files=>{sigreqFile=files[0];if(!sigreqFile)return;const pdfjsLib=await loadPdfjsLib();sigreqPdf=await pdfjsLib.getDocument({data:new Uint8Array(await sigreqFile.arrayBuffer())}).promise;sigreqPage=1;sigreqFields=[];await renderPage();});
@@ -2796,8 +2888,9 @@ async function loadQRCode(){
   addRecipient();document.getElementById('dist-add-recipient').addEventListener('click',()=>addRecipient());
   setupDrop(drop,fileInput,files=>{distFile=files[0];if(distFile)toast('PDF loaded for distribution','success');});
   async function saveDistribution(sendNow,btn){if(!distFile)return toast('Upload a PDF first','error');const recips=recipients();if(!recips.length)return toast('Add at least one recipient','error');const token=await auth.currentUser?.getIdToken(true);if(!token)return toast('Please sign in again','error');btn.disabled=true;showResult(resultEl,'info',sendNow?'Sending document distribution...':'Saving distribution draft...');try{const documentBase64=await fileToDataUrl(distFile);const res=await fetch(API+'/api/distributions',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({title:document.getElementById('dist-title').value||distFile.name,documentName:distFile.name,documentBase64,recipients:recips,sendNow})});const data=await res.json();if(!res.ok)throw new Error(data.error||'Save failed');showResult(resultEl,'success',sendNow?'Distribution sent.':'Distribution draft saved.');loadBatches();}catch(err){showResult(resultEl,'error',err.message);}finally{btn.disabled=false;}}
-  async function loadBatches(){const list=document.getElementById('dist-list'),token=await auth.currentUser?.getIdToken(true);if(!token)return;try{const res=await fetch(API+'/api/distributions',{headers:{Authorization:'Bearer '+token}});const data=await res.json();if(!res.ok)throw new Error(data.error||'Load failed');if(!data.batches.length){list.innerHTML='<div style="color:var(--muted);font-size:.85rem">No distribution batches yet.</div>';return;}list.innerHTML='';data.batches.forEach(batch=>{const row=document.createElement('div');row.className='recent-file-row';row.style.cursor='default';row.innerHTML='<span class="recent-fname">'+batch.title+'<br><span style="color:var(--muted);font-size:.72rem">'+batch.recipient_count+' recipients · '+batch.opened_count+' opened · '+batch.failed_count+' failed</span></span><span class="recent-tool-badge">'+batch.status+'</span><button class="btn btn-ghost" style="font-size:.72rem;padding:.25rem .5rem">Inspect</button>';row.querySelector('button').addEventListener('click',()=>loadBatchDetail(batch.id));list.appendChild(row);});}catch(err){list.innerHTML='<div style="color:var(--red);font-size:.85rem">'+err.message+'</div>';}}
-  async function loadBatchDetail(id){const detail=document.getElementById('dist-detail'),token=await auth.currentUser?.getIdToken(true);const res=await fetch(API+'/api/distributions/'+id,{headers:{Authorization:'Bearer '+token}});const data=await res.json();if(!res.ok)return toast(data.error||'Could not load batch','error');detail.innerHTML='<div class="card-title">Recipients</div>';data.recipients.forEach(r=>{const row=document.createElement('div');row.className='recent-file-row';row.style.cursor='default';row.innerHTML='<span class="recent-fname">'+r.name+'<br><span style="color:var(--muted);font-size:.72rem">'+r.email+'</span></span><span class="recent-tool-badge">'+r.status+'</span>';detail.appendChild(row);});}
+  async function loadBatches(){const list=document.getElementById('dist-list'),token=await auth.currentUser?.getIdToken(true);if(!token)return;try{const res=await fetch(API+'/api/distributions',{headers:{Authorization:'Bearer '+token}});const data=await res.json();if(!res.ok)throw new Error(data.error||'Load failed');if(!data.batches.length){list.innerHTML='<div style="color:var(--muted);font-size:.85rem">No distribution batches yet.</div>';return;}list.innerHTML='';data.batches.forEach(batch=>{const row=document.createElement('div');row.className='recent-file-row';row.style.cursor='default';row.innerHTML='<span class="recent-fname">'+escapeHtml(batch.title)+'<br><span style="color:var(--muted);font-size:.72rem">'+Number(batch.recipient_count)+' recipients · '+Number(batch.opened_count)+' opened · '+Number(batch.failed_count)+' failed</span></span><span class="recent-tool-badge">'+escapeHtml(batch.status)+'</span><button class="btn btn-ghost inspect" style="font-size:.72rem;padding:.25rem .5rem">Inspect</button>'+(batch.status==='draft'?'<button class="btn btn-ghost send" style="font-size:.72rem;padding:.25rem .5rem">Send</button>':'')+(['draft','sent'].includes(batch.status)?'<button class="btn btn-ghost revoke" style="font-size:.72rem;padding:.25rem .5rem">Revoke</button>':'')+'<button class="btn btn-ghost delete" style="font-size:.72rem;padding:.25rem .5rem;color:var(--red)">Delete</button>';row.querySelector('.inspect').addEventListener('click',()=>loadBatchDetail(batch.id));row.querySelector('.send')?.addEventListener('click',()=>distributionAction(batch.id,'send'));row.querySelector('.revoke')?.addEventListener('click',()=>distributionAction(batch.id,'revoke'));row.querySelector('.delete').addEventListener('click',()=>distributionAction(batch.id,'delete'));list.appendChild(row);});}catch(err){list.innerHTML='<div style="color:var(--red);font-size:.85rem">'+escapeHtml(err.message)+'</div>';}}
+  async function loadBatchDetail(id){const detail=document.getElementById('dist-detail'),token=await auth.currentUser?.getIdToken(true);const res=await fetch(API+'/api/distributions/'+id,{headers:{Authorization:'Bearer '+token}});const data=await res.json();if(!res.ok)return toast(data.error||'Could not load batch','error');detail.innerHTML='<div class="card-title">Recipients</div>';data.recipients.forEach(r=>{const row=document.createElement('div');row.className='recent-file-row';row.style.cursor='default';row.innerHTML='<span class="recent-fname">'+escapeHtml(r.name)+'<br><span style="color:var(--muted);font-size:.72rem">'+escapeHtml(r.email)+'</span></span><span class="recent-tool-badge">'+escapeHtml(r.status)+'</span>';detail.appendChild(row);});}
+  async function distributionAction(id,action){if((action==='delete'||action==='revoke')&&!confirm(action==='delete'?'Permanently delete this distribution and stored PDF?':'Revoke every recipient link?'))return;const token=await auth.currentUser?.getIdToken(true);const method=action==='delete'?'DELETE':'POST';try{const res=await fetch(API+'/api/distributions/'+id+(action==='delete'?'':'/'+action),{method,headers:{Authorization:'Bearer '+token}});const data=await res.json();if(!res.ok)throw new Error(data.error||'Action failed');toast(data.warning||('Distribution '+(action==='delete'?'deleted':action==='send'?'sent':'revoked')),'success');document.getElementById('dist-detail').replaceChildren();loadBatches();}catch(err){toast(err.message,'error');}}
   document.getElementById('dist-send').addEventListener('click',function(){saveDistribution(true,this);});document.getElementById('dist-save').addEventListener('click',function(){saveDistribution(false,this);});document.getElementById('dist-refresh').addEventListener('click',loadBatches);document.addEventListener('nyx:panel-changed',e=>{if(e.detail&&e.detail.panel==='distribution')loadBatches();});
 })();
 
@@ -2812,8 +2905,8 @@ async function loadQRCode(){
     try{const res=await fetch(API+'/api/sign-requests/alerts?windowDays=30&upcomingDays=7',{headers:{Authorization:'Bearer '+token}});const data=await res.json();if(!res.ok)throw new Error(data.error||'Failed to load alerts');
       const active=(data.alerts||[]).filter(a=>!a.acknowledged);
       if(!active.length){list.innerHTML='<div class="result-box success visible"><div class="rtext">No active document alerts.</div></div>';return;}
-      list.innerHTML='';active.forEach(alert=>{const row=document.createElement('div');row.className='recent-file-row';row.style.cursor='default';const sev=alert.severity==='expired'?'Expired':alert.severity==='upcoming'?'Expiring soon':'Notice';row.innerHTML='<span class="recent-fname">'+alert.title+'<br><span style="color:var(--muted);font-size:.72rem">'+alert.document_name+' · '+sev+' · '+alert.days_remaining+' day(s)</span></span><span class="recent-tool-badge">'+alert.status+'</span><button class="btn btn-ghost" style="font-size:.72rem;padding:.25rem .5rem">Acknowledge</button>';row.querySelector('button').addEventListener('click',()=>ackAlert(alert.id));list.appendChild(row);});
-    }catch(err){list.innerHTML='<div class="result-box error visible"><div class="rtext">'+err.message+'</div></div>';}
+      list.innerHTML='';active.forEach(alert=>{const row=document.createElement('div');row.className='recent-file-row';row.style.cursor='default';const sev=alert.severity==='expired'?'Expired':alert.severity==='upcoming'?'Expiring soon':'Notice';row.innerHTML='<span class="recent-fname">'+escapeHtml(alert.title)+'<br><span style="color:var(--muted);font-size:.72rem">'+escapeHtml(alert.document_name)+' · '+sev+' · '+Number(alert.days_remaining)+' day(s)</span></span><span class="recent-tool-badge">'+escapeHtml(alert.status)+'</span><button class="btn btn-ghost" style="font-size:.72rem;padding:.25rem .5rem">Acknowledge</button>';row.querySelector('button').addEventListener('click',()=>ackAlert(alert.id));list.appendChild(row);});
+    }catch(err){list.innerHTML='<div class="result-box error visible"><div class="rtext">'+escapeHtml(err.message)+'</div></div>';}
   }
   async function ackAlert(id){const token=await auth.currentUser?.getIdToken(true);if(!token)return;try{const res=await fetch(API+'/api/sign-requests/alerts/'+id+'/ack',{method:'POST',headers:{Authorization:'Bearer '+token}});if(!res.ok)throw new Error('Could not acknowledge alert');toast('Alert acknowledged','success');loadAlerts();}catch(err){toast(err.message,'error');}}
   refresh.addEventListener('click',loadAlerts);
@@ -3285,7 +3378,7 @@ async function loadQRCode(){
     const el = document.getElementById('batch-file-list');
     el.innerHTML = '';
     batchFiles.forEach((f, i) => {
-      el.insertAdjacentHTML('beforeend', renderFileItem(f, () => { batchFiles.splice(i, 1); renderBatchList(); }));
+      el.appendChild(renderFileItem(f, () => { batchFiles.splice(i, 1); renderBatchList(); }));
     });
   }
   document.getElementById('batch-apply-btn') && document.getElementById('batch-apply-btn').addEventListener('click', async () => {
@@ -3942,7 +4035,7 @@ window.addEventListener("beforeunload", function(e){
 // ── PRODUCT ASSISTANT ──
 const nyxChatLauncher=document.getElementById('nyx-chat-launcher'),nyxChatPanel=document.getElementById('nyx-chat-panel'),nyxChatClose=document.getElementById('nyx-chat-close'),nyxChatForm=document.getElementById('nyx-chat-form'),nyxChatInput=document.getElementById('nyx-chat-input'),nyxChatSend=document.getElementById('nyx-chat-send'),nyxChatMessages=document.getElementById('nyx-chat-messages'),nyxChatHistory=[];
 function setNyxChatOpen(open){nyxChatPanel.hidden=!open;nyxChatLauncher.setAttribute('aria-expanded',String(open));if(open)nyxChatInput.focus();}function addNyxChatMessage(role,content,isError=false){const message=document.createElement('p');message.className=`nyx-chat-message ${role}${isError?' error':''}`;message.textContent=content;nyxChatMessages.append(message);nyxChatMessages.scrollTop=nyxChatMessages.scrollHeight;return message;}
-nyxChatLauncher.addEventListener('click',()=>setNyxChatOpen(nyxChatPanel.hidden));nyxChatClose.addEventListener('click',()=>setNyxChatOpen(false));nyxChatForm.addEventListener('submit',async event=>{event.preventDefault();const content=nyxChatInput.value.trim();if(!content)return;nyxChatHistory.push({role:'user',content});addNyxChatMessage('user',content);nyxChatInput.value='';nyxChatInput.disabled=true;nyxChatSend.disabled=true;const pending=addNyxChatMessage('assistant','Thinking…');try{const response=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:nyxChatHistory})});const payload=await response.json();if(!response.ok||!payload.message)throw new Error(payload.error||'Unable to get a response.');pending.textContent=payload.message;nyxChatHistory.push({role:'assistant',content:payload.message});}catch(error){pending.textContent=error.message||'The assistant is temporarily unavailable. Please try again.';pending.classList.add('error');nyxChatHistory.pop();}finally{nyxChatInput.disabled=false;nyxChatSend.disabled=false;nyxChatInput.focus();}});
+nyxChatLauncher.addEventListener('click',()=>setNyxChatOpen(nyxChatPanel.hidden));nyxChatClose.addEventListener('click',()=>setNyxChatOpen(false));nyxChatForm.addEventListener('submit',async event=>{event.preventDefault();const content=nyxChatInput.value.trim();if(!content)return;nyxChatHistory.push({role:'user',content});addNyxChatMessage('user',content);nyxChatInput.value='';nyxChatInput.disabled=true;nyxChatSend.disabled=true;const pending=addNyxChatMessage('assistant','Thinking…');try{const token=await auth.currentUser?.getIdToken();if(!token)throw new Error('Please sign in again.');const response=await fetch(API+'/api/ai-assist',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({tool:'default',messages:nyxChatHistory})});const payload=await response.json();if(!response.ok||!payload.reply)throw new Error(payload.error||'Unable to get a response.');pending.textContent=payload.reply;nyxChatHistory.push({role:'assistant',content:payload.reply});}catch(error){pending.textContent=error.message||'The assistant is temporarily unavailable. Please try again.';pending.classList.add('error');nyxChatHistory.pop();}finally{nyxChatInput.disabled=false;nyxChatSend.disabled=false;nyxChatInput.focus();}});
 </script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}</script>
 </body>

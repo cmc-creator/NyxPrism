@@ -1,12 +1,12 @@
 import { Router } from 'express';
 import Anthropic from '@anthropic-ai/sdk';
-import { requireAuth } from '../middleware/auth.js';
+import { requireActivePlan, requireAuth } from '../middleware/auth.js';
 
 const router = Router();
 
 const MAX_TEXT_CHARS = 80_000;
 
-router.post('/', requireAuth, async (req, res) => {
+router.post('/', requireAuth, requireActivePlan, async (req, res) => {
   const { pdfText, messages, filename, pageCount } = req.body;
 
   if (!pdfText || typeof pdfText !== 'string') {
@@ -14,6 +14,9 @@ router.post('/', requireAuth, async (req, res) => {
   }
   if (!Array.isArray(messages) || messages.length === 0) {
     return res.status(400).json({ error: 'messages array is required.' });
+  }
+  if (messages.length > 20 || messages.some(message => !['user', 'assistant'].includes(message?.role) || typeof message?.content !== 'string' || message.content.length > 4000)) {
+    return res.status(400).json({ error: 'Use at most 20 valid messages of 4,000 characters each.' });
   }
 
   const truncated = pdfText.slice(0, MAX_TEXT_CHARS);
@@ -47,7 +50,7 @@ Conversation rules:
       model: 'claude-opus-4-5',
       max_tokens: 4096,
       system: systemPrompt,
-      messages,
+      messages: messages.map(message => ({ role: message.role, content: message.content.trim() })),
     });
 
     const raw = message.content[0]?.text?.trim() || '';

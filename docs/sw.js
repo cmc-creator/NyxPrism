@@ -1,9 +1,12 @@
 // NyxPrism Service Worker — network-first for HTML, cache-first for assets
-const CACHE = 'nyx-v2';
+const CACHE = 'nyx-v4';
 const SHELL = [
-  '/dashboard.html',
-  '/manifest.json'
+  '/manifest.json',
+  '/nyx-brand.css?v=2',
+  '/nyx-brand.js?v=2',
+  '/prism-icon.svg'
 ];
+const SENSITIVE_HTML = new Set(['/admin.html', '/dashboard.html', '/distribution.html', '/login.html', '/sign-request.html']);
 
 self.addEventListener('install', function(e) {
   e.waitUntil(
@@ -26,6 +29,11 @@ self.addEventListener('fetch', function(e) {
   if (e.request.method !== 'GET') return;
   var url = new URL(e.request.url);
   if (url.origin !== location.origin) return;
+
+  if (SENSITIVE_HTML.has(url.pathname)) {
+    e.respondWith(fetch(e.request, { cache: 'no-store' }));
+    return;
+  }
 
   // HTML must refresh after deployments so auth and security fixes are not stale.
   if (e.request.mode === 'navigate' || url.pathname.endsWith('.html')) {

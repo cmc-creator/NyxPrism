@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS signature_requests (
   document_mime TEXT NOT NULL DEFAULT 'application/pdf',
   document_size INTEGER,
   document_data BYTEA,
+  document_hash TEXT,
   message       TEXT,
   status        TEXT NOT NULL DEFAULT 'draft',
   expires_at    TIMESTAMPTZ,
@@ -63,7 +64,9 @@ CREATE TABLE IF NOT EXISTS signature_requests (
 ALTER TABLE signature_requests ADD COLUMN IF NOT EXISTS document_mime TEXT NOT NULL DEFAULT 'application/pdf';
 ALTER TABLE signature_requests ADD COLUMN IF NOT EXISTS document_size INTEGER;
 ALTER TABLE signature_requests ADD COLUMN IF NOT EXISTS document_data BYTEA;
+ALTER TABLE signature_requests ADD COLUMN IF NOT EXISTS document_hash TEXT;
 ALTER TABLE signature_requests ADD COLUMN IF NOT EXISTS expires_at TIMESTAMPTZ;
+UPDATE signature_requests SET expires_at = created_at + INTERVAL '30 days' WHERE expires_at IS NULL;
 
 CREATE TABLE IF NOT EXISTS signature_recipients (
   id           SERIAL PRIMARY KEY,
@@ -76,12 +79,16 @@ CREATE TABLE IF NOT EXISTS signature_recipients (
   viewed_at    TIMESTAMPTZ,
   created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   completed_at TIMESTAMPTZ,
+  consented_at TIMESTAMPTZ,
+  completion_hash TEXT,
   declined_at  TIMESTAMPTZ,
   decline_reason TEXT
 );
 ALTER TABLE signature_recipients ADD COLUMN IF NOT EXISTS viewed_at TIMESTAMPTZ;
 ALTER TABLE signature_recipients ADD COLUMN IF NOT EXISTS declined_at TIMESTAMPTZ;
 ALTER TABLE signature_recipients ADD COLUMN IF NOT EXISTS decline_reason TEXT;
+ALTER TABLE signature_recipients ADD COLUMN IF NOT EXISTS consented_at TIMESTAMPTZ;
+ALTER TABLE signature_recipients ADD COLUMN IF NOT EXISTS completion_hash TEXT;
 
 CREATE TABLE IF NOT EXISTS signature_fields (
   id           SERIAL PRIMARY KEY,
@@ -141,9 +148,12 @@ CREATE TABLE IF NOT EXISTS distribution_batches (
   document_size INTEGER,
   document_data BYTEA NOT NULL,
   status        TEXT NOT NULL DEFAULT 'draft',
+  expires_at    TIMESTAMPTZ,
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   sent_at       TIMESTAMPTZ
 );
+ALTER TABLE distribution_batches ADD COLUMN IF NOT EXISTS expires_at TIMESTAMPTZ;
+UPDATE distribution_batches SET expires_at = created_at + INTERVAL '30 days' WHERE expires_at IS NULL;
 
 CREATE TABLE IF NOT EXISTS distribution_recipients (
   id        SERIAL PRIMARY KEY,

@@ -7,7 +7,9 @@ if (!admin.apps.length) {
   const privateKey  = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
 
   if (!projectId || !clientEmail || !privateKey) {
-    console.warn('⚠ Firebase Admin: missing env vars (FIREBASE_PROJECT_ID / FIREBASE_CLIENT_EMAIL / FIREBASE_PRIVATE_KEY). Auth routes will return 500.');
+    const message = 'Firebase Admin requires FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY.';
+    if (process.env.NODE_ENV === 'production') throw new Error(message);
+    console.warn(message);
   } else {
     admin.initializeApp({
       credential: admin.credential.cert({ projectId, clientEmail, privateKey }),

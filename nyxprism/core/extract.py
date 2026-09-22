@@ -168,6 +168,11 @@ def pdf_to_images(
     List of paths to rendered images.
     """
     source = Path(source)
+    fmt = fmt.lower()
+    if fmt not in {"png", "jpeg", "jpg", "webp"}:
+        raise ValueError("fmt must be png, jpeg, jpg, or webp")
+    if not 50 <= dpi <= 1200:
+        raise ValueError("dpi must be between 50 and 1200")
     if output_dir is None:
         output_dir = source.parent / f"{source.stem}_pages"
     output_dir = Path(output_dir)
@@ -185,12 +190,25 @@ def pdf_to_images(
     created: list[Path] = []
     scale = dpi / 72.0
 
-    for i, page in enumerate(pdf):
-        bitmap = page.render(scale=scale, rotation=0)
-        pil_image = bitmap.to_pil()
-        out_path = output_dir / f"page_{i + 1:04d}.{fmt}"
-        pil_image.save(str(out_path))
-        created.append(out_path)
+    try:
+        for i in range(len(pdf)):
+            page = pdf[i]
+            bitmap = None
+            pil_image = None
+            try:
+                bitmap = page.render(scale=scale, rotation=0)
+                pil_image = bitmap.to_pil()
+                out_path = output_dir / f"page_{i + 1:04d}.{fmt}"
+                pil_image.save(str(out_path))
+                created.append(out_path)
+            finally:
+                if pil_image is not None:
+                    pil_image.close()
+                if bitmap is not None:
+                    bitmap.close()
+                page.close()
+    finally:
+        pdf.close()
 
     return created
 

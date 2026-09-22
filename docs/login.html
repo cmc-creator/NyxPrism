@@ -203,6 +203,8 @@
       padding: .6rem .85rem; margin-bottom: .9rem;
     }
   </style>
+  <link rel="stylesheet" href="nyx-brand.css?v=2" />
+  <script src="nyx-brand.js?v=2" defer></script>
 </head>
 <body>
 
@@ -210,9 +212,12 @@
 
 <!-- NAV -->
 <nav>
-  <a href="index.html" class="nav-brand">
-    <div class="nav-wordmark"><em>Nyx</em>Prism&#8482;</div>
-    <div class="nav-co">by NyxCollective LLC</div>
+  <a href="index.html" class="nav-brand nyx-brand-lockup">
+    <span class="nyx-brand-icon"><canvas class="nyx-prism-mark" aria-hidden="true"></canvas></span>
+    <span class="nyx-brand-copy">
+      <span class="nav-wordmark nyx-brand-wordmark"><em>Nyx</em>Prism&#8482;</span>
+      <span class="nav-co nyx-brand-company">by NyxCollective LLC</span>
+    </span>
   </a>
   <div class="nav-sep"></div>
   <a class="nav-back" href="index.html">
@@ -225,9 +230,12 @@
 <main>
   <div class="auth-wrap">
 
-    <div class="auth-logo">
-      <div class="wordmark"><em>Nyx</em>Prism&#8482;</div>
-      <div class="co">NyxCollective LLC</div>
+    <div class="auth-logo nyx-brand-lockup nyx-brand-lockup--hero">
+      <span class="nyx-brand-icon"><canvas class="nyx-prism-mark" aria-hidden="true"></canvas></span>
+      <span class="nyx-brand-copy">
+        <span class="wordmark nyx-brand-wordmark"><em>Nyx</em>Prism&#8482;</span>
+        <span class="co nyx-brand-company">NyxCollective LLC</span>
+      </span>
     </div>
 
     <!-- TAB TOGGLE -->
@@ -427,10 +435,17 @@
     btn.textContent = 'Signing in...';
     btn.disabled = true;
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      // onAuthStateChanged fires → showDashboard()
+      const cred = await signInWithEmailAndPassword(auth, email, password);
+      const token = await cred.user.getIdToken();
+      const sync = await fetch(`${API}/api/user/sync`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      });
+      if (!sync.ok) throw new Error('Account synchronization failed. Please try again.');
+      window.location.replace('dashboard.html');
     } catch (err) {
-      showError('login-error', authErrorMsg(err.code));
+      showError('login-error', err.code ? authErrorMsg(err.code) : err.message);
       btn.textContent = 'Log In';
       btn.disabled = false;
     }
@@ -475,17 +490,16 @@
         createdAt:    serverTimestamp(),
       });
       // Sync to Railway Postgres (drives license verification + Stripe)
-      try {
-        const token = await cred.user.getIdToken();
-        await fetch(`${API}/api/user/sync`, {
-          method:  'POST',
-          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-          body:    JSON.stringify({ firstName, lastName, plan }),
-        });
-      } catch (_) { /* Non-fatal — sync can be retried on next login */ }
-      // onAuthStateChanged fires → showDashboard()
+      const token = await cred.user.getIdToken();
+      const sync = await fetch(`${API}/api/user/sync`, {
+        method:  'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ firstName, lastName, plan }),
+      });
+      if (!sync.ok) throw new Error('Account synchronization failed. Please log in to retry.');
+      window.location.replace('dashboard.html');
     } catch (err) {
-      showError('trial-error', authErrorMsg(err.code));
+      showError('trial-error', err.code ? authErrorMsg(err.code) : err.message);
       btn.textContent = 'Create Account & Start Trial';
       btn.disabled = false;
     }

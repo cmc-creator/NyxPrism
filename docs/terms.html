@@ -122,19 +122,24 @@
     .footer-bottom a { color: var(--muted2); }
     .footer-bottom a:hover { color: var(--muted); }
   </style>
+  <link rel="stylesheet" href="nyx-brand.css?v=2" />
+  <script src="nyx-brand.js?v=2" defer></script>
 </head>
 <body>
 
 <!-- NAV -->
 <nav>
-  <a href="index.html" class="nav-brand">
-    <div class="nav-wordmark"><em>Nyx</em>Prism&#8482;</div>
-    <div class="nav-co">by NyxCollective LLC</div>
+  <a href="index.html" class="nav-brand nyx-brand-lockup">
+    <span class="nyx-brand-icon"><canvas class="nyx-prism-mark" aria-hidden="true"></canvas></span>
+    <span class="nyx-brand-copy">
+      <span class="nav-wordmark nyx-brand-wordmark"><em>Nyx</em>Prism&#8482;</span>
+      <span class="nav-co nyx-brand-company">by NyxCollective LLC</span>
+    </span>
   </a>
   <div class="nav-links">
     <a href="index.html#features">Features</a>
     <a href="index.html#pricing">Pricing</a>
-    <a href="index.html#ai">AI Tools</a>
+    <a href="index.html#capabilities">AI Tools</a>
     <a href="index.html#faq">FAQ</a>
   </div>
   <div class="nav-sep"></div>
@@ -148,7 +153,7 @@
 <div class="legal-hero">
   <div class="legal-eyebrow">Legal</div>
   <h1>Terms of Service</h1>
-  <p>Effective January 1, 2024 &mdash; NyxCollective LLC</p>
+  <p>Effective September 22, 2026 &mdash; NyxCollective LLC</p>
 </div>
 
 <!-- CONTENT -->
@@ -163,7 +168,7 @@
   <p>By downloading, installing, or using NyxPrism&#8482; in any form you confirm that you are at least 18 years of age, have read and understood these Terms, and agree to be bound by them.</p>
 
   <h2>2. Software License</h2>
-  <p>The NyxPrism&#8482; open-source core (the "Community" tier) is distributed under the MIT License. A copy of the MIT License is included in the software distribution and is available on <a href="https://pypi.org/project/nyxprism/" target="_blank" rel="noopener">PyPI</a>.</p>
+  <p>The NyxPrism&#8482; open-source core (the "Community" tier) is distributed under the Apache License 2.0. A copy of the license is included in the software distribution and is available on <a href="https://pypi.org/project/nyxprism/" target="_blank" rel="noopener">PyPI</a>.</p>
   <p>Professional and Enterprise tier features, where applicable, are licensed to you personally and non-exclusively for the duration of your active paid subscription. You may not sublicense, resell, or redistribute Professional or Enterprise tier features without prior written consent from NyxCollective LLC.</p>
 
   <h2>3. Permitted Use</h2>
@@ -171,7 +176,7 @@
   <ul>
     <li>Processing PDF documents you own or have lawful right to process</li>
     <li>Integrating NyxPrism&#8482; into your own software products or automation pipelines</li>
-    <li>Distributing software that uses the NyxPrism&#8482; Python library, subject to MIT License attribution requirements</li>
+    <li>Distributing software that uses the NyxPrism&#8482; Python library, subject to Apache License 2.0 attribution requirements</li>
   </ul>
 
   <h2>4. Prohibited Use</h2>
@@ -184,9 +189,9 @@
     <li>Attempt to reverse-engineer, decompile, or extract proprietary components of the Professional or Enterprise tiers</li>
   </ul>
 
-  <h2>5. Third-Party Services &mdash; OpenAI</h2>
-  <p>NyxPrism&#8482; optionally integrates with the OpenAI API to provide LLM-quality AI analysis. When you configure an OpenAI API key and use the <code>--strategy llm</code> or <code>--strategy auto</code> option, text extracted from your PDFs may be sent to OpenAI servers for processing.</p>
-  <p>Use of the OpenAI API is subject to <a href="https://openai.com/terms" target="_blank" rel="noopener">OpenAI's Terms of Service</a> and <a href="https://openai.com/privacy" target="_blank" rel="noopener">Privacy Policy</a>. NyxCollective LLC is not responsible for OpenAI's handling of any data you send to their API. You are responsible for supplying your own API key and for any associated charges from OpenAI.</p>
+  <h2>5. Third-Party AI Services</h2>
+  <p>NyxPrism&#8482; integrates with Anthropic for web-dashboard AI and can optionally integrate with OpenAI in the command-line package. Relevant document text and prompts may be sent to the selected provider.</p>
+  <p>Use of these services is subject to the provider's terms and privacy policy. You are responsible for ensuring that you have authority to submit document content for AI processing.</p>
   <p>All heuristic AI processing (<code>--strategy heuristic</code>) is performed entirely locally on your machine. No data is sent to any server.</p>
 
   <h2>6. Accounts and Subscriptions</h2>
@@ -194,25 +199,28 @@
   <p>Subscription fees are billed in advance on a monthly or annual basis. Fees are non-refundable except as required by applicable law or as explicitly stated in a separate agreement. We reserve the right to change pricing with 30 days' prior notice.</p>
   <p>Free trials (where offered) are limited to one per person. Creating multiple accounts to obtain additional free trials is a violation of these Terms.</p>
 
-  <h2>7. Intellectual Property</h2>
-  <p>NyxPrism&#8482; and the NyxPrism logotype are trademarks of NyxCollective LLC. Nothing in these Terms grants you any right to use our trademarks without our prior written consent, except as permitted for nominative fair use.</p>
-  <p>All contributions to the open-source project are governed by the MIT License and the project's contribution guidelines.</p>
+  <h2>7. Electronic Signatures and Shared Documents</h2>
+  <p>Signature requests use unique bearer links, typed field values, timestamps, IP addresses, and user-agent records. They are electronic-signature workflow records, not certificate-backed digital signatures. You are responsible for verifying recipient identity, consent, and legal suitability for your jurisdiction and document type. Keep recipient links confidential and revoke or delete workflows that should no longer be accessible.</p>
 
-  <h2>8. Disclaimer of Warranties</h2>
+  <h2>8. Intellectual Property</h2>
+  <p>NyxPrism&#8482; and the NyxPrism logotype are trademarks of NyxCollective LLC. Nothing in these Terms grants you any right to use our trademarks without our prior written consent, except as permitted for nominative fair use.</p>
+  <p>All contributions to the open-source project are governed by the Apache License 2.0 and the project's contribution guidelines.</p>
+
+  <h2>9. Disclaimer of Warranties</h2>
   <p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. NYXCOLLECTIVE LLC DOES NOT WARRANT THAT THE SOFTWARE WILL BE ERROR-FREE, UNINTERRUPTED, OR THAT IT WILL MEET YOUR REQUIREMENTS.</p>
   <p>AI-generated outputs (summaries, classifications, extracted information, suggested filenames) are provided for convenience only and may contain errors. You are responsible for verifying all AI-generated results before relying on them.</p>
 
-  <h2>9. Limitation of Liability</h2>
+  <h2>10. Limitation of Liability</h2>
   <p>TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL NYXCOLLECTIVE LLC, ITS OFFICERS, DIRECTORS, EMPLOYEES, OR AGENTS BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING LOSS OF DATA, LOSS OF PROFITS, OR BUSINESS INTERRUPTION, ARISING OUT OF OR IN CONNECTION WITH YOUR USE OF THE SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.</p>
   <p>In any case, the total liability of NyxCollective LLC shall not exceed the amounts paid by you for the software in the twelve (12) months immediately preceding the event giving rise to the claim.</p>
 
-  <h2>10. Changes to These Terms</h2>
+  <h2>11. Changes to These Terms</h2>
   <p>We may revise these Terms from time to time. When we make material changes, we will update the "Effective" date at the top of this page and, for paid subscribers, send a notice to the email address on your account. Your continued use of the software after the updated Terms take effect constitutes your acceptance of the changes.</p>
 
-  <h2>11. Governing Law</h2>
+  <h2>12. Governing Law</h2>
   <p>These Terms shall be governed by and construed in accordance with the laws of the State of Delaware, United States, without regard to its conflict of law provisions. Any disputes arising under these Terms shall be subject to the exclusive jurisdiction of the courts located in Delaware.</p>
 
-  <h2>12. Contact</h2>
+  <h2>13. Contact</h2>
   <p>If you have questions or concerns about these Terms, please use our <a href="contact.html">contact form</a> or email us at <a href="mailto:legal@nyxprism.com">legal@nyxprism.com</a>.</p>
 
 </div>
@@ -230,14 +238,14 @@
       <h4>Product</h4>
       <a href="index.html#features">Features</a>
       <a href="index.html#pricing">Pricing</a>
-      <a href="index.html#ai">AI Tools</a>
-      <a href="index.html#commands">Commands</a>
+      <a href="index.html#capabilities">AI Tools</a>
+      <a href="index.html#capabilities">Commands</a>
       <a href="index.html#faq">FAQ</a>
     </div>
     <div class="footer-col">
       <h4>Developers</h4>
       <a href="https://pypi.org/project/nyxprism/" target="_blank" rel="noopener">PyPI</a>
-      <a href="index.html#commands">Commands Reference</a>
+      <a href="index.html#capabilities">Commands Reference</a>
       <a href="contact.html">Report a Bug</a>
     </div>
     <div class="footer-col">
@@ -254,7 +262,7 @@
     <span>
       <a href="terms.html">Terms</a> &nbsp;&middot;&nbsp;
       <a href="privacy.html">Privacy</a> &nbsp;&middot;&nbsp;
-      MIT License
+      Apache 2.0 License
     </span>
   </div>
 </footer>

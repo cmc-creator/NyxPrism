@@ -16,7 +16,11 @@ router.post('/sync', requireAuth, async (req, res) => {
     await pool.query(
       `INSERT INTO users (firebase_uid, email, first_name, last_name, plan, trial_start)
       VALUES ($1, $2, $3, $4, 'trial', NOW())
-       ON CONFLICT (firebase_uid) DO NOTHING`,
+       ON CONFLICT (email) DO UPDATE SET
+         firebase_uid = EXCLUDED.firebase_uid,
+         first_name = COALESCE(NULLIF(EXCLUDED.first_name, ''), users.first_name),
+         last_name = COALESCE(NULLIF(EXCLUDED.last_name, ''), users.last_name),
+         updated_at = NOW()`,
           [uid, email, String(firstName || '').slice(0, 100) || null, String(lastName || '').slice(0, 100) || null],
     );
     res.json({ ok: true });

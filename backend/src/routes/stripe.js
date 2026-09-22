@@ -28,9 +28,12 @@ router.post('/create-checkout', requireAuth, async (req, res) => {
     const stripe = getStripe();
     // Upsert user row and retrieve stripe_customer_id
     let { rows } = await pool.query(
-      'SELECT stripe_customer_id FROM users WHERE firebase_uid = $1',
+      'SELECT stripe_customer_id, subscription_status FROM users WHERE firebase_uid = $1',
       [uid],
     );
+    if (['active', 'trialing'].includes(rows[0]?.subscription_status)) {
+      return res.status(409).json({ error: 'This account already has an active subscription.' });
+    }
     let customerId = rows[0]?.stripe_customer_id;
 
     if (!customerId) {
@@ -54,10 +57,7 @@ router.post('/create-checkout', requireAuth, async (req, res) => {
       success_url: `${process.env.FRONTEND_URL}/dashboard.html?checkout=success`,
       cancel_url:  `${process.env.FRONTEND_URL}/dashboard.html`,
       allow_promotion_codes: true,
-      subscription_data: {
-        trial_period_days: 14,
-        metadata: { firebase_uid: uid },
-      },
+      subscription_data: { metadata: { firebase_uid: uid } },
     });
 
     res.json({ url: session.url });

@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { createHash, randomBytes } from 'crypto';
 import pool from '../db/index.js';
-import { requireAuth } from '../middleware/auth.js';
+import { requireActivePlan, requireAuth } from '../middleware/auth.js';
 
 const router = Router();
 const MAX_KEYS_PER_USER = 5;
@@ -44,7 +44,7 @@ router.get('/', requireAuth, async (req, res) => {
 });
 
 // POST /api/keys — create a new key
-router.post('/', requireAuth, async (req, res) => {
+router.post('/', requireAuth, requireActivePlan, async (req, res) => {
   const label = (req.body.label || 'My API Key').trim().slice(0, 60);
 
   try {

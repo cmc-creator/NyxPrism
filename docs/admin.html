@@ -180,6 +180,8 @@
     .msg-subject { font-size: .875rem; font-weight: 600; margin-bottom: .5rem; color: var(--text); }
     .msg-body  { font-size: .84rem; color: var(--text2); line-height: 1.65; white-space: pre-wrap; }
   </style>
+  <link rel="stylesheet" href="nyx-brand.css?v=2" />
+  <script src="nyx-brand.js?v=2" defer></script>
 </head>
 <body>
 
@@ -187,7 +189,10 @@
 <div id="lock-screen">
   <div class="lock-card">
     <div>
-      <div class="lock-title"><em style="font-style:normal;color:#a78bfa">Nyx</em>Prism Admin</div>
+      <div class="nyx-brand-lockup nyx-brand-lockup--hero">
+        <span class="nyx-brand-icon"><canvas class="nyx-prism-mark" aria-hidden="true"></canvas></span>
+        <span class="nyx-brand-copy"><span class="lock-title nyx-brand-wordmark"><em>Nyx</em>Prism</span><span class="nyx-brand-company">Admin Console</span></span>
+      </div>
       <div class="lock-sub" style="margin-top:.4rem">Enter your admin secret to continue.</div>
     </div>
     <input class="lock-input" type="password" id="secret-input" placeholder="Admin secret" autocomplete="off" />
@@ -199,8 +204,9 @@
 <!-- ── ADMIN SHELL ───────────────────────────────────────────────────── -->
 <div id="admin-shell">
   <header class="admin-header">
-    <div style="display:flex;align-items:center;gap:.75rem">
-      <div class="admin-wordmark"><em>Nyx</em>Prism</div>
+    <div class="nyx-brand-lockup nyx-brand-lockup--compact">
+      <span class="nyx-brand-icon"><canvas class="nyx-prism-mark" aria-hidden="true"></canvas></span>
+      <span class="admin-wordmark nyx-brand-wordmark"><em>Nyx</em>Prism</span>
       <div class="admin-badge">Admin</div>
     </div>
     <button class="admin-logout" id="logout-btn">Log Out</button>
@@ -261,6 +267,21 @@
 <script>
 const API = 'https://nyxprism-production.up.railway.app';
 let adminSecret = '';
+let adminLockTimer = null;
+
+function lockAdmin() {
+  adminSecret = '';
+  if (adminLockTimer) clearTimeout(adminLockTimer);
+  document.getElementById('admin-shell').style.display = 'none';
+  document.getElementById('lock-screen').style.display = 'flex';
+  document.getElementById('secret-input').value = '';
+}
+
+function resetAdminLockTimer() {
+  if (!adminSecret) return;
+  if (adminLockTimer) clearTimeout(adminLockTimer);
+  adminLockTimer = setTimeout(lockAdmin, 15 * 60 * 1000);
+}
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 async function apiFetch(path, opts = {}) {
@@ -297,8 +318,10 @@ async function tryUnlock() {
   adminSecret = secret;
   try {
     await apiFetch('/api/admin/stats');
+    document.getElementById('secret-input').value = '';
     document.getElementById('lock-screen').style.display = 'none';
     document.getElementById('admin-shell').style.display = 'flex';
+    resetAdminLockTimer();
     loadOverview();
   } catch {
     document.getElementById('lock-error').style.display = 'block';
@@ -306,12 +329,9 @@ async function tryUnlock() {
   }
 }
 
-document.getElementById('logout-btn').addEventListener('click', () => {
-  adminSecret = '';
-  document.getElementById('admin-shell').style.display = 'none';
-  document.getElementById('lock-screen').style.display = 'flex';
-  document.getElementById('secret-input').value = '';
-});
+document.getElementById('logout-btn').addEventListener('click', lockAdmin);
+document.addEventListener('pointerdown', resetAdminLockTimer, { passive: true });
+document.addEventListener('keydown', resetAdminLockTimer);
 
 // ── Tabs ──────────────────────────────────────────────────────────────────
 document.querySelectorAll('.tab').forEach(btn => {
@@ -398,7 +418,7 @@ async function loadMessages(page) {
     document.getElementById('messages-list').innerHTML = data.messages.map(m => `
       <div class="msg-card">
         <div class="msg-meta">
-          <span class="msg-name">${escHtml(m.name || '')}</span>
+          <span class="msg-name">${escHtml([m.first_name, m.last_name].filter(Boolean).join(' '))}</span>
           <span class="msg-email">${escHtml(m.email || '')}</span>
           <span class="msg-date">${fmt(m.created_at)}</span>
         </div>
