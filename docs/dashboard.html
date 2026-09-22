@@ -70,6 +70,8 @@
     .recent-fname{flex:1;font-size:.8rem;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .recent-meta{font-size:.7rem;color:var(--muted);white-space:nowrap}
     .recent-tool-badge{font-size:.65rem;font-weight:600;padding:.1rem .4rem;border-radius:4px;background:var(--accent-glow);color:var(--accent-bright);white-space:nowrap}
+    .mini-action-btn{min-width:48px;min-height:28px;padding:.3rem .55rem;border:1px solid var(--border);border-radius:6px;background:rgba(15,23,36,.65);color:var(--muted);font-size:.72rem;font-weight:650;transition:color .15s,border-color .15s,background .15s}
+    .mini-action-btn:hover{color:var(--text);border-color:var(--border3);background:var(--surface2)}
 
     .nav-plan{font-size:.72rem;font-weight:700;letter-spacing:.06em;padding:.28rem .65rem;border-radius:999px;background:var(--accent-glow);border:1px solid rgba(124,58,237,.3);color:var(--accent-bright);text-transform:uppercase}
     .nav-avatar{width:32px;height:32px;border-radius:50%;border:1px solid var(--border2);background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:var(--accent-bright);cursor:pointer;position:relative}
@@ -148,6 +150,20 @@
     .range-row .fremove{background:none;border:none;color:var(--muted);transition:color .12s}
     .range-row .fremove:hover{color:var(--red)}
     .range-row .fremove svg{width:14px;height:14px;stroke:currentColor}
+    .recipient-row{display:grid;align-items:center;gap:.5rem;margin-top:.55rem;min-width:0}
+    .signature-recipient{grid-template-columns:20px minmax(0,1fr) minmax(0,1fr) 36px}
+    .distribution-recipient{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 36px}
+    .recipient-row .form-input{min-width:0}
+    .recipient-pick{width:16px;height:16px;margin:0;accent-color:var(--accent);cursor:pointer}
+    .recipient-remove{width:36px;height:36px;min-width:36px;padding:0;border:1px solid rgba(248,113,113,.24);border-radius:8px;background:rgba(248,113,113,.07);color:var(--red);display:inline-flex;align-items:center;justify-content:center;transition:background .15s,border-color .15s,transform .15s}
+    .recipient-remove:hover{background:rgba(248,113,113,.15);border-color:rgba(248,113,113,.5);transform:translateY(-1px)}
+    .recipient-remove svg{display:block;width:15px;height:15px;stroke:currentColor;pointer-events:none}
+    @media(max-width:620px){
+      .signature-recipient{grid-template-columns:20px minmax(0,1fr) 36px}
+      .signature-recipient .sr-email{grid-column:2}.signature-recipient .recipient-remove{grid-column:3;grid-row:1/span 2}
+      .distribution-recipient{grid-template-columns:minmax(0,1fr) 36px}
+      .distribution-recipient .dr-email{grid-column:1}.distribution-recipient .recipient-remove{grid-column:2;grid-row:1/span 2}
+    }
     .ocr-text{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--text2);white-space:pre-wrap;word-break:break-word;max-height:340px;overflow-y:auto;margin-bottom:1rem}
     .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:1.75rem}
     .stat-card{background:linear-gradient(160deg,rgba(15,23,36,.94),rgba(11,17,28,.86));border:1px solid rgba(167,139,250,.14);border-radius:var(--radius-lg);padding:1.25rem 1.1rem;box-shadow:0 14px 42px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.04)}
@@ -595,7 +611,7 @@
     <div style="margin-top:1.75rem">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
         <div class="card-title" style="margin-bottom:0">Recent Files</div>
-        <button id="recent-clear-btn" style="font-size:.72rem;color:var(--muted);background:none;border:none;cursor:pointer;padding:.2rem .4rem;border-radius:4px" title="Clear history">Clear</button>
+        <button id="recent-clear-btn" class="mini-action-btn" title="Clear history">Clear</button>
       </div>
       <div id="recent-files-list"><p style="color:var(--muted);font-size:.82rem;padding:.35rem 0">No files processed yet — download a result to see it here.</p></div>
     </div>
@@ -2874,13 +2890,13 @@ async function loadQRCode(){
   function recipients(){return Array.from(recipientsEl.querySelectorAll('.sigreq-recipient')).map(row=>({name:row.querySelector('.sr-name').value.trim(),email:row.querySelector('.sr-email').value.trim()})).filter(r=>r.name||r.email);}
   function selectedRecipient(){const rows=Array.from(recipientsEl.querySelectorAll('.sigreq-recipient'));const checked=rows.find(r=>r.querySelector('.sr-pick').checked)||rows[0];return checked?checked.querySelector('.sr-email').value.trim().toLowerCase():'';}
   function addRecipient(name='',email=''){
-    const row=document.createElement('div');row.className='sigreq-recipient';row.style.cssText='display:grid;grid-template-columns:auto 1fr 1fr auto;gap:.45rem;align-items:center;margin-top:.45rem';
-    row.innerHTML='<input class="sr-pick" type="radio" name="sigreq-recipient-pick" '+(!recipientsEl.children.length?'checked':'')+' />'+
-      '<input class="form-input sr-name" placeholder="Name" value="'+name.replace(/"/g,'&quot;')+'" />'+
-      '<input class="form-input sr-email" placeholder="email@example.com" value="'+email.replace(/"/g,'&quot;')+'" />'+
-      '<button class="fremove" type="button" title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
-    row.querySelector('.fremove').addEventListener('click',()=>{row.remove(); if(!recipientsEl.querySelector('.sr-pick:checked')&&recipientsEl.querySelector('.sr-pick'))recipientsEl.querySelector('.sr-pick').checked=true; renderFields();});
-    row.querySelector('.sr-email').addEventListener('input',renderFields);
+    const row=document.createElement('div');row.className='sigreq-recipient recipient-row signature-recipient';
+    const pick=document.createElement('input');pick.className='sr-pick recipient-pick';pick.type='radio';pick.name='sigreq-recipient-pick';pick.checked=!recipientsEl.children.length;pick.setAttribute('aria-label','Assign fields to this recipient');
+    const nameInput=document.createElement('input');nameInput.className='form-input sr-name';nameInput.placeholder='Name';nameInput.value=name;
+    const emailInput=document.createElement('input');emailInput.className='form-input sr-email';emailInput.type='email';emailInput.placeholder='email@example.com';emailInput.value=email;
+    const remove=document.createElement('button');remove.className='recipient-remove';remove.type='button';remove.title='Remove recipient';remove.setAttribute('aria-label','Remove recipient');remove.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+    remove.addEventListener('click',()=>{row.remove();if(!recipientsEl.querySelector('.sr-pick:checked')&&recipientsEl.querySelector('.sr-pick'))recipientsEl.querySelector('.sr-pick').checked=true;renderFields();});
+    emailInput.addEventListener('input',renderFields);row.append(pick,nameInput,emailInput,remove);
     recipientsEl.appendChild(row);
   }
   addRecipient();
@@ -2946,7 +2962,7 @@ async function loadQRCode(){
   if(!fileInput||!drop||!recipientsEl)return;
   let distFile=null;
   function fileToDataUrl(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(file);});}
-  function addRecipient(name='',email=''){const row=document.createElement('div');row.style.cssText='display:grid;grid-template-columns:1fr 1fr auto;gap:.45rem;align-items:center;margin-top:.45rem';row.innerHTML='<input class="form-input dr-name" placeholder="Name" value="'+name.replace(/"/g,'&quot;')+'" /><input class="form-input dr-email" placeholder="email@example.com" value="'+email.replace(/"/g,'&quot;')+'" /><button class="fremove" type="button" title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';row.querySelector('button').addEventListener('click',()=>row.remove());recipientsEl.appendChild(row);}
+  function addRecipient(name='',email=''){const row=document.createElement('div');row.className='recipient-row distribution-recipient';const nameInput=document.createElement('input');nameInput.className='form-input dr-name';nameInput.placeholder='Name';nameInput.value=name;const emailInput=document.createElement('input');emailInput.className='form-input dr-email';emailInput.type='email';emailInput.placeholder='email@example.com';emailInput.value=email;const remove=document.createElement('button');remove.className='recipient-remove';remove.type='button';remove.title='Remove recipient';remove.setAttribute('aria-label','Remove recipient');remove.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';remove.addEventListener('click',()=>row.remove());row.append(nameInput,emailInput,remove);recipientsEl.appendChild(row);}
   function recipients(){return Array.from(recipientsEl.children).map(row=>({name:row.querySelector('.dr-name').value.trim(),email:row.querySelector('.dr-email').value.trim()})).filter(r=>r.name||r.email);}
   addRecipient();document.getElementById('dist-add-recipient').addEventListener('click',()=>addRecipient());
   setupDrop(drop,fileInput,files=>{distFile=files[0];if(distFile)toast('PDF loaded for distribution','success');});

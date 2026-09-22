@@ -116,3 +116,11 @@ test('landing and dashboard wallpapers use faceted glass geometry', async () => 
     assert.match(source, /back\[side\].*front\[side\]/s);
   }
 });
+
+test('dynamic recipient rows use fixed accessible remove controls', async () => {
+  const dashboard = await readRepo('docs/dashboard.html');
+  assert.match(dashboard, /\.recipient-remove\{width:36px;height:36px;min-width:36px/);
+  assert.match(dashboard, /sigreq-recipient recipient-row signature-recipient/);
+  assert.match(dashboard, /recipient-row distribution-recipient/);
+  assert.doesNotMatch(dashboard, /className='sigreq-recipient';row\.style\.cssText/);
+});
