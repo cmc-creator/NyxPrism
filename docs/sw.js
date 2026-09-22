@@ -1,5 +1,5 @@
-// NyxPrism Service Worker — cache-first for app shell
-const CACHE = 'nyx-v1';
+// NyxPrism Service Worker — network-first for HTML, cache-first for assets
+const CACHE = 'nyx-v2';
 const SHELL = [
   '/dashboard.html',
   '/manifest.json'
@@ -26,6 +26,20 @@ self.addEventListener('fetch', function(e) {
   if (e.request.method !== 'GET') return;
   var url = new URL(e.request.url);
   if (url.origin !== location.origin) return;
+
+  // HTML must refresh after deployments so auth and security fixes are not stale.
+  if (e.request.mode === 'navigate' || url.pathname.endsWith('.html')) {
+    e.respondWith(
+      fetch(e.request).then(function(response) {
+        if (response && response.status === 200) {
+          var clone = response.clone();
+          caches.open(CACHE).then(function(c) { c.put(e.request, clone); });
+        }
+        return response;
+      }).catch(function() { return caches.match(e.request); })
+    );
+    return;
+  }
 
   e.respondWith(
     caches.match(e.request).then(function(cached) {
