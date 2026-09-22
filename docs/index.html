@@ -105,8 +105,8 @@
     /* ── HERO ─────────────────────────────────────────────────────────── */
     .hero {
       position: relative; overflow: hidden;
-      min-height: min(820px, calc(100vh - 62px));
-      padding: 8rem 2rem 6rem; text-align: center;
+      min-height: min(760px, calc(100vh - 122px));
+      padding: 6.5rem 2rem 4.5rem; text-align: left;
       isolation: isolate;
     }
     .hero::before {
@@ -136,10 +136,11 @@
     }
     @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
     .hero h1 {
-      font-size: clamp(2.8rem, 7.5vw, 5.2rem); font-weight: 900;
+      max-width: 850px; font-size: clamp(3.4rem, 8vw, 6.6rem); font-weight: 900;
       letter-spacing: -.04em; line-height: 1.06; margin-bottom: 1.5rem;
       text-shadow: 0 18px 60px rgba(0,0,0,.72), 0 0 46px rgba(124,58,237,.15);
     }
+    .hero-product { color: #fff; }
     .grad {
       background: linear-gradient(90deg, #e9d5ff 0%, #a78bfa 20%, #7c3aed 50%, #a78bfa 80%, #e9d5ff 100%);
       background-size: 300% 100%;
@@ -151,9 +152,10 @@
       50% { background-position: 100% 50%; }
     }
     .hero-sub {
-      max-width: 600px; margin: 0 auto 2.75rem; color: var(--text3);
+      max-width: 590px; margin: 0 0 2.5rem; color: var(--text2);
       font-size: 1.12rem; line-height: 1.75; letter-spacing: -.01em;
     }
+    .hero .cta-row { justify-content: flex-start; }
     .cta-row { display: flex; justify-content: center; flex-wrap: wrap; gap: .85rem; margin-bottom: 3.5rem; }
     .btn {
       display: inline-flex; align-items: center; gap: .55rem;
@@ -200,11 +202,14 @@
     }
     .stats-inner {
       max-width: 960px; margin: 0 auto;
-      display: flex; flex-wrap: wrap; justify-content: space-around; gap: 2rem;
+      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem;
     }
-    .stat { text-align: center; }
-    .stat-num { font-size: 2.1rem; font-weight: 900; letter-spacing: -.04em; line-height: 1; color: var(--accent-bright); }
+    .stat { min-width: 0; text-align: center; }
+    .stat-num { font-size: 1.65rem; font-weight: 850; letter-spacing: -.03em; line-height: 1.1; color: var(--text); }
     .stat-label { font-size: .74rem; color: var(--muted); margin-top: .3rem; letter-spacing: .08em; text-transform: uppercase; }
+    @media (max-width: 620px) {
+      .stats-inner { grid-template-columns: 1fr; gap: 1.4rem; }
+    }
 
     /* ── SECTION ──────────────────────────────────────────────────────── */
     .section { padding: 6.5rem 2rem; max-width: 1160px; margin: 0 auto; }
@@ -701,7 +706,7 @@
       0%,100% { transform: translate(0,0) scale(1); }
       50%      { transform: translate(55px,-45px) scale(.85); }
     }
-    .hero-body { position: relative; z-index: 2; max-width: 920px; margin: 0 auto; }
+    .hero-body { position: relative; z-index: 2; max-width: 1160px; margin: 0 auto; }
 
     /* Badge shimmer sweep */
     .hero-badge { position: relative; overflow: hidden; }
@@ -736,10 +741,64 @@
     #landing-prism-backdrop {
       position: absolute; inset: 0; width: 100%; height: 100%; display: block;
       z-index: 0; pointer-events: none; opacity: 1;
-      filter: saturate(1.34) contrast(1.08);
+      filter: saturate(1.55) contrast(1.12) brightness(1.12);
       background: #04060c;
     }
     .hero-grid { z-index: 1; opacity: .28; }
+    .legacy-detail { display: none !important; }
+    .divider { display: none; }
+    .stats-strip { display: none; }
+    .features-grid .feature-card:nth-child(n+7) { display: none; }
+    .pricing-features li:nth-child(n+7), .faq-list details:nth-child(n+5) { display: none; }
+    @media (max-width: 760px) {
+      .hero { min-height: 680px; padding: 5.5rem 1.25rem 4rem; text-align: center; }
+      .hero h1 { margin-inline: auto; }
+      .hero-sub { margin-inline: auto; }
+      .hero .cta-row { justify-content: center; }
+    }
+
+    .product-showcase {
+      position: relative; overflow: hidden;
+      padding: 7rem 2rem 7.5rem;
+      border-top: 1px solid rgba(167,139,250,.14);
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, #080b13 0%, #03060c 100%);
+    }
+    .product-showcase::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background:
+        linear-gradient(110deg, transparent 15%, rgba(103,232,249,.055) 38%, transparent 56%),
+        linear-gradient(250deg, transparent 20%, rgba(251,191,36,.04) 46%, transparent 65%),
+        radial-gradient(circle at 50% 0%, rgba(124,58,237,.15), transparent 58%);
+    }
+    .showcase-inner { position: relative; max-width: 1120px; margin: 0 auto; text-align: center; }
+    .showcase-copy { max-width: 720px; margin: 0 auto 3rem; }
+    .showcase-copy .s-sub { margin-bottom: 0; }
+    .showcase-meta { display: flex; justify-content: center; flex-wrap: wrap; gap: .65rem; margin-top: 1.35rem; }
+    .showcase-meta span {
+      padding: .38rem .72rem; border: 1px solid rgba(167,139,250,.2);
+      border-radius: 999px; background: rgba(10,15,26,.62);
+      color: var(--text3); font-size: .72rem; font-weight: 700;
+    }
+    .dashboard-shot {
+      position: relative; max-width: 966px; margin: 0 auto;
+      transform: perspective(1600px) rotateX(1.5deg);
+      filter: drop-shadow(0 45px 70px rgba(0,0,0,.58)) drop-shadow(0 0 45px rgba(124,58,237,.12));
+    }
+    .dashboard-shot::before {
+      content: ''; position: absolute; inset: -1px; z-index: -1; border-radius: 13px;
+      background: linear-gradient(120deg, rgba(255,255,255,.42), rgba(124,58,237,.25) 35%, rgba(34,211,238,.18) 70%, rgba(251,191,36,.22));
+    }
+    .dashboard-shot img {
+      display: block; width: 100%; height: auto; border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.08); background: #03050a;
+    }
+    .dashboard-shot figcaption { margin-top: 1.15rem; color: var(--muted); font-size: .76rem; }
+    @media (max-width: 680px) {
+      .product-showcase { padding: 5rem 1.1rem; }
+      .dashboard-shot { overflow: hidden; border-radius: 10px; }
+      .dashboard-shot img { width: 155%; max-width: none; transform: translateX(-13%); }
+    }
 
     /* Stats glow */
     .stat-num { text-shadow: 0 0 50px rgba(167,139,250,.45); }
@@ -853,7 +912,6 @@
     <a class="hide-md" href="#product">Product</a>
     <a class="hide-md" href="#features">Features</a>
     <a class="hide-md" href="#pricing">Pricing</a>
-    <a class="hide-md" href="#developers">API</a>
     <a class="hide-md" href="#faq">FAQ</a>
   </div>
   <div class="nav-sep"></div>
@@ -870,16 +928,15 @@
   <div class="hero-body">
     <div class="hero-badge">
       <span class="badge-dot"></span>
-      v1.3.0 &nbsp;&middot;&nbsp; Now with Visual TUI
+      Private PDF tools &nbsp;&middot;&nbsp; AI &nbsp;&middot;&nbsp; eSign
     </div>
     <h1>
-      PDF Intelligence,<br>
-      <span class="grad">Fully Automated.</span>
+      <span class="hero-product">NyxPrism.</span><br>
+      <span class="grad">Documents, mastered.</span>
     </h1>
     <p class="hero-sub">
-      NyxPrism&#8482; is the professional AI-powered PDF toolkit that auto-splits batch scans,
-      renames files by content, summarizes documents, and extracts structured data.
-      Runs from an elegant terminal interface or as a scriptable Python library.
+      One precise workspace to edit, understand, sign, and distribute PDFs.
+      Core tools process locally. Cloud workflows happen only when you choose them.
     </p>
     <div class="cta-row">
       <a class="btn btn-primary" href="login.html#trial">
@@ -891,21 +948,38 @@
   </div>
 </header>
 
+<section class="product-showcase" id="product">
+  <div class="showcase-inner">
+    <div class="showcase-copy">
+      <div class="s-eyebrow">The workspace</div>
+      <h2 class="s-title">Serious document work, without the clutter.</h2>
+      <p class="s-sub">Twenty-three tools live in one calm interface, from everyday PDF edits to AI splitting, signature requests, and tracked distribution.</p>
+      <div class="showcase-meta" aria-label="Product highlights">
+        <span>23 focused tools</span>
+        <span>Local-first core</span>
+        <span>eSign &amp; distribution</span>
+      </div>
+    </div>
+    <figure class="dashboard-shot">
+      <img src="nyxprism-dashboard.png" alt="NyxPrism dashboard showing document tools, alerts, and workspace overview" width="966" height="604" loading="eager" />
+      <figcaption>NyxPrism Professional dashboard</figcaption>
+    </figure>
+  </div>
+</section>
+
 <!-- STATS -->
 <div class="stats-strip">
   <div class="stats-inner">
-    <div class="stat"><div class="stat-num" data-target="19" data-suffix="">19</div><div class="stat-label">CLI Commands</div></div>
-    <div class="stat"><div class="stat-num" data-target="5" data-suffix="">5</div><div class="stat-label">AI Capabilities</div></div>
-    <div class="stat"><div class="stat-num" data-target="100" data-suffix="%">100%</div><div class="stat-label">Offline Capable</div></div>
-    <div class="stat"><div class="stat-num">Apache</div><div class="stat-label">2.0 Licensed</div></div>
-    <div class="stat"><div class="stat-num">3.10+</div><div class="stat-label">Python Support</div></div>
+    <div class="stat"><div class="stat-num">Private</div><div class="stat-label">Core tools process locally</div></div>
+    <div class="stat"><div class="stat-num">Complete</div><div class="stat-label">Edit, sign and distribute</div></div>
+    <div class="stat"><div class="stat-num">Focused</div><div class="stat-label">One document workspace</div></div>
   </div>
 </div>
 
 <hr class="divider" />
 
 <!-- PRODUCT DEMO -->
-<div class="demo-bg" id="product">
+<div class="demo-bg legacy-detail">
   <div class="demo-inner">
     <div class="demo-copy">
       <div class="s-eyebrow">See it in action</div>
@@ -1022,12 +1096,12 @@
 <hr class="divider" />
 
 <!-- HOW IT WORKS -->
-<section class="section" id="how-it-works" style="padding-bottom:3rem;">
+<section class="section legacy-detail" id="how-it-works" style="padding-bottom:3rem;">
   <div class="s-eyebrow">Simple by design</div>
   <h2 class="s-title">Three Steps to a Clean Document Archive</h2>
   <p class="s-sub">No configuration files. No setup wizards. Drop a PDF in, get organised files out.</p>
 </section>
-<div style="border-top:1px solid var(--border); border-bottom:1px solid var(--border); max-width:1160px; margin:0 auto 6.5rem;">
+<div class="legacy-detail" style="border-top:1px solid var(--border); border-bottom:1px solid var(--border); max-width:1160px; margin:0 auto 6.5rem;">
   <div class="steps-grid">
     <div class="step-card">
       <div class="step-num">01</div>
@@ -1054,7 +1128,7 @@
 </div>
 
 <!-- COMMAND CAPABILITIES -->
-<div class="tinted-bg">
+<div class="tinted-bg legacy-detail">
   <section class="section" id="capabilities" style="padding-top:5.5rem;padding-bottom:5.5rem;">
     <div class="s-eyebrow">Complete capability set</div>
     <h2 class="s-title">19 Commands. Every PDF Task Covered.</h2>
@@ -1143,56 +1217,56 @@
 <!-- FEATURES -->
 <section class="section" id="features">
   <div class="s-eyebrow">Everything you need</div>
-  <h2 class="s-title">One Toolkit. Every PDF Task.</h2>
-  <p class="s-sub">Professional-grade operations in a single install. AI is built in, not bolted on.</p>
+  <h2 class="s-title">Everything your document needs.</h2>
+  <p class="s-sub">Six focused workflows replace a folder full of disconnected PDF utilities.</p>
   <div class="features-grid">
 
     <div class="feature-card">
       <div class="feat-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
       </div>
-      <h3>AI Bulk Split &amp; Rename <span class="ai-badge">AI</span></h3>
-      <p>Drop a 50-page scan containing 8 different documents. NyxPrism detects every boundary and names each output file descriptively. Zero manual sorting.</p>
+      <h3>Edit &amp; Organize</h3>
+      <p>Merge, split, rotate, reorder, number, annotate, and rebuild pages without sending the file to another service.</p>
     </div>
 
     <div class="feature-card">
       <div class="feat-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 10h10M4 14h12M4 18h8"/></svg>
       </div>
-      <h3>AI Summarize <span class="ai-badge">AI</span></h3>
-      <p>Get a concise, accurate summary of any document in seconds. Target specific pages or let it determine what matters from the whole file.</p>
+      <h3>AI Smart Split <span class="ai-badge">AI</span></h3>
+      <p>Find document boundaries inside large batch scans, then create clean, descriptively named files in one pass.</p>
     </div>
 
     <div class="feature-card">
       <div class="feat-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10M7 12h6M3 5a2 2 0 012-2h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5z"/></svg>
       </div>
-      <h3>AI Classify <span class="ai-badge">AI</span></h3>
-      <p>Instantly detect whether a PDF is an invoice, contract, report, letter, or resume. Zero manual reading required.</p>
+      <h3>Request Signatures</h3>
+      <p>Place recipient fields, send sequential requests, track completion, and retain a tamper-evident audit record.</p>
     </div>
 
     <div class="feature-card">
       <div class="feat-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/></svg>
       </div>
-      <h3>AI Key Info Extraction <span class="ai-badge">AI</span></h3>
-      <p>Pull dates, parties, amounts, and reference numbers as clean JSON. Ready to feed into your database or downstream workflow.</p>
+      <h3>Distribute &amp; Track</h3>
+      <p>Share expiring document links with individuals or recipient batches and monitor opened or failed delivery states.</p>
     </div>
 
     <div class="feature-card">
       <div class="feat-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/></svg>
       </div>
-      <h3>AI Rename <span class="ai-badge">AI</span></h3>
-      <p>Batch-rename a folder of <code>scan_001.pdf</code> files into meaningful names. Preview with <code>--dry-run</code> before committing.</p>
+      <h3>OCR &amp; Convert</h3>
+      <p>Recover text from scans, create searchable PDFs, and move cleanly between PDF, image, and text formats.</p>
     </div>
 
     <div class="feature-card">
       <div class="feat-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.12 15.88M14.47 14.48L20 20M8.12 8.12L12 12"/></svg>
       </div>
-      <h3>Smart Split</h3>
-      <p>Every N pages, explicit ranges, page boundaries, or file-size limits. Batch-process an entire folder in one command.</p>
+      <h3>Protect &amp; Redact</h3>
+      <p>Encrypt sensitive documents, apply watermarks, flatten forms, and permanently remove confidential regions.</p>
     </div>
 
     <div class="feature-card">
@@ -1249,7 +1323,7 @@
 <hr class="divider" />
 
 <!-- USE CASES -->
-<div class="tinted-bg">
+<div class="tinted-bg legacy-detail">
   <section class="section" style="padding-top:5.5rem;padding-bottom:5.5rem;">
     <div class="s-eyebrow">Built for real workflows</div>
     <h2 class="s-title">Who Uses NyxPrism&#8482;</h2>
@@ -1428,7 +1502,7 @@
 <hr class="divider" />
 
 <!-- DEVELOPER API -->
-<section class="section" id="developers" style="padding-bottom:5.5rem">
+<section class="section legacy-detail" id="developers" style="padding-bottom:5.5rem">
   <div class="s-eyebrow">For developers</div>
   <h2 class="s-title">REST API</h2>
   <p class="s-sub">Automate PDF workflows from your own code with the NyxPrism REST API — authenticated by the keys you generate in the dashboard.</p>
@@ -1632,20 +1706,34 @@
 
     function build(){
       shards = [];
-      var count = width < 680 ? 14 : 24;
+      if(width >= 800){
+        shards.push({
+          x: width * .82,
+          y: height * .48,
+          radius: Math.min(205, width * .145),
+          phase: .8,
+          spin: .000035,
+          rotation: -.18,
+          hue: 218,
+          depth: 1,
+          alpha: .38,
+          sides: 5
+        });
+      }
+      var count = width < 680 ? 7 : 9;
       for(var i=0;i<count;i++){
-        var depth = Math.random();
-        var sideBias = Math.random() < .5 ? Math.random() * .3 : .7 + Math.random() * .3;
+        var depth = .12 + Math.random() * .62;
+        var sideBias = Math.random() < .45 ? Math.random() * .16 : .84 + Math.random() * .16;
         shards.push({
           x: sideBias * width,
           y: (Math.random() * 1.18 - .08) * height,
-          radius: (36 + Math.random() * 82) * (.62 + depth * .82),
+          radius: (28 + Math.random() * 58) * (.68 + depth * .7),
           phase: Math.random() * Math.PI * 2,
           spin: (Math.random() - .5) * .00022,
           rotation: Math.random() * Math.PI * 2,
           hue: palette[i % palette.length] + Math.random() * 18,
           depth: depth,
-          alpha: .12 + depth * .20,
+          alpha: .08 + depth * .18,
           sides: 5 + Math.floor(Math.random() * 2)
         });
       }
