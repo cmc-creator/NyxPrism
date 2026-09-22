@@ -39,14 +39,16 @@
     body.light #loading-screen{background:#f8fafc}
 
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    body{background:var(--bg);color:var(--text);font-family:'Inter',-apple-system,sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh}
+    body{background:linear-gradient(135deg,#04070d 0%,#07111d 42%,#09070f 100%);color:var(--text);font-family:'Inter',-apple-system,sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh;position:relative;overflow-x:hidden}
+    body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-2;background:linear-gradient(115deg,rgba(124,58,237,.18),transparent 28%),linear-gradient(245deg,rgba(34,197,94,.11),transparent 32%),linear-gradient(180deg,rgba(250,204,21,.06),transparent 45%)}
+    body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px);background-size:56px 56px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.65),transparent 78%)}
     a{color:inherit;text-decoration:none} button{font-family:inherit;cursor:pointer} input,select,textarea{font-family:inherit}
     #loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .3s}
     .spinner{width:36px;height:36px;border-radius:50%;border:3px solid var(--border2);border-top-color:var(--accent-bright);animation:spin .7s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
-    nav{position:sticky;top:0;z-index:500;background:rgba(6,8,13,.92);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);height:58px;padding:0 1.5rem;display:flex;align-items:center;gap:1rem}
+    nav{position:sticky;top:0;z-index:500;background:rgba(6,8,13,.72);backdrop-filter:blur(24px) saturate(1.25);border-bottom:1px solid rgba(167,139,250,.16);height:62px;padding:0 1.5rem;display:flex;align-items:center;gap:1rem;box-shadow:0 10px 40px rgba(0,0,0,.22)}
     .nav-brand{display:flex;align-items:center;gap:.5rem;border:0;background:none;color:inherit;padding:0;font:inherit;cursor:pointer}
-    .nav-brand-logo{width:26px;height:26px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--accent),var(--accent3));border-radius:7px}
+    .nav-brand-logo{width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#22c55e,var(--accent) 52%,#facc15);border-radius:8px;box-shadow:0 0 28px rgba(124,58,237,.35)}
     .nav-brand-logo svg{width:14px;height:14px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
     .nav-brand-name{font-size:.95rem;font-weight:800;letter-spacing:-.025em}
     .nav-brand-name em{color:var(--accent-bright);font-style:normal}
@@ -72,8 +74,8 @@
     .nav-dropdown-item:hover{background:var(--surface2);color:var(--text)}
     .nav-dropdown-item svg{width:14px;height:14px;flex-shrink:0}
     .nav-dropdown-item.danger{color:var(--red)}
-    .app-shell{display:flex;min-height:calc(100vh - 58px)}
-    .sidebar{width:220px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);padding:1.25rem .75rem;display:flex;flex-direction:column;gap:.25rem;position:sticky;top:58px;height:calc(100vh - 58px);overflow-y:auto}
+    .app-shell{display:flex;min-height:calc(100vh - 62px)}
+    .sidebar{width:226px;flex-shrink:0;background:rgba(8,14,24,.78);backdrop-filter:blur(18px);border-right:1px solid rgba(167,139,250,.13);padding:1.25rem .75rem;display:flex;flex-direction:column;gap:.25rem;position:sticky;top:62px;height:calc(100vh - 62px);overflow-y:auto}
     .sidebar-section{font-size:.65rem;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;padding:.85rem .75rem .35rem;margin-top:.25rem}
     .sidebar-section:first-child{padding-top:.2rem}
     .nav-item{display:flex;align-items:center;gap:.7rem;padding:.55rem .75rem;border-radius:var(--radius-sm);font-size:.845rem;font-weight:500;color:var(--text3);transition:background .12s,color .12s;border:none;background:none;width:100%;text-align:left}
@@ -81,13 +83,13 @@
     .nav-item:hover{background:var(--surface);color:var(--text2)}
     .nav-item.active{background:var(--accent-glow);color:var(--accent-bright);border:1px solid rgba(124,58,237,.2)}
     .nav-item.active svg{opacity:1}
-    .main{flex:1;padding:2rem;max-width:960px}
+    .main{flex:1;padding:2.35rem;max-width:1160px}
     .panel{display:none}
     .panel.active{display:block}
     .page-header{margin-bottom:1.75rem}
-    .page-header h1{font-size:1.5rem;font-weight:800;letter-spacing:-.03em;margin-bottom:.35rem}
+    .page-header h1{font-size:1.75rem;font-weight:900;letter-spacing:-.04em;margin-bottom:.35rem;text-shadow:0 10px 35px rgba(124,58,237,.18)}
     .page-header p{font-size:.875rem;color:var(--muted)}
-    .card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1.25rem}
+    .card{background:linear-gradient(180deg,rgba(15,23,36,.88),rgba(11,16,26,.86));border:1px solid rgba(167,139,250,.14);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1.25rem;box-shadow:0 18px 60px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.035)}
     .card-title{font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:1.1rem}
     .drop-zone{border:2px dashed var(--border2);border-radius:var(--radius-lg);padding:2.5rem 1.5rem;text-align:center;background:var(--bg2);transition:border-color .2s,background .2s;cursor:pointer;position:relative;margin-bottom:1.25rem}
     .drop-zone:hover,.drop-zone.drag-over{border-color:var(--accent);background:var(--accent-glow)}
@@ -136,15 +138,15 @@
     .range-row .fremove:hover{color:var(--red)}
     .range-row .fremove svg{width:14px;height:14px;stroke:currentColor}
     .ocr-text{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--text2);white-space:pre-wrap;word-break:break-word;max-height:340px;overflow-y:auto;margin-bottom:1rem}
-    .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1rem;margin-bottom:1.75rem}
-    .stat-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:1.25rem 1.1rem}
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:1.75rem}
+    .stat-card{background:linear-gradient(160deg,rgba(15,23,36,.94),rgba(11,17,28,.86));border:1px solid rgba(167,139,250,.14);border-radius:var(--radius-lg);padding:1.25rem 1.1rem;box-shadow:0 14px 42px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.04)}
     .stat-icon{width:34px;height:34px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;margin-bottom:.75rem}
     .stat-icon svg{width:16px;height:16px;stroke:currentColor}
     .stat-num{font-size:1.5rem;font-weight:800;letter-spacing:-.04em;line-height:1;margin-bottom:.2rem}
     .stat-label{font-size:.75rem;color:var(--muted)}
-    .tool-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:1rem}
-    .tool-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:1.25rem;cursor:pointer;transition:border-color .15s,background .15s,transform .12s}
-    .tool-card:hover{border-color:var(--border3);background:var(--surface2);transform:translateY(-2px)}
+    .tool-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem}
+    .tool-card{background:linear-gradient(160deg,rgba(15,23,36,.9),rgba(11,17,28,.78));border:1px solid rgba(167,139,250,.13);border-radius:var(--radius-lg);padding:1.25rem;cursor:pointer;transition:border-color .18s,background .18s,transform .16s,box-shadow .18s;box-shadow:0 12px 34px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.035)}
+    .tool-card:hover{border-color:rgba(167,139,250,.42);background:linear-gradient(160deg,rgba(20,30,46,.96),rgba(15,23,36,.88));transform:translateY(-3px);box-shadow:0 20px 50px rgba(0,0,0,.28),0 0 30px rgba(124,58,237,.12)}
     .tool-card-icon{width:40px;height:40px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;margin-bottom:.85rem}
     .tool-card-icon svg{width:19px;height:19px;stroke:currentColor}
     .tool-card h3{font-size:.9rem;font-weight:700;margin-bottom:.3rem}
@@ -561,6 +563,7 @@
 
       <div class="tool-card" data-launch="editpdf"><div class="tool-card-icon" style="background:rgba(251,191,36,.08);color:var(--yellow)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div><h3>Edit PDF</h3><p>Delete, reorder pages and add text overlays</p></div>
       <div class="tool-card" data-launch="convert"><div class="tool-card-icon" style="background:rgba(52,211,153,.08);color:var(--green)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg></div><h3>Convert PDF</h3><p>PDF to images or images to PDF</p></div>
+      <div class="tool-card" data-launch="signrequest" style="border-color:rgba(250,204,21,.28);background:linear-gradient(160deg,rgba(250,204,21,.08),rgba(124,58,237,.08))"><div class="tool-card-icon" style="background:rgba(250,204,21,.12);color:var(--yellow)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M8 16c2 2 4-2 6 0s3 0 4-1"/></svg></div><h3>Request Signatures</h3><p>Place signer fields and prepare signature requests</p></div>
       <div class="tool-card" data-launch="headerfooter"><div class="tool-card-icon" style="background:rgba(96,165,250,.08);color:var(--blue)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg></div><h3>Header &amp; Footer</h3><p>Stamp custom text on every page header and footer</p></div>
       <div class="tool-card" data-launch="flatten"><div class="tool-card-icon" style="background:rgba(52,211,153,.08);color:var(--green)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><polyline points="8 3 8 21"/><polyline points="3 9 8 9"/><polyline points="3 15 8 15"/></svg></div><h3>Flatten PDF</h3><p>Flatten form fields and annotations to static content</p></div>
     </div>
