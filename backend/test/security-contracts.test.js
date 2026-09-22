@@ -107,3 +107,12 @@ test('installed PWA registers and routes PDF files into the editor', async () =>
   assert.match(dashboard, /window\.__nyxOpenPdf/);
   assert.match(dashboard, /switchPanel\('editpdf'\)/);
 });
+
+test('landing and dashboard wallpapers use faceted glass geometry', async () => {
+  for (const path of ['docs/index.html', 'docs/dashboard.html']) {
+    const source = await readRepo(path);
+    assert.match(source, /function transformPoint/);
+    assert.match(source, /function polygonPath/);
+    assert.match(source, /back\[side\].*front\[side\]/s);
+  }
+});

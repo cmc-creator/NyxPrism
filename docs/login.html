@@ -168,7 +168,8 @@
         linear-gradient(145deg, rgba(124,58,237,.12), rgba(13,21,34,.96) 46%);
       padding: 1.2rem; box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 18px 42px rgba(0,0,0,.24);
     }
-    .session-identity { display: flex; align-items: center; gap: .85rem; margin-bottom: 1rem; }
+    .session-identity { display: grid; grid-template-columns: 42px minmax(0,1fr); align-items: center; gap: .85rem; margin-bottom: 1rem; }
+    .session-identity > div { min-width: 0; }
     .session-avatar {
       width: 42px; height: 42px; flex: 0 0 42px; border-radius: 50%;
       display: grid; place-items: center; color: #d8ccff;
@@ -180,7 +181,7 @@
       color: var(--muted); font-size: .66rem; font-weight: 800;
       letter-spacing: .11em; text-transform: uppercase; margin-bottom: .25rem;
     }
-    .session-email { color: var(--text); font-size: .9rem; font-weight: 700; overflow-wrap: anywhere; }
+    .session-email { color: var(--text); font-size: .79rem; font-weight: 700; letter-spacing: -.012em; white-space: nowrap; }
     .session-actions { display: grid; gap: .6rem; }
     .session-btn {
       width: 100%; min-height: 42px; padding: .68rem 1rem;
@@ -322,7 +323,7 @@
           </div>
           <div class="session-actions">
             <button type="button" class="session-btn session-btn-primary" id="continue-session">Continue to dashboard <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
-            <button type="button" class="session-btn session-btn-secondary" id="switch-session"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="m15 15 6 6"/><path d="M4 4l5 5"/></svg> Use a different account</button>
+            <button type="button" class="session-btn session-btn-secondary" id="switch-session"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg> Use a different account</button>
           </div>
         </div>
         <p class="card-foot" id="login-card-foot">No account? <a href="#" onclick="switchTab('trial');return false;">Start your free trial</a></p>
