@@ -50,8 +50,8 @@
     @keyframes spin{to{transform:rotate(360deg)}}
     nav{position:sticky;top:0;z-index:500;background:rgba(6,8,13,.72);backdrop-filter:blur(24px) saturate(1.25);border-bottom:1px solid rgba(167,139,250,.16);height:62px;padding:0 1.5rem;display:flex;align-items:center;gap:1rem;box-shadow:0 10px 40px rgba(0,0,0,.22)}
     .nav-brand{display:flex;align-items:center;gap:.5rem;border:0;background:none;color:inherit;padding:0;font:inherit;cursor:pointer}
-    .nav-brand-logo{width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#22c55e,var(--accent) 52%,#facc15);border-radius:8px;box-shadow:0 0 28px rgba(124,58,237,.35)}
-    .nav-brand-logo svg{width:14px;height:14px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .nav-brand-logo{width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:#05070d;border:1px solid rgba(167,139,250,.35);border-radius:8px;box-shadow:0 0 28px rgba(124,58,237,.35),inset 0 1px 0 rgba(255,255,255,.08)}
+    .nav-brand-logo svg{width:21px;height:21px;filter:drop-shadow(0 0 8px rgba(167,139,250,.45))}
     .nav-brand-name{font-size:.95rem;font-weight:800;letter-spacing:-.025em}
     .nav-brand-name em{color:var(--accent-bright);font-style:normal}
     .nav-sep{flex:1}
@@ -359,7 +359,7 @@
   <button class="hamburger-btn" id="hamburger-btn" aria-label="Open menu" style="margin-right:.5rem"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
   <button class="nav-brand" type="button" data-panel="home" aria-label="Go to dashboard home">
     <div class="nav-brand-logo">
-      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 4 6 15l18 29 18-29L24 4Z" fill="#090d16" stroke="#a78bfa" stroke-width="2"/><path d="M24 4 6 15h36L24 4Z" fill="#facc15" fill-opacity=".92"/><path d="M6 15l18 29V15H6Z" fill="#22c55e" fill-opacity=".9"/><path d="M24 15v29l18-29H24Z" fill="#7c3aed" fill-opacity=".92"/><path d="M13 15h22L24 4 13 15Z" fill="#60a5fa" fill-opacity=".86"/><path d="M24 15 6 15l18 29 18-29H24Z" fill="none" stroke="rgba(255,255,255,.72)" stroke-width="1.2"/></svg>
     </div>
     <span class="nav-brand-name"><em>Nyx</em>Prism&#8482;</span>
   </button>
