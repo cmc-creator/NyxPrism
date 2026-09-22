@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { randomBytes } from 'crypto';
+import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import pool from '../db/index.js';
 import { requireAuth } from '../middleware/auth.js';
 
@@ -158,6 +159,54 @@ router.get('/:id', requireAuth, async (req, res) => {
   } catch (err) {
     console.error('sign-requests detail error:', err.message);
     res.status(500).json({ error: 'Failed to load signature request.' });
+  }
+});
+
+router.get('/:id/final-pdf', requireAuth, async (req, res) => {
+  const requestId = parseInt(req.params.id, 10);
+  if (!Number.isInteger(requestId) || requestId < 1) return res.status(400).json({ error: 'Invalid request ID.' });
+  try {
+    const userId = await findOrCreateUser(req.user);
+    const requestResult = await pool.query(
+      `SELECT id, title, document_name, document_data
+       FROM signature_requests
+       WHERE id = $1 AND owner_user_id = $2`,
+      [requestId, userId],
+    );
+    if (!requestResult.rows.length) return res.status(404).json({ error: 'Signature request not found.' });
+    const request = requestResult.rows[0];
+    const fields = await pool.query(
+      `SELECT field_type, page_number, x, y, width, height, value_text
+       FROM signature_fields
+       WHERE request_id = $1 AND value_text IS NOT NULL AND value_text != ''
+       ORDER BY page_number, id`,
+      [requestId],
+    );
+    if (!fields.rows.length) return res.status(400).json({ error: 'No completed fields to apply yet.' });
+
+    const doc = await PDFDocument.load(Buffer.from(request.document_data), { ignoreEncryption: true });
+    const font = await doc.embedFont(StandardFonts.Helvetica);
+    const pages = doc.getPages();
+    for (const field of fields.rows) {
+      const page = pages[Number(field.page_number) - 1];
+      if (!page) continue;
+      const { width, height } = page.getSize();
+      const boxHeight = Number(field.height) * height;
+      const x = Number(field.x) * width + 4;
+      const y = height - (Number(field.y) * height) - boxHeight + 4;
+      const text = field.field_type === 'checkbox' ? 'X' : String(field.value_text || '');
+      const fontSize = Math.max(9, Math.min(18, boxHeight * 0.52));
+      page.drawText(text, { x, y, size: fontSize, font, color: rgb(0.08, 0.09, 0.12) });
+    }
+    const out = await doc.save();
+    await audit(pool, { requestId, eventType: 'final_pdf_downloaded', req });
+    const fileName = String(request.document_name || 'signed-document.pdf').replace(/\.pdf$/i, '') + '-completed.pdf';
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName.replace(/[^a-zA-Z0-9._-]/g, '_')}"`);
+    res.send(Buffer.from(out));
+  } catch (err) {
+    console.error('sign-requests final PDF error:', err.message);
+    res.status(500).json({ error: 'Failed to generate final signed PDF.' });
   }
 });
 
