@@ -35,24 +35,44 @@ router.post('/sync', requireAuth, async (req, res) => {
 router.get('/me', requireAuth, async (req, res) => {
   try {
     const developer = developerEntitlements(req.user.email);
-    if (developer) {
-      await pool.query(
-        `UPDATE users SET plan = 'professional', subscription_status = 'active',
-           trial_active = FALSE, updated_at = NOW()
-         WHERE firebase_uid = $1`,
-        [req.user.uid],
-      );
-    }
-    const { rows } = await pool.query(
-      `SELECT firebase_uid, email, first_name, last_name, plan,
+    let { rows } = await pool.query(
+      `SELECT id, firebase_uid, email, first_name, last_name, plan,
               subscription_status, trial_active, trial_start,
               current_period_end, created_at
-       FROM users WHERE firebase_uid = $1`,
-      [req.user.uid],
+       FROM users
+       WHERE firebase_uid = $1 OR LOWER(email) = LOWER($2)
+       ORDER BY (firebase_uid = $1) DESC
+       LIMIT 1`,
+      [req.user.uid, req.user.email],
     );
 
-    if (!rows.length) return res.status(404).json({ error: 'User not found.' });
-    res.json({ ...rows[0], ...(developer || {}) });
+    if (!rows.length) {
+      const created = await pool.query(
+        `INSERT INTO users (firebase_uid, email, plan, subscription_status, trial_start)
+         VALUES ($1, $2, $3, $4, NOW())
+         RETURNING id, firebase_uid, email, first_name, last_name, plan,
+                   subscription_status, trial_active, trial_start,
+                   current_period_end, created_at`,
+        [req.user.uid, req.user.email, developer ? 'professional' : 'trial', developer ? 'active' : 'trialing'],
+      );
+      rows = created.rows;
+    }
+
+    const account = rows[0];
+    if (account.firebase_uid !== req.user.uid || developer) {
+      await pool.query(
+        `UPDATE users SET firebase_uid = $1,
+           plan = CASE WHEN $3 THEN 'professional' ELSE plan END,
+           subscription_status = CASE WHEN $3 THEN 'active' ELSE subscription_status END,
+           trial_active = CASE WHEN $3 THEN FALSE ELSE trial_active END,
+           updated_at = NOW()
+         WHERE id = $2`,
+        [req.user.uid, account.id, Boolean(developer)],
+      );
+    }
+
+    const { id: _id, ...publicAccount } = account;
+    res.json({ ...publicAccount, firebase_uid: req.user.uid, ...(developer || {}) });
   } catch (err) {
     console.error('User /me error:', err);
     res.status(500).json({ error: 'Internal error.' });

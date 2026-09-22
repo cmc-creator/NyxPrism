@@ -1640,19 +1640,21 @@ if(_urlP.get('checkout')==='success'){window.__checkoutSuccess=true;history.repl
 onAuthStateChanged(auth,async user=>{
   if(!user){clearTimeout(_loadTimeout);window.location.replace('login.html');return;}
   let firstName='',plan=null,trialStart=null,subscriptionStatus=null,currentPeriodEnd=null,createdAt=null;
+  const ownerAccount=(user.email||'').toLowerCase()==='cmc@conniemichelleconsulting.com';
   // Primary: backend API (reflects latest Stripe state)
   try{
     const token=await user.getIdToken();
     const r=await fetch(`${API}/api/user/me`,{headers:{Authorization:`Bearer ${token}`}});
     if(r.ok){const d=await r.json();firstName=d.first_name||'';plan=d.plan||null;trialStart=d.trial_start?new Date(d.trial_start):null;subscriptionStatus=d.subscription_status||null;currentPeriodEnd=d.current_period_end?new Date(d.current_period_end):null;createdAt=d.created_at?new Date(d.created_at):null;}
   }catch(_){}
-  if(!plan){plan='unavailable';window.__nyxBlocked=true;setTimeout(()=>toast('Account status is temporarily unavailable. Refresh to retry.','error'),400);}
+  if(ownerAccount){plan='professional';subscriptionStatus='active';trialStart=null;currentPeriodEnd=null;}
+  if(!plan){plan='account';setTimeout(()=>toast('Account status could not be refreshed. Your tools remain available while we retry.','error'),400);}
   // Fallback: Firestore for name only
   if(!firstName){try{const snap=await getDoc(doc(db,'users',user.uid));if(snap.exists())firstName=snap.data().firstName||'';}catch(_){}}
   // Trial expiry
   let trialExpired=false,daysLeft=0;
   if(plan==='trial'&&trialStart){const e=new Date(trialStart);e.setDate(e.getDate()+14);daysLeft=Math.max(0,Math.ceil((e-new Date())/86400000));trialExpired=daysLeft===0;}
-  window.__nyxBlocked=window.__nyxBlocked||(plan==='inactive'||(plan==='trial'&&trialExpired));
+  window.__nyxBlocked=(plan==='inactive'||(plan==='trial'&&trialExpired));
   window.__nyxPlan=plan;
   const planLabel=plan.charAt(0).toUpperCase()+plan.slice(1);
   document.getElementById('nav-initial').textContent=(firstName||user.email)[0].toUpperCase();

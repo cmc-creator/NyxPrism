@@ -84,3 +84,16 @@ test('Python project metadata declares dependencies outside project URLs', async
   assert.match(source, /\ndependencies = \[/);
   assert.doesNotMatch(source, /\[project\.urls\][\s\S]*\ndependencies = \[/);
 });
+
+test('account lookup reconciles verified email and Firebase UID', async () => {
+  const source = await read('src/routes/user.js');
+  assert.match(source, /firebase_uid = \$1 OR LOWER\(email\) = LOWER\(\$2\)/);
+  assert.match(source, /UPDATE users SET firebase_uid = \$1/);
+});
+
+test('dashboard never exposes an unavailable subscription plan', async () => {
+  const source = await readRepo('docs/dashboard.html');
+  assert.doesNotMatch(source, /plan='unavailable'/);
+  assert.match(source, /plan='account'/);
+  assert.match(source, /ownerAccount.*cmc@conniemichelleconsulting\.com/);
+});
