@@ -75,9 +75,13 @@ CREATE TABLE IF NOT EXISTS signature_recipients (
   status       TEXT NOT NULL DEFAULT 'pending',
   viewed_at    TIMESTAMPTZ,
   created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  completed_at TIMESTAMPTZ
+  completed_at TIMESTAMPTZ,
+  declined_at  TIMESTAMPTZ,
+  decline_reason TEXT
 );
 ALTER TABLE signature_recipients ADD COLUMN IF NOT EXISTS viewed_at TIMESTAMPTZ;
+ALTER TABLE signature_recipients ADD COLUMN IF NOT EXISTS declined_at TIMESTAMPTZ;
+ALTER TABLE signature_recipients ADD COLUMN IF NOT EXISTS decline_reason TEXT;
 
 CREATE TABLE IF NOT EXISTS signature_fields (
   id           SERIAL PRIMARY KEY,
@@ -108,4 +112,49 @@ CREATE TABLE IF NOT EXISTS signature_audit_events (
   ip_address   TEXT,
   user_agent   TEXT,
   created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS signature_notifications (
+  id              SERIAL PRIMARY KEY,
+  request_id      INTEGER NOT NULL REFERENCES signature_requests(id) ON DELETE CASCADE,
+  recipient_id    INTEGER REFERENCES signature_recipients(id) ON DELETE SET NULL,
+  notification_type TEXT NOT NULL,
+  status          TEXT NOT NULL DEFAULT 'queued',
+  error           TEXT,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS signature_alert_acknowledgements (
+  id          SERIAL PRIMARY KEY,
+  request_id  INTEGER NOT NULL REFERENCES signature_requests(id) ON DELETE CASCADE,
+  user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  acknowledged_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (request_id, user_id)
+);
+
+CREATE TABLE IF NOT EXISTS distribution_batches (
+  id            SERIAL PRIMARY KEY,
+  owner_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  title         TEXT NOT NULL,
+  document_name TEXT NOT NULL,
+  document_mime TEXT NOT NULL DEFAULT 'application/pdf',
+  document_size INTEGER,
+  document_data BYTEA NOT NULL,
+  status        TEXT NOT NULL DEFAULT 'draft',
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  sent_at       TIMESTAMPTZ
+);
+
+CREATE TABLE IF NOT EXISTS distribution_recipients (
+  id        SERIAL PRIMARY KEY,
+  batch_id  INTEGER NOT NULL REFERENCES distribution_batches(id) ON DELETE CASCADE,
+  name      TEXT NOT NULL,
+  email     TEXT NOT NULL,
+  token     TEXT NOT NULL UNIQUE,
+  status    TEXT NOT NULL DEFAULT 'queued',
+  sent_at   TIMESTAMPTZ,
+  opened_at TIMESTAMPTZ,
+  failed_at TIMESTAMPTZ,
+  error     TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

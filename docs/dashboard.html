@@ -409,6 +409,10 @@
     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
     Dashboard
   </button>
+  <button class="nav-item" data-panel="alerts">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 10-12 0c0 7-3 7-3 7h18s-3 0-3-7"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+    Alerts
+  </button>
   <div class="sidebar-section">PDF Tools</div>
   <button class="nav-item" data-panel="split">
     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M8 3H3v5M3 21l7-7M21 21l-7-7M3 16v5h5M21 16v5h-5"/></svg>
@@ -462,6 +466,10 @@
   <button class="nav-item" data-panel="signrequest">
     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M8 16c2 2 4-2 6 0s3 0 4-1"/></svg>
     Request Signatures
+  </button>
+  <button class="nav-item" data-panel="distribution">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+    Distribute Documents
   </button>
   <button class="nav-item" data-panel="annotate">
     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
@@ -582,6 +590,18 @@
         <button id="recent-clear-btn" style="font-size:.72rem;color:var(--muted);background:none;border:none;cursor:pointer;padding:.2rem .4rem;border-radius:4px" title="Clear history">Clear</button>
       </div>
       <div id="recent-files-list"><p style="color:var(--muted);font-size:.82rem;padding:.35rem 0">No files processed yet — download a result to see it here.</p></div>
+    </div>
+  </div>
+
+  <!-- ALERTS -->
+  <div class="panel" id="panel-alerts">
+    <div class="page-header"><h1>Alerts</h1><p>Track signature requests nearing expiration and acknowledge completed follow-up.</p></div>
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1rem">
+        <div class="card-title" style="margin:0">Document Alerts</div>
+        <button class="btn btn-secondary" id="alerts-refresh" type="button">Refresh</button>
+      </div>
+      <div id="alerts-list"><div style="color:var(--muted);font-size:.85rem">Loading alerts…</div></div>
     </div>
   </div>
 
@@ -1049,6 +1069,28 @@
         </div>
         <div class="card-title" style="margin-top:1.25rem">Recent Requests</div>
         <div id="sigreq-list"><div style="color:var(--muted);font-size:.85rem">No requests loaded yet.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DISTRIBUTE DOCUMENTS PANEL -->
+  <div class="panel" id="panel-distribution">
+    <div class="page-header"><h1>Distribute Documents</h1><p>Send a PDF version to one recipient or a bulk recipient batch and track opened / failed delivery state.</p></div>
+    <div class="sigreq-layout">
+      <div class="card">
+        <div class="card-title">Document</div>
+        <div class="drop-zone" id="dist-drop"><input type="file" id="dist-file" accept=".pdf,application/pdf" /><div class="drop-title">Drop PDF here</div><div class="drop-sub">or click to browse</div></div>
+        <div class="form-group"><label class="form-label">Batch title</label><input class="form-input" id="dist-title" placeholder="Policy update distribution" /></div>
+        <div class="card-title" style="margin-top:1rem">Recipients</div>
+        <div id="dist-recipients"></div>
+        <button class="btn btn-ghost" id="dist-add-recipient" type="button" style="margin-top:.5rem">Add Recipient</button>
+        <div class="btn-row" style="margin-top:1rem"><button class="btn btn-primary" id="dist-send" type="button">Send Distribution</button><button class="btn btn-secondary" id="dist-save" type="button">Save Draft</button></div>
+        <div class="result-box" id="dist-result" style="display:none;margin-top:1rem"></div>
+      </div>
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1rem"><div class="card-title" style="margin:0">Distribution Batches</div><button class="btn btn-secondary" id="dist-refresh" type="button">Refresh</button></div>
+        <div id="dist-list"><div style="color:var(--muted);font-size:.85rem">No batches loaded yet.</div></div>
+        <div id="dist-detail" style="margin-top:1rem"></div>
       </div>
     </div>
   </div>
@@ -2723,6 +2765,42 @@ async function loadQRCode(){
 })();
 
 // ═══════════════════════════════════════════════════════
+// DOCUMENT DISTRIBUTION
+(function(){
+  const fileInput=document.getElementById('dist-file'),drop=document.getElementById('dist-drop'),recipientsEl=document.getElementById('dist-recipients'),resultEl=document.getElementById('dist-result');
+  if(!fileInput||!drop||!recipientsEl)return;
+  let distFile=null;
+  function fileToDataUrl(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(file);});}
+  function addRecipient(name='',email=''){const row=document.createElement('div');row.style.cssText='display:grid;grid-template-columns:1fr 1fr auto;gap:.45rem;align-items:center;margin-top:.45rem';row.innerHTML='<input class="form-input dr-name" placeholder="Name" value="'+name.replace(/"/g,'&quot;')+'" /><input class="form-input dr-email" placeholder="email@example.com" value="'+email.replace(/"/g,'&quot;')+'" /><button class="fremove" type="button" title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';row.querySelector('button').addEventListener('click',()=>row.remove());recipientsEl.appendChild(row);}
+  function recipients(){return Array.from(recipientsEl.children).map(row=>({name:row.querySelector('.dr-name').value.trim(),email:row.querySelector('.dr-email').value.trim()})).filter(r=>r.name||r.email);}
+  addRecipient();document.getElementById('dist-add-recipient').addEventListener('click',()=>addRecipient());
+  setupDrop(drop,fileInput,files=>{distFile=files[0];if(distFile)toast('PDF loaded for distribution','success');});
+  async function saveDistribution(sendNow,btn){if(!distFile)return toast('Upload a PDF first','error');const recips=recipients();if(!recips.length)return toast('Add at least one recipient','error');const token=await auth.currentUser?.getIdToken(true);if(!token)return toast('Please sign in again','error');btn.disabled=true;showResult(resultEl,'info',sendNow?'Sending document distribution...':'Saving distribution draft...');try{const documentBase64=await fileToDataUrl(distFile);const res=await fetch(API+'/api/distributions',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({title:document.getElementById('dist-title').value||distFile.name,documentName:distFile.name,documentBase64,recipients:recips,sendNow})});const data=await res.json();if(!res.ok)throw new Error(data.error||'Save failed');showResult(resultEl,'success',sendNow?'Distribution sent.':'Distribution draft saved.');loadBatches();}catch(err){showResult(resultEl,'error',err.message);}finally{btn.disabled=false;}}
+  async function loadBatches(){const list=document.getElementById('dist-list'),token=await auth.currentUser?.getIdToken(true);if(!token)return;try{const res=await fetch(API+'/api/distributions',{headers:{Authorization:'Bearer '+token}});const data=await res.json();if(!res.ok)throw new Error(data.error||'Load failed');if(!data.batches.length){list.innerHTML='<div style="color:var(--muted);font-size:.85rem">No distribution batches yet.</div>';return;}list.innerHTML='';data.batches.forEach(batch=>{const row=document.createElement('div');row.className='recent-file-row';row.style.cursor='default';row.innerHTML='<span class="recent-fname">'+batch.title+'<br><span style="color:var(--muted);font-size:.72rem">'+batch.recipient_count+' recipients · '+batch.opened_count+' opened · '+batch.failed_count+' failed</span></span><span class="recent-tool-badge">'+batch.status+'</span><button class="btn btn-ghost" style="font-size:.72rem;padding:.25rem .5rem">Inspect</button>';row.querySelector('button').addEventListener('click',()=>loadBatchDetail(batch.id));list.appendChild(row);});}catch(err){list.innerHTML='<div style="color:var(--red);font-size:.85rem">'+err.message+'</div>';}}
+  async function loadBatchDetail(id){const detail=document.getElementById('dist-detail'),token=await auth.currentUser?.getIdToken(true);const res=await fetch(API+'/api/distributions/'+id,{headers:{Authorization:'Bearer '+token}});const data=await res.json();if(!res.ok)return toast(data.error||'Could not load batch','error');detail.innerHTML='<div class="card-title">Recipients</div>';data.recipients.forEach(r=>{const row=document.createElement('div');row.className='recent-file-row';row.style.cursor='default';row.innerHTML='<span class="recent-fname">'+r.name+'<br><span style="color:var(--muted);font-size:.72rem">'+r.email+'</span></span><span class="recent-tool-badge">'+r.status+'</span>';detail.appendChild(row);});}
+  document.getElementById('dist-send').addEventListener('click',function(){saveDistribution(true,this);});document.getElementById('dist-save').addEventListener('click',function(){saveDistribution(false,this);});document.getElementById('dist-refresh').addEventListener('click',loadBatches);document.addEventListener('nyx:panel-changed',e=>{if(e.detail&&e.detail.panel==='distribution')loadBatches();});
+})();
+
+// ═══════════════════════════════════════════════════════
+// ALERTS PANEL
+(function(){
+  const list=document.getElementById('alerts-list'),refresh=document.getElementById('alerts-refresh');
+  if(!list||!refresh)return;
+  async function loadAlerts(){
+    const token=await auth.currentUser?.getIdToken(true);if(!token)return;
+    list.innerHTML='<div style="color:var(--muted);font-size:.85rem">Loading alerts…</div>';
+    try{const res=await fetch(API+'/api/sign-requests/alerts?windowDays=30&upcomingDays=7',{headers:{Authorization:'Bearer '+token}});const data=await res.json();if(!res.ok)throw new Error(data.error||'Failed to load alerts');
+      const active=(data.alerts||[]).filter(a=>!a.acknowledged);
+      if(!active.length){list.innerHTML='<div class="result-box success visible"><div class="rtext">No active document alerts.</div></div>';return;}
+      list.innerHTML='';active.forEach(alert=>{const row=document.createElement('div');row.className='recent-file-row';row.style.cursor='default';const sev=alert.severity==='expired'?'Expired':alert.severity==='upcoming'?'Expiring soon':'Notice';row.innerHTML='<span class="recent-fname">'+alert.title+'<br><span style="color:var(--muted);font-size:.72rem">'+alert.document_name+' · '+sev+' · '+alert.days_remaining+' day(s)</span></span><span class="recent-tool-badge">'+alert.status+'</span><button class="btn btn-ghost" style="font-size:.72rem;padding:.25rem .5rem">Acknowledge</button>';row.querySelector('button').addEventListener('click',()=>ackAlert(alert.id));list.appendChild(row);});
+    }catch(err){list.innerHTML='<div class="result-box error visible"><div class="rtext">'+err.message+'</div></div>';}
+  }
+  async function ackAlert(id){const token=await auth.currentUser?.getIdToken(true);if(!token)return;try{const res=await fetch(API+'/api/sign-requests/alerts/'+id+'/ack',{method:'POST',headers:{Authorization:'Bearer '+token}});if(!res.ok)throw new Error('Could not acknowledge alert');toast('Alert acknowledged','success');loadAlerts();}catch(err){toast(err.message,'error');}}
+  refresh.addEventListener('click',loadAlerts);
+  document.addEventListener('nyx:panel-changed',e=>{if(e.detail&&e.detail.panel==='alerts')loadAlerts();});
+})();
+
+// ═══════════════════════════════════════════════════════
 // ANNOTATE PDF
 {
   let annPdfDoc = null, annPdfJsDoc = null, annCurrentPage = 1, annTotalPages = 1;
@@ -3375,7 +3453,7 @@ var NyxRecents = (function(){
     split:"Split",merge:"Merge",compress:"Compress",watermark:"Watermark",protect:"Protect",
     extract:"Extract",ocr:"OCR",rotate:"Rotate",editpdf:"Edit",convert:"Convert",sign:"Sign",signrequest:"Sign Request",
     annotate:"Annotate",pagemanager:"Pages",number:"Number",redact:"Redact",batch:"Batch",
-    aisplit:"AI Split",pdf2qr:"QR Stamp"
+    aisplit:"AI Split",alerts:"Alerts",distribution:"Distribution",pdf2qr:"QR Stamp"
   };
   function get(){ try{ return JSON.parse(localStorage.getItem(KEY))||[]; }catch(e){ return []; } }
   function add(name, tool, sizeBytes){
@@ -3537,6 +3615,8 @@ document.addEventListener("keydown", function(e){
     {panel:"redact",label:"Redact PDF",desc:"Permanently black out sensitive text"},
     {panel:"batch",label:"Batch Compress",desc:"Compress many PDFs at once with rename templates"},
     {panel:"diff",label:"PDF Diff Viewer",desc:"Compare two PDFs — pixel differences shown in red"},
+    {panel:"alerts",label:"Alerts",desc:"Review signature expirations and document follow-up"},
+    {panel:"distribution",label:"Distribute Documents",desc:"Send PDF versions to individual or bulk recipients"},
     {panel:"apikeys",label:"API Keys",desc:"Manage programmatic API access"},
     {panel:"account",label:"Account Settings",desc:"Profile, subscription, and billing"},
     {panel:"home",label:"Home",desc:"Dashboard overview and recent files"},

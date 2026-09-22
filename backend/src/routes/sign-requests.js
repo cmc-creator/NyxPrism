@@ -31,6 +31,18 @@ async function sendEmail({ to, subject, html }) {
   if (!res.ok) throw new Error(`Brevo error ${res.status}`);
 }
 
+async function recordNotification(clientOrPool, { requestId, recipientId = null, type, status, error = null }) {
+  await clientOrPool.query(
+    `INSERT INTO signature_notifications (request_id, recipient_id, notification_type, status, error)
+     VALUES ($1, $2, $3, $4, $5)`,
+    [requestId, recipientId, type, status, error],
+  );
+}
+
+function signerEmailHtml({ signer, title, documentName, message, ownerEmail }) {
+  return `<p>Hello ${escapeHtml(signer.name)},</p><p>${escapeHtml(ownerEmail || 'NyxPrism')} requested your signature on <strong>${escapeHtml(documentName)}</strong>.</p>${message ? `<p style="white-space:pre-wrap;">${escapeHtml(message)}</p>` : ''}<p><a href="${signer.url}">Review and sign the document</a></p><p>This secure link is unique to you.</p>`;
+}
+
 async function audit(clientOrPool, { requestId, recipientId = null, eventType, detail = null, req = null }) {
   await clientOrPool.query(
     `INSERT INTO signature_audit_events (request_id, recipient_id, event_type, detail, ip_address, user_agent)
@@ -123,6 +135,64 @@ router.get('/', requireAuth, async (req, res) => {
   }
 });
 
+router.get('/alerts', requireAuth, async (req, res) => {
+  const windowDays = Math.max(1, Math.min(365, parseInt(req.query.windowDays, 10) || 30));
+  const upcomingDays = Math.max(1, Math.min(windowDays, parseInt(req.query.upcomingDays, 10) || 7));
+  try {
+    const userId = await findOrCreateUser(req.user);
+    await pool.query(
+      `UPDATE signature_requests SET status = 'expired', updated_at = NOW()
+       WHERE owner_user_id = $1 AND expires_at < NOW() AND status NOT IN ('completed','declined','expired')`,
+      [userId],
+    );
+    const result = await pool.query(
+      `SELECT r.id, r.title, r.document_name, r.status, r.expires_at,
+              CEIL(EXTRACT(EPOCH FROM (r.expires_at - NOW())) / 86400)::int AS days_remaining,
+              a.acknowledged_at
+       FROM signature_requests r
+       LEFT JOIN signature_alert_acknowledgements a ON a.request_id = r.id AND a.user_id = $1
+       WHERE r.owner_user_id = $1
+         AND r.expires_at IS NOT NULL
+         AND r.status NOT IN ('completed','declined')
+         AND r.expires_at <= NOW() + ($2 || ' days')::interval
+       ORDER BY r.expires_at ASC`,
+      [userId, windowDays],
+    );
+    res.json({
+      alerts: result.rows.map(row => ({
+        ...row,
+        severity: row.status === 'expired' || row.days_remaining <= 0 ? 'expired' : row.days_remaining <= upcomingDays ? 'upcoming' : 'notice',
+        acknowledged: Boolean(row.acknowledged_at),
+      })),
+      windowDays,
+      upcomingDays,
+    });
+  } catch (err) {
+    console.error('sign-requests alerts error:', err.message);
+    res.status(500).json({ error: 'Failed to load alerts.' });
+  }
+});
+
+router.post('/alerts/:id/ack', requireAuth, async (req, res) => {
+  const requestId = parseInt(req.params.id, 10);
+  if (!Number.isInteger(requestId) || requestId < 1) return res.status(400).json({ error: 'Invalid request ID.' });
+  try {
+    const userId = await findOrCreateUser(req.user);
+    const owns = await pool.query('SELECT id FROM signature_requests WHERE id = $1 AND owner_user_id = $2', [requestId, userId]);
+    if (!owns.rows.length) return res.status(404).json({ error: 'Alert not found.' });
+    await pool.query(
+      `INSERT INTO signature_alert_acknowledgements (request_id, user_id)
+       VALUES ($1, $2)
+       ON CONFLICT (request_id, user_id) DO UPDATE SET acknowledged_at = NOW()`,
+      [requestId, userId],
+    );
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('sign-requests ack error:', err.message);
+    res.status(500).json({ error: 'Failed to acknowledge alert.' });
+  }
+});
+
 router.get('/:id', requireAuth, async (req, res) => {
   const requestId = parseInt(req.params.id, 10);
   if (!Number.isInteger(requestId) || requestId < 1) return res.status(400).json({ error: 'Invalid request ID.' });
@@ -136,7 +206,7 @@ router.get('/:id', requireAuth, async (req, res) => {
     );
     if (!requestResult.rows.length) return res.status(404).json({ error: 'Signature request not found.' });
     const recipients = await pool.query(
-      `SELECT id, name, email, role_order, token, status, viewed_at, completed_at
+      `SELECT id, name, email, role_order, token, status, viewed_at, completed_at, declined_at, decline_reason
        FROM signature_recipients
        WHERE request_id = $1
        ORDER BY role_order, id`,
@@ -249,14 +319,15 @@ router.post('/', requireAuth, async (req, res) => {
     const recipientIds = new Map();
     for (const recipient of recipients) {
       const token = randomBytes(32).toString('hex');
+      const recipientStatus = sendNow && recipient.roleOrder > 1 ? 'waiting' : 'pending';
       const inserted = await client.query(
         `INSERT INTO signature_recipients (request_id, name, email, role_order, token, status)
-         VALUES ($1, $2, $3, $4, $5, 'pending')
+         VALUES ($1, $2, $3, $4, $5, $6)
          RETURNING id, email`,
-        [request.id, recipient.name, recipient.email, recipient.roleOrder, token],
+        [request.id, recipient.name, recipient.email, recipient.roleOrder, token, recipientStatus],
       );
       recipientIds.set(inserted.rows[0].email, inserted.rows[0].id);
-      signers.push({ ...recipient, token, url: `${process.env.FRONTEND_URL || 'https://nyxprism.com'}/sign-request.html?token=${token}` });
+      signers.push({ ...recipient, id: inserted.rows[0].id, status: recipientStatus, token, url: `${process.env.FRONTEND_URL || 'https://nyxprism.com'}/sign-request.html?token=${token}` });
     }
 
     for (const field of fields) {
@@ -299,11 +370,15 @@ router.post('/', requireAuth, async (req, res) => {
   let emailWarning = null;
   if (sendNow) {
     try {
-      await Promise.all(signers.map(signer => sendEmail({
-        to: signer.email,
-        subject: `Signature requested: ${title}`,
-        html: `<p>Hello ${escapeHtml(signer.name)},</p><p>${escapeHtml(req.user.email || 'NyxPrism')} requested your signature on <strong>${escapeHtml(documentName)}</strong>.</p>${message ? `<p style="white-space:pre-wrap;">${escapeHtml(message)}</p>` : ''}<p><a href="${signer.url}">Review and sign the document</a></p><p>This secure link is unique to you.</p>`,
-      })));
+      await Promise.all(signers.filter(signer => signer.status === 'pending').map(async signer => {
+        try {
+          await sendEmail({ to: signer.email, subject: `Signature requested: ${title}`, html: signerEmailHtml({ signer, title, documentName, message, ownerEmail: req.user.email }) });
+          await recordNotification(pool, { requestId: request.id, recipientId: signer.id, type: 'signature_request_sent', status: 'sent' });
+        } catch (err) {
+          await recordNotification(pool, { requestId: request.id, recipientId: signer.id, type: 'signature_request_sent', status: 'failed', error: err.message });
+          throw err;
+        }
+      }));
     } catch (err) {
       emailWarning = 'Draft saved, but email delivery failed. Check BREVO_API_KEY.';
       console.error('sign-requests email error:', err.message);
@@ -327,6 +402,8 @@ router.get('/public/:token', async (req, res) => {
     if (!recipientResult.rows.length) return res.status(404).json({ error: 'Signature link not found.' });
     const row = recipientResult.rows[0];
     if (row.expires_at && new Date(row.expires_at).getTime() < Date.now()) return res.status(410).json({ error: 'Signature link expired.' });
+    if (row.recipient_status === 'waiting') return res.status(423).json({ error: 'This request is waiting for a previous signer.' });
+    if (row.recipient_status === 'declined') return res.status(410).json({ error: 'This signature request was declined.' });
     await pool.query('UPDATE signature_recipients SET viewed_at = COALESCE(viewed_at, NOW()) WHERE id = $1', [row.recipient_id]);
     await audit(pool, { requestId: row.request_id, recipientId: row.recipient_id, eventType: 'viewed', req });
     const fields = await pool.query(
@@ -370,6 +447,27 @@ router.post('/public/:token/complete', async (req, res) => {
     await pool.query('UPDATE signature_recipients SET status = $1, completed_at = NOW() WHERE id = $2', ['completed', recipient.id]);
     await audit(pool, { requestId: recipient.request_id, recipientId: recipient.id, eventType: 'completed', req });
 
+    const next = await pool.query(
+      `SELECT sr.id, sr.name, sr.email, sr.token, r.title, r.document_name, r.message
+       FROM signature_recipients sr
+       JOIN signature_requests r ON r.id = sr.request_id
+       WHERE sr.request_id = $1 AND sr.status = 'waiting'
+       ORDER BY sr.role_order, sr.id
+       LIMIT 1`,
+      [recipient.request_id],
+    );
+    if (next.rows.length) {
+      const signer = { ...next.rows[0], url: `${process.env.FRONTEND_URL || 'https://nyxprism.com'}/sign-request.html?token=${next.rows[0].token}` };
+      await pool.query('UPDATE signature_recipients SET status = $1 WHERE id = $2', ['pending', signer.id]);
+      await audit(pool, { requestId: recipient.request_id, recipientId: signer.id, eventType: 'advanced', detail: 'Sequential signer activated', req });
+      try {
+        await sendEmail({ to: signer.email, subject: `Signature requested: ${signer.title}`, html: signerEmailHtml({ signer, title: signer.title, documentName: signer.document_name, message: signer.message, ownerEmail: 'NyxPrism' }) });
+        await recordNotification(pool, { requestId: recipient.request_id, recipientId: signer.id, type: 'signature_request_advanced', status: 'sent' });
+      } catch (err) {
+        await recordNotification(pool, { requestId: recipient.request_id, recipientId: signer.id, type: 'signature_request_advanced', status: 'failed', error: err.message });
+      }
+    }
+
     const remaining = await pool.query('SELECT COUNT(*) AS count FROM signature_recipients WHERE request_id = $1 AND status != $2', [recipient.request_id, 'completed']);
     if (Number(remaining.rows[0].count) === 0) {
       await pool.query('UPDATE signature_requests SET status = $1, completed_at = NOW(), updated_at = NOW() WHERE id = $2', ['completed', recipient.request_id]);
@@ -378,6 +476,22 @@ router.post('/public/:token/complete', async (req, res) => {
   } catch (err) {
     console.error('sign-requests public complete error:', err.message);
     res.status(500).json({ error: 'Failed to complete signature request.' });
+  }
+});
+
+router.post('/public/:token/decline', async (req, res) => {
+  const reason = String(req.body?.reason || '').trim().slice(0, 1000) || null;
+  try {
+    const recipientResult = await pool.query('SELECT id, request_id FROM signature_recipients WHERE token = $1 LIMIT 1', [req.params.token]);
+    if (!recipientResult.rows.length) return res.status(404).json({ error: 'Signature link not found.' });
+    const recipient = recipientResult.rows[0];
+    await pool.query('UPDATE signature_recipients SET status = $1, declined_at = NOW(), decline_reason = $2 WHERE id = $3', ['declined', reason, recipient.id]);
+    await pool.query('UPDATE signature_requests SET status = $1, updated_at = NOW() WHERE id = $2', ['declined', recipient.request_id]);
+    await audit(pool, { requestId: recipient.request_id, recipientId: recipient.id, eventType: 'declined', detail: reason, req });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('sign-requests public decline error:', err.message);
+    res.status(500).json({ error: 'Failed to decline signature request.' });
   }
 });
 

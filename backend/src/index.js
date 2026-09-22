@@ -16,6 +16,7 @@ import aiSplitRouter  from './routes/ai-split.js';
 import apiKeysRouter  from './routes/api-keys.js';
 import adminRouter    from './routes/admin.js';
 import signRequestsRouter from './routes/sign-requests.js';
+import distributionsRouter from './routes/distributions.js';
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -94,6 +95,7 @@ app.use('/api/ai-assist', aiSplitLimiter, aiAssistRouter);
 app.post('/api/keys',     keyCreateLimiter);
 app.use('/api/keys',      apiKeysRouter);
 app.use('/api/sign-requests', signRequestsRouter);
+app.use('/api/distributions', distributionsRouter);
 app.use('/api/admin',     adminRouter);
 
 // ── 404 catch-all ────────────────────────────────────────────────────────
