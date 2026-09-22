@@ -89,6 +89,11 @@
     .page-header{margin-bottom:1.75rem}
     .page-header h1{font-size:1.75rem;font-weight:900;letter-spacing:-.04em;margin-bottom:.35rem;text-shadow:0 10px 35px rgba(124,58,237,.18)}
     .page-header p{font-size:.875rem;color:var(--muted)}
+    #panel-home .page-header{position:relative;overflow:hidden;border:1px solid rgba(167,139,250,.22);border-radius:18px;padding:1.4rem 1.55rem;background:linear-gradient(135deg,rgba(124,58,237,.16),rgba(15,23,36,.92) 48%,rgba(34,197,94,.10));box-shadow:0 22px 70px rgba(0,0,0,.34),0 0 50px rgba(124,58,237,.10);margin-bottom:1.35rem}
+    #panel-home .page-header::after{content:"";position:absolute;right:-80px;top:-120px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(250,204,21,.18),transparent 62%);pointer-events:none}
+    #panel-home .page-header h1{font-size:2rem;line-height:1.05}
+    #panel-home .page-header p{color:var(--text2);font-size:.95rem;letter-spacing:.01em}
+    #panel-home .card-title{color:var(--accent-bright);letter-spacing:.12em}
     .card{background:linear-gradient(180deg,rgba(15,23,36,.88),rgba(11,16,26,.86));border:1px solid rgba(167,139,250,.14);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1.25rem;box-shadow:0 18px 60px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.035)}
     .card-title{font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:1.1rem}
     .drop-zone{border:2px dashed var(--border2);border-radius:var(--radius-lg);padding:2.5rem 1.5rem;text-align:center;background:var(--bg2);transition:border-color .2s,background .2s;cursor:pointer;position:relative;margin-bottom:1.25rem}
@@ -1424,6 +1429,7 @@ function renderStats(s){
 }
 
 const loading=document.getElementById('loading-screen'),content=document.getElementById('main-content');
+const NYX_DEVELOPER_EMAILS=new Set(['cmc@conniemichelleconsulting.com']);
 
 // Safety-net: force-hide spinner after 12s if JS hangs
 const _loadTimeout=setTimeout(()=>{
@@ -1446,6 +1452,9 @@ onAuthStateChanged(auth,async user=>{
     const r=await fetch(`${API}/api/user/me`,{headers:{Authorization:`Bearer ${token}`}});
     if(r.ok){const d=await r.json();firstName=d.first_name||'';plan=d.plan||'trial';trialStart=d.trial_start?new Date(d.trial_start):null;subscriptionStatus=d.subscription_status||null;currentPeriodEnd=d.current_period_end?new Date(d.current_period_end):null;createdAt=d.created_at?new Date(d.created_at):null;}
   }catch(_){}
+  if(NYX_DEVELOPER_EMAILS.has((user.email||'').toLowerCase())){
+    plan='professional';subscriptionStatus='active';trialStart=null;currentPeriodEnd=null;
+  }
   // Fallback: Firestore for name only
   if(!firstName){try{const snap=await getDoc(doc(db,'users',user.uid));if(snap.exists())firstName=snap.data().firstName||'';}catch(_){}}
   // Trial expiry
@@ -1460,6 +1469,7 @@ onAuthStateChanged(auth,async user=>{
   document.getElementById('stat-plan').textContent=planLabel;
   document.getElementById('home-welcome').textContent=`Welcome back${firstName?', '+firstName:''}!`;
   // Trial banner
+  document.getElementById('trial-banner').style.display='none';
   if(plan==='trial'&&trialStart){
     document.getElementById('trial-banner').style.display='flex';
     if(daysLeft>0){document.getElementById('trial-days').textContent=`${daysLeft} day${daysLeft!==1?'s':''}`;document.getElementById('trial-msg').textContent='left in your free trial — upgrade to keep full access.';}
