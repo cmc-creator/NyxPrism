@@ -7,6 +7,7 @@ const router = Router();
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const FIELD_TYPES = new Set(['signature', 'initials', 'name', 'date', 'text', 'checkbox']);
 const MAX_DOCUMENT_BYTES = 8 * 1024 * 1024;
+const REQUEST_DAYS = 30;
 
 function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, char => ({
@@ -27,6 +28,14 @@ async function sendEmail({ to, subject, html }) {
     }),
   });
   if (!res.ok) throw new Error(`Brevo error ${res.status}`);
+}
+
+async function audit(clientOrPool, { requestId, recipientId = null, eventType, detail = null, req = null }) {
+  await clientOrPool.query(
+    `INSERT INTO signature_audit_events (request_id, recipient_id, event_type, detail, ip_address, user_agent)
+     VALUES ($1, $2, $3, $4, $5, $6)`,
+    [requestId, recipientId, eventType, detail, req?.ip || null, req?.headers?.['user-agent'] || null],
+  );
 }
 
 function normalizeDocument(body) {
@@ -99,7 +108,7 @@ router.get('/', requireAuth, async (req, res) => {
   try {
     const userId = await findOrCreateUser(req.user);
     const result = await pool.query(
-      `SELECT id, title, document_name, status, created_at, sent_at, completed_at
+      `SELECT id, title, document_name, status, created_at, sent_at, completed_at, expires_at
        FROM signature_requests
        WHERE owner_user_id = $1
        ORDER BY created_at DESC
@@ -110,6 +119,45 @@ router.get('/', requireAuth, async (req, res) => {
   } catch (err) {
     console.error('sign-requests GET error:', err.message);
     res.status(500).json({ error: 'Failed to load signature requests.' });
+  }
+});
+
+router.get('/:id', requireAuth, async (req, res) => {
+  const requestId = parseInt(req.params.id, 10);
+  if (!Number.isInteger(requestId) || requestId < 1) return res.status(400).json({ error: 'Invalid request ID.' });
+  try {
+    const userId = await findOrCreateUser(req.user);
+    const requestResult = await pool.query(
+      `SELECT id, title, document_name, message, status, created_at, sent_at, completed_at, expires_at
+       FROM signature_requests
+       WHERE id = $1 AND owner_user_id = $2`,
+      [requestId, userId],
+    );
+    if (!requestResult.rows.length) return res.status(404).json({ error: 'Signature request not found.' });
+    const recipients = await pool.query(
+      `SELECT id, name, email, role_order, token, status, viewed_at, completed_at
+       FROM signature_recipients
+       WHERE request_id = $1
+       ORDER BY role_order, id`,
+      [requestId],
+    );
+    const events = await pool.query(
+      `SELECT event_type, detail, created_at
+       FROM signature_audit_events
+       WHERE request_id = $1
+       ORDER BY created_at DESC
+       LIMIT 50`,
+      [requestId],
+    );
+    const base = process.env.FRONTEND_URL || 'https://nyxprism.com';
+    res.json({
+      request: requestResult.rows[0],
+      recipients: recipients.rows.map(row => ({ ...row, url: `${base}/sign-request.html?token=${row.token}` })),
+      events: events.rows,
+    });
+  } catch (err) {
+    console.error('sign-requests detail error:', err.message);
+    res.status(500).json({ error: 'Failed to load signature request.' });
   }
 });
 
@@ -127,6 +175,7 @@ router.post('/', requireAuth, async (req, res) => {
   const documentName = String(req.body?.documentName || 'document.pdf').trim().slice(0, 240);
   const message = String(req.body?.message || '').trim().slice(0, 2000) || null;
   const sendNow = req.body?.sendNow === true;
+  const expiresAt = new Date(Date.now() + REQUEST_DAYS * 24 * 60 * 60 * 1000);
   let documentBuffer;
   try {
     documentBuffer = normalizeDocument(req.body);
@@ -141,10 +190,10 @@ router.post('/', requireAuth, async (req, res) => {
     await client.query('BEGIN');
     const userId = await findOrCreateUser(req.user);
     const requestResult = await client.query(
-      `INSERT INTO signature_requests (owner_user_id, title, document_name, document_mime, document_size, document_data, message, status)
-       VALUES ($1, $2, $3, 'application/pdf', $4, $5, $6, $7)
+      `INSERT INTO signature_requests (owner_user_id, title, document_name, document_mime, document_size, document_data, message, status, expires_at)
+       VALUES ($1, $2, $3, 'application/pdf', $4, $5, $6, $7, $8)
        RETURNING id, title, document_name, status, created_at`,
-      [userId, title, documentName, documentBuffer.length, documentBuffer, message, sendNow ? 'sent' : 'draft'],
+      [userId, title, documentName, documentBuffer.length, documentBuffer, message, sendNow ? 'sent' : 'draft', expiresAt],
     );
     request = requestResult.rows[0];
 
@@ -183,6 +232,9 @@ router.post('/', requireAuth, async (req, res) => {
 
     if (sendNow) {
       await client.query('UPDATE signature_requests SET sent_at = NOW(), updated_at = NOW() WHERE id = $1', [request.id]);
+      await audit(client, { requestId: request.id, eventType: 'sent', detail: `${signers.length} recipient(s)` });
+    } else {
+      await audit(client, { requestId: request.id, eventType: 'draft_created', detail: `${signers.length} recipient(s)` });
     }
 
     await client.query('COMMIT');
@@ -216,7 +268,7 @@ router.get('/public/:token', async (req, res) => {
   try {
     const recipientResult = await pool.query(
       `SELECT sr.id AS recipient_id, sr.name, sr.email, sr.status AS recipient_status,
-              r.id AS request_id, r.title, r.document_name, r.document_mime, r.document_data, r.status AS request_status
+              r.id AS request_id, r.title, r.document_name, r.document_mime, r.document_data, r.status AS request_status, r.expires_at
        FROM signature_recipients sr
        JOIN signature_requests r ON r.id = sr.request_id
        WHERE sr.token = $1
@@ -225,6 +277,9 @@ router.get('/public/:token', async (req, res) => {
     );
     if (!recipientResult.rows.length) return res.status(404).json({ error: 'Signature link not found.' });
     const row = recipientResult.rows[0];
+    if (row.expires_at && new Date(row.expires_at).getTime() < Date.now()) return res.status(410).json({ error: 'Signature link expired.' });
+    await pool.query('UPDATE signature_recipients SET viewed_at = COALESCE(viewed_at, NOW()) WHERE id = $1', [row.recipient_id]);
+    await audit(pool, { requestId: row.request_id, recipientId: row.recipient_id, eventType: 'viewed', req });
     const fields = await pool.query(
       `SELECT id, field_type, page_number, x, y, width, height, required, label, value_text
        FROM signature_fields
@@ -250,6 +305,8 @@ router.post('/public/:token/complete', async (req, res) => {
     const recipientResult = await pool.query('SELECT id, request_id FROM signature_recipients WHERE token = $1 LIMIT 1', [req.params.token]);
     if (!recipientResult.rows.length) return res.status(404).json({ error: 'Signature link not found.' });
     const recipient = recipientResult.rows[0];
+    const expiry = await pool.query('SELECT expires_at FROM signature_requests WHERE id = $1', [recipient.request_id]);
+    if (expiry.rows[0]?.expires_at && new Date(expiry.rows[0].expires_at).getTime() < Date.now()) return res.status(410).json({ error: 'Signature link expired.' });
 
     const existing = await pool.query('SELECT id, required FROM signature_fields WHERE recipient_id = $1', [recipient.id]);
     const existingIds = new Set(existing.rows.map(row => Number(row.id)));
@@ -262,6 +319,7 @@ router.post('/public/:token/complete', async (req, res) => {
       await pool.query('UPDATE signature_fields SET value_text = $1, completed_at = NOW() WHERE id = $2 AND recipient_id = $3', [value, fieldId, recipient.id]);
     }
     await pool.query('UPDATE signature_recipients SET status = $1, completed_at = NOW() WHERE id = $2', ['completed', recipient.id]);
+    await audit(pool, { requestId: recipient.request_id, recipientId: recipient.id, eventType: 'completed', req });
 
     const remaining = await pool.query('SELECT COUNT(*) AS count FROM signature_recipients WHERE request_id = $1 AND status != $2', [recipient.request_id, 'completed']);
     if (Number(remaining.rows[0].count) === 0) {

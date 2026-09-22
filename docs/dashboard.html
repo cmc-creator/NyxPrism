@@ -1032,11 +1032,14 @@
         </div>
         <div class="sigreq-stage" id="sigreq-stage"><canvas id="sigreq-canvas"></canvas></div>
         <div class="result-box" id="sigreq-result" style="display:none;margin-top:1rem"></div>
+        <div id="sigreq-links" style="display:none;margin-top:1rem"></div>
         <div class="btn-row">
           <button class="btn btn-primary" id="sigreq-save" type="button">Save Request Draft</button>
           <button class="btn btn-primary" id="sigreq-send" type="button">Send Request</button>
           <button class="btn btn-secondary" id="sigreq-clear" type="button">Clear</button>
         </div>
+        <div class="card-title" style="margin-top:1.25rem">Recent Requests</div>
+        <div id="sigreq-list"><div style="color:var(--muted);font-size:.85rem">No requests loaded yet.</div></div>
       </div>
     </div>
   </div>
@@ -2639,6 +2642,15 @@ async function loadQRCode(){
     sigreqFields.push({type,assignedTo,pageNumber:sigreqPage,x,y,width:type==='checkbox'?.06:.24,height:.065,label:type.charAt(0).toUpperCase()+type.slice(1),required:true});renderFields();
   }
   function fileToDataUrl(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(file);});}
+  async function loadRequests(){
+    const list=document.getElementById('sigreq-list');const token=await auth.currentUser?.getIdToken(true);if(!token)return;
+    try{const res=await fetch(API+'/api/sign-requests',{headers:{Authorization:'Bearer '+token}});const data=await res.json();if(!res.ok)throw new Error(data.error||'Load failed');
+      if(!data.requests.length){list.innerHTML='<div style="color:var(--muted);font-size:.85rem">No signature requests yet.</div>';return;}
+      list.innerHTML='';data.requests.forEach(req=>{const row=document.createElement('div');row.className='recent-file-row';row.innerHTML='<span class="recent-fname">'+req.title+'</span><span class="recent-tool-badge">'+req.status+'</span><button class="btn btn-ghost" style="font-size:.72rem;padding:.25rem .5rem">Links</button>';row.querySelector('button').addEventListener('click',()=>loadRequestLinks(req.id));list.appendChild(row);});
+    }catch(err){list.innerHTML='<div style="color:var(--red);font-size:.85rem">'+err.message+'</div>';}
+  }
+  async function loadRequestLinks(id){const token=await auth.currentUser?.getIdToken(true);const res=await fetch(API+'/api/sign-requests/'+id,{headers:{Authorization:'Bearer '+token}});const data=await res.json();if(!res.ok)return toast(data.error||'Could not load links','error');showSignerLinks(data.recipients||[]);}
+  function showSignerLinks(signers){const wrap=document.getElementById('sigreq-links');wrap.style.display='block';wrap.innerHTML='<div class="card-title" style="margin-bottom:.5rem">Signer Links</div>';signers.forEach(s=>{const row=document.createElement('div');row.className='code-pill';row.style.cssText='width:100%;margin-bottom:.45rem;white-space:normal';row.innerHTML='<span style="flex:1;word-break:break-all">'+s.email+' — '+s.url+'</span><button class="copy-btn" type="button" title="Copy"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button>';row.querySelector('button').addEventListener('click',()=>{navigator.clipboard.writeText(s.url);toast('Signer link copied','success');});wrap.appendChild(row);});}
   document.querySelectorAll('.sigreq-field-btn').forEach(btn=>{btn.draggable=true;btn.addEventListener('click',()=>addField(btn.dataset.field));btn.addEventListener('dragstart',e=>e.dataTransfer.setData('text/plain',btn.dataset.field));});
   stage.addEventListener('dragover',e=>e.preventDefault());stage.addEventListener('drop',e=>{e.preventDefault();const type=e.dataTransfer.getData('text/plain');if(!type)return;const r=stage.getBoundingClientRect();addField(type,(e.clientX-r.left)/canvas.offsetWidth,(e.clientY-r.top)/canvas.offsetHeight);});
   setupDrop(drop,fileInput,async files=>{sigreqFile=files[0];if(!sigreqFile)return;const pdfjsLib=await loadPdfjsLib();sigreqPdf=await pdfjsLib.getDocument({data:new Uint8Array(await sigreqFile.arrayBuffer())}).promise;sigreqPage=1;sigreqFields=[];await renderPage();});
@@ -2651,11 +2663,12 @@ async function loadQRCode(){
     if(!sigreqFields.length)return toast('Place at least one field','error');
     const token=await auth.currentUser?.getIdToken(true);if(!token)return toast('Please sign in again','error');
     btn.disabled=true;showResult(resultEl,'info',sendNow?'Saving and sending signature request...':'Saving signature request draft...');
-    try{const documentBase64=await fileToDataUrl(sigreqFile);const res=await fetch(API+'/api/sign-requests',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({title:document.getElementById('sigreq-title').value||sigreqFile.name,documentName:sigreqFile.name,documentBase64,message:document.getElementById('sigreq-message').value,recipients:recips,fields:sigreqFields,sendNow})});const data=await res.json();if(!res.ok)throw new Error(data.error||'Save failed');showResult(resultEl,data.warning?'info':'success',data.warning|| (sendNow?'Signature links sent.':'Draft saved.'))}
+    try{const documentBase64=await fileToDataUrl(sigreqFile);const res=await fetch(API+'/api/sign-requests',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({title:document.getElementById('sigreq-title').value||sigreqFile.name,documentName:sigreqFile.name,documentBase64,message:document.getElementById('sigreq-message').value,recipients:recips,fields:sigreqFields,sendNow})});const data=await res.json();if(!res.ok)throw new Error(data.error||'Save failed');showResult(resultEl,data.warning?'info':'success',data.warning|| (sendNow?'Signature links sent.':'Draft saved.'));showSignerLinks(data.signers||[]);loadRequests();}
     catch(err){showResult(resultEl,'error',err.message);}finally{btn.disabled=false;}
   }
   document.getElementById('sigreq-save').addEventListener('click',function(){saveSigRequest(false,this);});
   document.getElementById('sigreq-send').addEventListener('click',function(){saveSigRequest(true,this);});
+  document.addEventListener('nyx:panel-changed',e=>{if(e.detail&&e.detail.panel==='signrequest')loadRequests();});
 })();
 
 // ═══════════════════════════════════════════════════════

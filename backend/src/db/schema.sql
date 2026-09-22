@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS signature_requests (
   document_data BYTEA,
   message       TEXT,
   status        TEXT NOT NULL DEFAULT 'draft',
+  expires_at    TIMESTAMPTZ,
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   sent_at       TIMESTAMPTZ,
@@ -62,6 +63,7 @@ CREATE TABLE IF NOT EXISTS signature_requests (
 ALTER TABLE signature_requests ADD COLUMN IF NOT EXISTS document_mime TEXT NOT NULL DEFAULT 'application/pdf';
 ALTER TABLE signature_requests ADD COLUMN IF NOT EXISTS document_size INTEGER;
 ALTER TABLE signature_requests ADD COLUMN IF NOT EXISTS document_data BYTEA;
+ALTER TABLE signature_requests ADD COLUMN IF NOT EXISTS expires_at TIMESTAMPTZ;
 
 CREATE TABLE IF NOT EXISTS signature_recipients (
   id           SERIAL PRIMARY KEY,
@@ -71,9 +73,11 @@ CREATE TABLE IF NOT EXISTS signature_recipients (
   role_order   INTEGER NOT NULL DEFAULT 1,
   token        TEXT NOT NULL UNIQUE,
   status       TEXT NOT NULL DEFAULT 'pending',
+  viewed_at    TIMESTAMPTZ,
   created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   completed_at TIMESTAMPTZ
 );
+ALTER TABLE signature_recipients ADD COLUMN IF NOT EXISTS viewed_at TIMESTAMPTZ;
 
 CREATE TABLE IF NOT EXISTS signature_fields (
   id           SERIAL PRIMARY KEY,
@@ -94,3 +98,14 @@ CREATE TABLE IF NOT EXISTS signature_fields (
 
 ALTER TABLE signature_fields ADD COLUMN IF NOT EXISTS value_text TEXT;
 ALTER TABLE signature_fields ADD COLUMN IF NOT EXISTS completed_at TIMESTAMPTZ;
+
+CREATE TABLE IF NOT EXISTS signature_audit_events (
+  id           SERIAL PRIMARY KEY,
+  request_id   INTEGER NOT NULL REFERENCES signature_requests(id) ON DELETE CASCADE,
+  recipient_id INTEGER REFERENCES signature_recipients(id) ON DELETE SET NULL,
+  event_type   TEXT NOT NULL,
+  detail       TEXT,
+  ip_address   TEXT,
+  user_agent   TEXT,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
