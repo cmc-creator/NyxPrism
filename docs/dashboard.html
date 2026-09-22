@@ -1034,6 +1034,7 @@
         <div class="result-box" id="sigreq-result" style="display:none;margin-top:1rem"></div>
         <div class="btn-row">
           <button class="btn btn-primary" id="sigreq-save" type="button">Save Request Draft</button>
+          <button class="btn btn-primary" id="sigreq-send" type="button">Send Request</button>
           <button class="btn btn-secondary" id="sigreq-clear" type="button">Clear</button>
         </div>
       </div>
@@ -2637,21 +2638,24 @@ async function loadQRCode(){
     const assignedTo=selectedRecipient();if(!assignedTo){toast('Add and select a recipient first','error');return;}
     sigreqFields.push({type,assignedTo,pageNumber:sigreqPage,x,y,width:type==='checkbox'?.06:.24,height:.065,label:type.charAt(0).toUpperCase()+type.slice(1),required:true});renderFields();
   }
+  function fileToDataUrl(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(file);});}
   document.querySelectorAll('.sigreq-field-btn').forEach(btn=>{btn.draggable=true;btn.addEventListener('click',()=>addField(btn.dataset.field));btn.addEventListener('dragstart',e=>e.dataTransfer.setData('text/plain',btn.dataset.field));});
   stage.addEventListener('dragover',e=>e.preventDefault());stage.addEventListener('drop',e=>{e.preventDefault();const type=e.dataTransfer.getData('text/plain');if(!type)return;const r=stage.getBoundingClientRect();addField(type,(e.clientX-r.left)/canvas.offsetWidth,(e.clientY-r.top)/canvas.offsetHeight);});
   setupDrop(drop,fileInput,async files=>{sigreqFile=files[0];if(!sigreqFile)return;const pdfjsLib=await loadPdfjsLib();sigreqPdf=await pdfjsLib.getDocument({data:new Uint8Array(await sigreqFile.arrayBuffer())}).promise;sigreqPage=1;sigreqFields=[];await renderPage();});
   document.getElementById('sigreq-prev').addEventListener('click',()=>{if(sigreqPdf&&sigreqPage>1){sigreqPage--;renderPage();}});
   document.getElementById('sigreq-next').addEventListener('click',()=>{if(sigreqPdf&&sigreqPage<sigreqPdf.numPages){sigreqPage++;renderPage();}});
   document.getElementById('sigreq-clear').addEventListener('click',()=>{sigreqFile=null;sigreqPdf=null;sigreqFields=[];ctx.clearRect(0,0,canvas.width,canvas.height);stage.querySelectorAll('.sigreq-box').forEach(el=>el.remove());resultEl.style.display='none';fileInput.value='';});
-  document.getElementById('sigreq-save').addEventListener('click',async function(){
+  async function saveSigRequest(sendNow,btn){
     if(!sigreqFile)return toast('Upload a PDF first','error');
     const recips=recipients();if(!recips.length)return toast('Add at least one recipient','error');
     if(!sigreqFields.length)return toast('Place at least one field','error');
     const token=await auth.currentUser?.getIdToken(true);if(!token)return toast('Please sign in again','error');
-    this.disabled=true;showResult(resultEl,'info','Saving signature request draft...');
-    try{const res=await fetch(API+'/api/sign-requests',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({title:document.getElementById('sigreq-title').value||sigreqFile.name,documentName:sigreqFile.name,message:document.getElementById('sigreq-message').value,recipients:recips,fields:sigreqFields})});const data=await res.json();if(!res.ok)throw new Error(data.error||'Save failed');showResult(resultEl,'success','Draft saved. Sending links comes next after secure document storage is enabled.');}
-    catch(err){showResult(resultEl,'error',err.message);}finally{this.disabled=false;}
-  });
+    btn.disabled=true;showResult(resultEl,'info',sendNow?'Saving and sending signature request...':'Saving signature request draft...');
+    try{const documentBase64=await fileToDataUrl(sigreqFile);const res=await fetch(API+'/api/sign-requests',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({title:document.getElementById('sigreq-title').value||sigreqFile.name,documentName:sigreqFile.name,documentBase64,message:document.getElementById('sigreq-message').value,recipients:recips,fields:sigreqFields,sendNow})});const data=await res.json();if(!res.ok)throw new Error(data.error||'Save failed');showResult(resultEl,data.warning?'info':'success',data.warning|| (sendNow?'Signature links sent.':'Draft saved.'))}
+    catch(err){showResult(resultEl,'error',err.message);}finally{btn.disabled=false;}
+  }
+  document.getElementById('sigreq-save').addEventListener('click',function(){saveSigRequest(false,this);});
+  document.getElementById('sigreq-send').addEventListener('click',function(){saveSigRequest(true,this);});
 })();
 
 // ═══════════════════════════════════════════════════════

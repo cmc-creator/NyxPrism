@@ -49,7 +49,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Admin-Secret'],
 }));
 
-app.use(express.json({ limit: '2mb' }));
+app.use(express.json({ limit: '12mb' }));
 
 // ── Rate limiting ─────────────────────────────────────────────────────────
 // General API — 300 requests per 15 minutes per IP

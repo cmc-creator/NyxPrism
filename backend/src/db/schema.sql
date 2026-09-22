@@ -48,6 +48,9 @@ CREATE TABLE IF NOT EXISTS signature_requests (
   owner_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   title         TEXT NOT NULL,
   document_name TEXT NOT NULL,
+  document_mime TEXT NOT NULL DEFAULT 'application/pdf',
+  document_size INTEGER,
+  document_data BYTEA,
   message       TEXT,
   status        TEXT NOT NULL DEFAULT 'draft',
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -55,6 +58,10 @@ CREATE TABLE IF NOT EXISTS signature_requests (
   sent_at       TIMESTAMPTZ,
   completed_at  TIMESTAMPTZ
 );
+
+ALTER TABLE signature_requests ADD COLUMN IF NOT EXISTS document_mime TEXT NOT NULL DEFAULT 'application/pdf';
+ALTER TABLE signature_requests ADD COLUMN IF NOT EXISTS document_size INTEGER;
+ALTER TABLE signature_requests ADD COLUMN IF NOT EXISTS document_data BYTEA;
 
 CREATE TABLE IF NOT EXISTS signature_recipients (
   id           SERIAL PRIMARY KEY,
@@ -80,5 +87,10 @@ CREATE TABLE IF NOT EXISTS signature_fields (
   height       NUMERIC NOT NULL,
   required     BOOLEAN NOT NULL DEFAULT TRUE,
   label        TEXT,
+  value_text   TEXT,
+  completed_at TIMESTAMPTZ,
   created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+ALTER TABLE signature_fields ADD COLUMN IF NOT EXISTS value_text TEXT;
+ALTER TABLE signature_fields ADD COLUMN IF NOT EXISTS completed_at TIMESTAMPTZ;
