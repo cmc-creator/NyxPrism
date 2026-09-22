@@ -39,10 +39,12 @@
     body.light #loading-screen{background:#f8fafc}
 
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    body{background:linear-gradient(135deg,#04070d 0%,#07111d 42%,#09070f 100%);color:var(--text);font-family:'Inter',-apple-system,sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh;position:relative;overflow-x:hidden}
+    body{background:#02040a;color:var(--text);font-family:'Inter',-apple-system,sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh;position:relative;overflow-x:hidden}
     body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-2;background:linear-gradient(115deg,rgba(124,58,237,.18),transparent 28%),linear-gradient(245deg,rgba(34,197,94,.11),transparent 32%),linear-gradient(180deg,rgba(250,204,21,.06),transparent 45%)}
     body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px);background-size:56px 56px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.65),transparent 78%)}
     a{color:inherit;text-decoration:none} button{font-family:inherit;cursor:pointer} input,select,textarea{font-family:inherit}
+    #nyx-live-wallpaper{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;pointer-events:none;background:#02040a}
+    .app-shell{position:relative;z-index:1}
     #loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .3s}
     .spinner{width:36px;height:36px;border-radius:50%;border:3px solid var(--border2);border-top-color:var(--accent-bright);animation:spin .7s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
@@ -303,6 +305,7 @@
   <meta property="og:description" content="Professional PDF tools: split, merge, compress, OCR, watermark, sign, annotate and more." />
 </head>
 <body>
+<canvas id="nyx-live-wallpaper" aria-hidden="true"></canvas>
 <div id="loading-screen"><div class="spinner"></div></div>
 <div id="toast-container"></div>
 
@@ -1386,6 +1389,50 @@
 <!-- PRODUCT ASSISTANT: authenticated dashboard only -->
 <button class="nyx-chat-launcher" id="nyx-chat-launcher" type="button" aria-expanded="false" aria-controls="nyx-chat-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-8.6 8.2 9.6 9.6 0 0 1-4.2-1L3 20l1.4-4.4A8.1 8.1 0 0 1 3.1 11.5 8.4 8.4 0 0 1 11.7 3 8.4 8.4 0 0 1 21 11.5Z"/></svg>Ask NyxPrism</button>
 <section class="nyx-chat-panel" id="nyx-chat-panel" aria-label="NyxPrism assistant" hidden><header class="nyx-chat-header"><div class="nyx-chat-title"><span aria-hidden="true">✦</span><span>NyxPrism Assistant<small class="nyx-chat-status">Product help, instantly</small></span></div><button class="nyx-chat-close" id="nyx-chat-close" type="button" aria-label="Close chat">×</button></header><div class="nyx-chat-messages" id="nyx-chat-messages" aria-live="polite"><p class="nyx-chat-message assistant">Hi! I can help with NyxPrism’s PDF tools, installation, API, and pricing. What would you like to know?</p></div><form class="nyx-chat-form" id="nyx-chat-form"><textarea class="nyx-chat-input" id="nyx-chat-input" rows="1" maxlength="1500" placeholder="Ask about NyxPrism…" aria-label="Your message"></textarea><button class="nyx-chat-send" id="nyx-chat-send" type="submit">Send</button></form></section>
+
+<script>
+(function(){
+  var canvas=document.getElementById('nyx-live-wallpaper');
+  if(!canvas)return;
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var ctx=canvas.getContext('2d'),w=0,h=0,dpr=1,points=[],strands=[];
+  var palette=[330,282,224,188,146,96,48,12];
+  function resize(){
+    dpr=Math.min(window.devicePixelRatio||1,2);w=window.innerWidth;h=window.innerHeight;
+    canvas.width=Math.floor(w*dpr);canvas.height=Math.floor(h*dpr);canvas.style.width=w+'px';canvas.style.height=h+'px';ctx.setTransform(dpr,0,0,dpr,0,0);build();draw(0);
+  }
+  function build(){
+    strands=[];var rows=Math.max(4,Math.round(h/170));var cols=Math.max(9,Math.round(w/140));
+    for(var r=0;r<rows;r++){
+      var arr=[];var base=(r+0.3)*h/(rows+.25);var hue=palette[r%palette.length];
+      for(var c=-1;c<=cols;c++){
+        arr.push({x:c*w/(cols-1)+Math.random()*34,y:base+(Math.random()-.5)*105,baseY:base,amp:42+Math.random()*60,phase:Math.random()*6.28,hue:(hue+c*12)%360});
+      }
+      strands.push(arr);
+    }
+  }
+  function draw(t){
+    ctx.clearRect(0,0,w,h);ctx.fillStyle='#02040a';ctx.fillRect(0,0,w,h);ctx.globalCompositeOperation='lighter';
+    for(var r=0;r<strands.length-1;r++){
+      var a=strands[r],b=strands[r+1];
+      for(var i=0;i<Math.min(a.length,b.length)-1;i++){
+        var p=a[i],q=a[i+1],s=b[i],u=b[i+1];
+        var py=p.y+Math.sin(t*.00035+p.phase+i*.4)*p.amp;
+        var qy=q.y+Math.sin(t*.00035+q.phase+i*.4)*q.amp;
+        var sy=s.y+Math.sin(t*.00035+s.phase+i*.4)*s.amp;
+        var uy=u.y+Math.sin(t*.00035+u.phase+i*.4)*u.amp;
+        var hue=(p.hue+q.hue+s.hue)/3;
+        ctx.beginPath();ctx.moveTo(p.x,py);ctx.lineTo(q.x,qy);ctx.lineTo(s.x,sy);ctx.closePath();ctx.fillStyle='hsla('+hue+',95%,52%,.16)';ctx.fill();
+        ctx.beginPath();ctx.moveTo(q.x,qy);ctx.lineTo(u.x,uy);ctx.lineTo(s.x,sy);ctx.closePath();ctx.fillStyle='hsla('+(hue+24)+',95%,52%,.12)';ctx.fill();
+        ctx.strokeStyle='hsla('+hue+',100%,55%,.28)';ctx.lineWidth=.8;ctx.stroke();
+      }
+    }
+    ctx.globalCompositeOperation='source-over';
+    if(!reduce)requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize',resize,{passive:true});resize();
+})();
+</script>
 
 <script type="module">
 import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
