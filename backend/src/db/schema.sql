@@ -42,3 +42,43 @@ CREATE TABLE IF NOT EXISTS api_keys (
   created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   last_used_at TIMESTAMPTZ
 );
+
+CREATE TABLE IF NOT EXISTS signature_requests (
+  id            SERIAL PRIMARY KEY,
+  owner_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  title         TEXT NOT NULL,
+  document_name TEXT NOT NULL,
+  message       TEXT,
+  status        TEXT NOT NULL DEFAULT 'draft',
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  sent_at       TIMESTAMPTZ,
+  completed_at  TIMESTAMPTZ
+);
+
+CREATE TABLE IF NOT EXISTS signature_recipients (
+  id           SERIAL PRIMARY KEY,
+  request_id   INTEGER NOT NULL REFERENCES signature_requests(id) ON DELETE CASCADE,
+  name         TEXT NOT NULL,
+  email        TEXT NOT NULL,
+  role_order   INTEGER NOT NULL DEFAULT 1,
+  token        TEXT NOT NULL UNIQUE,
+  status       TEXT NOT NULL DEFAULT 'pending',
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  completed_at TIMESTAMPTZ
+);
+
+CREATE TABLE IF NOT EXISTS signature_fields (
+  id           SERIAL PRIMARY KEY,
+  request_id   INTEGER NOT NULL REFERENCES signature_requests(id) ON DELETE CASCADE,
+  recipient_id INTEGER NOT NULL REFERENCES signature_recipients(id) ON DELETE CASCADE,
+  field_type   TEXT NOT NULL,
+  page_number  INTEGER NOT NULL DEFAULT 1,
+  x            NUMERIC NOT NULL,
+  y            NUMERIC NOT NULL,
+  width        NUMERIC NOT NULL,
+  height       NUMERIC NOT NULL,
+  required     BOOLEAN NOT NULL DEFAULT TRUE,
+  label        TEXT,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

@@ -241,6 +241,14 @@
     .tool-grid .tool-card{animation:cardIn .35s ease both}
     .tool-grid .tool-card:nth-child(1){animation-delay:.02s}.tool-grid .tool-card:nth-child(2){animation-delay:.05s}.tool-grid .tool-card:nth-child(3){animation-delay:.08s}.tool-grid .tool-card:nth-child(4){animation-delay:.11s}.tool-grid .tool-card:nth-child(5){animation-delay:.14s}.tool-grid .tool-card:nth-child(6){animation-delay:.17s}.tool-grid .tool-card:nth-child(7){animation-delay:.2s}.tool-grid .tool-card:nth-child(8){animation-delay:.23s}.tool-grid .tool-card:nth-child(9){animation-delay:.26s}.tool-grid .tool-card:nth-child(10){animation-delay:.29s}.tool-grid .tool-card:nth-child(11){animation-delay:.32s}.tool-grid .tool-card:nth-child(12){animation-delay:.35s}.tool-grid .tool-card:nth-child(13){animation-delay:.38s}.tool-grid .tool-card:nth-child(14){animation-delay:.41s}.tool-grid .tool-card:nth-child(15){animation-delay:.44s}.tool-grid .tool-card:nth-child(16){animation-delay:.47s}
     .fchip-pages{font-size:.68rem;background:rgba(124,58,237,.12);color:var(--accent-bright);border:1px solid rgba(124,58,237,.25);border-radius:4px;padding:.05rem .3rem;margin-left:.3rem;white-space:nowrap;flex-shrink:0}
+    .sigreq-layout{display:grid;grid-template-columns:minmax(260px,330px) 1fr;gap:1rem;align-items:start}
+    .sigreq-palette{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.5rem}
+    .sigreq-field-btn{border:1px solid var(--border2);background:var(--surface2);color:var(--text2);border-radius:6px;padding:.4rem .65rem;font-size:.78rem;cursor:grab}
+    .sigreq-stage{position:relative;display:inline-block;max-width:100%;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:#fff}
+    .sigreq-stage canvas{display:block;max-width:100%}
+    .sigreq-box{position:absolute;border:2px solid var(--accent);background:rgba(124,58,237,.13);color:#111827;border-radius:5px;padding:.25rem .4rem;font-size:.72rem;font-weight:800;cursor:move;user-select:none;min-width:72px;min-height:26px;display:flex;align-items:center;justify-content:center;text-align:center}
+    .sigreq-box .x{position:absolute;right:-7px;top:-8px;background:var(--red);color:#fff;border-radius:999px;border:0;width:18px;height:18px;font-size:.7rem;line-height:18px;cursor:pointer}
+    @media(max-width:900px){.sigreq-layout{grid-template-columns:1fr}}
     /* Upgrade modal */
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);z-index:8000;display:flex;align-items:center;justify-content:center;padding:1.5rem}
     .modal-box{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:2rem 2rem 1.75rem;max-width:420px;width:100%;text-align:center;box-shadow:var(--shadow)}
@@ -439,6 +447,10 @@
   <button class="nav-item" data-panel="sign">
     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
     Sign PDF
+  </button>
+  <button class="nav-item" data-panel="signrequest">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M8 16c2 2 4-2 6 0s3 0 4-1"/></svg>
+    Request Signatures
   </button>
   <button class="nav-item" data-panel="annotate">
     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
@@ -978,6 +990,50 @@
         <button class="btn btn-primary" id="sign-apply-btn">Apply Signature</button>
       </div>
       <div class="result-box" id="sign-result" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- REQUEST SIGNATURES PANEL -->
+  <div class="panel" id="panel-signrequest">
+    <div class="page-header">
+      <h1>Request Signatures</h1>
+      <p>Prepare signer fields on a PDF and save a signature request draft.</p>
+    </div>
+    <div class="sigreq-layout">
+      <div class="card">
+        <div class="card-title">Document & Recipients</div>
+        <div class="form-group" style="margin-bottom:.75rem">
+          <label class="form-label">PDF File</label>
+          <div class="drop-zone" id="sigreq-drop"><input type="file" id="sigreq-file" accept=".pdf,application/pdf" /><div class="drop-title">Drop PDF here</div><div class="drop-sub">or click to browse</div></div>
+        </div>
+        <div class="form-group"><label class="form-label">Request title</label><input class="form-input" id="sigreq-title" placeholder="NDA signature request" /></div>
+        <div class="form-group"><label class="form-label">Message</label><textarea class="form-input" id="sigreq-message" rows="3" placeholder="Please review and sign this document."></textarea></div>
+        <div class="card-title" style="margin-top:1rem">Recipients</div>
+        <div id="sigreq-recipients"></div>
+        <button class="btn btn-ghost" id="sigreq-add-recipient" type="button" style="margin-top:.5rem">Add Recipient</button>
+        <div class="card-title" style="margin-top:1.1rem">Fields</div>
+        <div class="sigreq-palette">
+          <button class="sigreq-field-btn" type="button" data-field="signature">Signature</button>
+          <button class="sigreq-field-btn" type="button" data-field="initials">Initials</button>
+          <button class="sigreq-field-btn" type="button" data-field="name">Name</button>
+          <button class="sigreq-field-btn" type="button" data-field="date">Date</button>
+          <button class="sigreq-field-btn" type="button" data-field="text">Text</button>
+          <button class="sigreq-field-btn" type="button" data-field="checkbox">Checkbox</button>
+        </div>
+        <div class="form-hint" style="margin-top:.5rem">Select a recipient, then click a field type or drop it on the preview.</div>
+      </div>
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:.75rem;flex-wrap:wrap">
+          <div class="card-title" style="margin-bottom:0">Field Placement <span id="sigreq-page-info" style="color:var(--muted);font-weight:600"></span></div>
+          <div class="btn-row" style="margin:0"><button class="btn btn-secondary" id="sigreq-prev" type="button">Prev</button><button class="btn btn-secondary" id="sigreq-next" type="button">Next</button></div>
+        </div>
+        <div class="sigreq-stage" id="sigreq-stage"><canvas id="sigreq-canvas"></canvas></div>
+        <div class="result-box" id="sigreq-result" style="display:none;margin-top:1rem"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="sigreq-save" type="button">Save Request Draft</button>
+          <button class="btn btn-secondary" id="sigreq-clear" type="button">Clear</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -2535,6 +2591,67 @@ async function loadQRCode(){
 }
 
 // ═══════════════════════════════════════════════════════
+// REQUEST SIGNATURES
+(function(){
+  const fileInput=document.getElementById('sigreq-file'),drop=document.getElementById('sigreq-drop'),canvas=document.getElementById('sigreq-canvas'),stage=document.getElementById('sigreq-stage');
+  if(!fileInput||!drop||!canvas||!stage)return;
+  const ctx=canvas.getContext('2d');
+  const recipientsEl=document.getElementById('sigreq-recipients'),resultEl=document.getElementById('sigreq-result');
+  let sigreqFile=null,sigreqPdf=null,sigreqPage=1,sigreqFields=[];
+  function recipients(){return Array.from(recipientsEl.querySelectorAll('.sigreq-recipient')).map(row=>({name:row.querySelector('.sr-name').value.trim(),email:row.querySelector('.sr-email').value.trim()})).filter(r=>r.name||r.email);}
+  function selectedRecipient(){const rows=Array.from(recipientsEl.querySelectorAll('.sigreq-recipient'));const checked=rows.find(r=>r.querySelector('.sr-pick').checked)||rows[0];return checked?checked.querySelector('.sr-email').value.trim().toLowerCase():'';}
+  function addRecipient(name='',email=''){
+    const row=document.createElement('div');row.className='sigreq-recipient';row.style.cssText='display:grid;grid-template-columns:auto 1fr 1fr auto;gap:.45rem;align-items:center;margin-top:.45rem';
+    row.innerHTML='<input class="sr-pick" type="radio" name="sigreq-recipient-pick" '+(!recipientsEl.children.length?'checked':'')+' />'+
+      '<input class="form-input sr-name" placeholder="Name" value="'+name.replace(/"/g,'&quot;')+'" />'+
+      '<input class="form-input sr-email" placeholder="email@example.com" value="'+email.replace(/"/g,'&quot;')+'" />'+
+      '<button class="fremove" type="button" title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
+    row.querySelector('.fremove').addEventListener('click',()=>{row.remove(); if(!recipientsEl.querySelector('.sr-pick:checked')&&recipientsEl.querySelector('.sr-pick'))recipientsEl.querySelector('.sr-pick').checked=true; renderFields();});
+    row.querySelector('.sr-email').addEventListener('input',renderFields);
+    recipientsEl.appendChild(row);
+  }
+  addRecipient();
+  document.getElementById('sigreq-add-recipient').addEventListener('click',()=>addRecipient());
+  async function renderPage(){
+    if(!sigreqPdf)return;
+    const page=await sigreqPdf.getPage(sigreqPage);const vp=page.getViewport({scale:1.15});canvas.width=vp.width;canvas.height=vp.height;
+    await page.render({canvasContext:ctx,viewport:vp}).promise;
+    document.getElementById('sigreq-page-info').textContent='Page '+sigreqPage+' / '+sigreqPdf.numPages;
+    renderFields();
+  }
+  function renderFields(){
+    stage.querySelectorAll('.sigreq-box').forEach(el=>el.remove());
+    sigreqFields.filter(f=>f.pageNumber===sigreqPage).forEach((field,idx)=>{
+      const el=document.createElement('div');el.className='sigreq-box';el.style.left=(field.x*canvas.offsetWidth)+'px';el.style.top=(field.y*canvas.offsetHeight)+'px';el.style.width=(field.width*canvas.offsetWidth)+'px';el.style.height=(field.height*canvas.offsetHeight)+'px';
+      el.textContent=field.label+' · '+(field.assignedTo||'recipient');
+      const x=document.createElement('button');x.className='x';x.type='button';x.textContent='×';x.addEventListener('click',e=>{e.stopPropagation();sigreqFields=sigreqFields.filter(f=>f!==field);renderFields();});el.appendChild(x);
+      let dragging=false,dx=0,dy=0;el.addEventListener('pointerdown',e=>{if(e.target===x)return;dragging=true;dx=e.offsetX;dy=e.offsetY;el.setPointerCapture(e.pointerId);});
+      el.addEventListener('pointermove',e=>{if(!dragging)return;const r=stage.getBoundingClientRect();field.x=Math.max(0,Math.min(.98,(e.clientX-r.left-dx)/canvas.offsetWidth));field.y=Math.max(0,Math.min(.98,(e.clientY-r.top-dy)/canvas.offsetHeight));el.style.left=(field.x*canvas.offsetWidth)+'px';el.style.top=(field.y*canvas.offsetHeight)+'px';});
+      el.addEventListener('pointerup',()=>dragging=false);stage.appendChild(el);
+    });
+  }
+  function addField(type,x=.12,y=.12){
+    const assignedTo=selectedRecipient();if(!assignedTo){toast('Add and select a recipient first','error');return;}
+    sigreqFields.push({type,assignedTo,pageNumber:sigreqPage,x,y,width:type==='checkbox'?.06:.24,height:.065,label:type.charAt(0).toUpperCase()+type.slice(1),required:true});renderFields();
+  }
+  document.querySelectorAll('.sigreq-field-btn').forEach(btn=>{btn.draggable=true;btn.addEventListener('click',()=>addField(btn.dataset.field));btn.addEventListener('dragstart',e=>e.dataTransfer.setData('text/plain',btn.dataset.field));});
+  stage.addEventListener('dragover',e=>e.preventDefault());stage.addEventListener('drop',e=>{e.preventDefault();const type=e.dataTransfer.getData('text/plain');if(!type)return;const r=stage.getBoundingClientRect();addField(type,(e.clientX-r.left)/canvas.offsetWidth,(e.clientY-r.top)/canvas.offsetHeight);});
+  setupDrop(drop,fileInput,async files=>{sigreqFile=files[0];if(!sigreqFile)return;const pdfjsLib=await loadPdfjsLib();sigreqPdf=await pdfjsLib.getDocument({data:new Uint8Array(await sigreqFile.arrayBuffer())}).promise;sigreqPage=1;sigreqFields=[];await renderPage();});
+  document.getElementById('sigreq-prev').addEventListener('click',()=>{if(sigreqPdf&&sigreqPage>1){sigreqPage--;renderPage();}});
+  document.getElementById('sigreq-next').addEventListener('click',()=>{if(sigreqPdf&&sigreqPage<sigreqPdf.numPages){sigreqPage++;renderPage();}});
+  document.getElementById('sigreq-clear').addEventListener('click',()=>{sigreqFile=null;sigreqPdf=null;sigreqFields=[];ctx.clearRect(0,0,canvas.width,canvas.height);stage.querySelectorAll('.sigreq-box').forEach(el=>el.remove());resultEl.style.display='none';fileInput.value='';});
+  document.getElementById('sigreq-save').addEventListener('click',async function(){
+    if(!sigreqFile)return toast('Upload a PDF first','error');
+    const recips=recipients();if(!recips.length)return toast('Add at least one recipient','error');
+    if(!sigreqFields.length)return toast('Place at least one field','error');
+    const token=await auth.currentUser?.getIdToken(true);if(!token)return toast('Please sign in again','error');
+    this.disabled=true;showResult(resultEl,'info','Saving signature request draft...');
+    try{const res=await fetch(API+'/api/sign-requests',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({title:document.getElementById('sigreq-title').value||sigreqFile.name,documentName:sigreqFile.name,message:document.getElementById('sigreq-message').value,recipients:recips,fields:sigreqFields})});const data=await res.json();if(!res.ok)throw new Error(data.error||'Save failed');showResult(resultEl,'success','Draft saved. Sending links comes next after secure document storage is enabled.');}
+    catch(err){showResult(resultEl,'error',err.message);}finally{this.disabled=false;}
+  });
+})();
+
+// ═══════════════════════════════════════════════════════
 // ANNOTATE PDF
 {
   let annPdfDoc = null, annPdfJsDoc = null, annCurrentPage = 1, annTotalPages = 1;
@@ -3185,7 +3302,7 @@ var NyxRecents = (function(){
   var KEY = "nyx_recents_v1";
   var TOOL_LABELS = {
     split:"Split",merge:"Merge",compress:"Compress",watermark:"Watermark",protect:"Protect",
-    extract:"Extract",ocr:"OCR",rotate:"Rotate",editpdf:"Edit",convert:"Convert",sign:"Sign",
+    extract:"Extract",ocr:"OCR",rotate:"Rotate",editpdf:"Edit",convert:"Convert",sign:"Sign",signrequest:"Sign Request",
     annotate:"Annotate",pagemanager:"Pages",number:"Number",redact:"Redact",batch:"Batch",
     aisplit:"AI Split",pdf2qr:"QR Stamp"
   };
@@ -3342,6 +3459,7 @@ document.addEventListener("keydown", function(e){
     {panel:"editpdf",label:"Edit PDF",desc:"Add text overlays, images, and annotations"},
     {panel:"convert",label:"Convert",desc:"PDF to images, images to PDF, searchable PDF, QR stamp"},
     {panel:"sign",label:"Sign PDF",desc:"Draw or type a handwritten signature"},
+    {panel:"signrequest",label:"Request Signatures",desc:"Prepare signer fields and save a signature request draft"},
     {panel:"annotate",label:"Annotate PDF",desc:"Highlight, underline, and add comments"},
     {panel:"pagemanager",label:"Page Manager",desc:"Drag-and-drop page reordering and deletion"},
     {panel:"number",label:"Page Numbers",desc:"Stamp page numbers onto every page"},
