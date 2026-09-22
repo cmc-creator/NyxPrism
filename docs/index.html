@@ -53,6 +53,8 @@
     a { color: var(--accent-bright); text-decoration: none; }
     a:hover { color: var(--text); }
     ::selection { background: rgba(124,58,237,.35); color: #fff; }
+    h1, h2, h3, h4, summary { text-wrap: balance; }
+    p, li { text-wrap: pretty; }
 
     /* ── NAV ──────────────────────────────────────────────────────────── */
     nav {
@@ -233,27 +235,48 @@
       display: grid; grid-template-columns: repeat(auto-fill, minmax(292px, 1fr)); gap: 1.25rem;
     }
     .feature-card {
-      background: var(--surface); border: 1px solid var(--border);
+      --card-hue: 268;
+      background:
+        linear-gradient(145deg, hsla(var(--card-hue),85%,62%,.10), transparent 38%),
+        linear-gradient(180deg, rgba(18,27,42,.94), rgba(10,16,27,.96));
+      border: 1px solid hsla(var(--card-hue),75%,70%,.22);
       border-radius: var(--radius-lg); padding: 1.85rem;
       transition: border-color .25s, box-shadow .25s, transform .25s;
-      position: relative; overflow: hidden;
+      position: relative; overflow: hidden; isolation: isolate;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.045), 0 16px 36px rgba(0,0,0,.22);
     }
     .feature-card::before {
       content: ''; position: absolute; inset: 0; pointer-events: none;
-      background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(124,58,237,.18) 0%, transparent 55%);
-      opacity: 0; transition: opacity .35s;
+      background:
+        radial-gradient(circle at var(--mx,50%) var(--my,50%), hsla(var(--card-hue),100%,70%,.24) 0%, transparent 48%),
+        linear-gradient(112deg, transparent 25%, rgba(255,255,255,.055) 46%, transparent 65%);
+      opacity: .32; transition: opacity .35s;
+    }
+    .feature-card::after {
+      content: ''; position: absolute; left: 10%; right: 10%; top: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, hsla(var(--card-hue),100%,82%,.7), transparent);
+      box-shadow: 0 0 22px hsla(var(--card-hue),100%,65%,.25);
+      pointer-events: none;
     }
     .feature-card:hover {
-      border-color: rgba(124,58,237,.45);
-      box-shadow: 0 0 0 1px rgba(124,58,237,.15), 0 16px 48px rgba(0,0,0,.4), 0 0 60px rgba(124,58,237,.07);
-      transform: translateY(-3px);
+      border-color: hsla(var(--card-hue),90%,72%,.5);
+      box-shadow: 0 0 0 1px hsla(var(--card-hue),80%,65%,.12), 0 24px 58px rgba(0,0,0,.45), 0 0 52px hsla(var(--card-hue),90%,58%,.1);
+      transform: translateY(-5px);
     }
-    .feature-card:hover::before { opacity: 1; }
+    .feature-card:hover::before { opacity: .9; }
+    .feature-card:nth-child(2) { --card-hue: 197; }
+    .feature-card:nth-child(3) { --card-hue: 323; }
+    .feature-card:nth-child(4) { --card-hue: 158; }
+    .feature-card:nth-child(5) { --card-hue: 38; }
+    .feature-card:nth-child(6) { --card-hue: 275; }
+    .feature-card > * { position: relative; z-index: 1; }
     .feat-icon {
       width: 42px; height: 42px; border-radius: 10px;
-      background: var(--accent-glow); border: 1px solid rgba(124,58,237,.25);
+      background: linear-gradient(145deg, hsla(var(--card-hue),90%,62%,.24), hsla(var(--card-hue),70%,38%,.12));
+      border: 1px solid hsla(var(--card-hue),85%,68%,.35);
       display: flex; align-items: center; justify-content: center;
-      color: var(--accent-bright); margin-bottom: 1.25rem;
+      color: hsl(var(--card-hue),100%,78%); margin-bottom: 1.25rem;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 8px 24px hsla(var(--card-hue),90%,50%,.12);
     }
     .feat-icon svg { width: 18px; height: 18px; }
     .feature-card h3 { font-size: 1rem; font-weight: 700; letter-spacing: -.01em; margin-bottom: .45rem; }
@@ -952,11 +975,11 @@
   <div class="showcase-inner">
     <div class="showcase-copy">
       <div class="s-eyebrow">The workspace</div>
-      <h2 class="s-title">Serious document work, without the clutter.</h2>
+      <h2 class="s-title">Document work, beautifully organized.</h2>
       <p class="s-sub">Twenty-three tools live in one calm interface, from everyday PDF edits to AI splitting, signature requests, and tracked distribution.</p>
       <div class="showcase-meta" aria-label="Product highlights">
         <span>23 focused tools</span>
-        <span>Local-first core</span>
+        <span>AI-assisted workflows</span>
         <span>eSign &amp; distribution</span>
       </div>
     </div>
@@ -1218,7 +1241,7 @@
 <section class="section" id="features">
   <div class="s-eyebrow">Everything you need</div>
   <h2 class="s-title">Everything your document needs.</h2>
-  <p class="s-sub">Six focused workflows replace a folder full of disconnected PDF utilities.</p>
+  <p class="s-sub">Edit, automate, sign, and share from one connected workspace.</p>
   <div class="features-grid">
 
     <div class="feature-card">
@@ -1423,11 +1446,11 @@
         <div class="price-annual"><span>Save 30%</span> with annual billing &nbsp;&middot;&nbsp; $99/yr</div>
         <div class="pricing-desc">For professionals and teams who want the full web dashboard, AI features, signing workflows, and support.</div>
         <ul class="pricing-features">
-          <li><span class="pf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>All 19 CLI commands</li>
-          <li><span class="pf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Heuristic AI (fully offline)</li>
-          <li><span class="pf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Python library API</li>
-          <li><span class="pf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>NyxPrism UI (visual terminal)</li>
-          <li><span class="pf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>LLM AI integration</li>
+          <li><span class="pf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Complete browser PDF workspace</li>
+          <li><span class="pf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>AI Smart Split &amp; document analysis</li>
+          <li><span class="pf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>OCR, redaction &amp; protection</li>
+          <li><span class="pf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Tracked document distribution</li>
+          <li><span class="pf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>AI-assisted document workflows</li>
           <li><span class="pf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Signature requests &amp; signer links</li>
           <li><span class="pf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Email support &middot; 48h response</li>
           <li><span class="pf-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Early access to new releases</li>
@@ -1466,27 +1489,19 @@
 <section class="section" id="faq">
   <div class="s-eyebrow">Common questions</div>
   <h2 class="s-title">FAQ</h2>
-  <p class="s-sub">Everything you need to know before installing.</p>
+  <p class="s-sub">The essentials before you get started.</p>
   <div class="faq-list">
     <details>
       <summary>Do I need an API key to use the AI features?</summary>
       <p>No. AI Smart Split in the web dashboard is powered by Claude (Anthropic) — no configuration needed on your end. The CLI tool also has a built-in heuristic engine that runs with no API key and no cost.</p>
     </details>
     <details>
-      <summary>Is there a free trial?</summary>
-      <p>Yes. The Professional tier includes a 14-day free trial with no credit card required. You get immediate access to all features including NyxPrism UI, LLM AI integration, and email support. Cancel any time before the trial ends and you will not be charged.</p>
-    </details>
-    <details>
       <summary>Does NyxPrism send my PDF content to any server?</summary>
-      <p>The AI Smart Split feature sends extracted PDF text to Claude (Anthropic) for analysis. In heuristic mode (CLI only), processing is entirely local. No data is ever sent to NyxCollective LLC servers. See our <a href="privacy.html">Privacy Policy</a> for full details.</p>
+      <p>Everyday editing tools run in your browser. Cloud AI, signature requests, and document distribution send only the content needed for the workflow you choose. See our <a href="privacy.html">Privacy Policy</a> for full details.</p>
     </details>
     <details>
-      <summary>What is the NyxPrism UI (nyxprism-ui)?</summary>
-      <p>A beautiful terminal-based visual interface built with Textual. Instead of memorising commands, you see a menu of buttons for every operation. Select an action, fill in your file paths, hit Run. Results stream right in the interface. Available in the Professional tier.</p>
-    </details>
-    <details>
-      <summary>What Python version is required?</summary>
-      <p>Python 3.10 or higher. NyxPrism uses modern type hint syntax and other Python 3.10+ language features.</p>
+      <summary>What can I do in the dashboard?</summary>
+      <p>Edit, organize, convert, OCR, redact, protect, sign, and distribute PDFs from one visual workspace. AI tools are available when you need deeper document analysis.</p>
     </details>
     <details>
       <summary>Is Tesseract OCR required?</summary>
