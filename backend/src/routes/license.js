@@ -1,6 +1,7 @@
 import express from 'express';
 import pool from '../db/index.js';
 import { requireAuth } from '../middleware/auth.js';
+import { developerEntitlements } from '../access.js';
 
 const router = express.Router();
 
@@ -11,6 +12,11 @@ const TRIAL_DAYS = 14;
 // an active subscription or a valid trial.
 router.get('/verify', requireAuth, async (req, res) => {
   const { uid } = req.user;
+  const developer = developerEntitlements(req.user.email);
+
+  if (developer) {
+    return res.json({ valid: true, ...developer, reason: null });
+  }
 
   try {
     const { rows } = await pool.query(

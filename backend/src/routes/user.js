@@ -1,6 +1,7 @@
 import express from 'express';
 import pool from '../db/index.js';
 import { requireAuth } from '../middleware/auth.js';
+import { developerEntitlements } from '../access.js';
 
 const router = express.Router();
 
@@ -38,7 +39,7 @@ router.get('/me', requireAuth, async (req, res) => {
     );
 
     if (!rows.length) return res.status(404).json({ error: 'User not found.' });
-    res.json(rows[0]);
+    res.json({ ...rows[0], ...(developerEntitlements(req.user.email) || {}) });
   } catch (err) {
     console.error('User /me error:', err);
     res.status(500).json({ error: 'Internal error.' });
