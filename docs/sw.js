@@ -3,9 +3,7 @@ const CACHE = 'nyx-v5';
 const SHELL = [
   '/manifest.json',
   '/nyx-brand.css?v=2',
-  '/prism-icon-192.png',
-  '/prism-icon-512.png',
-  '/prism-icon.svg'
+  '/prismlogo.jpg?v=1'
 ];
 const SENSITIVE_HTML = new Set(['/admin.html', '/dashboard.html', '/distribution.html', '/login.html', '/sign-request.html']);
 

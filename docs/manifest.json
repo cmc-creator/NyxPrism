@@ -12,21 +12,21 @@
   "orientation": "any",
   "icons": [
     {
-      "src": "/prism-icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/prism-icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/prism-icon.svg",
+      "src": "/prismlogo.jpg?v=1",
       "sizes": "any",
-      "type": "image/svg+xml",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/prismlogo.jpg?v=1",
+      "sizes": "any",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/prismlogo.jpg?v=1",
+      "sizes": "any",
+      "type": "image/jpeg",
       "purpose": "any maskable"
     }
   ],

@@ -1,18 +1,71 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
-  <title id="title">NyxPrism</title>
+  <title id="title">NyxPrism diamond</title>
   <defs>
-    <linearGradient id="bg" x1="80" y1="40" x2="440" y2="472" gradientUnits="userSpaceOnUse"><stop stop-color="#202b48"/><stop offset=".5" stop-color="#0c1222"/><stop offset="1" stop-color="#03060d"/></linearGradient>
-    <linearGradient id="left" x1="92" y1="86" x2="270" y2="432" gradientUnits="userSpaceOnUse"><stop stop-color="#fff8f2"/><stop offset=".35" stop-color="#ff9ac7" stop-opacity=".82"/><stop offset="1" stop-color="#27d9ff" stop-opacity=".58"/></linearGradient>
-    <linearGradient id="right" x1="246" y1="96" x2="428" y2="426" gradientUnits="userSpaceOnUse"><stop stop-color="#9a83ff"/><stop offset=".52" stop-color="#24d8eb" stop-opacity=".78"/><stop offset="1" stop-color="#ffd875" stop-opacity=".9"/></linearGradient>
-    <linearGradient id="spectrum" x1="102" y1="352" x2="414" y2="180" gradientUnits="userSpaceOnUse"><stop stop-color="#ff226e"/><stop offset=".2" stop-color="#ff9b35"/><stop offset=".4" stop-color="#ffe45b"/><stop offset=".59" stop-color="#35e99b"/><stop offset=".78" stop-color="#2bdcff"/><stop offset="1" stop-color="#be82ff"/></linearGradient>
-    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <radialGradient id="bg" cx="50%" cy="38%" r="72%">
+      <stop stop-color="#17152a"/>
+      <stop offset=".62" stop-color="#080812"/>
+      <stop offset="1" stop-color="#010204"/>
+    </radialGradient>
+    <linearGradient id="crown" x1="118" y1="120" x2="390" y2="250" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff" stop-opacity=".92"/>
+      <stop offset=".3" stop-color="#d9d7ec" stop-opacity=".55"/>
+      <stop offset=".62" stop-color="#9c9bbd" stop-opacity=".3"/>
+      <stop offset="1" stop-color="#fff" stop-opacity=".76"/>
+    </linearGradient>
+    <linearGradient id="leftFacet" x1="100" y1="140" x2="256" y2="398" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f2efff" stop-opacity=".72"/>
+      <stop offset=".38" stop-color="#9a95b9" stop-opacity=".2"/>
+      <stop offset="1" stop-color="#46436e" stop-opacity=".62"/>
+    </linearGradient>
+    <linearGradient id="rightFacet" x1="256" y1="120" x2="416" y2="390" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff" stop-opacity=".72"/>
+      <stop offset=".38" stop-color="#9e9bc0" stop-opacity=".16"/>
+      <stop offset="1" stop-color="#5b4c88" stop-opacity=".64"/>
+    </linearGradient>
+    <linearGradient id="rainbow" x1="196" y1="194" x2="322" y2="320" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ef3b72"/>
+      <stop offset=".2" stop-color="#ffb52e"/>
+      <stop offset=".4" stop-color="#f7ed55"/>
+      <stop offset=".6" stop-color="#36df9b"/>
+      <stop offset=".8" stop-color="#36c9ff"/>
+      <stop offset="1" stop-color="#9e63ff"/>
+    </linearGradient>
+    <linearGradient id="edge" x1="100" y1="108" x2="414" y2="424" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff"/>
+      <stop offset=".48" stop-color="#b8b7d2"/>
+      <stop offset="1" stop-color="#8f7fe2"/>
+    </linearGradient>
+    <filter id="stoneShadow" x="-30%" y="-30%" width="160%" height="180%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="13" result="blur"/>
+      <feOffset dy="10"/>
+      <feComponentTransfer><feFuncA type="linear" slope=".7"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="sparkle" x="-200%" y="-200%" width="400%" height="400%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
   </defs>
   <rect width="512" height="512" rx="112" fill="url(#bg)"/>
-  <path d="M246 54 72 358l220 101 151-249L246 54Z" fill="#fff" fill-opacity=".045" stroke="#fff" stroke-opacity=".78" stroke-width="10" stroke-linejoin="round"/>
-  <path d="M246 54 72 358l180-218Z" fill="url(#left)"/>
-  <path d="m252 140 40 319 151-249Z" fill="url(#right)"/>
-  <path d="m72 358 180-218 40 319Z" fill="#071126" fill-opacity=".9"/>
-  <path d="m99 346 148-199 177 68" fill="none" stroke="url(#spectrum)" stroke-linecap="round" stroke-width="20" filter="url(#glow)"/>
-  <path d="m99 346 148-199 177 68" fill="none" stroke="url(#spectrum)" stroke-linecap="round" stroke-width="12"/>
-  <path d="m246 54 6 86 40 319M72 358l220 101 151-249" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="7" stroke-linejoin="round"/>
+  <ellipse cx="256" cy="426" rx="137" ry="14" fill="#050509" fill-opacity=".8"/>
+  <g filter="url(#stoneShadow)" stroke-linejoin="round">
+    <path d="M92 164 132 106h248l40 58-164 260Z" fill="#d9d8e8" fill-opacity=".1" stroke="url(#edge)" stroke-width="5"/>
+    <path d="m92 164 40-58 44 58-52 80Z" fill="url(#leftFacet)" stroke="#fff" stroke-opacity=".45" stroke-width="2"/>
+    <path d="m132 106 124 8-80 50Z" fill="#fff" fill-opacity=".7" stroke="#fff" stroke-opacity=".66" stroke-width="2"/>
+    <path d="m256 114 124-8-44 58-80-50Z" fill="url(#crown)" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <path d="m380 106 40 58-32 80-52-80Z" fill="url(#rightFacet)" stroke="#fff" stroke-opacity=".56" stroke-width="2"/>
+    <path d="m176 164 80-50 80 50-80 52Z" fill="#9ea0ba" fill-opacity=".28" stroke="#fff" stroke-opacity=".6" stroke-width="2"/>
+    <path d="m176 164 80 52-52 84-76-56Z" fill="url(#rainbow)" fill-opacity=".68" stroke="#fff" stroke-opacity=".48" stroke-width="2"/>
+    <path d="m336 164-80 52 52 84 76-56Z" fill="url(#rainbow)" fill-opacity=".72" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <path d="m128 244 76 56 52 124-164-260Z" fill="url(#leftFacet)" fill-opacity=".8" stroke="#fff" stroke-opacity=".42" stroke-width="2"/>
+    <path d="m204 300 52-84 52 84-52 124Z" fill="#eef2ff" fill-opacity=".36" stroke="#fff" stroke-opacity=".65" stroke-width="2"/>
+    <path d="m308 300 76-56 36-80-164 260Z" fill="url(#rightFacet)" fill-opacity=".86" stroke="#fff" stroke-opacity=".46" stroke-width="2"/>
+    <path d="M92 164h328M132 106l44 58M380 106l-44 58M128 244l76 56 52 124M384 244l-76 56-52 124" fill="none" stroke="#fff" stroke-opacity=".48" stroke-width="2"/>
+    <path d="M150 124 178 118" stroke="#fff" stroke-opacity=".9" stroke-width="9" stroke-linecap="round"/>
+  </g>
+  <g filter="url(#sparkle)" fill="#fff">
+    <path d="m128 132 3 17 17 3-17 3-3 17-3-17-17-3 17-3Z"/>
+    <path d="m388 118 2 12 12 2-12 2-2 12-2-12-12-2 12-2Z" fill-opacity=".9"/>
+    <path d="m350 205 2 10 10 2-10 2-2 10-2-10-10-2 10-2Z" fill-opacity=".72"/>
+  </g>
 </svg>
