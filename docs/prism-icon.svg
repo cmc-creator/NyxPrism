@@ -1,16 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
   <title id="title">NyxPrism</title>
   <defs>
-    <linearGradient id="bg" x1="70" y1="40" x2="450" y2="480" gradientUnits="userSpaceOnUse"><stop stop-color="#17233a"/><stop offset="1" stop-color="#03060d"/></linearGradient>
-    <linearGradient id="left" x1="95" y1="95" x2="270" y2="430" gradientUnits="userSpaceOnUse"><stop stop-color="#fff4eb"/><stop offset=".42" stop-color="#ff9fcd" stop-opacity=".75"/><stop offset="1" stop-color="#00c8ff" stop-opacity=".55"/></linearGradient>
-    <linearGradient id="right" x1="245" y1="105" x2="426" y2="420" gradientUnits="userSpaceOnUse"><stop stop-color="#765cff"/><stop offset=".55" stop-color="#00d9ed" stop-opacity=".7"/><stop offset="1" stop-color="#ffd678" stop-opacity=".85"/></linearGradient>
-    <linearGradient id="spectrum" x1="108" y1="350" x2="413" y2="190" gradientUnits="userSpaceOnUse"><stop stop-color="#ff005c"/><stop offset=".2" stop-color="#ff7a00"/><stop offset=".38" stop-color="#ffe600"/><stop offset=".56" stop-color="#00f56a"/><stop offset=".75" stop-color="#00c8ff"/><stop offset="1" stop-color="#b000ff"/></linearGradient>
+    <linearGradient id="bg" x1="80" y1="40" x2="440" y2="472" gradientUnits="userSpaceOnUse"><stop stop-color="#202b48"/><stop offset=".5" stop-color="#0c1222"/><stop offset="1" stop-color="#03060d"/></linearGradient>
+    <linearGradient id="left" x1="92" y1="86" x2="270" y2="432" gradientUnits="userSpaceOnUse"><stop stop-color="#fff8f2"/><stop offset=".35" stop-color="#ff9ac7" stop-opacity=".82"/><stop offset="1" stop-color="#27d9ff" stop-opacity=".58"/></linearGradient>
+    <linearGradient id="right" x1="246" y1="96" x2="428" y2="426" gradientUnits="userSpaceOnUse"><stop stop-color="#9a83ff"/><stop offset=".52" stop-color="#24d8eb" stop-opacity=".78"/><stop offset="1" stop-color="#ffd875" stop-opacity=".9"/></linearGradient>
+    <linearGradient id="spectrum" x1="102" y1="352" x2="414" y2="180" gradientUnits="userSpaceOnUse"><stop stop-color="#ff226e"/><stop offset=".2" stop-color="#ff9b35"/><stop offset=".4" stop-color="#ffe45b"/><stop offset=".59" stop-color="#35e99b"/><stop offset=".78" stop-color="#2bdcff"/><stop offset="1" stop-color="#be82ff"/></linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
   </defs>
-  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
-  <path d="M244 58 74 360l218 94 148-244L244 58Z" fill="#fff" fill-opacity=".04" stroke="#fff" stroke-opacity=".72" stroke-width="12"/>
-  <path d="M244 58 74 360l177-215Z" fill="url(#left)"/>
-  <path d="m251 145 41 309 148-244Z" fill="url(#right)"/>
-  <path d="m74 360 177-215 41 309Z" fill="#071126" fill-opacity=".82"/>
-  <path d="m104 345 143-192 171 64" fill="none" stroke="url(#spectrum)" stroke-linecap="round" stroke-width="22"/>
-  <path d="m244 58 7 87 41 309M74 360l218 94 148-244" fill="none" stroke="#fff" stroke-opacity=".64" stroke-width="8"/>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <path d="M246 54 72 358l220 101 151-249L246 54Z" fill="#fff" fill-opacity=".045" stroke="#fff" stroke-opacity=".78" stroke-width="10" stroke-linejoin="round"/>
+  <path d="M246 54 72 358l180-218Z" fill="url(#left)"/>
+  <path d="m252 140 40 319 151-249Z" fill="url(#right)"/>
+  <path d="m72 358 180-218 40 319Z" fill="#071126" fill-opacity=".9"/>
+  <path d="m99 346 148-199 177 68" fill="none" stroke="url(#spectrum)" stroke-linecap="round" stroke-width="20" filter="url(#glow)"/>
+  <path d="m99 346 148-199 177 68" fill="none" stroke="url(#spectrum)" stroke-linecap="round" stroke-width="12"/>
+  <path d="m246 54 6 86 40 319M72 358l220 101 151-249" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="7" stroke-linejoin="round"/>
 </svg>
