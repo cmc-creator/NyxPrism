@@ -1,5 +1,5 @@
 // NyxPrism Service Worker — network-first for HTML, cache-first for assets
-const CACHE = 'nyx-v6';
+const CACHE = 'nyx-v7';
 const SHELL = [
   '/manifest.json',
   '/nyx-brand.css?v=3',
@@ -7,7 +7,8 @@ const SHELL = [
   '/prism-icon-512.png?v=2',
   '/prism-icon-maskable-512.png?v=2'
 ];
-const SENSITIVE_HTML = new Set(['/admin.html', '/dashboard.html', '/distribution.html', '/login.html', '/sign-request.html']);
+const SENSITIVE_HTML = new Set(['/admin.html', '/dashboard.html', '/distribution.html', '/login.html', '/sign-request.html',
+  '/admin', '/dashboard', '/distribution', '/login', '/sign-request']);
 
 self.addEventListener('install', function(e) {
   e.waitUntil(
