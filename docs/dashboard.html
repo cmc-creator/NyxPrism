@@ -438,7 +438,7 @@
 <div class="sidebar-overlay" id="sidebar-overlay"></div>
 <aside class="sidebar">
   <div class="sidebar-search">
-    <input class="sidebar-search-input" id="sidebar-search" placeholder="Filter tools…" />
+    <input class="sidebar-search-input" id="sidebar-search" type="search" name="nyx-tool-filter" placeholder="Filter tools…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Filter tools" />
   </div>
   <div class="sidebar-section">Overview</div>
   <button class="nav-item active" data-panel="home">
@@ -4070,7 +4070,7 @@ document.addEventListener("keydown", function(e){
 (function(){
   var inp = document.getElementById("sidebar-search");
   if (!inp) return;
-  inp.addEventListener("input", function() {
+  function applyFilter() {
     var q = inp.value.trim().toLowerCase();
     var sections = document.querySelectorAll(".sidebar-section");
     var items = document.querySelectorAll(".nav-item[data-panel]");
@@ -4087,7 +4087,13 @@ document.addEventListener("keydown", function(e){
       }
       sec.style.display = hasVisible ? "" : "none";
     });
-  });
+  }
+  inp.addEventListener("input", applyFilter);
+  // Recover from browser autofill dumping a saved email/username into the filter.
+  function clearAutofill() { if (inp.value && inp !== document.activeElement) { inp.value = ""; applyFilter(); } }
+  setTimeout(clearAutofill, 300);
+  setTimeout(clearAutofill, 1200);
+  window.addEventListener("pageshow", clearAutofill);
 })();
 
 // ── CLIPBOARD PASTE TO DROP ZONES ──
