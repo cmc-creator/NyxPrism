@@ -105,15 +105,42 @@ router.post('/create-checkout', requireAuth, async (req, res) => {
       );
     }
 
-    const session = await stripe.checkout.sessions.create({
+    // Checkout Studio settings. customer + subscription_data.metadata are kept:
+    // the webhook uses them to link the subscription to the NyxPrism user.
+    const params = {
       customer:   customerId,
       mode:       'subscription',
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${process.env.FRONTEND_URL}/dashboard.html?checkout=success`,
       cancel_url:  `${process.env.FRONTEND_URL}/dashboard.html`,
-      allow_promotion_codes: true,
       subscription_data: { metadata: { firebase_uid: uid } },
-    });
+      ui_mode: 'hosted', // 'hosted_page' once the stripe SDK is >= 21.0.0
+      billing_address_collection: 'auto',
+      phone_number_collection: { enabled: true },
+      automatic_tax: { enabled: false },
+      allow_promotion_codes: true,
+      payment_method_collection: 'always',
+      submit_type: 'auto',
+      saved_payment_method_options: { payment_method_save: 'enabled' },
+      integration_identifier: 'hosted_web_0001',
+      origin_context: 'web',
+    };
+    // Newer Checkout Studio fields may be unknown to this SDK's pinned API
+    // version; drop only the field Stripe rejects so checkout keeps working.
+    const optional = ['integration_identifier', 'origin_context', 'submit_type', 'saved_payment_method_options', 'phone_number_collection'];
+    let session;
+    for (;;) {
+      try {
+        session = await stripe.checkout.sessions.create(params);
+        break;
+      } catch (err) {
+        const field = optional.find(name => name in params && (
+          err?.param === name || err?.param?.startsWith(`${name}[`) || String(err?.message || '').includes(name)));
+        if (err?.type !== 'StripeInvalidRequestError' || !field) throw err;
+        console.warn(`Checkout: Stripe rejected ${field} (${err.message}); retrying without it.`);
+        delete params[field];
+      }
+    }
 
     res.json({ url: session.url });
   } catch (err) {
