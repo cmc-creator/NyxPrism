@@ -11,8 +11,8 @@ const router = express.Router();
 router.post('/sync', requireAuth, async (req, res) => {
   const { uid, email } = req.user;
   const { firstName, lastName, plan } = req.body ?? {};
-  const accountPlan = plan === 'free' ? 'free' : 'trial';
-  const subscriptionStatus = accountPlan === 'free' ? 'active' : 'trialing';
+  const accountPlan = plan === 'trial' ? 'trial' : 'free';
+  const subscriptionStatus = accountPlan === 'trial' ? 'trialing' : 'active';
 
   try {
     await pool.query(
@@ -51,12 +51,12 @@ router.get('/me', requireAuth, async (req, res) => {
 
     if (!rows.length) {
       const created = await pool.query(
-        `INSERT INTO users (firebase_uid, email, plan, subscription_status, trial_start)
-         VALUES ($1, $2, $3, $4, NOW())
+        `INSERT INTO users (firebase_uid, email, plan, subscription_status, trial_active, trial_start)
+         VALUES ($1, $2, $3, $4, FALSE, NULL)
          RETURNING id, firebase_uid, email, first_name, last_name, plan,
                    subscription_status, trial_active, trial_start,
                    current_period_end, created_at`,
-        [req.user.uid, req.user.email, developer ? 'professional' : 'trial', developer ? 'active' : 'trialing'],
+        [req.user.uid, req.user.email, developer ? 'professional' : 'free', 'active'],
       );
       rows = created.rows;
     }

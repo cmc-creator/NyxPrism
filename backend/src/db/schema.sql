@@ -6,13 +6,13 @@ CREATE TABLE IF NOT EXISTS users (
   email                  TEXT UNIQUE NOT NULL,
   first_name             TEXT,
   last_name              TEXT,
-  plan                   TEXT NOT NULL DEFAULT 'trial',
+  plan                   TEXT NOT NULL DEFAULT 'free',
   stripe_customer_id     TEXT UNIQUE,
   stripe_subscription_id TEXT UNIQUE,
   stripe_price_id        TEXT,
-  subscription_status    TEXT NOT NULL DEFAULT 'trialing',
-  trial_start            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  trial_active           BOOLEAN NOT NULL DEFAULT TRUE,
+  subscription_status    TEXT NOT NULL DEFAULT 'active',
+  trial_start            TIMESTAMPTZ DEFAULT NULL,
+  trial_active           BOOLEAN NOT NULL DEFAULT FALSE,
   current_period_end     TIMESTAMPTZ,
   is_admin               BOOLEAN NOT NULL DEFAULT FALSE,
   created_at             TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -21,6 +21,11 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- Add is_admin to pre-existing deployments
 ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE users ALTER COLUMN plan SET DEFAULT 'free';
+ALTER TABLE users ALTER COLUMN subscription_status SET DEFAULT 'active';
+ALTER TABLE users ALTER COLUMN trial_start DROP NOT NULL;
+ALTER TABLE users ALTER COLUMN trial_start SET DEFAULT NULL;
+ALTER TABLE users ALTER COLUMN trial_active SET DEFAULT FALSE;
 
 CREATE TABLE IF NOT EXISTS contact_messages (
   id         SERIAL PRIMARY KEY,

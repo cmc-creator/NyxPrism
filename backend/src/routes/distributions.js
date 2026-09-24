@@ -18,8 +18,8 @@ async function findOrCreateUser(user) {
   const existing = await pool.query('SELECT id FROM users WHERE firebase_uid = $1 OR email = $2 LIMIT 1', [user.uid, user.email]);
   if (existing.rows.length) return existing.rows[0].id;
   const created = await pool.query(
-    `INSERT INTO users (firebase_uid, email, plan, subscription_status, trial_start)
-     VALUES ($1, $2, 'trial', 'trialing', NOW())
+    `INSERT INTO users (firebase_uid, email, plan, subscription_status, trial_active, trial_start)
+     VALUES ($1, $2, 'free', 'active', FALSE, NULL)
      ON CONFLICT (email) DO UPDATE SET firebase_uid = EXCLUDED.firebase_uid
      RETURNING id`,
     [user.uid, user.email],

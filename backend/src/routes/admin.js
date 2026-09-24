@@ -83,8 +83,8 @@ router.post('/claim', adminSecretLimiter, async (req, res) => {
     // No row yet — insert one (e.g. owner hasn't gone through normal signup)
     if (!result.rows.length) {
       result = await pool.query(
-        `INSERT INTO users (firebase_uid, email, plan, subscription_status, trial_start, is_admin)
-         VALUES ('bootstrap-' || gen_random_uuid(), $1, 'trial', 'trialing', NOW(), TRUE)
+        `INSERT INTO users (firebase_uid, email, plan, subscription_status, trial_active, trial_start, is_admin)
+         VALUES ('bootstrap-' || gen_random_uuid(), $1, 'free', 'active', FALSE, NULL, TRUE)
          ON CONFLICT (email) DO UPDATE SET is_admin = TRUE
          RETURNING email`,
         [normalised]
