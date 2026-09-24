@@ -438,7 +438,7 @@
 <div class="sidebar-overlay" id="sidebar-overlay"></div>
 <aside class="sidebar">
   <div class="sidebar-search">
-    <input class="sidebar-search-input" id="sidebar-search" type="search" name="nyx-tool-filter" placeholder="Filter tools…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Filter tools" />
+    <input class="sidebar-search-input" id="sidebar-search" type="search" name="nyx-tool-filter" placeholder="Filter tools…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Filter tools" readonly />
   </div>
   <div class="sidebar-section">Overview</div>
   <button class="nav-item active" data-panel="home">
@@ -4089,10 +4089,14 @@ document.addEventListener("keydown", function(e){
     });
   }
   inp.addEventListener("input", applyFilter);
-  // Recover from browser autofill dumping a saved email/username into the filter.
+  // Password managers ignore autocomplete=off; keep the field readonly until the user interacts.
+  function unlock(){ inp.removeAttribute("readonly"); }
+  inp.addEventListener("focus", unlock);
+  inp.addEventListener("pointerdown", unlock);
+  inp.addEventListener("touchstart", unlock, { passive: true });
   function clearAutofill() { if (inp.value && inp !== document.activeElement) { inp.value = ""; applyFilter(); } }
-  setTimeout(clearAutofill, 300);
-  setTimeout(clearAutofill, 1200);
+  var sweeps = 0;
+  var sweep = setInterval(function(){ clearAutofill(); if (++sweeps >= 12) clearInterval(sweep); }, 500);
   window.addEventListener("pageshow", clearAutofill);
 })();
 
