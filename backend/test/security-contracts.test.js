@@ -16,6 +16,11 @@ test('owner account always receives Professional access', () => {
   });
 });
 
+test('store certification reviewer account receives Professional access', () => {
+  assert.equal(developerEntitlements('msstore-review@nyxprism.com')?.plan, 'professional');
+  assert.equal(developerEntitlements('MSStore-Review@nyxprism.com')?.plan, 'professional');
+});
+
 test('paid operations enforce active plans on the server', async () => {
   for (const path of [
     'src/routes/ai-assist.js',
@@ -123,4 +128,35 @@ test('dynamic recipient rows use fixed accessible remove controls', async () => 
   assert.match(dashboard, /sigreq-recipient recipient-row signature-recipient/);
   assert.match(dashboard, /recipient-row distribution-recipient/);
   assert.doesNotMatch(dashboard, /className='sigreq-recipient';row\.style\.cssText/);
+});
+
+test('saved people are user-scoped and automatically updated by document workflows', async () => {
+  const schema = await read('src/db/schema.sql');
+  const contacts = await read('src/routes/saved-contacts.js');
+  const signatures = await read('src/routes/sign-requests.js');
+  const distributions = await read('src/routes/distributions.js');
+  assert.match(schema, /CREATE TABLE IF NOT EXISTS saved_contacts/);
+  assert.match(schema, /UNIQUE \(user_id, email\)/);
+  assert.match(contacts, /WHERE user_id = \$1/);
+  assert.match(signatures, /INSERT INTO saved_contacts/);
+  assert.match(distributions, /INSERT INTO saved_contacts/);
+  const dashboard = await readRepo('docs/dashboard.html');
+  assert.match(dashboard, /api\/saved-contacts/);
+  assert.match(dashboard, /id="sigreq-saved-person"/);
+  assert.match(dashboard, /id="dist-saved-person"/);
+});
+
+test('account settings support name, password, email, and appearance changes', async () => {
+  const dashboard = await readRepo('docs/dashboard.html');
+  assert.match(dashboard, /id="acc-save-name"/);
+  assert.match(dashboard, /id="acc-change-password"/);
+  assert.match(dashboard, /id="acc-change-email"/);
+  assert.match(dashboard, /reauthenticateWithCredential/);
+  assert.match(dashboard, /verifyBeforeUpdateEmail/);
+  assert.match(dashboard, /acc-theme-choices/);
+  assert.match(dashboard, /acc-wallpaper-choices/);
+  assert.match(dashboard, /acc-accent-choices/);
+  const userRoutes = await read('src/routes/user.js');
+  assert.match(userRoutes, /router\.post\('\/profile', requireAuth/);
+  assert.match(userRoutes, /UPDATE users SET email = \$1/);
 });

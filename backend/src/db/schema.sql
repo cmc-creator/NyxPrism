@@ -48,6 +48,16 @@ CREATE TABLE IF NOT EXISTS api_keys (
   last_used_at TIMESTAMPTZ
 );
 
+CREATE TABLE IF NOT EXISTS saved_contacts (
+  id           SERIAL PRIMARY KEY,
+  user_id      INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  name         TEXT NOT NULL,
+  email        TEXT NOT NULL,
+  last_used_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (user_id, email)
+);
+
 CREATE TABLE IF NOT EXISTS signature_requests (
   id            SERIAL PRIMARY KEY,
   owner_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -173,3 +183,19 @@ CREATE TABLE IF NOT EXISTS distribution_recipients (
   error     TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+INSERT INTO saved_contacts (user_id, name, email, last_used_at)
+SELECT DISTINCT ON (owner_user_id, LOWER(recipient_email))
+       owner_user_id, recipient_name, LOWER(recipient_email), used_at
+FROM (
+  SELECT r.owner_user_id, sr.name AS recipient_name, sr.email AS recipient_email,
+         COALESCE(sr.completed_at, sr.created_at) AS used_at
+  FROM signature_recipients sr
+  JOIN signature_requests r ON r.id = sr.request_id
+  UNION ALL
+  SELECT b.owner_user_id, dr.name, dr.email, dr.created_at
+  FROM distribution_recipients dr
+  JOIN distribution_batches b ON b.id = dr.batch_id
+) prior_recipients
+ORDER BY owner_user_id, LOWER(recipient_email), used_at DESC
+ON CONFLICT (user_id, email) DO NOTHING;

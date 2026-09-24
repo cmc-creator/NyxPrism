@@ -74,11 +74,40 @@ router.get('/me', requireAuth, async (req, res) => {
       );
     }
 
+    // Firebase is the source of truth for email — reconcile after an email change.
+    if (req.user.email && account.email.toLowerCase() !== req.user.email.toLowerCase()) {
+      try {
+        await pool.query('UPDATE users SET email = $1, updated_at = NOW() WHERE id = $2', [req.user.email, account.id]);
+        account.email = req.user.email;
+      } catch (_) { /* unique-email conflict: keep the stored address */ }
+    }
+
     const { id: _id, ...publicAccount } = account;
     res.json({ ...publicAccount, firebase_uid: req.user.uid, ...(developer || {}) });
   } catch (err) {
     console.error('User /me error:', err);
     res.status(500).json({ error: 'Internal error.' });
+  }
+});
+
+// ── POST /api/user/profile ───────────────────────────────────────────────
+// Updates the authenticated user's first and last name.
+router.post('/profile', requireAuth, async (req, res) => {
+  const firstName = String(req.body?.firstName || '').trim().slice(0, 100);
+  const lastName = String(req.body?.lastName || '').trim().slice(0, 100);
+  if (!firstName) return res.status(400).json({ error: 'First name is required.' });
+  try {
+    const result = await pool.query(
+      `UPDATE users SET first_name = $1, last_name = $2, updated_at = NOW()
+       WHERE firebase_uid = $3 OR LOWER(email) = LOWER($4)
+       RETURNING first_name, last_name`,
+      [firstName, lastName || null, req.user.uid, req.user.email],
+    );
+    if (!result.rows.length) return res.status(404).json({ error: 'Account not found.' });
+    res.json({ ok: true, firstName: result.rows[0].first_name, lastName: result.rows[0].last_name || '' });
+  } catch (err) {
+    console.error('User profile error:', err);
+    res.status(500).json({ error: 'Failed to update profile.' });
   }
 });
 

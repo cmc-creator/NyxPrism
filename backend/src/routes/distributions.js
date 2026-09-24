@@ -132,6 +132,13 @@ router.post('/', requireAuth, requireActivePlan, async (req, res) => {
     batch = batchResult.rows[0];
     for (const recipient of recipients) {
       const token = randomBytes(32).toString('hex');
+      await client.query(
+        `INSERT INTO saved_contacts (user_id, name, email, last_used_at)
+         VALUES ($1, $2, $3, NOW())
+         ON CONFLICT (user_id, email)
+         DO UPDATE SET name = EXCLUDED.name, last_used_at = NOW()`,
+        [userId, recipient.name, recipient.email],
+      );
       const inserted = await client.query(
         `INSERT INTO distribution_recipients (batch_id, name, email, token, status)
          VALUES ($1, $2, $3, $4, $5)

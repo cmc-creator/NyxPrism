@@ -36,7 +36,6 @@ const limiter = rateLimit({
 });
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, char => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
@@ -46,10 +45,10 @@ function escapeHtml(value) {
 router.post('/', limiter, async (req, res) => {
   const { firstName, lastName, email, subject, message } = req.body ?? {};
 
-  if (![firstName, lastName, email, subject, message].every(value => typeof value === 'string' && value.trim())) {
+  if ([firstName, lastName, email, subject, message].some(value => typeof value !== 'string' || !value.trim())) {
     return res.status(400).json({ error: 'All fields are required.' });
   }
-  if (!EMAIL_RE.test(email)) {
+  if (!EMAIL_RE.test(email) || /[\r\n]|%0[ad]/i.test(email)) {
     return res.status(400).json({ error: 'Invalid email address.' });
   }
   if (message.trim().length < 20) {
@@ -58,11 +57,11 @@ router.post('/', limiter, async (req, res) => {
 
   // Sanitise lengths to prevent DB / email abuse
   const safe = {
-    firstName: firstName.trim().slice(0, 100),
-    lastName:  lastName.trim().slice(0, 100),
-    email:     email.trim().slice(0, 254),
-    subject:   subject.trim().slice(0, 100),
-    message:   message.trim().slice(0, 5000),
+    firstName: firstName.slice(0, 100),
+    lastName:  lastName.slice(0, 100),
+    email:     email.slice(0, 254),
+    subject:   subject.slice(0, 100),
+    message:   message.slice(0, 5000),
   };
 
   try {

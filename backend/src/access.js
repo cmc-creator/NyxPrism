@@ -1,6 +1,8 @@
 const ownerEmails = ['cmc@conniemichelleconsulting.com'];
+// Permanent full-access account for app store certification reviewers.
+const reviewerEmails = ['msstore-review@nyxprism.com'];
 const developerEmails = new Set(
-  [ownerEmails.join(','), process.env.DEVELOPER_EMAILS || '']
+  [ownerEmails.join(','), reviewerEmails.join(','), process.env.DEVELOPER_EMAILS || '']
     .join(',')
     .split(',')
     .map(email => email.trim().toLowerCase())

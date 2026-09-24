@@ -1,9 +1,11 @@
 // NyxPrism Service Worker — network-first for HTML, cache-first for assets
-const CACHE = 'nyx-v5';
+const CACHE = 'nyx-v6';
 const SHELL = [
   '/manifest.json',
   '/nyx-brand.css?v=3',
-  '/prismlogo.jpg?v=1'
+  '/prism-icon-192.png?v=2',
+  '/prism-icon-512.png?v=2',
+  '/prism-icon-maskable-512.png?v=2'
 ];
 const SENSITIVE_HTML = new Set(['/admin.html', '/dashboard.html', '/distribution.html', '/login.html', '/sign-request.html']);
 
