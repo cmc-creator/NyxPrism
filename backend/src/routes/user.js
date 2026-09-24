@@ -10,18 +10,21 @@ const router = express.Router();
 // Creates the Postgres user row if it doesn't exist yet.
 router.post('/sync', requireAuth, async (req, res) => {
   const { uid, email } = req.user;
-  const { firstName, lastName } = req.body ?? {};
+  const { firstName, lastName, plan } = req.body ?? {};
+  const accountPlan = plan === 'free' ? 'free' : 'trial';
+  const subscriptionStatus = accountPlan === 'free' ? 'active' : 'trialing';
 
   try {
     await pool.query(
-      `INSERT INTO users (firebase_uid, email, first_name, last_name, plan, trial_start)
-      VALUES ($1, $2, $3, $4, 'trial', NOW())
+      `INSERT INTO users (firebase_uid, email, first_name, last_name, plan, subscription_status, trial_active, trial_start)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        ON CONFLICT (email) DO UPDATE SET
          firebase_uid = EXCLUDED.firebase_uid,
          first_name = COALESCE(NULLIF(EXCLUDED.first_name, ''), users.first_name),
          last_name = COALESCE(NULLIF(EXCLUDED.last_name, ''), users.last_name),
          updated_at = NOW()`,
-          [uid, email, String(firstName || '').slice(0, 100) || null, String(lastName || '').slice(0, 100) || null],
+          [uid, email, String(firstName || '').slice(0, 100) || null, String(lastName || '').slice(0, 100) || null,
+            accountPlan, subscriptionStatus, accountPlan === 'trial', accountPlan === 'trial' ? new Date() : null],
     );
     res.json({ ok: true });
   } catch (err) {

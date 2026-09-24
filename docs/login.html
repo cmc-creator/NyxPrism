@@ -284,7 +284,7 @@
     <!-- TAB TOGGLE -->
     <div class="tab-row" role="tablist">
       <button class="tab-btn active" onclick="switchTab('login')" role="tab" aria-selected="true" id="tab-login">Log In</button>
-      <button class="tab-btn" onclick="switchTab('trial')" role="tab" aria-selected="false" id="tab-trial">Start Free Trial</button>
+      <button class="tab-btn" onclick="switchTab('trial')" role="tab" aria-selected="false" id="tab-trial">Create Free Account</button>
     </div>
 
     <div class="auth-card">
@@ -325,45 +325,27 @@
             <button type="button" class="session-btn session-btn-secondary" id="switch-session"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg> Use a different account</button>
           </div>
         </div>
-        <p class="card-foot" id="login-card-foot">No account? <a href="#" onclick="switchTab('trial');return false;">Start your free trial</a></p>
+        <p class="card-foot" id="login-card-foot">No account? <a href="#" onclick="switchTab('trial');return false;">Create a free account</a></p>
       </div>
 
       <!-- TRIAL PANEL -->
       <div class="form-panel" id="panel-trial">
-        <div class="form-title">Start your free trial</div>
-        <p class="form-sub">14 days free, no credit card required. Access NyxPrism&#8482; Professional immediately.</p>
+        <div class="form-title">Create your free account</div>
+        <p class="form-sub">No credit card required. Start with the free NyxPrism&#8482; tools and upgrade whenever you need more.</p>
         <div class="plan-hint">
-          Starting with <strong>Professional</strong> &mdash; includes NyxPrism UI, LLM AI, and email support. Cancel any time before your trial ends and you won&rsquo;t be charged.
+          Free forever &mdash; no payment details or company information required.
         </div>
         <form id="form-trial">
-          <div class="field-row">
-            <div class="field">
-              <label for="trial-first">First name</label>
-              <input type="text" id="trial-first" name="first_name" placeholder="Alex" autocomplete="given-name" required />
-            </div>
-            <div class="field">
-              <label for="trial-last">Last name</label>
-              <input type="text" id="trial-last" name="last_name" placeholder="Smith" autocomplete="family-name" required />
-            </div>
-          </div>
           <div class="field">
-            <label for="trial-email">Work email</label>
-            <input type="email" id="trial-email" name="email" placeholder="you@company.com" autocomplete="email" required />
+            <label for="trial-email">Email address</label>
+            <input type="email" id="trial-email" name="email" placeholder="you@example.com" autocomplete="email" required />
           </div>
           <div class="field">
             <label for="trial-password">Create a password</label>
             <input type="password" id="trial-password" name="password" placeholder="Min. 12 characters" autocomplete="new-password" required minlength="12" />
           </div>
-          <div class="field">
-            <label for="trial-plan">Plan</label>
-            <select id="trial-plan" name="plan">
-              <option value="professional" selected>Professional &mdash; $12/mo (14-day free trial)</option>
-              <option value="professional-annual">Professional Annual &mdash; $99/yr (save 30%)</option>
-              <option value="enterprise">Enterprise &mdash; Contact sales</option>
-            </select>
-          </div>
           <div class="auth-error" id="trial-error"></div>
-          <button type="submit" class="submit-btn">Create Account &amp; Start Trial</button>
+          <button type="submit" class="submit-btn">Create Free Account</button>
         </form>
         <p class="card-foot">Already have an account? <a href="#" onclick="switchTab('login');return false;">Log in</a></p>
         <p style="text-align:center;font-size:.75rem;color:var(--muted2);margin-top:1rem;line-height:1.5;">
@@ -525,23 +507,20 @@
     e.preventDefault();
     clearError('trial-error');
     const btn       = e.target.querySelector('.submit-btn');
-    const firstName = document.getElementById('trial-first').value.trim();
-    const lastName  = document.getElementById('trial-last').value.trim();
     const email     = document.getElementById('trial-email').value.trim();
     const password  = document.getElementById('trial-password').value;
-    const plan      = document.getElementById('trial-plan').value;
     btn.textContent = 'Creating account...';
     btn.disabled = true;
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       // Write user profile to Firestore (drives dashboard display)
       await setDoc(doc(db, 'users', cred.user.uid), {
-        firstName,
-        lastName,
+        firstName: '',
+        lastName: '',
         email,
-        plan,
-        trialStart:   serverTimestamp(),
-        trialActive:  true,
+        plan: 'free',
+        trialStart:   null,
+        trialActive:  false,
         createdAt:    serverTimestamp(),
       });
       // Sync to Railway Postgres (drives license verification + Stripe)
@@ -549,13 +528,13 @@
       const sync = await fetch(`${API}/api/user/sync`, {
         method:  'POST',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ firstName, lastName, plan }),
+        body:    JSON.stringify({ plan: 'free' }),
       });
       if (!sync.ok) throw new Error('Account synchronization failed. Please log in to retry.');
       window.location.replace('dashboard.html');
     } catch (err) {
       showError('trial-error', err.code ? authErrorMsg(err.code) : err.message);
-      btn.textContent = 'Create Account & Start Trial';
+      btn.textContent = 'Create Free Account';
       btn.disabled = false;
     }
   });
