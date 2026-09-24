@@ -751,7 +751,7 @@ async function openUser(id) {
 // ── Billing ────────────────────────────────────────────────────────────
 loaders.billing = async () => {
   const b = await api('/api/admin/billing');
-  $('bill-msg').textContent = !b.configured ? 'Stripe is not configured on the backend (STRIPE_SECRET_KEY is missing).' : (b.error || '');
+  $('bill-msg').textContent = '';
   renderStripeConnection(b);
   const counts = b.counts || {};
   $('bill-tiles').innerHTML = [
@@ -772,7 +772,14 @@ loaders.billing = async () => {
 function renderStripeConnection(b) {
   const el = $('bill-conn');
   if (!b.configured) { el.innerHTML = '<h2>Stripe connection</h2><div class="msg error">Not connected. STRIPE_SECRET_KEY is not set on Railway.</div>'; return; }
-  if (b.error) { el.innerHTML = `<h2>Stripe connection</h2><div class="msg error">${esc(b.error)}. Check that STRIPE_SECRET_KEY on Railway is a current key from your Stripe account (Developers → API keys).</div>`; return; }
+  if (b.error) {
+    const orgKey = /Organization API key|Stripe-Context/i.test(b.error);
+    const fix = orgKey
+      ? 'STRIPE_SECRET_KEY on Railway is an organization key. In Stripe, open the NyxPrism account itself → Developers → API keys, copy the Standard secret key (sk_live_…), and replace STRIPE_SECRET_KEY on Railway with it.'
+      : 'Check that STRIPE_SECRET_KEY on Railway is a current secret key from your Stripe account (Developers → API keys).';
+    el.innerHTML = `<h2>Stripe connection</h2><div class="msg error">${esc(b.error.replace(/\.+$/, ''))}.</div><div class="sub" style="margin-top:.5rem">${esc(fix)}</div>`;
+    return;
+  }
   const ok = (good, text) => `<span class="status-dot ${good ? 'ok' : 'bad'}"></span>${text}`;
   const a = b.account || {};
   const mode = b.keyMode === 'live' ? pill('live', 'ok') : b.keyMode === 'test' ? pill('test mode', 'pending') : pill('unknown', 'tag');
