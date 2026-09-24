@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
-import { developerEntitlements } from '../src/access.js';
+import { developerEntitlements, hasProfessionalAccess } from '../src/access.js';
 
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 const readRepo = path => readFile(new URL(`../../${path}`, import.meta.url), 'utf8');
@@ -19,6 +19,28 @@ test('owner account always receives Professional access', () => {
 test('store certification reviewer account receives Professional access', () => {
   assert.equal(developerEntitlements('msstore-review@nyxprism.com')?.plan, 'professional');
   assert.equal(developerEntitlements('MSStore-Review@nyxprism.com')?.plan, 'professional');
+});
+
+test('free accounts never receive Professional access, even with an active status', () => {
+  const day = 24 * 60 * 60 * 1000;
+  const acct = (plan, status, extra = {}) => ({ email: 'user@example.com', plan, subscription_status: status, ...extra });
+  assert.equal(hasProfessionalAccess(acct('free', 'active')), false);
+  assert.equal(hasProfessionalAccess(acct('inactive', 'canceled')), false);
+  assert.equal(hasProfessionalAccess(acct('professional', 'active')), true);
+  assert.equal(hasProfessionalAccess(acct('professional', 'past_due')), true);
+  assert.equal(hasProfessionalAccess(acct('professional', 'canceled')), false);
+  assert.equal(hasProfessionalAccess(acct('trial', 'trialing', { trial_start: new Date(Date.now() - 3 * day) })), true);
+  assert.equal(hasProfessionalAccess(acct('trial', 'trialing', { trial_start: new Date(Date.now() - 15 * day) })), false);
+  assert.equal(hasProfessionalAccess(acct('free', 'active', { email: 'cmc@conniemichelleconsulting.com' })), true);
+  assert.equal(hasProfessionalAccess(null), false);
+});
+
+test('canceled subscriptions fall back to Free and webhooks re-read Stripe state', async () => {
+  const stripe = await read('src/routes/stripe.js');
+  assert.match(stripe, /subscriptions\.retrieve/);
+  assert.match(stripe, /paid \? 'professional' : 'free'/);
+  assert.doesNotMatch(stripe, /plan\s*=\s*'inactive'/);
+  assert.match(stripe, /item\?\.current_period_end/);
 });
 
 test('paid operations enforce active plans on the server', async () => {

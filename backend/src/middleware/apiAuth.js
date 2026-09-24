@@ -1,6 +1,6 @@
 import { createHash } from 'crypto';
 import pool from '../db/index.js';
-import { developerEntitlements } from '../access.js';
+import { developerEntitlements, hasProfessionalAccess } from '../access.js';
 
 /**
  * Express middleware that authenticates requests using a NyxPrism API key.
@@ -34,13 +34,8 @@ export async function requireApiKey(req, res, next) {
     const row = result.rows[0];
     const developer = developerEntitlements(row.email);
 
-    // Check that the key owner has an active plan
-    const trialExpired =
-      row.plan === 'trial' &&
-      row.trial_start &&
-      Date.now() > new Date(row.trial_start).getTime() + 14 * 24 * 60 * 60 * 1000;
-
-    if (!developer && (row.plan === 'inactive' || trialExpired)) {
+    // API access is a Professional feature: the key owner must still have it.
+    if (!hasProfessionalAccess(row, row.email)) {
       return res.status(403).json({ error: 'Your subscription is inactive. Please renew at https://nyxprism.com/dashboard.html' });
     }
 

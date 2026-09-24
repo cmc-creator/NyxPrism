@@ -1,6 +1,6 @@
 import admin from '../firebase.js';
 import pool from '../db/index.js';
-import { developerEntitlements } from '../access.js';
+import { developerEntitlements, hasProfessionalAccess } from '../access.js';
 
 /**
  * Express middleware that verifies a Firebase ID token in the
@@ -36,12 +36,7 @@ export async function requireActivePlan(req, res, next) {
       return res.status(403).json({ error: 'Create your NyxPrism account before using this feature.' });
     }
 
-    const account = result.rows[0];
-    const trialExpired = account.plan === 'trial' && account.trial_start &&
-      Date.now() > new Date(account.trial_start).getTime() + 14 * 24 * 60 * 60 * 1000;
-    const active = !trialExpired && ['active', 'trialing'].includes(account.subscription_status);
-
-    if (!active) {
+    if (!hasProfessionalAccess(result.rows[0], req.user.email)) {
       return res.status(403).json({ error: 'An active trial or Professional subscription is required.' });
     }
     next();

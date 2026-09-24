@@ -15,6 +15,59 @@ const PRICES = {
   annual:  process.env.STRIPE_PRICE_ID_ANNUAL,
 };
 
+// Subscription states in which the customer keeps Professional access.
+// past_due: Stripe is still retrying a failed renewal.
+const PAID_STATUSES = ['active', 'trialing', 'past_due'];
+const SUBSCRIPTION_EVENTS = new Set([
+  'customer.subscription.created',
+  'customer.subscription.updated',
+  'customer.subscription.deleted',
+]);
+
+// Webhook events can arrive late or out of order, so always re-read the
+// subscription from Stripe and store its current state rather than the
+// (possibly stale) copy inside the event.
+async function syncSubscription(stripe, eventSubscription) {
+  let sub = eventSubscription;
+  try {
+    sub = await stripe.subscriptions.retrieve(eventSubscription.id);
+  } catch (err) {
+    if (err?.code !== 'resource_missing') throw err;
+  }
+  const customerId = typeof sub.customer === 'string' ? sub.customer : sub.customer?.id;
+  const firebaseUid = sub.metadata?.firebase_uid || null;
+  const item = sub.items?.data?.[0];
+  // Newer Stripe API versions moved current_period_end onto subscription items.
+  const periodEnd = sub.current_period_end ?? item?.current_period_end ?? null;
+  const paid = PAID_STATUSES.includes(sub.status);
+
+  await pool.query(
+    `UPDATE users SET
+       stripe_customer_id     = COALESCE(stripe_customer_id, $1),
+       stripe_subscription_id = $2,
+       stripe_price_id        = $3,
+       subscription_status    = $4,
+       trial_active           = $5,
+       current_period_end     = to_timestamp($6),
+       plan                   = $7,
+       updated_at             = NOW()
+     WHERE (firebase_uid = $8 OR stripe_customer_id = $1)
+       AND (stripe_subscription_id IS NULL OR stripe_subscription_id = $2 OR $9)`,
+    [
+      customerId,
+      sub.id,
+      item?.price?.id ?? null,
+      sub.status,
+      sub.status === 'trialing',
+      periodEnd,
+      // A lapsed or canceled subscriber drops back to the Free plan, not a lockout.
+      paid ? 'professional' : 'free',
+      firebaseUid,
+      paid,
+    ],
+  );
+}
+
 // ΓöÇΓöÇ POST /api/stripe/create-checkout ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 // Requires Firebase auth. Returns a Stripe Checkout URL.
 router.post('/create-checkout', requireAuth, async (req, res) => {
@@ -28,10 +81,12 @@ router.post('/create-checkout', requireAuth, async (req, res) => {
     const stripe = getStripe();
     // Upsert user row and retrieve stripe_customer_id
     let { rows } = await pool.query(
-      'SELECT stripe_customer_id, subscription_status FROM users WHERE firebase_uid = $1',
+      'SELECT stripe_customer_id, stripe_subscription_id, plan, subscription_status FROM users WHERE firebase_uid = $1',
       [uid],
     );
-    if (['active', 'trialing'].includes(rows[0]?.subscription_status)) {
+    // Free accounts are "active" too; only a live paid subscription blocks a new checkout.
+    const current = rows[0];
+    if (current?.stripe_subscription_id && current.plan === 'professional' && PAID_STATUSES.includes(current.subscription_status)) {
       return res.status(409).json({ error: 'This account already has an active subscription.' });
     }
     let customerId = rows[0]?.stripe_customer_id;
@@ -113,55 +168,9 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
     return res.status(400).send('Webhook signature verification failed.');
   }
 
-  const obj = event.data.object;
-
   try {
-    switch (event.type) {
-      case 'customer.subscription.created':
-      case 'customer.subscription.updated': {
-        const firebaseUid = obj.metadata?.firebase_uid;
-        if (!firebaseUid) break;
-
-        const isActive = ['active', 'trialing'].includes(obj.status);
-
-        await pool.query(
-          `UPDATE users SET
-             stripe_subscription_id = $1,
-             stripe_price_id        = $2,
-             subscription_status    = $3,
-             trial_active           = $4,
-             current_period_end     = to_timestamp($5),
-             plan                   = $6,
-             updated_at             = NOW()
-           WHERE firebase_uid = $7`,
-          [
-            obj.id,
-            obj.items.data[0]?.price.id ?? null,
-            obj.status,
-            obj.status === 'trialing',
-            obj.current_period_end,
-            isActive ? 'professional' : 'inactive',
-            firebaseUid,
-          ],
-        );
-        break;
-      }
-
-      case 'customer.subscription.deleted': {
-        const firebaseUid = obj.metadata?.firebase_uid;
-        if (!firebaseUid) break;
-
-        await pool.query(
-          `UPDATE users SET
-             subscription_status = 'canceled',
-             trial_active        = false,
-             plan                = 'inactive',
-             updated_at          = NOW()
-           WHERE firebase_uid = $1`,
-          [firebaseUid],
-        );
-        break;
-      }
+    if (SUBSCRIPTION_EVENTS.has(event.type)) {
+      await syncSubscription(getStripe(), event.data.object);
     }
   } catch (err) {
     console.error('Webhook handler error:', err);

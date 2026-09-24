@@ -691,7 +691,7 @@ router.get('/billing', async (_req, res) => {
         email: typeof s.customer === 'object' ? s.customer?.email : null,
         amountCents: s.items.data.reduce((t, i) => t + (i.price.unit_amount || 0) * (i.quantity || 1), 0),
         interval: s.items.data[0]?.price.recurring?.interval || null,
-        currentPeriodEnd: s.current_period_end ? new Date(s.current_period_end * 1000).toISOString() : null,
+        currentPeriodEnd: (() => { const t = s.current_period_end ?? s.items.data[0]?.current_period_end; return t ? new Date(t * 1000).toISOString() : null; })(),
         cancelAtPeriodEnd: s.cancel_at_period_end,
         created: new Date(s.created * 1000).toISOString(),
       })),
