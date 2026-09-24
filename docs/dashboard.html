@@ -164,6 +164,14 @@
     .accent-swatch{width:34px;height:34px;border-radius:50%;border:2px solid transparent;background:var(--swatch);transition:transform .15s,border-color .15s;box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}
     .accent-swatch:hover{transform:scale(1.1)}
     .accent-swatch.active{border-color:var(--text);transform:scale(1.08)}
+    .pw-wrap{position:relative}
+    .pw-wrap .form-input{width:100%;padding-right:2.6rem}
+    .pw-toggle{position:absolute;right:.4rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:6px;transition:color .15s}
+    .pw-toggle:hover{color:var(--text)}
+    .pw-toggle svg{width:16px;height:16px;stroke:currentColor;pointer-events:none}
+    .pw-toggle .pw-eye-off{display:none}
+    .pw-toggle.showing .pw-eye{display:none}
+    .pw-toggle.showing .pw-eye-off{display:block}
     .saved-person-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.5rem;align-items:center;margin-top:.55rem}
     .saved-person-row .form-input{min-width:0}
     .recipient-pick{width:16px;height:16px;margin:0;accent-color:var(--accent);cursor:pointer}
@@ -1462,10 +1470,10 @@
     </div>
     <div class="card">
       <div class="card-title">Security</div>
-      <div class="form-group"><label class="form-label">Current password</label><input class="form-input" id="acc-current-password" type="password" autocomplete="current-password" placeholder="Required to change password or email"></div>
+      <div class="form-group"><label class="form-label">Current password</label><div class="pw-wrap"><input class="form-input" id="acc-current-password" type="password" autocomplete="current-password" placeholder="Required to change password or email"><button class="pw-toggle" type="button" aria-label="Show password"><svg class="pw-eye" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><svg class="pw-eye-off" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg></button></div></div>
       <div class="form-row">
-        <div class="form-group" style="flex:1"><label class="form-label">New password</label><input class="form-input" id="acc-new-password" type="password" autocomplete="new-password" placeholder="At least 8 characters"></div>
-        <div class="form-group" style="flex:1"><label class="form-label">Confirm new password</label><input class="form-input" id="acc-confirm-password" type="password" autocomplete="new-password"></div>
+        <div class="form-group" style="flex:1"><label class="form-label">New password</label><div class="pw-wrap"><input class="form-input" id="acc-new-password" type="password" autocomplete="new-password" placeholder="At least 8 characters"><button class="pw-toggle" type="button" aria-label="Show password"><svg class="pw-eye" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><svg class="pw-eye-off" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg></button></div></div>
+        <div class="form-group" style="flex:1"><label class="form-label">Confirm new password</label><div class="pw-wrap"><input class="form-input" id="acc-confirm-password" type="password" autocomplete="new-password"><button class="pw-toggle" type="button" aria-label="Show password"><svg class="pw-eye" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><svg class="pw-eye-off" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg></button></div></div>
       </div>
       <div class="btn-row"><button class="btn btn-primary" id="acc-change-password" type="button">Change Password</button></div>
       <div class="form-group" style="margin-top:1.25rem"><label class="form-label">New email address</label><input class="form-input" id="acc-new-email" type="email" autocomplete="email" placeholder="you@example.com"></div>
@@ -4065,6 +4073,17 @@ document.addEventListener("keydown", function(e){
   if (scBtn) scBtn.addEventListener("click", function() { scOv.style.display = "none"; });
   if (scOv) scOv.addEventListener("click", function(e) { if (e.target === scOv) scOv.style.display = "none"; });
 })();
+
+// ── PASSWORD VISIBILITY TOGGLES ──
+document.addEventListener("click", function(e) {
+  var btn = e.target.closest(".pw-toggle");
+  if (!btn) return;
+  var input = btn.parentElement.querySelector("input");
+  var show = input.type === "password";
+  input.type = show ? "text" : "password";
+  btn.classList.toggle("showing", show);
+  btn.setAttribute("aria-label", show ? "Hide password" : "Show password");
+});
 
 // ── SIDEBAR SEARCH FILTER ──
 (function(){
