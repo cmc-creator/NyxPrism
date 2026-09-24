@@ -1953,12 +1953,15 @@ window.__nyxGetToken=()=>auth.currentUser?.getIdToken();
     const btn=document.getElementById('acc-change-password');btn.disabled=true;
     try{
       await reauth();await updatePassword(auth.currentUser,newPass);
+      // Prove the new password works before telling the user it changed.
+      try{await reauthenticateWithCredential(auth.currentUser,EmailAuthProvider.credential(auth.currentUser.email,newPass));}
+      catch(_){throw new Error('Firebase did not accept the new password. Your password was not changed — please try again.');}
       // Tell the browser's password manager about the new password so it stops autofilling the old one at login.
       if(window.PasswordCredential&&navigator.credentials?.store){
         try{await navigator.credentials.store(new PasswordCredential({id:auth.currentUser.email,password:newPass}));}catch(_){}
       }
       ['acc-current-password','acc-new-password','acc-confirm-password'].forEach(id=>document.getElementById(id).value='');
-      showResult(securityResult,'success','Password changed. Use the new password next time you sign in (update it in your password manager if it doesn't prompt you).');
+      showResult(securityResult,'success','Password changed and verified for '+auth.currentUser.email+'. Use the new password next time you sign in.');
     }catch(err){showResult(securityResult,'error',friendlyAuthError(err));}finally{btn.disabled=false;}
   });
   document.getElementById('acc-change-email').addEventListener('click',async function(){

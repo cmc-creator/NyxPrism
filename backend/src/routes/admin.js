@@ -144,6 +144,25 @@ router.get('/users', async (req, res) => {
   }
 });
 
+// POST /api/admin/users/set-password  { email, password }
+// Sets a user's Firebase login password directly (e.g. store reviewer accounts).
+router.post('/users/set-password', async (req, res) => {
+  const email = String(req.body?.email || '').trim().toLowerCase();
+  const password = String(req.body?.password || '');
+  if (!EMAIL_RE.test(email)) return res.status(400).json({ error: 'Enter a valid email address.' });
+  if (password.length < 8 || password.length > 128) return res.status(400).json({ error: 'Password must be 8–128 characters.' });
+  try {
+    const user = await admin.auth().getUserByEmail(email);
+    await admin.auth().updateUser(user.uid, { password });
+    await admin.auth().revokeRefreshTokens(user.uid);
+    res.json({ ok: true, email: user.email });
+  } catch (err) {
+    if (err?.code === 'auth/user-not-found') return res.status(404).json({ error: 'No login exists for that email.' });
+    console.error('admin/set-password error:', err.message);
+    res.status(500).json({ error: 'Could not set the password.' });
+  }
+});
+
 // GET /api/admin/messages?page=1&limit=20
 router.get('/messages', async (req, res) => {
   const page  = Math.max(1, parseInt(req.query.page)  || 1);

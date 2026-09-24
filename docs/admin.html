@@ -179,6 +179,12 @@
     .msg-date  { font-size: .75rem; color: var(--muted); margin-left: auto; }
     .msg-subject { font-size: .875rem; font-weight: 600; margin-bottom: .5rem; color: var(--text); }
     .msg-body  { font-size: .84rem; color: var(--text2); line-height: 1.65; white-space: pre-wrap; }
+    .setpw-card { background: var(--surface, rgba(255,255,255,.03)); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.1rem; margin-bottom: 1.25rem; }
+    .setpw-title { font-weight: 700; margin-bottom: .7rem; }
+    .setpw-row { display: flex; flex-wrap: wrap; gap: .6rem; }
+    .setpw-input { flex: 1 1 220px; min-width: 0; background: rgba(0,0,0,.25); border: 1px solid var(--border); border-radius: 8px; color: inherit; font: inherit; padding: .6rem .75rem; outline: none; }
+    .setpw-input:focus { border-color: var(--accent); }
+    .setpw-result { font-size: .82rem; margin-top: .6rem; min-height: 1em; }
   </style>
   <link rel="stylesheet" href="nyx-brand.css?v=3" />
 </head>
@@ -228,6 +234,15 @@
 
     <!-- Users tab -->
     <div class="tab-pane" id="tab-users">
+      <form class="setpw-card" id="setpw-form" autocomplete="off">
+        <div class="setpw-title">Set a user's password</div>
+        <div class="setpw-row">
+          <input class="setpw-input" type="email" id="setpw-email" placeholder="user@example.com" autocomplete="off" required />
+          <input class="setpw-input" type="text" id="setpw-password" placeholder="New password (8+ characters)" autocomplete="off" minlength="8" required />
+          <button class="lock-btn" type="submit" id="setpw-btn">Set Password</button>
+        </div>
+        <div class="setpw-result" id="setpw-result"></div>
+      </form>
       <div class="tbl-wrap">
         <table id="users-table">
           <thead>
@@ -438,6 +453,28 @@ async function loadMessages(page) {
 
 document.getElementById('msgs-prev').addEventListener('click', () => loadMessages(msgsPage - 1));
 document.getElementById('msgs-next').addEventListener('click', () => loadMessages(msgsPage + 1));
+
+document.getElementById('setpw-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const out = document.getElementById('setpw-result');
+  const btn = document.getElementById('setpw-btn');
+  const email = document.getElementById('setpw-email').value.trim();
+  const password = document.getElementById('setpw-password').value;
+  btn.disabled = true; out.style.color = 'var(--muted)'; out.textContent = 'Saving…';
+  try {
+    const res = await fetch(`${API}/api/admin/users/set-password`, {
+      method: 'POST',
+      headers: { 'x-admin-secret': adminSecret, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || `${res.status} ${res.statusText}`);
+    document.getElementById('setpw-password').value = '';
+    out.style.color = 'var(--green)'; out.textContent = `Password set for ${data.email}. They can log in with it now.`;
+  } catch (err) {
+    out.style.color = 'var(--red)'; out.textContent = err.message;
+  } finally { btn.disabled = false; }
+});
 
 function escHtml(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
