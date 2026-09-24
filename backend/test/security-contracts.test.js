@@ -182,3 +182,45 @@ test('account settings support name, password, email, and appearance changes', a
   assert.match(userRoutes, /router\.post\('\/profile', requireAuth/);
   assert.match(userRoutes, /UPDATE users SET email = \$1/);
 });
+test('senders must verify their email before sending documents to other people', async () => {
+  for (const path of ['src/routes/sign-requests.js', 'src/routes/distributions.js']) {
+    const source = await read(path);
+    assert.match(source, /router\.post\('\/', requireAuth, requireVerifiedEmail/);
+    assert.match(source, /router\.post\('\/:id\/send', requireAuth, requireVerifiedEmail/);
+  }
+  const auth = await read('src/middleware/auth.js');
+  assert.match(auth, /email_verified/);
+});
+
+test('desktop licence check uses the Professional access rule', async () => {
+  const license = await read('src/routes/license.js');
+  assert.match(license, /hasProfessionalAccess\(/);
+  assert.doesNotMatch(license, /plan = 'inactive'/);
+});
+
+test('backend trusts exactly one proxy hop so rate limits and audit IPs are per client', async () => {
+  assert.match(await read('src/index.js'), /app\.set\('trust proxy', 1\)/);
+});
+
+test('admin portal has no shared-secret login', async () => {
+  const adminRoutes = await read('src/routes/admin.js');
+  assert.doesNotMatch(adminRoutes, /ADMIN_SECRET|x-admin-secret/i);
+  assert.doesNotMatch(await readRepo('docs/admin.html'), /admin secret/i);
+});
+
+test('AI routes use the shared helper with a per-user daily quota', async () => {
+  for (const path of ['src/routes/ai-assist.js', 'src/routes/ai-split.js']) {
+    const source = await read(path);
+    assert.match(source, /aiDailyQuota/);
+    assert.match(source, /askClaude\(/);
+    assert.doesNotMatch(source, /content\[0\]/);
+  }
+});
+
+test('completed signature PDFs carry a certificate and notify the sender', async () => {
+  const source = await read('src/routes/sign-requests.js');
+  assert.match(source, /Certificate of Completion/);
+  assert.match(source, /notifyCompleted\(/);
+  assert.match(source, /notifyDeclined\(/);
+  assert.match(source, /router\.get\('\/public\/:token\/final-pdf'/);
+});

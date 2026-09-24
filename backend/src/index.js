@@ -23,6 +23,9 @@ const app  = express();
 const PORT = process.env.PORT || 3000;
 
 app.disable('x-powered-by');
+// Railway terminates connections at one proxy hop; trust it so req.ip is the
+// real client (rate limits and signature audit trails depend on this).
+app.set('trust proxy', 1);
 app.use((_req, res, next) => {
   res.setHeader('Strict-Transport-Security', 'max-age=63072000; includeSubDomains');
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -59,7 +62,7 @@ app.use(cors({
     cb(new Error(`CORS: origin ${origin} not allowed`));
   },
   methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Admin-Secret'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 app.use(express.json({ limit: '12mb' }));

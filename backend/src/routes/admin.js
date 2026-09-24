@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import { timingSafeEqual } from 'crypto';
 import rateLimit from 'express-rate-limit';
 import pool from '../db/index.js';
 import admin from '../firebase.js';
@@ -8,7 +7,7 @@ import { isOwner, isDeveloper } from '../access.js';
 
 const router = Router();
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const adminSecretLimiter = rateLimit({
+const adminAuthLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: 5,
   // Only failed authentication counts toward the limit, so validation errors
@@ -20,22 +19,8 @@ const adminSecretLimiter = rateLimit({
   message: { error: 'Too many admin authentication attempts. Try again later.' },
 });
 
-function secretsMatch(provided, expected) {
-  if (typeof provided !== 'string' || typeof expected !== 'string') return false;
-  const providedBuffer = Buffer.from(provided);
-  const expectedBuffer = Buffer.from(expected);
-  return providedBuffer.length === expectedBuffer.length && timingSafeEqual(providedBuffer, expectedBuffer);
-}
-
 // ── Auth middleware ───────────────────────────────────────────────────────
 async function requireAdmin(req, res, next) {
-  const configuredSecret = process.env.ADMIN_SECRET;
-  const headerSecret = req.headers['x-admin-secret'];
-  if (configuredSecret && secretsMatch(headerSecret, configuredSecret)) {
-    req.adminUser = { auth: 'admin-secret', email: 'admin-secret', owner: true };
-    return next();
-  }
-
   const authHeader = req.headers['authorization'];
   if (!authHeader?.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'Missing Firebase token.' });
@@ -64,48 +49,9 @@ async function requireAdmin(req, res, next) {
   }
 }
 
-// ── POST /api/admin/claim ─────────────────────────────────────────────────
-// One-time bootstrap: only needs ADMIN_SECRET + email in the body.
-// No Firebase token required — avoids all uid/row-mismatch issues.
-router.post('/claim', adminSecretLimiter, async (req, res) => {
-  const secret = process.env.ADMIN_SECRET;
-  if (!secret) return res.status(503).json({ error: 'ADMIN_SECRET not configured on server.' });
-
-  const { secret: provided, email } = req.body || {};
-  if (!secretsMatch(provided, secret)) {
-    return res.status(401).json({ error: 'Wrong secret.' });
-  }
-  if (typeof email !== 'string' || email.length > 254 || !EMAIL_RE.test(email)) {
-    return res.status(400).json({ error: 'Email is required.' });
-  }
-
-  const normalised = email.toLowerCase().trim();
-  try {
-    // Try to update an existing row first
-    let result = await pool.query(
-      `UPDATE users SET is_admin = TRUE WHERE email = $1 RETURNING email`,
-      [normalised]
-    );
-    // No row yet — insert one (e.g. owner hasn't gone through normal signup)
-    if (!result.rows.length) {
-      result = await pool.query(
-        `INSERT INTO users (firebase_uid, email, plan, subscription_status, trial_active, trial_start, is_admin)
-         VALUES ('bootstrap-' || gen_random_uuid(), $1, 'free', 'active', FALSE, NULL, TRUE)
-         ON CONFLICT (email) DO UPDATE SET is_admin = TRUE
-         RETURNING email`,
-        [normalised]
-      );
-    }
-    res.json({ ok: true, email: result.rows[0]?.email || normalised });
-  } catch (err) {
-    console.error('admin/claim error:', err.message);
-    res.status(500).json({ error: 'Unable to claim admin access.' });
-  }
-});
-
 // All routes below require admin auth. Failed attempts are limited; normal
 // admin work (including 4xx validation results) never counts toward the limit.
-router.use(adminSecretLimiter, requireAdmin);
+router.use(adminAuthLimiter, requireAdmin);
 
 const PLANS = ['free', 'trial', 'professional', 'inactive'];
 const STATUSES = ['active', 'trialing', 'past_due', 'canceled', 'inactive'];
@@ -722,7 +668,7 @@ router.get('/system', async (_req, res) => {
   try { await admin.auth().listUsers(1); firebase = { ok: true }; } catch (err) { firebase = { ok: false, error: err.message }; }
   const env = ['DATABASE_URL', 'FIREBASE_PROJECT_ID', 'FIREBASE_CLIENT_EMAIL', 'FIREBASE_PRIVATE_KEY', 'FRONTEND_URL',
     'STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET', 'STRIPE_PRICE_ID_MONTHLY', 'STRIPE_PRICE_ID_ANNUAL',
-    'BREVO_API_KEY', 'CONTACT_EMAIL', 'ANTHROPIC_API_KEY', 'ADMIN_SECRET', 'DEVELOPER_EMAILS']
+    'BREVO_API_KEY', 'CONTACT_EMAIL', 'ANTHROPIC_API_KEY', 'DEVELOPER_EMAILS', 'AI_DAILY_LIMIT']
     .map(name => ({ name, set: !!process.env[name] }));
   res.json({
     database,

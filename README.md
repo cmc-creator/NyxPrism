@@ -1,13 +1,13 @@
 # NyxPrism
 
 <p align="center">
-  <a href="https://cmc-creator.github.io/NyxPrism/"><strong>🌐 Website / App Page</strong></a> ·
+  <a href="https://www.nyxprism.com/"><strong>🌐 Website / App Page</strong></a> ·
   <a href="https://pypi.org/project/nyxprism/">PyPI</a> ·
   <a href="https://github.com/cmc-creator/NyxPrism/issues">Issues</a>
 </p>
 
 <p align="center">
-  <a href="https://cmc-creator.github.io/NyxPrism/">
+  <a href="https://www.nyxprism.com/">
     <img src="https://img.shields.io/badge/App%20Page-NyxPrism-7c3aed?style=for-the-badge&logo=github" alt="App Page" />
   </a>
   <a href="https://pypi.org/project/nyxprism/">

@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { randomBytes } from 'crypto';
 import pool from '../db/index.js';
-import { requireActivePlan, requireAuth } from '../middleware/auth.js';
+import { requireActivePlan, requireAuth, requireVerifiedEmail } from '../middleware/auth.js';
 
 const router = Router();
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -96,7 +96,7 @@ router.get('/:id', requireAuth, async (req, res) => {
   }
 });
 
-router.post('/', requireAuth, requireActivePlan, async (req, res) => {
+router.post('/', requireAuth, requireVerifiedEmail, requireActivePlan, async (req, res) => {
   let recipients;
   let documentBuffer;
   try {
@@ -174,7 +174,7 @@ router.post('/', requireAuth, requireActivePlan, async (req, res) => {
   });
 });
 
-router.post('/:id/send', requireAuth, requireActivePlan, async (req, res) => {
+router.post('/:id/send', requireAuth, requireVerifiedEmail, requireActivePlan, async (req, res) => {
   const batchId = parseInt(req.params.id, 10);
   if (!Number.isInteger(batchId) || batchId < 1) return res.status(400).json({ error: 'Invalid batch ID.' });
   const client = await pool.connect();

@@ -1,6 +1,6 @@
 import admin from '../firebase.js';
 import pool from '../db/index.js';
-import { developerEntitlements, hasProfessionalAccess } from '../access.js';
+import { developerEntitlements, hasProfessionalAccess, isDeveloper } from '../access.js';
 
 /**
  * Express middleware that verifies a Firebase ID token in the
@@ -44,4 +44,13 @@ export async function requireActivePlan(req, res, next) {
     console.error('Subscription authorization error:', error.message);
     res.status(500).json({ error: 'Unable to verify subscription access.' });
   }
+}
+
+/**
+ * Sending documents to other people shows the sender's email to recipients,
+ * so the sender must have proven they own that address.
+ */
+export function requireVerifiedEmail(req, res, next) {
+  if (req.user?.email_verified || isDeveloper(req.user?.email)) return next();
+  res.status(403).json({ error: 'Verify your email address before sending documents to other people.', code: 'email_unverified' });
 }

@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import Anthropic from '@anthropic-ai/sdk';
 import { requireActivePlan, requireAuth } from '../middleware/auth.js';
+import { aiDailyQuota, askClaude } from '../ai.js';
 
 const router = Router();
 
 const MAX_TEXT_CHARS = 80_000;
 
-router.post('/', requireAuth, requireActivePlan, async (req, res) => {
+router.post('/', requireAuth, requireActivePlan, aiDailyQuota, async (req, res) => {
   const { pdfText, messages, filename, pageCount } = req.body;
 
   if (!pdfText || typeof pdfText !== 'string') {
@@ -21,8 +21,6 @@ router.post('/', requireAuth, requireActivePlan, async (req, res) => {
 
   const truncated = pdfText.slice(0, MAX_TEXT_CHARS);
   const pages = pageCount || '?';
-
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
   const systemPrompt = `You are an AI assistant built into NyxPrism, a browser-based PDF tool. Your job is to help the user split their PDF intelligently through a friendly conversation.
 
@@ -46,14 +44,12 @@ Conversation rules:
 - If the user wants to revise, update the plan by emitting a new <SPLIT_PLAN> tag.`;
 
   try {
-    const message = await client.messages.create({
-      model: 'claude-opus-4-5',
-      max_tokens: 4096,
+    const raw = await askClaude({
       system: systemPrompt,
       messages: messages.map(message => ({ role: message.role, content: message.content.trim() })),
+      maxTokens: 16000,
+      effort: 'medium',
     });
-
-    const raw = message.content[0]?.text?.trim() || '';
 
     // Extract plan if present
     let plan = null;
@@ -70,7 +66,7 @@ Conversation rules:
     res.json({ reply: raw, plan });
   } catch (err) {
     console.error('AI split error:', err.message);
-    res.status(502).json({ error: 'AI service unavailable. Please try again.' });
+    res.status(502).json({ error: err.userFacing ? err.message : 'AI service unavailable. Please try again.' });
   }
 });
 

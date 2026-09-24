@@ -1,10 +1,11 @@
-name: Deploy GitHub Pages
+name: GitHub Pages redirect
 
 on:
   push:
     branches: [main]
     paths:
-      - "docs/**"
+      - ".github/pages-redirect/**"
+      - ".github/workflows/pages.yml"
   workflow_dispatch:
 
 permissions:
@@ -32,7 +33,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: "./docs"
+          # The real site is served by Vercel at www.nyxprism.com; this copy only redirects there.
+          path: "./.github/pages-redirect"
 
       - name: Deploy to GitHub Pages
         id: deployment

@@ -160,7 +160,7 @@
 <!-- ── Sign in ─────────────────────────────────────────────────────────── -->
 <div id="signin" hidden>
   <form class="signin-card" id="signin-form" autocomplete="on">
-    <div class="brand"><img src="prismlogo.jpg?v=1" alt=""><span><em>Nyx</em>Prism</span><span class="badge-owner">Owner Portal</span></div>
+    <div class="brand"><img src="prism-mark.webp?v=1" alt=""><span><em>Nyx</em>Prism</span><span class="badge-owner">Owner Portal</span></div>
     <div>
       <div class="signin-title">Sign in</div>
       <div class="sub">Use your NyxPrism owner or admin account.</div>
@@ -171,21 +171,15 @@
         <div class="pw-wrap"><input class="input" type="password" id="si-password" autocomplete="current-password" required><button class="pw-toggle" type="button" aria-label="Show password"><svg class="pw-eye" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><svg class="pw-eye-off" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg></button></div>
       </div>
     </div>
-    <div id="signin-secret-fields" hidden>
-      <div class="field"><label for="si-secret">Admin secret</label>
-        <div class="pw-wrap"><input class="input mono" type="password" id="si-secret" autocomplete="off"><button class="pw-toggle" type="button" aria-label="Show secret"><svg class="pw-eye" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><svg class="pw-eye-off" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg></button></div>
-      </div>
-    </div>
     <button class="btn btn-primary" type="submit" id="signin-btn">Sign In</button>
     <div class="msg error" id="signin-msg"></div>
-    <button class="btn-link" type="button" id="signin-mode">Use the admin secret instead</button>
   </form>
 </div>
 
 <!-- ── Portal ─────────────────────────────────────────────────────────── -->
 <div id="portal" hidden>
   <header class="top">
-    <div class="brand"><img src="prismlogo.jpg?v=1" alt=""><span><em>Nyx</em>Prism</span><span class="badge-owner">Owner Portal</span></div>
+    <div class="brand"><img src="prism-mark.webp?v=1" alt=""><span><em>Nyx</em>Prism</span><span class="badge-owner">Owner Portal</span></div>
     <div class="top-right">
       <span class="who" id="who"></span>
       <a class="btn btn-sm" href="dashboard.html">Open app</a>
@@ -338,7 +332,6 @@ const firebaseConfig = {
 const auth = getAuth(initializeApp(firebaseConfig));
 const API = 'https://nyxprism-production.up.railway.app';
 
-let adminSecret = '';
 let me = null;
 let idleTimer = null;
 const $ = id => document.getElementById(id);
@@ -369,8 +362,7 @@ function setMsg(el, text, ok) { el.textContent = text; el.className = 'msg ' + (
 
 async function api(path, opts = {}) {
   const headers = { 'Content-Type': 'application/json' };
-  if (adminSecret) headers['x-admin-secret'] = adminSecret;
-  else if (auth.currentUser) headers.Authorization = 'Bearer ' + await auth.currentUser.getIdToken();
+  if (auth.currentUser) headers.Authorization = 'Bearer ' + await auth.currentUser.getIdToken();
   const res = await fetch(API + path, { ...opts, headers, body: opts.body ? JSON.stringify(opts.body) : undefined });
   const data = await res.json().catch(() => ({}));
   if (res.status === 401 && !path.startsWith('/api/admin/me')) { showSignin('Your session expired. Please sign in again.'); }
@@ -410,7 +402,6 @@ async function enterPortal() {
   try {
     me = await api('/api/admin/me');
   } catch (err) {
-    adminSecret = '';
     if (auth.currentUser) {
       // Leave their app session alone; signing in below switches accounts.
       const email = auth.currentUser.email;
@@ -421,39 +412,21 @@ async function enterPortal() {
     }
     return;
   }
-  $('who').textContent = me.auth === 'admin-secret' ? 'Signed in with admin secret' : `${me.email}${me.owner ? ' · Owner' : ' · Admin'}`;
+  $('who').textContent = `${me.email}${me.owner ? ' · Owner' : ' · Admin'}`;
   $('signin').hidden = true;
   $('portal').hidden = false;
   resetIdle();
   showPage(location.hash.slice(1) || 'overview');
 }
 
-let secretMode = false;
-$('signin-mode').addEventListener('click', () => {
-  secretMode = !secretMode;
-  $('signin-account-fields').hidden = secretMode;
-  $('signin-secret-fields').hidden = !secretMode;
-  $('si-email').required = !secretMode;
-  $('si-password').required = !secretMode;
-  $('signin-mode').textContent = secretMode ? 'Sign in with my account instead' : 'Use the admin secret instead';
-  $('signin-msg').textContent = '';
-});
-
 $('signin-form').addEventListener('submit', async e => {
   e.preventDefault();
   const btn = $('signin-btn');
   btn.disabled = true; $('signin-msg').textContent = '';
   try {
-    if (secretMode) {
-      adminSecret = $('si-secret').value.trim();
-      if (!adminSecret) throw new Error('Enter the admin secret.');
-      $('si-secret').value = '';
-      await enterPortal();
-    } else {
-      await signInWithEmailAndPassword(auth, $('si-email').value.trim(), $('si-password').value);
-      $('si-password').value = '';
-      // onAuthStateChanged enters the portal.
-    }
+    await signInWithEmailAndPassword(auth, $('si-email').value.trim(), $('si-password').value);
+    $('si-password').value = '';
+    // onAuthStateChanged enters the portal.
   } catch (err) {
     const code = err.code || '';
     showSignin(code.includes('invalid-credential') || code.includes('wrong-password') ? 'Incorrect email or password.'
@@ -462,7 +435,6 @@ $('signin-form').addEventListener('submit', async e => {
 });
 
 async function doSignOut() {
-  adminSecret = '';
   me = null;
   closeDrawer();
   if (auth.currentUser) await signOut(auth);
@@ -477,7 +449,6 @@ function resetIdle() {
 ['click', 'keydown'].forEach(evt => document.addEventListener(evt, () => { if (me) resetIdle(); }));
 
 onAuthStateChanged(auth, user => {
-  if (adminSecret) return;
   if (user) enterPortal();
   else if (!me) showSignin('');
 });

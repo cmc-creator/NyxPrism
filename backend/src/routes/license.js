@@ -1,11 +1,9 @@
 import express from 'express';
 import pool from '../db/index.js';
 import { requireAuth } from '../middleware/auth.js';
-import { developerEntitlements } from '../access.js';
+import { developerEntitlements, hasProfessionalAccess } from '../access.js';
 
 const router = express.Router();
-
-const TRIAL_DAYS = 14;
 
 // ── GET /api/license/verify ──────────────────────────────────────────────
 // Called by the NyxPrism CLI to check whether the authenticated user has
@@ -30,35 +28,18 @@ router.get('/verify', requireAuth, async (req, res) => {
     }
 
     const user = rows[0];
-    const now  = new Date();
-
-    // Expire stale trials
-    if (user.trial_active && user.subscription_status === 'trialing') {
-      const trialEnd = new Date(user.trial_start);
-      trialEnd.setDate(trialEnd.getDate() + TRIAL_DAYS);
-
-      if (now > trialEnd) {
-        await pool.query(
-          `UPDATE users SET trial_active = false, subscription_status = 'trial_expired',
-             plan = 'inactive', updated_at = NOW()
-           WHERE firebase_uid = $1`,
-          [uid],
-        );
-        return res.json({
-          valid:  false,
-          reason: 'Your 14-day trial has expired. Subscribe at nyxprism.com to continue.',
-        });
-      }
-    }
-
-    const valid = ['active', 'trialing'].includes(user.subscription_status);
+    // Free accounts have status "active" too, so the plan decides access.
+    const valid = hasProfessionalAccess(user, req.user.email);
+    const trialOver = user.plan === 'trial' && !valid;
 
     res.json({
       valid,
       plan:      user.plan,
       status:    user.subscription_status,
       periodEnd: user.current_period_end ?? null,
-      reason:    valid ? null : 'No active subscription. Visit nyxprism.com to subscribe.',
+      reason:    valid ? null
+        : trialOver ? 'Your 14-day trial has ended. Subscribe at nyxprism.com to continue using Professional features.'
+        : 'Professional features need an active subscription. Visit nyxprism.com to subscribe.',
     });
   } catch (err) {
     console.error('License verify error:', err);

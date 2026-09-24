@@ -33,7 +33,7 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://cmc-creator.github.io/NyxPrism/"
+Homepage = "https://www.nyxprism.com/"
 Source = "https://github.com/cmc-creator/NyxPrism"
 "Bug Tracker" = "https://github.com/cmc-creator/NyxPrism/issues"
 Changelog = "https://github.com/cmc-creator/NyxPrism/releases"

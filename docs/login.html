@@ -264,7 +264,7 @@
 <!-- NAV -->
 <nav>
   <a href="index.html" class="nav-brand nyx-brand-lockup">
-    <span class="nyx-brand-icon"><img class="nyx-prism-mark" src="prismlogo.jpg?v=1" alt="NyxPrism"></span>
+    <span class="nyx-brand-icon"><img class="nyx-prism-mark" src="prism-mark.webp?v=1" alt="NyxPrism"></span>
     <span class="nyx-brand-copy">
       <span class="nav-wordmark nyx-brand-wordmark"><em>Nyx</em>Prism&#8482;</span>
       <span class="nav-co nyx-brand-company">by NyxCollective LLC</span>
@@ -282,7 +282,7 @@
   <div class="auth-wrap">
 
     <div class="auth-logo nyx-brand-lockup nyx-brand-lockup--hero">
-      <span class="nyx-brand-icon"><img class="nyx-prism-mark" src="prismlogo.jpg?v=1" alt="NyxPrism"></span>
+      <span class="nyx-brand-icon"><img class="nyx-prism-mark" src="prism-mark.webp?v=1" alt="NyxPrism"></span>
       <span class="nyx-brand-copy">
         <span class="wordmark nyx-brand-wordmark"><em>Nyx</em>Prism&#8482;</span>
         <span class="co nyx-brand-company">NyxCollective LLC</span>
@@ -391,7 +391,7 @@
 
   import { initializeApp }                                          from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
   import { getAuth, signInWithEmailAndPassword,
-           createUserWithEmailAndPassword, sendPasswordResetEmail,
+           createUserWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification,
            onAuthStateChanged, signOut }                            from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
   import { getFirestore, doc, setDoc,
            serverTimestamp }                                        from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
@@ -532,6 +532,8 @@
     btn.disabled = true;
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, password);
+      // Proves the address is theirs; required before sending documents to other people.
+      sendEmailVerification(cred.user).catch(() => {});
       // Write user profile to Firestore (drives dashboard display)
       await setDoc(doc(db, 'users', cred.user.uid), {
         firstName: '',

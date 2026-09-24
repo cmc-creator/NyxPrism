@@ -209,3 +209,15 @@ CREATE TABLE IF NOT EXISTS admin_audit_log (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS admin_audit_log_created_idx ON admin_audit_log (created_at DESC);
+
+CREATE TABLE IF NOT EXISTS ai_usage (
+  firebase_uid TEXT NOT NULL,
+  day          DATE NOT NULL,
+  requests     INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (firebase_uid, day)
+);
+DELETE FROM ai_usage WHERE day < CURRENT_DATE - 30;
+
+-- Ended trials and canceled subscriptions fall back to Free rather than a lockout.
+UPDATE users SET plan = 'free', updated_at = NOW()
+WHERE plan = 'inactive' AND subscription_status IN ('trial_expired', 'canceled');

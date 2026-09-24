@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { createHash, randomBytes } from 'crypto';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import pool from '../db/index.js';
-import { requireActivePlan, requireAuth } from '../middleware/auth.js';
+import { requireActivePlan, requireAuth, requireVerifiedEmail } from '../middleware/auth.js';
 
 const router = Router();
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -116,6 +116,168 @@ function normalizeFields(fields, recipients) {
       required: field.required !== false,
       label: String(field.label || type).trim().slice(0, 80),
     };
+  });
+}
+
+const SIGNATURE_IMAGE_RE = /^data:image\/png;base64,[A-Za-z0-9+/=]+$/;
+const MAX_SIGNATURE_IMAGE_CHARS = 300_000;
+const IMAGE_FIELD_TYPES = new Set(['signature', 'initials']);
+
+// Signature and initials fields may hold a drawn PNG; everything else is text.
+function normalizeFieldValue(fieldType, raw) {
+  const value = String(raw || '').trim();
+  if (IMAGE_FIELD_TYPES.has(fieldType) && value.startsWith('data:image/')) {
+    if (value.length > MAX_SIGNATURE_IMAGE_CHARS || !SIGNATURE_IMAGE_RE.test(value)) return null;
+    const bytes = Buffer.from(value.split(',')[1], 'base64');
+    if (bytes.length < 8 || bytes.readUInt32BE(0) !== 0x89504e47) return null; // PNG signature
+    return value;
+  }
+  return value.slice(0, 1000);
+}
+
+// The built-in PDF fonts only encode Latin-1; anything else would make pdf-lib throw.
+function pdfSafe(text) {
+  return String(text).replace(/[^ -~ -ÿ]/g, '?');
+}
+
+function formatUtc(date) {
+  return date ? new Date(date).toISOString().replace('T', ' ').replace(/\.\d+Z$/, ' UTC') : '-';
+}
+
+/** Builds the completed PDF: every signer's values applied, plus a certificate of completion page. */
+async function buildFinalPdf(requestId) {
+  const requestResult = await pool.query(
+    `SELECT r.id, r.title, r.document_name, r.document_data, r.document_hash, r.created_at, r.sent_at, r.completed_at, u.email AS owner_email
+     FROM signature_requests r JOIN users u ON u.id = r.owner_user_id WHERE r.id = $1`,
+    [requestId],
+  );
+  const request = requestResult.rows[0];
+  const [fields, signers] = await Promise.all([
+    pool.query(
+      `SELECT field_type, page_number, x, y, width, height, value_text
+       FROM signature_fields WHERE request_id = $1 AND value_text IS NOT NULL AND value_text != ''
+       ORDER BY page_number, id`,
+      [requestId],
+    ),
+    pool.query(
+      `SELECT sr.name, sr.email, sr.role_order, sr.status, sr.viewed_at, sr.completed_at, sr.completion_hash,
+              (SELECT e.ip_address FROM signature_audit_events e
+               WHERE e.recipient_id = sr.id AND e.event_type = 'completed' ORDER BY e.created_at DESC LIMIT 1) AS ip_address
+       FROM signature_recipients sr WHERE sr.request_id = $1 ORDER BY sr.role_order, sr.id`,
+      [requestId],
+    ),
+  ]);
+
+  const doc = await PDFDocument.load(Buffer.from(request.document_data), { ignoreEncryption: true });
+  const font = await doc.embedFont(StandardFonts.Helvetica);
+  const bold = await doc.embedFont(StandardFonts.HelveticaBold);
+  const pages = doc.getPages();
+  const ink = rgb(0.08, 0.09, 0.12);
+  for (const field of fields.rows) {
+    const page = pages[Number(field.page_number) - 1];
+    if (!page) continue;
+    const { width, height } = page.getSize();
+    const boxWidth = Number(field.width) * width;
+    const boxHeight = Number(field.height) * height;
+    const left = Number(field.x) * width;
+    const bottom = height - (Number(field.y) * height) - boxHeight;
+    const value = String(field.value_text || '');
+    if (IMAGE_FIELD_TYPES.has(field.field_type) && value.startsWith('data:image/png;base64,')) {
+      const image = await doc.embedPng(Buffer.from(value.split(',')[1], 'base64'));
+      const scale = Math.min(boxWidth / image.width, boxHeight / image.height);
+      const drawWidth = image.width * scale;
+      const drawHeight = image.height * scale;
+      page.drawImage(image, { x: left + (boxWidth - drawWidth) / 2, y: bottom + (boxHeight - drawHeight) / 2, width: drawWidth, height: drawHeight });
+      continue;
+    }
+    const text = field.field_type === 'checkbox' ? 'X' : value;
+    const fontSize = Math.max(9, Math.min(18, boxHeight * 0.52));
+    page.drawText(pdfSafe(text), { x: left + 4, y: bottom + 4, size: fontSize, font, color: ink });
+  }
+
+  // Certificate of completion
+  const cert = doc.addPage([612, 792]);
+  const muted = rgb(0.35, 0.38, 0.45);
+  let y = 740;
+  const line = (text, opts = {}) => {
+    cert.drawText(pdfSafe(text), { x: opts.x ?? 56, y, size: opts.size ?? 10, font: opts.bold ? bold : font, color: opts.color ?? ink });
+    y -= opts.gap ?? 15;
+  };
+  line('Certificate of Completion', { size: 18, bold: true, gap: 26 });
+  line(`Document: ${request.title}`, { bold: true });
+  line(`File: ${request.document_name}`);
+  line(`Sent by: ${request.owner_email}`);
+  line(`Sent: ${formatUtc(request.sent_at || request.created_at)}    Completed: ${formatUtc(request.completed_at)}`);
+  line(`Original document SHA-256: ${request.document_hash || '-'}`, { size: 8, color: muted, gap: 26 });
+  line('Signers', { size: 13, bold: true, gap: 20 });
+  for (const signer of signers.rows) {
+    if (y < 110) break;
+    line(`${signer.role_order}. ${signer.name} <${signer.email}>`, { bold: true });
+    line(`Status: ${signer.status}    Viewed: ${formatUtc(signer.viewed_at)}    Signed: ${formatUtc(signer.completed_at)}`, { x: 70 });
+    line(`IP address: ${signer.ip_address || '-'}`, { x: 70 });
+    line(`Signature record SHA-256: ${signer.completion_hash || '-'}`, { x: 70, size: 8, color: muted, gap: 20 });
+  }
+  y = Math.min(y, 90);
+  line('Each signer consented to use electronic records and signatures before signing.', { size: 8, color: muted, gap: 12 });
+  line('Generated by NyxPrism (nyxprism.com). The full audit trail is retained with the signature request.', { size: 8, color: muted });
+
+  return { bytes: Buffer.from(await doc.save()), request };
+}
+
+async function sendFinalPdf(res, requestId, req, eventType, recipientId = null) {
+  const { bytes, request } = await buildFinalPdf(requestId);
+  const finalHash = createHash('sha256').update(bytes).digest('hex');
+  await audit(pool, { requestId, recipientId, eventType, detail: `SHA-256 ${finalHash}`, req });
+  const fileName = String(request.document_name || 'signed-document.pdf').replace(/\.pdf$/i, '') + '-completed.pdf';
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `attachment; filename="${fileName.replace(/[^a-zA-Z0-9._-]/g, '_')}"`);
+  res.setHeader('X-Document-SHA256', finalHash);
+  res.setHeader('Cache-Control', 'no-store, max-age=0');
+  res.send(bytes);
+}
+
+async function requestSummary(requestId) {
+  const { rows } = await pool.query(
+    'SELECT r.title, r.document_name, u.email AS owner_email FROM signature_requests r JOIN users u ON u.id = r.owner_user_id WHERE r.id = $1',
+    [requestId],
+  );
+  return rows[0];
+}
+
+async function sendLogged(requestId, recipientId, type, message) {
+  try {
+    await sendEmail(message);
+    await recordNotification(pool, { requestId, recipientId, type, status: 'sent' });
+  } catch (err) {
+    await recordNotification(pool, { requestId, recipientId, type, status: 'failed', error: err.message }).catch(() => {});
+  }
+}
+
+/** After the last signature: tell the sender, and give every signer a link to the completed copy. */
+async function notifyCompleted(requestId) {
+  const request = await requestSummary(requestId);
+  const signers = await pool.query('SELECT id, name, email, token FROM signature_recipients WHERE request_id = $1 ORDER BY role_order, id', [requestId]);
+  const base = process.env.FRONTEND_URL || 'https://nyxprism.com';
+  await Promise.all([
+    sendLogged(requestId, null, 'owner_completed', {
+      to: request.owner_email,
+      subject: `Completed: ${request.title}`,
+      html: `<p>Everyone has signed <strong>${escapeHtml(request.document_name)}</strong>.</p><p><a href="${base}/dashboard.html">Open NyxPrism</a> to download the completed PDF with its certificate of completion.</p>`,
+    }),
+    ...signers.rows.map(signer => sendLogged(requestId, signer.id, 'signer_completed_copy', {
+      to: signer.email,
+      subject: `Your signed copy: ${request.title}`,
+      html: `<p>Hello ${escapeHtml(signer.name)},</p><p>All parties have signed <strong>${escapeHtml(request.document_name)}</strong>.</p><p><a href="${base}/sign-request.html?token=${signer.token}">Download the completed document</a></p><p>This link is unique to you.</p>`,
+    })),
+  ]);
+}
+
+async function notifyDeclined(requestId, signerName, reason) {
+  const request = await requestSummary(requestId);
+  await sendLogged(requestId, null, 'owner_declined', {
+    to: request.owner_email,
+    subject: `Declined: ${request.title}`,
+    html: `<p>${escapeHtml(signerName)} declined to sign <strong>${escapeHtml(request.document_name)}</strong>.</p>${reason ? `<p>Reason: ${escapeHtml(reason)}</p>` : ''}<p>The request is closed. You can send a new one from NyxPrism.</p>`,
   });
 }
 
@@ -240,54 +402,17 @@ router.get('/:id/final-pdf', requireAuth, async (req, res) => {
   if (!Number.isInteger(requestId) || requestId < 1) return res.status(400).json({ error: 'Invalid request ID.' });
   try {
     const userId = await findOrCreateUser(req.user);
-    const requestResult = await pool.query(
-      `SELECT id, title, document_name, document_data, status
-       FROM signature_requests
-       WHERE id = $1 AND owner_user_id = $2`,
-      [requestId, userId],
-    );
-    if (!requestResult.rows.length) return res.status(404).json({ error: 'Signature request not found.' });
-    const request = requestResult.rows[0];
-    if (request.status !== 'completed') return res.status(409).json({ error: 'The final PDF is available after every signer completes.' });
-    const fields = await pool.query(
-      `SELECT field_type, page_number, x, y, width, height, value_text
-       FROM signature_fields
-       WHERE request_id = $1 AND value_text IS NOT NULL AND value_text != ''
-       ORDER BY page_number, id`,
-      [requestId],
-    );
-    if (!fields.rows.length) return res.status(400).json({ error: 'No completed fields to apply yet.' });
-
-    const doc = await PDFDocument.load(Buffer.from(request.document_data), { ignoreEncryption: true });
-    const font = await doc.embedFont(StandardFonts.Helvetica);
-    const pages = doc.getPages();
-    for (const field of fields.rows) {
-      const page = pages[Number(field.page_number) - 1];
-      if (!page) continue;
-      const { width, height } = page.getSize();
-      const boxHeight = Number(field.height) * height;
-      const x = Number(field.x) * width + 4;
-      const y = height - (Number(field.y) * height) - boxHeight + 4;
-      const text = field.field_type === 'checkbox' ? 'X' : String(field.value_text || '');
-      const fontSize = Math.max(9, Math.min(18, boxHeight * 0.52));
-      page.drawText(text, { x, y, size: fontSize, font, color: rgb(0.08, 0.09, 0.12) });
-    }
-    const out = await doc.save();
-    const finalHash = createHash('sha256').update(out).digest('hex');
-    await audit(pool, { requestId, eventType: 'final_pdf_downloaded', detail: `SHA-256 ${finalHash}`, req });
-    const fileName = String(request.document_name || 'signed-document.pdf').replace(/\.pdf$/i, '') + '-completed.pdf';
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="${fileName.replace(/[^a-zA-Z0-9._-]/g, '_')}"`);
-    res.setHeader('X-Document-SHA256', finalHash);
-    res.setHeader('Cache-Control', 'no-store, max-age=0');
-    res.send(Buffer.from(out));
+    const owns = await pool.query('SELECT id, status FROM signature_requests WHERE id = $1 AND owner_user_id = $2', [requestId, userId]);
+    if (!owns.rows.length) return res.status(404).json({ error: 'Signature request not found.' });
+    if (owns.rows[0].status !== 'completed') return res.status(409).json({ error: 'The final PDF is available after every signer completes.' });
+    await sendFinalPdf(res, requestId, req, 'final_pdf_downloaded');
   } catch (err) {
     console.error('sign-requests final PDF error:', err.message);
     res.status(500).json({ error: 'Failed to generate final signed PDF.' });
   }
 });
 
-router.post('/', requireAuth, requireActivePlan, async (req, res) => {
+router.post('/', requireAuth, requireVerifiedEmail, requireActivePlan, async (req, res) => {
   let recipients;
   let fields;
   try {
@@ -415,7 +540,7 @@ router.post('/', requireAuth, requireActivePlan, async (req, res) => {
   });
 });
 
-router.post('/:id/send', requireAuth, requireActivePlan, async (req, res) => {
+router.post('/:id/send', requireAuth, requireVerifiedEmail, requireActivePlan, async (req, res) => {
   const requestId = parseInt(req.params.id, 10);
   if (!Number.isInteger(requestId) || requestId < 1) return res.status(400).json({ error: 'Invalid request ID.' });
   const client = await pool.connect();
@@ -568,6 +693,23 @@ router.get('/public/:token', async (req, res) => {
   }
 });
 
+router.get('/public/:token/final-pdf', async (req, res) => {
+  if (!TOKEN_RE.test(req.params.token)) return res.status(404).json({ error: 'Signature link not found.' });
+  try {
+    const { rows } = await pool.query(
+      `SELECT sr.id AS recipient_id, r.id AS request_id, r.status
+       FROM signature_recipients sr JOIN signature_requests r ON r.id = sr.request_id WHERE sr.token = $1`,
+      [req.params.token],
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Signature link not found.' });
+    if (rows[0].status !== 'completed') return res.status(409).json({ error: 'The completed document is available once everyone has signed.' });
+    await sendFinalPdf(res, rows[0].request_id, req, 'signer_copy_downloaded', rows[0].recipient_id);
+  } catch (err) {
+    console.error('sign-requests public final PDF error:', err.message);
+    res.status(500).json({ error: 'Failed to generate the completed document.' });
+  }
+});
+
 router.post('/public/:token/complete', async (req, res) => {
   if (!TOKEN_RE.test(req.params.token)) return res.status(404).json({ error: 'Signature link not found.' });
   if (req.body?.consent !== true) return res.status(400).json({ error: 'Electronic-signature consent is required.' });
@@ -605,9 +747,20 @@ router.post('/public/:token/complete', async (req, res) => {
       return res.status(409).json({ error: 'This signer is not currently eligible to complete the request.' });
     }
 
-    const existing = await client.query('SELECT id, required FROM signature_fields WHERE recipient_id = $1', [recipient.id]);
+    const existing = await client.query('SELECT id, required, field_type FROM signature_fields WHERE recipient_id = $1', [recipient.id]);
     const existingIds = new Set(existing.rows.map(row => Number(row.id)));
-    const provided = new Map(values.map(value => [Number(value.fieldId), String(value.value || '').trim().slice(0, 1000)]));
+    const fieldTypes = new Map(existing.rows.map(row => [Number(row.id), row.field_type]));
+    const provided = new Map();
+    for (const value of values) {
+      const fieldId = Number(value?.fieldId);
+      if (!fieldTypes.has(fieldId)) continue;
+      const normalized = normalizeFieldValue(fieldTypes.get(fieldId), value.value);
+      if (normalized === null) {
+        await client.query('ROLLBACK');
+        return res.status(400).json({ error: 'A signature image could not be read. Please draw it again.' });
+      }
+      provided.set(fieldId, normalized);
+    }
     for (const row of existing.rows) {
       if (row.required && !provided.get(Number(row.id))) {
         await client.query('ROLLBACK');
@@ -643,8 +796,10 @@ router.post('/public/:token/complete', async (req, res) => {
       await audit(client, { requestId: recipient.request_id, recipientId: nextSigner.id, eventType: 'advanced', detail: 'Sequential signer activated', req });
     } else {
       await client.query("UPDATE signature_requests SET status = 'completed', completed_at = NOW(), updated_at = NOW() WHERE id = $1", [recipient.request_id]);
+      await audit(client, { requestId: recipient.request_id, eventType: 'request_completed', detail: 'All signers completed', req });
     }
     await client.query('COMMIT');
+    if (!nextSigner) notifyCompleted(recipient.request_id).catch(err => console.error('completion email error:', err.message));
 
     if (nextSigner) {
       try {
@@ -675,7 +830,7 @@ router.post('/public/:token/decline', async (req, res) => {
   try {
     await client.query('BEGIN');
     const recipientResult = await client.query(
-      `SELECT sr.id, sr.request_id, sr.status AS recipient_status,
+      `SELECT sr.id, sr.name, sr.request_id, sr.status AS recipient_status,
               r.status AS request_status, r.expires_at
        FROM signature_recipients sr
        JOIN signature_requests r ON r.id = sr.request_id
@@ -702,6 +857,7 @@ router.post('/public/:token/decline', async (req, res) => {
     await client.query("UPDATE signature_requests SET status = 'declined', updated_at = NOW() WHERE id = $1", [recipient.request_id]);
     await audit(client, { requestId: recipient.request_id, recipientId: recipient.id, eventType: 'declined', detail: reason, req });
     await client.query('COMMIT');
+    notifyDeclined(recipient.request_id, recipient.name, reason).catch(err => console.error('decline email error:', err.message));
     res.json({ ok: true });
   } catch (err) {
     await client.query('ROLLBACK').catch(() => {});

@@ -404,7 +404,7 @@
 <nav>
   <button class="hamburger-btn" id="hamburger-btn" aria-label="Open menu" style="margin-right:.5rem"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
   <button class="nav-brand nyx-brand-lockup nyx-brand-lockup--compact" type="button" data-panel="home" aria-label="Go to dashboard home">
-    <span class="nav-brand-logo nyx-brand-icon"><img class="nyx-prism-mark" src="prismlogo.jpg?v=1" alt="NyxPrism"></span>
+    <span class="nav-brand-logo nyx-brand-icon"><img class="nyx-prism-mark" src="prism-mark.webp?v=1" alt="NyxPrism"></span>
     <span class="nav-brand-name nyx-brand-wordmark"><em>Nyx</em>Prism&#8482;</span>
   </button>
   <div class="nav-sep"></div>
@@ -572,6 +572,12 @@
 </aside>
 
 <main class="main" id="main-content" style="display:none">
+  <div id="verify-banner" class="trial-banner" style="display:none;margin:0 0 1rem">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+    <div class="trial-banner-text"><strong>Verify your email.</strong> <span id="verify-msg">We sent a link to <span id="verify-email"></span>. You need it to send signature requests and documents to other people.</span></div>
+    <button id="verify-resend-btn" class="btn btn-secondary" type="button" style="font-size:.8rem;padding:.45rem .95rem">Resend email</button>
+    <button id="verify-done-btn" class="btn btn-primary" type="button" style="font-size:.8rem;padding:.45rem .95rem">I've verified</button>
+  </div>
 
   <!-- HOME -->
   <div class="panel active" id="panel-home">
@@ -1521,6 +1527,23 @@
         <button class="btn btn-secondary" id="acc-upgrade-btn" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>Upgrade Plan</button>
       </div>
     </div>
+    <div class="card">
+      <div class="card-title">Your data</div>
+      <p style="color:var(--text3);font-size:.84rem;line-height:1.55;margin:0 0 1rem">Download a copy of everything NyxPrism stores about your account, or delete your account permanently.</p>
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="acc-export-btn" type="button">Download my data</button>
+        <button class="btn btn-secondary" id="acc-delete-open" type="button" style="color:var(--red)">Delete account</button>
+      </div>
+      <div id="acc-delete-box" style="display:none;margin-top:1rem;border:1px solid rgba(248,113,113,.35);border-radius:var(--radius);padding:1rem">
+        <p style="font-size:.84rem;line-height:1.55;margin:0 0 .75rem"><strong>This can't be undone.</strong> Your login, saved people, signature requests, distributions and API keys are deleted, and any subscription is cancelled immediately. Type your email to confirm.</p>
+        <input class="form-input" id="acc-delete-confirm" type="email" autocomplete="off" placeholder="you@example.com">
+        <div class="btn-row" style="margin-top:.75rem">
+          <button class="btn btn-secondary" id="acc-delete-cancel" type="button">Keep my account</button>
+          <button class="btn btn-primary" id="acc-delete-btn" type="button" style="background:var(--red);border-color:var(--red)">Delete my account</button>
+        </div>
+      </div>
+      <div class="result-box" id="acc-data-result" style="display:none;margin-top:1rem"></div>
+    </div>
   </div>
 
 </main>
@@ -1733,7 +1756,7 @@
 
 <script type="module">
 import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getAuth, onAuthStateChanged, signOut, EmailAuthProvider, reauthenticateWithCredential, updatePassword, verifyBeforeUpdateEmail } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getAuth, onAuthStateChanged, signOut, EmailAuthProvider, reauthenticateWithCredential, updatePassword, verifyBeforeUpdateEmail, sendEmailVerification, reload } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import { getFirestore, doc, getDoc }            from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 const firebaseConfig = {
@@ -1752,6 +1775,17 @@ const db   = getFirestore(app);
 
 // ── Update to your Railway backend URL ────────────────────────────
 const API = 'https://nyxprism-production.up.railway.app';
+document.getElementById('verify-resend-btn')?.addEventListener('click',async function(){
+  this.disabled=true;
+  try{await sendEmailVerification(auth.currentUser);toast('Verification email sent. Check your inbox (and spam).','success');}
+  catch(err){toast(err?.code==='auth/too-many-requests'?'Please wait a few minutes before requesting another email.':'Could not send the email. Try again shortly.','error');}
+  finally{setTimeout(()=>{this.disabled=false;},30000);}
+});
+document.getElementById('verify-done-btn')?.addEventListener('click',async()=>{
+  await reload(auth.currentUser);
+  if(auth.currentUser.emailVerified){await auth.currentUser.getIdToken(true);document.getElementById('verify-banner').style.display='none';toast('Email verified. You can now send documents.','success');}
+  else toast("It isn't verified yet. Click the link in the email first.",'error');
+});
 // Professional-only endpoints answer 403 for free accounts; offer the upgrade instead of a dead end.
 const PRO_ENDPOINT=/\/api\/(sign-requests|distributions|ai-split|ai-assist|keys)(\/|$|\?)/;
 const _nyxFetch=window.fetch.bind(window);
@@ -1762,6 +1796,7 @@ window.fetch=async function(input,init){
     if(res.status===403&&url.startsWith(API)&&PRO_ENDPOINT.test(url)){
       const body=await res.clone().json().catch(()=>({}));
       if(/Professional subscription is required/i.test(body.error||'')){const m=document.getElementById('upgrade-modal');if(m)m.style.display='flex';}
+      if(body.code==='email_unverified'){const vb=document.getElementById('verify-banner');if(vb){vb.style.display='flex';vb.scrollIntoView({behavior:'smooth',block:'start'});}}
     }
   }catch(_){}
   return res;
@@ -1832,6 +1867,8 @@ onAuthStateChanged(auth,async user=>{
     if(r.ok){const d=await r.json();firstName=d.first_name||'';lastName=d.last_name||'';plan=d.plan||null;trialStart=d.trial_start?new Date(d.trial_start):null;subscriptionStatus=d.subscription_status||null;currentPeriodEnd=d.current_period_end?new Date(d.current_period_end):null;createdAt=d.created_at?new Date(d.created_at):null;}
   }catch(_){}
   if(ownerAccount){plan='professional';subscriptionStatus='active';trialStart=null;currentPeriodEnd=null;}
+  const verifyBanner=document.getElementById('verify-banner');
+  if(verifyBanner){verifyBanner.style.display=(user.emailVerified||ownerAccount)?'none':'flex';document.getElementById('verify-email').textContent=user.email;}
   const ownerLink=document.getElementById('sidebar-owner-portal');if(ownerLink)ownerLink.style.display=ownerAccount?'flex':'none';
   if(!plan){plan='account';setTimeout(()=>toast('Account status could not be refreshed. Your tools remain available while we retry.','error'),400);}
   // Fallback: Firestore for name only
@@ -1839,7 +1876,8 @@ onAuthStateChanged(auth,async user=>{
   // Trial expiry
   let trialExpired=false,daysLeft=0;
   if(plan==='trial'&&trialStart){const e=new Date(trialStart);e.setDate(e.getDate()+14);daysLeft=Math.max(0,Math.ceil((e-new Date())/86400000));trialExpired=daysLeft===0;}
-  window.__nyxBlocked=(plan==='inactive'||(plan==='trial'&&trialExpired));
+  // An ended trial drops to the free tools (with an upgrade prompt); only an admin-set 'inactive' plan blocks the app.
+  window.__nyxBlocked=(plan==='inactive');
   window.__nyxPlan=plan;
   const planLabel=plan.charAt(0).toUpperCase()+plan.slice(1);
   document.getElementById('nav-initial').textContent=(firstName||user.email)[0].toUpperCase();
@@ -1852,7 +1890,7 @@ onAuthStateChanged(auth,async user=>{
   if(plan==='trial'&&trialStart){
     document.getElementById('trial-banner').style.display='flex';
     if(daysLeft>0){document.getElementById('trial-days').textContent=`${daysLeft} day${daysLeft!==1?'s':''}`;document.getElementById('trial-msg').textContent='left in your free trial — upgrade to keep full access.';}
-    else{document.getElementById('trial-days').textContent='Trial expired.';document.getElementById('trial-msg').textContent='Subscribe to continue using NyxPrism.';}
+    else{document.getElementById('trial-days').textContent='Your trial has ended.';document.getElementById('trial-msg').textContent='The free tools are still yours. Upgrade to keep Professional features.';}
   }
   // Account panel
   const accE=document.getElementById('acc-email');if(accE)accE.textContent=user.email;const accU=document.getElementById('acc-pw-username');if(accU)accU.value=user.email;
@@ -1983,6 +2021,33 @@ window.__nyxGetToken=()=>auth.currentUser?.getIdToken();
       ['acc-current-password','acc-new-password','acc-confirm-password'].forEach(id=>document.getElementById(id).value='');
       showResult(securityResult,'success','Password changed and verified for '+auth.currentUser.email+'. Use the new password next time you sign in.');
     }catch(err){showResult(securityResult,'error',friendlyAuthError(err));}finally{btn.disabled=false;}
+  });
+  const dataResult=document.getElementById('acc-data-result');
+  document.getElementById('acc-export-btn').addEventListener('click',async function(){
+    this.disabled=true;
+    try{
+      const token=await auth.currentUser.getIdToken();
+      const res=await fetch(`${API}/api/user/export`,{headers:{Authorization:`Bearer ${token}`}});
+      if(!res.ok){const d=await res.json().catch(()=>({}));throw new Error(d.error||'Could not export your data.');}
+      triggerDownload(await res.blob(),'nyxprism-my-data.json');
+      showResult(dataResult,'success','Your data was downloaded as nyxprism-my-data.json.');
+    }catch(err){showResult(dataResult,'error',err.message);}finally{this.disabled=false;}
+  });
+  const deleteBox=document.getElementById('acc-delete-box');
+  document.getElementById('acc-delete-open').addEventListener('click',()=>{deleteBox.style.display='block';document.getElementById('acc-delete-confirm').focus();});
+  document.getElementById('acc-delete-cancel').addEventListener('click',()=>{deleteBox.style.display='none';document.getElementById('acc-delete-confirm').value='';});
+  document.getElementById('acc-delete-btn').addEventListener('click',async function(){
+    const confirmEmail=document.getElementById('acc-delete-confirm').value.trim();
+    if(confirmEmail.toLowerCase()!==(auth.currentUser.email||'').toLowerCase())return showResult(dataResult,'error','Type your email address exactly to confirm.');
+    this.disabled=true;
+    try{
+      const token=await auth.currentUser.getIdToken();
+      const res=await fetch(`${API}/api/user/account`,{method:'DELETE',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({confirmEmail})});
+      const d=await res.json().catch(()=>({}));
+      if(!res.ok)throw new Error(d.error||'Could not delete your account.');
+      await signOut(auth).catch(()=>{});
+      window.location.replace('index.html?account=deleted');
+    }catch(err){showResult(dataResult,'error',err.message);this.disabled=false;}
   });
   document.getElementById('acc-change-email').addEventListener('click',async function(){
     const newEmail=document.getElementById('acc-new-email').value.trim();

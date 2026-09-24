@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import Anthropic from '@anthropic-ai/sdk';
 import { requireActivePlan, requireAuth } from '../middleware/auth.js';
+import { aiDailyQuota, askClaude } from '../ai.js';
 
 const router = Router();
 
@@ -25,7 +25,7 @@ const TOOL_PROMPTS = {
 
 const DEFAULT_PROMPT = 'You are a helpful AI assistant in NyxPrism, a browser-based PDF tool suite. Help the user with their PDF task. Be concise and practical.';
 
-router.post('/', requireAuth, requireActivePlan, async (req, res) => {
+router.post('/', requireAuth, requireActivePlan, aiDailyQuota, async (req, res) => {
   const { tool, messages } = req.body;
 
   if (!Array.isArray(messages) || messages.length === 0) {
@@ -41,21 +41,17 @@ router.post('/', requireAuth, requireActivePlan, async (req, res) => {
   const systemPrompt = (TOOL_PROMPTS[tool] || DEFAULT_PROMPT) +
     '\n\nKeep responses under 160 words. Be direct and actionable. Use plain text, no markdown.';
 
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
   try {
-    const message = await client.messages.create({
-      model: 'claude-opus-4-5',
-      max_tokens: 512,
+    const reply = await askClaude({
       system: systemPrompt,
       messages: messages.slice(-10).map(message => ({ role: message.role, content: message.content.trim() })),
+      maxTokens: 4000,
+      effort: 'low',
     });
-
-    const reply = message.content[0]?.text?.trim() || '';
     res.json({ reply });
   } catch (err) {
     console.error('AI assist error:', err.message);
-    res.status(502).json({ error: 'AI service unavailable. Please try again.' });
+    res.status(502).json({ error: err.userFacing ? err.message : 'AI service unavailable. Please try again.' });
   }
 });
 
