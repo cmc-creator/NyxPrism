@@ -89,9 +89,9 @@ test('backend disables framework disclosure and sets security headers', async ()
 
 test('public signer renders server fields without innerHTML interpolation', async () => {
   const source = await readRepo('docs/sign-request.html');
-  assert.match(source, /row\.append\(strong,type,input\)/);
-  assert.doesNotMatch(source, /row\.innerHTML='<strong>'\+label/);
-  assert.match(source, /consent:true/);
+  // Server-provided names, labels and titles are only ever set as text.
+  assert.doesNotMatch(source, /innerHTML/);
+  assert.match(source, /consent: ?true/);
 });
 
 test('dashboard panel event uses the listener contract', async () => {
@@ -223,4 +223,19 @@ test('completed signature PDFs carry a certificate and notify the sender', async
   assert.match(source, /notifyCompleted\(/);
   assert.match(source, /notifyDeclined\(/);
   assert.match(source, /router\.get\('\/public\/:token\/final-pdf'/);
+});
+
+test('signature requests are prepared in a four-step flow with validation', async () => {
+  const dashboard = await readRepo('docs/dashboard.html');
+  assert.match(dashboard, /function createWizard\(/);
+  for (const step of ['Document', 'Signers', 'Place fields', 'Review &amp; send']) assert.ok(dashboard.includes(step), step);
+  assert.match(dashboard, /still need.*at least one field/);
+});
+
+test('signers can draw or type signatures and download the completed copy', async () => {
+  const signer = await readRepo('docs/sign-request.html');
+  assert.match(signer, /id="sig-pad"/);
+  assert.match(signer, /data-mode="type"/);
+  assert.match(signer, /\/final-pdf/);
+  assert.doesNotMatch(signer, /\bprompt\(|\bconfirm\(/);
 });

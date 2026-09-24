@@ -7,12 +7,62 @@
   <meta name="robots" content="noindex, nofollow" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Caveat:wght@600&display=swap" rel="stylesheet" />
   <style>
-    :root{--bg:#05070d;--surface:#0f1724;--surface2:#141e2e;--border:#213049;--accent:#7c3aed;--accent2:#22c55e;--gold:#facc15;--text:#f0f4fc;--text2:#c8d3e0;--muted:#7f96b2;--red:#f87171;--green:#34d399}
-    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:linear-gradient(135deg,#04070d,#07111d 45%,#09070f);color:var(--text);font-family:Inter,system-ui,sans-serif}body:before{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(115deg,rgba(124,58,237,.18),transparent 30%),linear-gradient(245deg,rgba(34,197,94,.12),transparent 32%)}
-    header{height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 1.25rem;border-bottom:1px solid rgba(167,139,250,.14);background:rgba(5,7,13,.72);backdrop-filter:blur(22px)}.brand{font-weight:900;letter-spacing:-.03em}.brand em{font-style:normal;color:#a78bfa}.status{font-size:.78rem;color:var(--muted)}
-    main{max-width:1180px;margin:0 auto;padding:1.5rem;display:grid;grid-template-columns:1fr 320px;gap:1rem}.card{background:linear-gradient(180deg,rgba(15,23,36,.9),rgba(11,16,26,.86));border:1px solid rgba(167,139,250,.14);border-radius:14px;padding:1rem;box-shadow:0 18px 60px rgba(0,0,0,.25)}h1{font-size:1.25rem;margin:.2rem 0 .35rem}p{color:var(--muted);font-size:.88rem;line-height:1.55}.viewer-head{display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:.75rem;flex-wrap:wrap}.btn{border:0;border-radius:7px;padding:.55rem .9rem;background:linear-gradient(135deg,var(--accent),#5b21b6);color:#fff;font-weight:700;cursor:pointer}.btn.secondary{background:var(--surface2);border:1px solid var(--border);color:var(--text2)}.btn:disabled{opacity:.45;cursor:not-allowed}.stage{position:relative;display:inline-block;max-width:100%;background:#fff;border-radius:10px;overflow:hidden;border:1px solid var(--border)}canvas{display:block;max-width:100%}.field{position:absolute;border:2px solid var(--gold);background:rgba(250,204,21,.16);color:#111827;border-radius:5px;padding:.25rem .35rem;font-size:.72rem;font-weight:800;display:flex;align-items:center;justify-content:center;text-align:center;cursor:pointer}.field.done{border-color:var(--green);background:rgba(52,211,153,.18)}.field.required:after{content:"*";color:#b91c1c;margin-left:.15rem}.field-list{display:flex;flex-direction:column;gap:.5rem;margin-top:1rem}.field-row{border:1px solid var(--border);border-radius:8px;padding:.65rem;background:var(--surface2);font-size:.84rem}.field-row strong{display:block;margin-bottom:.25rem}.field-row span{color:var(--muted)}input[type=text]{width:100%;margin-top:.5rem;padding:.55rem .65rem;border-radius:7px;border:1px solid var(--border);background:#080d16;color:var(--text);font-family:inherit}.result{display:none;margin-top:.75rem;border-radius:8px;padding:.75rem;font-size:.86rem}.result.ok{display:block;background:rgba(52,211,153,.1);color:var(--green);border:1px solid rgba(52,211,153,.25)}.result.err{display:block;background:rgba(248,113,113,.1);color:var(--red);border:1px solid rgba(248,113,113,.25)}@media(max-width:900px){main{grid-template-columns:1fr}.card.side{order:-1}}
+    :root{--bg:#05070d;--surface:#0f1724;--surface2:#141e2e;--border:#213049;--accent:#7c3aed;--gold:#facc15;--text:#f0f4fc;--text2:#c8d3e0;--muted:#7f96b2;--red:#f87171;--green:#34d399}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;background:linear-gradient(135deg,#04070d,#07111d 45%,#09070f);color:var(--text);font-family:Inter,system-ui,sans-serif}
+    body:before{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(115deg,rgba(124,58,237,.18),transparent 30%),linear-gradient(245deg,rgba(34,197,94,.12),transparent 32%)}
+    header{min-height:64px;display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.5rem 1.25rem;border-bottom:1px solid rgba(167,139,250,.14);background:rgba(5,7,13,.72);backdrop-filter:blur(22px)}
+    .brand{font-weight:900;letter-spacing:-.03em;color:var(--text);text-decoration:none}.brand em{font-style:normal;color:#a78bfa}
+    .secure{font-size:.76rem;color:var(--muted);display:flex;align-items:center;gap:.4rem}
+    main{max-width:1180px;margin:0 auto;padding:1.25rem clamp(.75rem,3vw,1.5rem) 3rem}
+    .steps{display:flex;gap:.5rem;list-style:none;margin:0 0 1rem;padding:0;flex-wrap:wrap}
+    .steps li{flex:1 1 140px;display:flex;align-items:center;gap:.55rem;padding:.6rem .8rem;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--muted);font-size:.84rem;font-weight:600}
+    .steps .num{width:24px;height:24px;border-radius:999px;display:grid;place-items:center;font-size:.76rem;font-weight:800;background:var(--surface2);border:1px solid var(--border)}
+    .steps li.active{border-color:var(--accent);background:rgba(124,58,237,.1);color:var(--text)}.steps li.active .num{background:var(--accent);border-color:var(--accent);color:#fff}
+    .steps li.done{color:var(--text2)}.steps li.done .num{background:rgba(52,211,153,.14);border-color:rgba(52,211,153,.45);color:var(--green)}
+    .layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:1rem;align-items:start}
+    .card{background:linear-gradient(180deg,rgba(15,23,36,.92),rgba(11,16,26,.88));border:1px solid rgba(167,139,250,.14);border-radius:14px;padding:1rem;box-shadow:0 18px 60px rgba(0,0,0,.25)}
+    .side{position:sticky;top:1rem}
+    h1{font-size:1.2rem;margin:.1rem 0 .3rem}h2{font-size:1rem;margin:0 0 .4rem}
+    p{color:var(--muted);font-size:.88rem;line-height:1.55;margin:.2rem 0 .8rem}
+    .viewer-head{display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:.75rem;flex-wrap:wrap}
+    .btn{border:0;border-radius:8px;padding:.62rem 1rem;background:linear-gradient(135deg,var(--accent),#5b21b6);color:#fff;font-weight:700;font-size:.88rem;cursor:pointer;font-family:inherit}
+    .btn.secondary{background:var(--surface2);border:1px solid var(--border);color:var(--text2)}
+    .btn.danger{background:none;border:1px solid rgba(248,113,113,.4);color:var(--red)}
+    .btn.block{width:100%}.btn:disabled{opacity:.45;cursor:not-allowed}
+    .pager{display:flex;align-items:center;gap:.5rem;color:var(--muted);font-size:.8rem}
+    .stage{position:relative;display:inline-block;max-width:100%;background:#fff;border-radius:10px;overflow:hidden;border:1px solid var(--border)}
+    canvas#pdf-canvas{display:block;max-width:100%}
+    .field{position:absolute;border:2px dashed var(--gold);background:rgba(250,204,21,.18);color:#111827;border-radius:5px;padding:.15rem .3rem;font-size:.72rem;font-weight:800;display:flex;align-items:center;justify-content:center;text-align:center;cursor:pointer;overflow:hidden}
+    .field.done{border-style:solid;border-color:var(--green);background:rgba(52,211,153,.14)}
+    .field.current{box-shadow:0 0 0 3px rgba(124,58,237,.55);animation:pulse 1.6s ease-in-out infinite}
+    .field img{max-width:100%;max-height:100%;object-fit:contain}
+    @keyframes pulse{50%{box-shadow:0 0 0 6px rgba(124,58,237,.25)}}
+    .progress{height:8px;border-radius:99px;background:var(--surface2);overflow:hidden;margin:.4rem 0 .9rem}.progress span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--green));width:0;transition:width .3s}
+    .field-list{display:flex;flex-direction:column;gap:.45rem;margin-bottom:1rem;max-height:46vh;overflow:auto}
+    .field-row{display:flex;align-items:center;gap:.6rem;border:1px solid var(--border);border-radius:9px;padding:.55rem .65rem;background:var(--surface2);font-size:.84rem;cursor:pointer;text-align:left;color:var(--text);font-family:inherit}
+    .field-row .tick{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);display:grid;place-items:center;font-size:.7rem;flex-shrink:0}
+    .field-row.done .tick{background:var(--green);border-color:var(--green);color:#052e1b}
+    .field-row .meta{flex:1;min-width:0}.field-row small{display:block;color:var(--muted)}
+    .field-row.current{border-color:var(--accent)}
+    .consent{display:flex;align-items:flex-start;gap:.55rem;margin:.5rem 0 1rem;color:var(--text2);font-size:.82rem;line-height:1.5}
+    .consent input{margin-top:.2rem;width:18px;height:18px;accent-color:var(--accent)}
+    .result{display:none;margin-top:.75rem;border-radius:8px;padding:.75rem;font-size:.86rem;line-height:1.5}
+    .result.ok{display:block;background:rgba(52,211,153,.1);color:var(--green);border:1px solid rgba(52,211,153,.25)}
+    .result.err{display:block;background:rgba(248,113,113,.1);color:var(--red);border:1px solid rgba(248,113,113,.25)}
+    .done-card{text-align:center;padding:2rem 1rem}.done-card .big{width:60px;height:60px;border-radius:50%;display:grid;place-items:center;margin:0 auto 1rem;background:rgba(52,211,153,.14);color:var(--green);font-size:1.8rem}
+    input[type=text],textarea{width:100%;padding:.6rem .7rem;border-radius:8px;border:1px solid var(--border);background:#080d16;color:var(--text);font-family:inherit;font-size:.9rem}
+    .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;padding:1rem;z-index:50}
+    .modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.1rem;width:100%;max-width:520px}
+    .tabs{display:flex;gap:.4rem;margin:.5rem 0 .75rem}.tab{flex:1;padding:.5rem;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-weight:700;cursor:pointer;font-family:inherit}.tab.active{border-color:var(--accent);background:rgba(124,58,237,.14);color:var(--text)}
+    .pad{width:100%;height:180px;background:#fff;border-radius:10px;touch-action:none;cursor:crosshair;display:block}
+    .typed-preview{height:110px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#111827;font-family:Caveat,cursive;font-size:3rem;margin-top:.6rem;overflow:hidden;white-space:nowrap;padding:0 1rem}
+    .modal-actions{display:flex;justify-content:flex-end;gap:.5rem;margin-top:.9rem;flex-wrap:wrap}
+    .hint{font-size:.76rem;color:var(--muted);margin-top:.4rem}
+    [hidden]{display:none!important}
+    @media(max-width:900px){.layout{grid-template-columns:1fr}.side{position:static;order:-1}}
   </style>
   <link rel="stylesheet" href="nyx-brand.css?v=3" />
 </head>
@@ -22,46 +72,338 @@
     <span class="nyx-brand-icon"><img class="nyx-prism-mark" src="prism-mark.webp?v=1" alt="NyxPrism"></span>
     <span class="nyx-brand-copy"><span class="nyx-brand-wordmark"><em>Nyx</em>Prism&#8482;</span><span class="nyx-brand-company">by NyxCollective LLC</span></span>
   </a>
-  <div class="status" id="status">Loading secure signing link...</div>
+  <div class="secure">🔒 Secure signing link</div>
 </header>
 <main>
-  <section class="card"><div class="viewer-head"><div><h1 id="doc-title">Document</h1><p id="doc-sub">Review each field, complete the required entries, then submit.</p></div><div><button class="btn secondary" id="prev-page">Prev</button> <button class="btn secondary" id="next-page">Next</button></div></div><div class="stage" id="stage"><canvas id="pdf-canvas"></canvas></div></section>
-  <aside class="card side"><h1>Your Fields</h1><p id="recipient-line"></p><div id="field-list" class="field-list"></div><label style="display:flex;align-items:flex-start;gap:.55rem;margin-top:1rem;color:var(--text2);font-size:.78rem;line-height:1.45"><input type="checkbox" id="sign-consent" style="margin-top:.2rem" />I consent to use electronic records and agree that submitting these fields constitutes my electronic signature.</label><button class="btn" id="complete-btn" style="width:100%;margin-top:1rem">Complete Signing</button><button class="btn secondary" id="decline-btn" style="width:100%;margin-top:.6rem">Decline Request</button><button class="btn secondary" id="download-signed" style="width:100%;margin-top:.6rem;display:none">Download My Signed Copy</button><div id="result" class="result"></div></aside>
+  <ol class="steps" id="steps">
+    <li data-step="1" class="active"><span class="num">1</span>Review</li>
+    <li data-step="2"><span class="num">2</span>Fill in &amp; sign</li>
+    <li data-step="3"><span class="num">3</span>Finish</li>
+  </ol>
+
+  <div id="loading" class="card"><p>Loading your document…</p></div>
+  <div id="fatal" class="card done-card" hidden><div class="big" style="background:rgba(248,113,113,.12);color:var(--red)">!</div><h1 id="fatal-title">This link can't be used</h1><p id="fatal-text"></p></div>
+
+  <div id="done" class="card done-card" hidden>
+    <div class="big">✓</div>
+    <h1 id="done-title">You're all set</h1>
+    <p id="done-text"></p>
+    <button class="btn" id="download-final" hidden>Download completed document</button>
+    <div id="done-result" class="result"></div>
+  </div>
+
+  <div class="layout" id="workspace" hidden>
+    <section class="card">
+      <div class="viewer-head">
+        <div><h1 id="doc-title">Document</h1><p id="doc-sub" style="margin:0"></p></div>
+        <div class="pager"><button class="btn secondary" id="prev-page" type="button">‹</button><span id="page-info"></span><button class="btn secondary" id="next-page" type="button">›</button></div>
+      </div>
+      <div class="stage" id="stage"><canvas id="pdf-canvas"></canvas></div>
+    </section>
+
+    <aside class="card side">
+      <div data-pane="1">
+        <h2>Step 1 · Review the document</h2>
+        <p id="recipient-line"></p>
+        <p>Read through the document on the left. When you're ready, continue to fill in your <strong id="field-count"></strong>.</p>
+        <button class="btn block" id="start-btn" type="button">Start signing →</button>
+        <button class="btn danger block" id="decline-open" type="button" style="margin-top:.6rem">Decline to sign</button>
+      </div>
+
+      <div data-pane="2" hidden>
+        <h2>Step 2 · Fill in &amp; sign</h2>
+        <p>Click each highlighted box, or use <strong>Next field</strong>. Fields marked * are required.</p>
+        <div class="progress"><span id="progress-bar"></span></div>
+        <div class="field-list" id="field-list"></div>
+        <button class="btn block" id="next-field" type="button">Next field</button>
+        <button class="btn secondary block" id="to-finish" type="button" style="margin-top:.6rem">Continue to finish →</button>
+        <div id="fill-result" class="result"></div>
+      </div>
+
+      <div data-pane="3" hidden>
+        <h2>Step 3 · Finish</h2>
+        <p>Almost done. Confirm below and submit your signature.</p>
+        <label class="consent"><input type="checkbox" id="sign-consent" />I agree to use electronic records and signatures, and that submitting this form is my legal signature on this document.</label>
+        <button class="btn block" id="complete-btn" type="button">Submit signature</button>
+        <button class="btn secondary block" id="back-to-fill" type="button" style="margin-top:.6rem">← Back to fields</button>
+        <div id="result" class="result"></div>
+      </div>
+
+      <div data-pane="decline" hidden>
+        <h2>Decline to sign</h2>
+        <p>The sender will be told you declined. You can add a reason (optional).</p>
+        <textarea id="decline-reason" rows="3" maxlength="1000" placeholder="Reason (optional)"></textarea>
+        <div class="modal-actions"><button class="btn secondary" id="decline-cancel" type="button">Go back</button><button class="btn danger" id="decline-btn" type="button">Decline request</button></div>
+        <div id="decline-result" class="result"></div>
+      </div>
+    </aside>
+  </div>
 </main>
+
+<div class="modal-bg" id="field-modal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <h2 id="modal-title">Your signature</h2>
+    <div id="sig-editor">
+      <div class="tabs"><button class="tab active" type="button" data-mode="draw">Draw</button><button class="tab" type="button" data-mode="type">Type</button></div>
+      <div data-mode-pane="draw"><canvas class="pad" id="sig-pad"></canvas><div class="hint">Sign with your mouse, finger or stylus. <button type="button" id="pad-clear" style="background:none;border:0;color:#a78bfa;cursor:pointer;font:inherit;padding:0">Clear</button></div></div>
+      <div data-mode-pane="type" hidden><input type="text" id="sig-typed" maxlength="80" placeholder="Type your full name" /><div class="typed-preview" id="typed-preview"></div></div>
+    </div>
+    <div id="text-editor" hidden>
+      <input type="text" id="text-value" maxlength="1000" />
+    </div>
+    <div class="modal-actions"><button class="btn secondary" id="modal-cancel" type="button">Cancel</button><button class="btn" id="modal-save" type="button">Apply</button></div>
+  </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://unpkg.com/@cantoo/pdf-lib/dist/pdf-lib.min.js"></script>
 <script>
-const API='https://nyxprism-production.up.railway.app';
-pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-const token=new URLSearchParams(location.search).get('token');
-const state={pdf:null,page:1,data:null,values:new Map(),signedBlob:null};
-const canvas=document.getElementById('pdf-canvas'),ctx=canvas.getContext('2d'),stage=document.getElementById('stage'),result=document.getElementById('result');
-function show(cls,msg){result.className='result '+cls;result.textContent=msg;}
-function valueFor(field){return state.values.get(Number(field.id))||field.value_text||'';}
-async function render(){if(!state.pdf)return;const page=await state.pdf.getPage(state.page);const vp=page.getViewport({scale:1.15});canvas.width=vp.width;canvas.height=vp.height;await page.render({canvasContext:ctx,viewport:vp}).promise;stage.querySelectorAll('.field').forEach(el=>el.remove());state.data.fields.filter(f=>Number(f.page_number)===state.page).forEach(field=>{const el=document.createElement('div');el.className='field '+(field.required?'required ':'')+(valueFor(field)?'done':'');el.style.left=(Number(field.x)*canvas.offsetWidth)+'px';el.style.top=(Number(field.y)*canvas.offsetHeight)+'px';el.style.width=(Number(field.width)*canvas.offsetWidth)+'px';el.style.height=(Number(field.height)*canvas.offsetHeight)+'px';el.textContent=valueFor(field)||field.label||field.field_type;el.addEventListener('click',()=>focusField(field.id));stage.appendChild(el);});document.getElementById('status').textContent='Page '+state.page+' / '+state.pdf.numPages;}
-function focusField(id){const input=document.querySelector('[data-field-input="'+id+'"]');if(input){input.focus();input.scrollIntoView({block:'center',behavior:'smooth'});}}
-function renderFields(){const list=document.getElementById('field-list');list.replaceChildren();state.data.fields.forEach(field=>{const row=document.createElement('div');row.className='field-row';const strong=document.createElement('strong');strong.textContent=(field.label||field.field_type)+' · page '+field.page_number+(field.required?' *':'');const type=document.createElement('span');type.textContent=field.field_type;const input=document.createElement('input');input.type='text';input.dataset.fieldInput=String(field.id);input.placeholder='Enter '+field.field_type;input.value=String(valueFor(field));input.addEventListener('input',()=>{state.values.set(Number(field.id),input.value);render();});row.append(strong,type,input);list.appendChild(row);});}
-async function load(){if(!token){show('err','Missing signing token.');return;}try{const res=await fetch(API+'/api/sign-requests/public/'+token);const data=await res.json();if(!res.ok)throw new Error(data.error||'Unable to load request');state.data=data;document.getElementById('doc-title').textContent=data.request.title;document.getElementById('doc-sub').textContent=data.request.documentName;document.getElementById('recipient-line').textContent='Signing as '+data.recipient.name+' ('+data.recipient.email+')';state.pdf=await pdfjsLib.getDocument({data:Uint8Array.from(atob(data.documentBase64.split(',').pop()),c=>c.charCodeAt(0))}).promise;renderFields();await render();}catch(err){show('err',err.message);}}
-document.getElementById('prev-page').addEventListener('click',()=>{if(state.pdf&&state.page>1){state.page--;render();}});document.getElementById('next-page').addEventListener('click',()=>{if(state.pdf&&state.page<state.pdf.numPages){state.page++;render();}});
-async function buildSignedPdf(){
-  const PDFLib=window.PDFLib;if(!PDFLib)throw new Error('PDF engine failed to load.');
-  const bytes=Uint8Array.from(atob(state.data.documentBase64.split(',').pop()),c=>c.charCodeAt(0));
-  const doc=await PDFLib.PDFDocument.load(bytes,{ignoreEncryption:true});
-  const font=await doc.embedFont(PDFLib.StandardFonts.Helvetica);
-  const pages=doc.getPages();
-  for(const field of state.data.fields){
-    const value=valueFor(field);if(!value)continue;
-    const page=pages[Number(field.page_number)-1];if(!page)continue;
-    const size=page.getSize();const x=Number(field.x)*size.width;const boxH=Number(field.height)*size.height;const y=size.height-(Number(field.y)*size.height)-boxH+4;
-    const text=field.field_type==='checkbox'?'X':value;
-    const fontSize=Math.max(9,Math.min(18,boxH*.52));
-    page.drawText(text,{x:x+4,y,font,size:fontSize,color:PDFLib.rgb(.08,.09,.12)});
-  }
-  const out=await doc.save();return new Blob([out],{type:'application/pdf'});
+const API = 'https://nyxprism-production.up.railway.app';
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const token = new URLSearchParams(location.search).get('token');
+const $ = id => document.getElementById(id);
+const state = { pdf: null, page: 1, data: null, values: new Map(), current: null, step: 1 };
+const canvas = $('pdf-canvas'), ctx = canvas.getContext('2d'), stage = $('stage');
+const IMAGE_TYPES = new Set(['signature', 'initials']);
+const LABELS = { signature: 'Signature', initials: 'Initials', name: 'Full name', date: 'Date', text: 'Text', checkbox: 'Checkbox' };
+
+function show(el, cls, msg) { el.className = 'result ' + cls; el.textContent = msg; }
+function valueFor(f) { return state.values.get(Number(f.id)) ?? f.value_text ?? ''; }
+function fieldLabel(f) { return (f.label && f.label.toLowerCase() !== f.field_type ? f.label : LABELS[f.field_type] || f.field_type); }
+function orderedFields() { return [...state.data.fields].sort((a, b) => a.page_number - b.page_number || a.y - b.y || a.x - b.x); }
+
+function setStep(step) {
+  state.step = step;
+  document.querySelectorAll('[data-pane]').forEach(p => { p.hidden = String(p.dataset.pane) !== String(step); });
+  document.querySelectorAll('#steps li').forEach(li => {
+    const n = Number(li.dataset.step);
+    li.classList.toggle('active', n === step);
+    li.classList.toggle('done', typeof step === 'number' && n < step);
+  });
+  render();
 }
-document.getElementById('download-signed').addEventListener('click',()=>{if(!state.signedBlob)return;const a=document.createElement('a');a.href=URL.createObjectURL(state.signedBlob);a.download=(state.data.request.documentName||'signed-document.pdf').replace(/\.pdf$/i,'')+'-signed.pdf';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000);});
-document.getElementById('complete-btn').addEventListener('click',async function(){if(!state.data)return;if(!document.getElementById('sign-consent').checked){show('err','Confirm electronic-signature consent before completing.');return;}this.disabled=true;try{const values=state.data.fields.map(f=>({fieldId:f.id,value:valueFor(f)}));const res=await fetch(API+'/api/sign-requests/public/'+token+'/complete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({values,consent:true})});const data=await res.json();if(!res.ok)throw new Error(data.error||'Unable to complete request');state.signedBlob=await buildSignedPdf();document.getElementById('download-signed').style.display='block';show('ok','Thank you. Your consent and fields were recorded. Download your recipient copy below.');}catch(err){show('err',err.message);}finally{this.disabled=false;}});
-document.getElementById('decline-btn').addEventListener('click',async function(){if(!state.data)return;const reason=prompt('Optional reason for declining:')||'';if(!confirm('Decline this signature request?'))return;this.disabled=true;try{const res=await fetch(API+'/api/sign-requests/public/'+token+'/decline',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reason})});const data=await res.json();if(!res.ok)throw new Error(data.error||'Unable to decline request');document.getElementById('complete-btn').disabled=true;show('ok','Signature request declined.');}catch(err){show('err',err.message);}finally{this.disabled=false;}});
+
+// pdf.js can't draw on one canvas twice at once, so redraws run one after another.
+let renderQueue = Promise.resolve();
+function render() { renderQueue = renderQueue.then(draw, draw); return renderQueue; }
+async function draw() {
+  if (!state.pdf) return;
+  const page = await state.pdf.getPage(state.page);
+  const vp = page.getViewport({ scale: 1.25 });
+  canvas.width = vp.width; canvas.height = vp.height;
+  await page.render({ canvasContext: ctx, viewport: vp }).promise;
+  stage.querySelectorAll('.field').forEach(el => el.remove());
+  state.data.fields.filter(f => Number(f.page_number) === state.page).forEach(f => {
+    const el = document.createElement('div');
+    const value = valueFor(f);
+    el.className = 'field' + (value ? ' done' : '') + (state.current === f.id ? ' current' : '');
+    Object.assign(el.style, {
+      left: (Number(f.x) * canvas.offsetWidth) + 'px', top: (Number(f.y) * canvas.offsetHeight) + 'px',
+      width: (Number(f.width) * canvas.offsetWidth) + 'px', height: (Number(f.height) * canvas.offsetHeight) + 'px',
+    });
+    if (value && IMAGE_TYPES.has(f.field_type) && String(value).startsWith('data:image/')) {
+      const img = document.createElement('img'); img.src = value; img.alt = fieldLabel(f); el.appendChild(img);
+    } else {
+      el.textContent = f.field_type === 'checkbox' ? (value ? '✓' : '☐') : (value || (fieldLabel(f) + (f.required ? ' *' : '')));
+    }
+    el.addEventListener('click', () => { if (state.step === 1) setStep(2); openField(f); });
+    stage.appendChild(el);
+  });
+  $('page-info').textContent = 'Page ' + state.page + ' of ' + state.pdf.numPages;
+  $('prev-page').disabled = state.page <= 1; $('next-page').disabled = state.page >= state.pdf.numPages;
+  renderList();
+}
+
+function renderList() {
+  const list = $('field-list'); list.replaceChildren();
+  const fields = orderedFields();
+  let filled = 0;
+  fields.forEach(f => {
+    const done = Boolean(valueFor(f)); if (done) filled++;
+    const row = document.createElement('button'); row.type = 'button';
+    row.className = 'field-row' + (done ? ' done' : '') + (state.current === f.id ? ' current' : '');
+    const tick = document.createElement('span'); tick.className = 'tick'; tick.textContent = done ? '✓' : '';
+    const meta = document.createElement('span'); meta.className = 'meta'; meta.textContent = fieldLabel(f) + (f.required ? ' *' : '');
+    const small = document.createElement('small'); small.textContent = 'Page ' + f.page_number + (done ? ' · done' : f.required ? ' · required' : ' · optional'); meta.appendChild(small);
+    row.append(tick, meta); row.addEventListener('click', () => openField(f));
+    list.appendChild(row);
+  });
+  $('progress-bar').style.width = (fields.length ? (filled / fields.length) * 100 : 100) + '%';
+  const remaining = fields.filter(f => f.required && !valueFor(f)).length;
+  $('next-field').textContent = remaining ? `Next field (${remaining} left)` : 'All required fields done ✓';
+}
+
+async function goToField(f) {
+  state.current = f.id;
+  if (Number(f.page_number) !== state.page) state.page = Number(f.page_number);
+  await render();
+  const el = stage.querySelector('.field.current'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// ── Field editor ──
+let editing = null, padDirty = false;
+const pad = $('sig-pad'), padCtx = pad.getContext('2d');
+function sizePad() {
+  const ratio = window.devicePixelRatio || 1; const rect = pad.getBoundingClientRect();
+  pad.width = rect.width * ratio; pad.height = rect.height * ratio;
+  padCtx.setTransform(ratio, 0, 0, ratio, 0, 0); padCtx.lineWidth = 2.6; padCtx.lineCap = 'round'; padCtx.lineJoin = 'round'; padCtx.strokeStyle = '#0f172a';
+  padDirty = false;
+}
+let drawing = false, last = null;
+pad.addEventListener('pointerdown', e => { drawing = true; pad.setPointerCapture(e.pointerId); const r = pad.getBoundingClientRect(); last = [e.clientX - r.left, e.clientY - r.top]; });
+pad.addEventListener('pointermove', e => { if (!drawing) return; const r = pad.getBoundingClientRect(); const p = [e.clientX - r.left, e.clientY - r.top]; padCtx.beginPath(); padCtx.moveTo(...last); padCtx.lineTo(...p); padCtx.stroke(); last = p; padDirty = true; });
+['pointerup', 'pointercancel', 'pointerleave'].forEach(t => pad.addEventListener(t, () => { drawing = false; }));
+$('pad-clear').addEventListener('click', () => { padCtx.clearRect(0, 0, pad.width, pad.height); padDirty = false; });
+let mode = 'draw';
+function setMode(m) { mode = m; document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.mode === m)); document.querySelectorAll('[data-mode-pane]').forEach(p => { p.hidden = p.dataset.modePane !== m; }); if (m === 'draw') requestAnimationFrame(sizePad); else $('sig-typed').focus(); }
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => setMode(t.dataset.mode)));
+$('sig-typed').addEventListener('input', () => { $('typed-preview').textContent = $('sig-typed').value; });
+
+function trimmedSignature(source) {
+  // Crop to the ink so the signature fills its box on the PDF.
+  const w = source.width, h = source.height, data = source.getContext('2d').getImageData(0, 0, w, h).data;
+  let minX = w, minY = h, maxX = -1, maxY = -1;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (data[(y * w + x) * 4 + 3] > 10) { if (x < minX) minX = x; if (x > maxX) maxX = x; if (y < minY) minY = y; if (y > maxY) maxY = y; }
+  if (maxX < 0) return null;
+  const margin = 8, cw = maxX - minX + margin * 2, ch = maxY - minY + margin * 2;
+  const scale = Math.min(1, 600 / cw);
+  const out = document.createElement('canvas'); out.width = Math.round(cw * scale); out.height = Math.round(ch * scale);
+  out.getContext('2d').drawImage(source, minX - margin, minY - margin, cw, ch, 0, 0, out.width, out.height);
+  return out.toDataURL('image/png');
+}
+function typedSignature(text) {
+  const c = document.createElement('canvas'); const x = c.getContext('2d');
+  x.font = '600 72px Caveat, cursive'; const width = Math.ceil(x.measureText(text).width) + 24;
+  c.width = Math.min(1200, width); c.height = 100; x.font = '600 72px Caveat, cursive'; x.fillStyle = '#0f172a'; x.textBaseline = 'middle'; x.fillText(text, 12, 52);
+  return trimmedSignature(c) || c.toDataURL('image/png');
+}
+
+function initialsOf(name) { return String(name || '').split(/\s+/).filter(Boolean).map(p => p[0].toUpperCase()).join('').slice(0, 4); }
+async function openField(f) {
+  await goToField(f);
+  if (f.field_type === 'checkbox') { state.values.set(Number(f.id), valueFor(f) ? '' : 'X'); render(); return; }
+  editing = f;
+  const isImage = IMAGE_TYPES.has(f.field_type);
+  $('sig-editor').hidden = !isImage; $('text-editor').hidden = isImage;
+  $('modal-title').textContent = isImage ? (f.field_type === 'initials' ? 'Your initials' : 'Your signature') : fieldLabel(f);
+  $('field-modal').hidden = false;
+  if (isImage) {
+    $('sig-typed').value = f.field_type === 'initials' ? initialsOf(state.data.recipient.name) : state.data.recipient.name;
+    $('typed-preview').textContent = $('sig-typed').value;
+    setMode('draw');
+  } else {
+    const input = $('text-value');
+    input.placeholder = f.field_type === 'date' ? 'MM/DD/YYYY' : 'Enter ' + fieldLabel(f).toLowerCase();
+    input.value = valueFor(f) || (f.field_type === 'date' ? new Date().toLocaleDateString('en-US') : f.field_type === 'name' ? state.data.recipient.name : '');
+    input.focus(); input.select();
+  }
+}
+function closeModal() { $('field-modal').hidden = true; editing = null; }
+$('modal-cancel').addEventListener('click', closeModal);
+$('field-modal').addEventListener('click', e => { if (e.target === $('field-modal')) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('field-modal').hidden) closeModal(); });
+$('text-value').addEventListener('keydown', e => { if (e.key === 'Enter') $('modal-save').click(); });
+function alertInModal(msg) { const t = $('modal-title'); const old = t.textContent; t.textContent = msg; t.style.color = 'var(--red)'; setTimeout(() => { t.textContent = old; t.style.color = ''; }, 1800); }
+$('modal-save').addEventListener('click', () => {
+  if (!editing) return;
+  let value;
+  if (IMAGE_TYPES.has(editing.field_type)) {
+    value = mode === 'draw' ? (padDirty ? trimmedSignature(pad) : null) : ($('sig-typed').value.trim() ? typedSignature($('sig-typed').value.trim()) : null);
+    if (!value) { alertInModal(mode === 'draw' ? 'Draw your signature first.' : 'Type your name first.'); return; }
+  } else {
+    value = $('text-value').value.trim();
+    if (!value && editing.required) { alertInModal('This field is required.'); return; }
+  }
+  const f = editing;
+  state.values.set(Number(f.id), value);
+  closeModal();
+  const nextField = orderedFields().find(x => x.required && !valueFor(x));
+  state.current = nextField ? nextField.id : null;
+  render();
+});
+
+$('next-field').addEventListener('click', () => {
+  const next = orderedFields().find(f => f.required && !valueFor(f)) || orderedFields().find(f => !valueFor(f));
+  if (next) openField(next); else setStep(3);
+});
+$('to-finish').addEventListener('click', () => {
+  const missing = orderedFields().filter(f => f.required && !valueFor(f));
+  if (missing.length) { show($('fill-result'), 'err', `Please complete ${missing.length} required field${missing.length === 1 ? '' : 's'} first.`); goToField(missing[0]); return; }
+  $('fill-result').className = 'result'; setStep(3);
+});
+$('start-btn').addEventListener('click', () => { setStep(2); const first = orderedFields()[0]; if (first) goToField(first); });
+$('back-to-fill').addEventListener('click', () => setStep(2));
+$('prev-page').addEventListener('click', () => { if (state.page > 1) { state.page--; render(); } });
+$('next-page').addEventListener('click', () => { if (state.page < state.pdf.numPages) { state.page++; render(); } });
+window.addEventListener('resize', () => render());
+
+// ── Submit / decline ──
+$('complete-btn').addEventListener('click', async function () {
+  if (!$('sign-consent').checked) { show($('result'), 'err', 'Tick the box to confirm your electronic signature.'); return; }
+  this.disabled = true; show($('result'), 'ok', 'Submitting…');
+  try {
+    const values = state.data.fields.map(f => ({ fieldId: f.id, value: valueFor(f) }));
+    const res = await fetch(`${API}/api/sign-requests/public/${token}/complete`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ values, consent: true }) });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Could not submit your signature.');
+    showDone("Thank you — you've signed", "Your signature was recorded securely. You'll receive an email with a link to the completed document once everyone has signed.", false);
+  } catch (err) { show($('result'), 'err', err.message); this.disabled = false; }
+});
+$('decline-open').addEventListener('click', () => setStep('decline'));
+$('decline-cancel').addEventListener('click', () => setStep(1));
+$('decline-btn').addEventListener('click', async function () {
+  this.disabled = true;
+  try {
+    const res = await fetch(`${API}/api/sign-requests/public/${token}/decline`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ reason: $('decline-reason').value }) });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Could not decline the request.');
+    showDone('You declined this request', 'The sender has been notified. No signature was recorded.', false, true);
+  } catch (err) { show($('decline-result'), 'err', err.message); this.disabled = false; }
+});
+
+function showDone(title, text, canDownload, declined = false) {
+  $('workspace').hidden = true; $('loading').hidden = true; $('done').hidden = false;
+  $('done-title').textContent = title; $('done-text').textContent = text;
+  $('download-final').hidden = !canDownload;
+  if (declined) { $('done').querySelector('.big').textContent = '–'; $('steps').hidden = true; }
+  else document.querySelectorAll('#steps li').forEach(li => { li.classList.remove('active'); li.classList.add('done'); });
+}
+$('download-final').addEventListener('click', async function () {
+  this.disabled = true;
+  try {
+    const res = await fetch(`${API}/api/sign-requests/public/${token}/final-pdf`);
+    if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(d.error || 'The completed document is not available yet.'); }
+    const blob = await res.blob();
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = (state.data?.request?.documentName || 'document.pdf').replace(/\.pdf$/i, '') + '-completed.pdf';
+    a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+  } catch (err) { show($('done-result'), 'err', err.message); } finally { this.disabled = false; }
+});
+
+function fatal(title, text) { $('loading').hidden = true; $('steps').hidden = true; $('fatal').hidden = false; $('fatal-title').textContent = title; $('fatal-text').textContent = text; }
+
+async function load() {
+  if (!token) return fatal('Missing link details', 'Open the link from your email again. If it still does not work, ask the sender to resend it.');
+  try {
+    const res = await fetch(`${API}/api/sign-requests/public/${token}`);
+    const data = await res.json();
+    if (!res.ok) {
+      if (res.status === 423) return fatal('Not your turn yet', "Someone earlier in the signing order still needs to sign. You'll get an email as soon as it's your turn.");
+      if (res.status === 410) return fatal('This request is closed', data.error || 'It has expired or was cancelled by the sender.');
+      return fatal("This link can't be used", data.error || 'Ask the sender for a new link.');
+    }
+    state.data = data;
+    if (data.request.status === 'completed') return showDone('This document is complete', 'Everyone has signed. Download your copy, including the certificate of completion.', true);
+    if (data.recipient.status === 'completed') return showDone("You've already signed", "Thanks! We'll email you a link to the completed document once everyone has signed.", false);
+    $('doc-title').textContent = data.request.title;
+    $('doc-sub').textContent = data.request.documentName;
+    $('recipient-line').textContent = `Signing as ${data.recipient.name} (${data.recipient.email}).`;
+    const n = data.fields.length;
+    $('field-count').textContent = n + ' field' + (n === 1 ? '' : 's');
+    state.pdf = await pdfjsLib.getDocument({ data: Uint8Array.from(atob(data.documentBase64.split(',').pop()), c => c.charCodeAt(0)) }).promise;
+    $('loading').hidden = true; $('workspace').hidden = false;
+    setStep(1);
+  } catch (err) { fatal('Something went wrong', 'Check your connection and reload the page. ' + err.message); }
+}
 load();
 </script>
 </body>

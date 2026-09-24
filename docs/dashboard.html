@@ -152,7 +152,11 @@
     .range-row .fremove:hover{color:var(--red)}
     .range-row .fremove svg{width:14px;height:14px;stroke:currentColor}
     .recipient-row{display:grid;align-items:center;gap:.5rem;margin-top:.55rem;min-width:0}
-    .signature-recipient{grid-template-columns:20px minmax(0,1fr) minmax(0,1fr) 36px}
+    .signature-recipient{grid-template-columns:26px minmax(0,1fr) minmax(0,1fr) 36px}
+    #sigreq-recipients{counter-reset:signer}
+    .signature-recipient .sr-pick{display:none}
+    .signer-order{width:24px;height:24px;border-radius:999px;display:grid;place-items:center;background:var(--surface2);border:1px solid var(--border2);font-size:.74rem;font-weight:800;color:var(--text2)}
+    .signer-order::before{counter-increment:signer;content:counter(signer)}
     .distribution-recipient{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 36px}
     .recipient-row .form-input{min-width:0}
     .appearance-group{display:flex;align-items:center;gap:1rem;margin-top:.9rem;flex-wrap:wrap}
@@ -180,7 +184,7 @@
     .recipient-remove svg{display:block;width:15px;height:15px;stroke:currentColor;pointer-events:none}
     @media(max-width:620px){
       .saved-person-row{grid-template-columns:1fr}.saved-person-row .btn{width:100%}
-      .signature-recipient{grid-template-columns:20px minmax(0,1fr) 36px}
+      .signature-recipient{grid-template-columns:26px minmax(0,1fr) 36px}
       .signature-recipient .sr-email{grid-column:2}.signature-recipient .recipient-remove{grid-column:3;grid-row:1/span 2}
       .distribution-recipient{grid-template-columns:minmax(0,1fr) 36px}
       .distribution-recipient .dr-email{grid-column:1}.distribution-recipient .recipient-remove{grid-column:2;grid-row:1/span 2}
@@ -300,6 +304,41 @@
     .sigreq-box{position:absolute;border:2px solid var(--accent);background:rgba(124,58,237,.13);color:#111827;border-radius:5px;padding:.25rem .4rem;font-size:.72rem;font-weight:800;cursor:move;user-select:none;min-width:72px;min-height:26px;display:flex;align-items:center;justify-content:center;text-align:center}
     .sigreq-box .x{position:absolute;right:-7px;top:-8px;background:var(--red);color:#fff;border-radius:999px;border:0;width:18px;height:18px;font-size:.7rem;line-height:18px;cursor:pointer}
     @media(max-width:900px){.sigreq-layout{grid-template-columns:1fr}}
+    /* Step-by-step workflow (wizard) */
+    .wizard-steps{display:flex;gap:.5rem;list-style:none;margin:0 0 1.25rem;padding:0;counter-reset:none;flex-wrap:wrap}
+    .wizard-steps li{flex:1 1 150px;display:flex;align-items:center;gap:.6rem;padding:.7rem .85rem;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text3);font-size:.84rem;font-weight:600;cursor:default;transition:border-color .15s,background .15s}
+    .wizard-steps li .num{width:26px;height:26px;border-radius:999px;display:grid;place-items:center;font-size:.8rem;font-weight:800;background:var(--surface2);border:1px solid var(--border2);flex-shrink:0}
+    .wizard-steps li.done{color:var(--text2);cursor:pointer}
+    .wizard-steps li.done .num{background:rgba(52,211,153,.14);border-color:rgba(52,211,153,.45);color:var(--green)}
+    .wizard-steps li.active{border-color:var(--accent);background:rgba(124,58,237,.1);color:var(--text)}
+    .wizard-steps li.active .num{background:var(--accent);border-color:var(--accent);color:#fff}
+    .wizard-pane{display:none}
+    .wizard-pane.active{display:block}
+    .wizard-pane > .card{max-width:760px}
+    .wizard-pane.wide > .card{max-width:none}
+    .wizard-lead{color:var(--text3);font-size:.88rem;line-height:1.55;margin:-.35rem 0 1.1rem}
+    .wizard-nav{display:flex;justify-content:space-between;align-items:center;gap:.75rem;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border);flex-wrap:wrap}
+    .wizard-nav .spacer{flex:1}
+    .wizard-error{color:var(--red);font-size:.82rem;flex-basis:100%;display:none}
+    .wizard-error.show{display:block}
+    .signer-chips{display:flex;flex-wrap:wrap;gap:.5rem;margin:.25rem 0 1rem}
+    .signer-chip{display:flex;align-items:center;gap:.45rem;border:1.5px solid var(--border2);background:var(--surface2);color:var(--text2);border-radius:999px;padding:.4rem .8rem;font-size:.8rem;font-weight:600;cursor:pointer}
+    .signer-chip .dot{width:10px;height:10px;border-radius:50%}
+    .signer-chip .count{color:var(--text3);font-weight:500}
+    .signer-chip.active{color:var(--text);background:rgba(124,58,237,.12)}
+    .place-toolbar{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.75rem}
+    .place-toolbar .label{font-size:.78rem;color:var(--text3);margin-right:.25rem}
+    .review-grid{display:grid;grid-template-columns:140px 1fr;gap:.55rem .9rem;font-size:.86rem;margin-bottom:1rem}
+    .review-grid dt{color:var(--text3)}
+    .review-grid dd{margin:0;word-break:break-word}
+    .review-signers{display:flex;flex-direction:column;gap:.45rem;margin:.25rem 0 0}
+    .review-signer{display:flex;align-items:center;gap:.65rem;border:1px solid var(--border);border-radius:var(--radius-sm);padding:.55rem .75rem;background:var(--surface2);font-size:.84rem}
+    .review-signer .order{width:22px;height:22px;border-radius:999px;display:grid;place-items:center;background:var(--surface);border:1px solid var(--border2);font-size:.74rem;font-weight:800}
+    .review-signer .who{flex:1;min-width:0}
+    .review-signer .who small{display:block;color:var(--text3)}
+    .wizard-done{text-align:center;padding:1.5rem 1rem}
+    .wizard-done .big{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;margin:0 auto .9rem;background:rgba(52,211,153,.14);color:var(--green);font-size:1.6rem}
+    @media(max-width:620px){.wizard-steps li{flex-basis:calc(50% - .5rem)}.review-grid{grid-template-columns:1fr}.review-grid dt{margin-top:.4rem}}
     /* Upgrade modal */
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);z-index:8000;display:flex;align-items:center;justify-content:center;padding:1.5rem}
     .modal-box{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:2rem 2rem 1.75rem;max-width:420px;width:100%;text-align:center;box-shadow:var(--shadow)}
@@ -1083,53 +1122,91 @@
   <div class="panel" id="panel-signrequest">
     <div class="page-header">
       <h1>Request Signatures</h1>
-      <p>Prepare signer fields on a PDF and save a signature request draft.</p>
+      <p>Send a PDF for signature in four quick steps.</p>
     </div>
-    <div class="sigreq-layout">
-      <div class="card">
-        <div class="card-title">Document & Recipients</div>
-        <div class="form-group" style="margin-bottom:.75rem">
-          <label class="form-label">PDF File</label>
-          <div class="drop-zone" id="sigreq-drop"><input type="file" id="sigreq-file" accept=".pdf,application/pdf" /><div class="drop-title">Drop PDF here</div><div class="drop-sub">or click to browse</div></div>
+    <div class="wizard" id="sigreq-wizard">
+      <ol class="wizard-steps">
+        <li data-step="1" class="active"><span class="num">1</span><span>Document</span></li>
+        <li data-step="2"><span class="num">2</span><span>Signers</span></li>
+        <li data-step="3"><span class="num">3</span><span>Place fields</span></li>
+        <li data-step="4"><span class="num">4</span><span>Review &amp; send</span></li>
+      </ol>
+
+      <section class="wizard-pane active" data-step="1">
+        <div class="card">
+          <div class="card-title">Step 1 · Choose your document</div>
+          <p class="wizard-lead">Upload the PDF you want signed. You can give the request a name and a short note for your signers.</p>
+          <div class="form-group" style="margin-bottom:.9rem">
+            <div class="drop-zone" id="sigreq-drop"><input type="file" id="sigreq-file" accept=".pdf,application/pdf" /><div class="drop-title" id="sigreq-drop-title">Drop PDF here</div><div class="drop-sub" id="sigreq-drop-sub">or click to browse · up to 8 MB</div></div>
+          </div>
+          <div class="form-group"><label class="form-label" for="sigreq-title">Request name <span style="color:var(--muted);font-weight:500">(optional)</span></label><input class="form-input" id="sigreq-title" placeholder="e.g. NDA — Acme Corp" /></div>
+          <div class="form-group"><label class="form-label" for="sigreq-message">Message to signers <span style="color:var(--muted);font-weight:500">(optional)</span></label><textarea class="form-input" id="sigreq-message" rows="3" placeholder="Please review and sign this document."></textarea></div>
+          <div class="wizard-nav"><span class="wizard-error" data-error></span><button class="btn btn-ghost" id="sigreq-clear" type="button">Start over</button><span class="spacer"></span><button class="btn btn-primary" type="button" data-next>Next: Signers →</button></div>
         </div>
-        <div class="form-group"><label class="form-label">Request title</label><input class="form-input" id="sigreq-title" placeholder="NDA signature request" /></div>
-        <div class="form-group"><label class="form-label">Message</label><textarea class="form-input" id="sigreq-message" rows="3" placeholder="Please review and sign this document."></textarea></div>
-        <div class="card-title" style="margin-top:1rem">Recipients</div>
-        <div class="saved-person-row"><select class="form-input" id="sigreq-saved-person" aria-label="Saved people"><option value="">Select a saved person</option></select><button class="btn btn-secondary" id="sigreq-use-saved" type="button">Add Saved Person</button></div>
-        <div class="form-hint">People from your previous signature requests and distributions are saved automatically.</div>
-        <div id="sigreq-recipients"></div>
-        <button class="btn btn-ghost" id="sigreq-add-recipient" type="button" style="margin-top:.5rem">Add Recipient</button>
-        <div class="card-title" style="margin-top:1.1rem">Fields</div>
-        <div class="sigreq-palette">
-          <button class="sigreq-field-btn" type="button" data-field="signature">Signature</button>
-          <button class="sigreq-field-btn" type="button" data-field="initials">Initials</button>
-          <button class="sigreq-field-btn" type="button" data-field="name">Name</button>
-          <button class="sigreq-field-btn" type="button" data-field="date">Date</button>
-          <button class="sigreq-field-btn" type="button" data-field="text">Text</button>
-          <button class="sigreq-field-btn" type="button" data-field="checkbox">Checkbox</button>
+      </section>
+
+      <section class="wizard-pane" data-step="2">
+        <div class="card">
+          <div class="card-title">Step 2 · Who needs to sign?</div>
+          <p class="wizard-lead">Add each signer's name and email. They sign <strong>in this order</strong>; the next person is emailed when the one before finishes.</p>
+          <div class="saved-person-row"><select class="form-input" id="sigreq-saved-person" aria-label="Saved people"><option value="">Pick someone you've sent to before</option></select><button class="btn btn-secondary" id="sigreq-use-saved" type="button">Add</button></div>
+          <div id="sigreq-recipients"></div>
+          <button class="btn btn-ghost" id="sigreq-add-recipient" type="button" style="margin-top:.6rem">+ Add another signer</button>
+          <div class="wizard-nav"><span class="wizard-error" data-error></span><button class="btn btn-secondary" type="button" data-back>← Back</button><span class="spacer"></span><button class="btn btn-primary" type="button" data-next>Next: Place fields →</button></div>
         </div>
-        <div class="form-hint" style="margin-top:.5rem">Select a recipient, then click a field type or drop it on the preview.</div>
-      </div>
-      <div class="card">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:.75rem;flex-wrap:wrap">
-          <div class="card-title" style="margin-bottom:0">Field Placement <span id="sigreq-page-info" style="color:var(--muted);font-weight:600"></span></div>
-          <div class="btn-row" style="margin:0"><button class="btn btn-secondary" id="sigreq-prev" type="button">Prev</button><button class="btn btn-secondary" id="sigreq-next" type="button">Next</button></div>
+      </section>
+
+      <section class="wizard-pane wide" data-step="3">
+        <div class="card">
+          <div class="card-title">Step 3 · Place signature fields</div>
+          <p class="wizard-lead">Choose a signer, then click a field type to add it to this page. Drag fields into place; click × to remove one. Every signer needs at least one field.</p>
+          <div class="signer-chips" id="sigreq-signer-chips"></div>
+          <div class="place-toolbar">
+            <span class="label">Add field:</span>
+            <button class="sigreq-field-btn" type="button" data-field="signature">✍ Signature</button>
+            <button class="sigreq-field-btn" type="button" data-field="initials">Initials</button>
+            <button class="sigreq-field-btn" type="button" data-field="name">Name</button>
+            <button class="sigreq-field-btn" type="button" data-field="date">Date</button>
+            <button class="sigreq-field-btn" type="button" data-field="text">Text</button>
+            <button class="sigreq-field-btn" type="button" data-field="checkbox">☐ Checkbox</button>
+            <span class="spacer" style="flex:1"></span>
+            <button class="btn btn-secondary" id="sigreq-prev" type="button">‹ Page</button>
+            <span id="sigreq-page-info" style="color:var(--muted);font-size:.8rem;font-weight:600"></span>
+            <button class="btn btn-secondary" id="sigreq-next" type="button">Page ›</button>
+          </div>
+          <div class="sigreq-stage" id="sigreq-stage"><canvas id="sigreq-canvas"></canvas></div>
+          <div class="wizard-nav"><span class="wizard-error" data-error></span><button class="btn btn-secondary" type="button" data-back>← Back</button><span class="spacer"></span><button class="btn btn-primary" type="button" data-next>Next: Review →</button></div>
         </div>
-        <div class="sigreq-stage" id="sigreq-stage"><canvas id="sigreq-canvas"></canvas></div>
-        <div class="result-box" id="sigreq-result" style="display:none;margin-top:1rem"></div>
-        <div id="sigreq-links" style="display:none;margin-top:1rem"></div>
-        <div class="btn-row">
-          <button class="btn btn-primary" id="sigreq-save" type="button">Save Request Draft</button>
-          <button class="btn btn-primary" id="sigreq-send" type="button">Send Request</button>
-          <button class="btn btn-secondary" id="sigreq-clear" type="button">Clear</button>
+      </section>
+
+      <section class="wizard-pane" data-step="4">
+        <div class="card">
+          <div id="sigreq-review">
+            <div class="card-title">Step 4 · Review and send</div>
+            <p class="wizard-lead">Check everything below. <strong>Send</strong> emails the first signer now; <strong>Save as draft</strong> keeps it here to send later.</p>
+            <dl class="review-grid" id="sigreq-review-grid"></dl>
+            <div class="card-title" style="font-size:.8rem">Signing order</div>
+            <div class="review-signers" id="sigreq-review-signers"></div>
+            <div class="result-box" id="sigreq-result" style="display:none;margin-top:1rem"></div>
+            <div class="wizard-nav"><span class="wizard-error" data-error></span><button class="btn btn-secondary" type="button" data-back>← Back</button><span class="spacer"></span><button class="btn btn-secondary" id="sigreq-save" type="button">Save as draft</button><button class="btn btn-primary" id="sigreq-send" type="button">Send for signature</button></div>
+          </div>
+          <div id="sigreq-done" class="wizard-done" style="display:none">
+            <div class="big">✓</div>
+            <div class="card-title" id="sigreq-done-title" style="justify-content:center">Sent for signature</div>
+            <p class="wizard-lead" id="sigreq-done-text" style="margin:0 auto 1rem;max-width:460px"></p>
+            <div id="sigreq-links" style="display:none;text-align:left;margin:0 auto 1rem;max-width:620px"></div>
+            <button class="btn btn-primary" id="sigreq-restart" type="button">Send another document</button>
+          </div>
         </div>
-        <div class="card-title" style="margin-top:1.25rem">Recent Requests</div>
-        <div id="sigreq-list"><div style="color:var(--muted);font-size:.85rem">No requests loaded yet.</div></div>
-      </div>
+      </section>
+    </div>
+
+    <div class="card" style="margin-top:1.25rem">
+      <div class="card-title">Your signature requests</div>
+      <div id="sigreq-list"><div style="color:var(--muted);font-size:.85rem">No requests loaded yet.</div></div>
     </div>
   </div>
 
-  <!-- DISTRIBUTE DOCUMENTS PANEL -->
   <div class="panel" id="panel-distribution">
     <div class="page-header"><h1>Distribute Documents</h1><p>Send a PDF version to one recipient or a bulk recipient batch and track opened / failed delivery state.</p></div>
     <div class="sigreq-layout">
@@ -3154,6 +3231,31 @@ async function loadSavedPeople(select){
     data.contacts.forEach(contact=>{const option=document.createElement('option');option.value=String(contact.id);option.textContent=contact.name+' — '+contact.email;option.dataset.name=contact.name;option.dataset.email=contact.email;select.appendChild(option);});
   }catch(err){select.replaceChildren();const option=document.createElement('option');option.value='';option.textContent='Saved people unavailable';select.appendChild(option);}
 }
+// Step-by-step workflow: validate(step) returns an error string or '', onEnter(step) runs on arrival.
+function createWizard(root,{validate=()=>'',onEnter=()=>{}}={}){
+  const tabs=[...root.querySelectorAll('.wizard-steps li')],panes=[...root.querySelectorAll('.wizard-pane')];
+  let current=1,furthest=1;
+  function show(step){
+    current=step;furthest=Math.max(furthest,step);
+    tabs.forEach(li=>{const n=Number(li.dataset.step);li.classList.toggle('active',n===step);li.classList.toggle('done',n<step||(n<=furthest&&n!==step));});
+    panes.forEach(p=>p.classList.toggle('active',Number(p.dataset.step)===step));
+    root.querySelectorAll('[data-error]').forEach(e=>{e.textContent='';e.classList.remove('show');});
+    onEnter(step);
+    root.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  function next(){
+    const pane=panes.find(p=>Number(p.dataset.step)===current);const err=validate(current);
+    if(err){const box=pane.querySelector('[data-error]');if(box){box.textContent=err;box.classList.add('show');}return false;}
+    show(current+1);return true;
+  }
+  const clearErrors=()=>root.querySelectorAll('[data-error].show').forEach(e=>{e.textContent='';e.classList.remove('show');});
+  root.addEventListener('input',clearErrors);root.addEventListener('change',clearErrors);
+  root.querySelectorAll('.wizard-pane').forEach(p=>p.addEventListener('click',e=>{if(!e.target.closest('[data-next]'))clearErrors();}));
+  root.querySelectorAll('[data-next]').forEach(b=>b.addEventListener('click',next));
+  root.querySelectorAll('[data-back]').forEach(b=>b.addEventListener('click',()=>show(current-1)));
+  tabs.forEach(li=>li.addEventListener('click',()=>{const n=Number(li.dataset.step);if(n<current)show(n);else if(n<=furthest){for(let i=current;i<n;i++){if(!next())return;}}}));
+  return {show,reset(){furthest=1;show(1);},get step(){return current;}};
+}
 function useSavedPerson(select,addRecipient){const option=select.selectedOptions[0];if(!option?.value)return toast('Choose a saved person first','error');addRecipient(option.dataset.name,option.dataset.email);select.value='';}
 (function(){
   const fileInput=document.getElementById('sigreq-file'),drop=document.getElementById('sigreq-drop'),canvas=document.getElementById('sigreq-canvas'),stage=document.getElementById('sigreq-stage');
@@ -3170,7 +3272,9 @@ function useSavedPerson(select,addRecipient){const option=select.selectedOptions
     const emailInput=document.createElement('input');emailInput.className='form-input sr-email';emailInput.type='email';emailInput.placeholder='email@example.com';emailInput.value=email;
     const remove=document.createElement('button');remove.className='recipient-remove';remove.type='button';remove.title='Remove recipient';remove.setAttribute('aria-label','Remove recipient');remove.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
     remove.addEventListener('click',()=>{row.remove();if(!recipientsEl.querySelector('.sr-pick:checked')&&recipientsEl.querySelector('.sr-pick'))recipientsEl.querySelector('.sr-pick').checked=true;renderFields();});
-    emailInput.addEventListener('input',renderFields);row.append(pick,nameInput,emailInput,remove);
+    emailInput.addEventListener('input',renderFields);pick.addEventListener('change',renderChips);
+    const order=document.createElement('span');order.className='signer-order';order.setAttribute('aria-hidden','true');
+    row.append(order,pick,nameInput,emailInput,remove);
     recipientsEl.appendChild(row);
   }
   addRecipient();
@@ -3188,8 +3292,9 @@ function useSavedPerson(select,addRecipient){const option=select.selectedOptions
     stage.querySelectorAll('.sigreq-box').forEach(el=>el.remove());
     sigreqFields.filter(f=>f.pageNumber===sigreqPage).forEach((field,idx)=>{
       const el=document.createElement('div');el.className='sigreq-box';el.style.left=(field.x*canvas.offsetWidth)+'px';el.style.top=(field.y*canvas.offsetHeight)+'px';el.style.width=(field.width*canvas.offsetWidth)+'px';el.style.height=(field.height*canvas.offsetHeight)+'px';
-      el.textContent=field.label+' · '+(field.assignedTo||'recipient');
-      const x=document.createElement('button');x.className='x';x.type='button';x.textContent='×';x.addEventListener('click',e=>{e.stopPropagation();sigreqFields=sigreqFields.filter(f=>f!==field);renderFields();});el.appendChild(x);
+      const color=signerColor(field.assignedTo);el.style.borderColor=color;el.style.background=color+'22';
+      el.textContent=field.label+' · '+(signerName(field.assignedTo)||'signer');
+      const x=document.createElement('button');x.className='x';x.type='button';x.textContent='×';x.addEventListener('click',e=>{e.stopPropagation();sigreqFields=sigreqFields.filter(f=>f!==field);renderFields();renderChips();});el.appendChild(x);
       let dragging=false,dx=0,dy=0;el.addEventListener('pointerdown',e=>{if(e.target===x)return;dragging=true;dx=e.offsetX;dy=e.offsetY;el.setPointerCapture(e.pointerId);});
       el.addEventListener('pointermove',e=>{if(!dragging)return;const r=stage.getBoundingClientRect();field.x=Math.max(0,Math.min(.98,(e.clientX-r.left-dx)/canvas.offsetWidth));field.y=Math.max(0,Math.min(.98,(e.clientY-r.top-dy)/canvas.offsetHeight));el.style.left=(field.x*canvas.offsetWidth)+'px';el.style.top=(field.y*canvas.offsetHeight)+'px';});
       el.addEventListener('pointerup',()=>dragging=false);stage.appendChild(el);
@@ -3197,7 +3302,10 @@ function useSavedPerson(select,addRecipient){const option=select.selectedOptions
   }
   function addField(type,x=.12,y=.12){
     const assignedTo=selectedRecipient();if(!assignedTo){toast('Add and select a recipient first','error');return;}
-    sigreqFields.push({type,assignedTo,pageNumber:sigreqPage,x,y,width:type==='checkbox'?.06:.24,height:.065,label:type.charAt(0).toUpperCase()+type.slice(1),required:true});renderFields();
+    // Stagger new fields so several added in a row don't stack exactly on top of each other.
+    const onPage=sigreqFields.filter(f=>f.pageNumber===sigreqPage).length;
+    if(x===.12&&y===.12){x=Math.min(.7,.12+(onPage%5)*.05);y=Math.min(.85,.12+(onPage%8)*.08);}
+    sigreqFields.push({type,assignedTo,pageNumber:sigreqPage,x,y,width:type==='checkbox'?.06:.24,height:.065,label:type.charAt(0).toUpperCase()+type.slice(1),required:true});renderFields();renderChips();
   }
   function fileToDataUrl(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(file);});}
   async function loadRequests(){
@@ -3213,17 +3321,102 @@ function useSavedPerson(select,addRecipient){const option=select.selectedOptions
   function showSignerLinks(signers){const wrap=document.getElementById('sigreq-links');wrap.style.display='block';wrap.innerHTML='<div class="card-title" style="margin-bottom:.5rem">Signer Links</div>';signers.filter(s=>s.url).forEach(s=>{const row=document.createElement('div');row.className='code-pill';row.style.cssText='width:100%;margin-bottom:.45rem;white-space:normal';row.innerHTML='<span style="flex:1;word-break:break-all">'+escapeHtml(s.email)+' — '+escapeHtml(s.url)+'</span><button class="copy-btn" type="button" title="Copy"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button>';row.querySelector('button').addEventListener('click',()=>{navigator.clipboard.writeText(s.url);toast('Signer link copied','success');});wrap.appendChild(row);});}
   document.querySelectorAll('.sigreq-field-btn').forEach(btn=>{btn.draggable=true;btn.addEventListener('click',()=>addField(btn.dataset.field));btn.addEventListener('dragstart',e=>e.dataTransfer.setData('text/plain',btn.dataset.field));});
   stage.addEventListener('dragover',e=>e.preventDefault());stage.addEventListener('drop',e=>{e.preventDefault();const type=e.dataTransfer.getData('text/plain');if(!type)return;const r=stage.getBoundingClientRect();addField(type,(e.clientX-r.left)/canvas.offsetWidth,(e.clientY-r.top)/canvas.offsetHeight);});
-  setupDrop(drop,fileInput,async files=>{sigreqFile=files[0];if(!sigreqFile)return;const pdfjsLib=await loadPdfjsLib();sigreqPdf=await pdfjsLib.getDocument({data:new Uint8Array(await sigreqFile.arrayBuffer())}).promise;sigreqPage=1;sigreqFields=[];await renderPage();});
+  setupDrop(drop,fileInput,async files=>{
+    const file=files[0];if(!file)return;
+    if(file.size>8*1024*1024){toast('That PDF is over 8 MB. Compress it first, then try again.','error');return;}
+    try{const pdfjsLib=await loadPdfjsLib();sigreqPdf=await pdfjsLib.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise;}
+    catch(_){toast('That file could not be opened as a PDF.','error');return;}
+    sigreqFile=file;sigreqPage=1;sigreqFields=[];
+    document.getElementById('sigreq-drop-title').textContent='✓ '+file.name;
+    document.getElementById('sigreq-drop-sub').textContent=sigreqPdf.numPages+' page'+(sigreqPdf.numPages===1?'':'s')+' · click to choose a different file';
+    const title=document.getElementById('sigreq-title');if(!title.value)title.value=file.name.replace(/\.pdf$/i,'');
+  });
   document.getElementById('sigreq-prev').addEventListener('click',()=>{if(sigreqPdf&&sigreqPage>1){sigreqPage--;renderPage();}});
   document.getElementById('sigreq-next').addEventListener('click',()=>{if(sigreqPdf&&sigreqPage<sigreqPdf.numPages){sigreqPage++;renderPage();}});
-  document.getElementById('sigreq-clear').addEventListener('click',()=>{sigreqFile=null;sigreqPdf=null;sigreqFields=[];ctx.clearRect(0,0,canvas.width,canvas.height);stage.querySelectorAll('.sigreq-box').forEach(el=>el.remove());resultEl.style.display='none';fileInput.value='';});
+  function resetFlow(){
+    sigreqFile=null;sigreqPdf=null;sigreqFields=[];ctx.clearRect(0,0,canvas.width,canvas.height);stage.querySelectorAll('.sigreq-box').forEach(el=>el.remove());
+    resultEl.style.display='none';fileInput.value='';
+    document.getElementById('sigreq-drop-title').textContent='Drop PDF here';document.getElementById('sigreq-drop-sub').textContent='or click to browse · up to 8 MB';
+    document.getElementById('sigreq-title').value='';document.getElementById('sigreq-message').value='';
+    recipientsEl.replaceChildren();addRecipient();
+    document.getElementById('sigreq-review').style.display='';document.getElementById('sigreq-done').style.display='none';document.getElementById('sigreq-links').style.display='none';
+    wizard.reset();
+  }
+  document.getElementById('sigreq-clear').addEventListener('click',resetFlow);
+  document.getElementById('sigreq-restart').addEventListener('click',resetFlow);
+  const SIGNER_COLORS=['#7c3aed','#0ea5e9','#f59e0b','#10b981','#ef4444','#ec4899','#6366f1','#84cc16','#14b8a6','#f97316'];
+  function signerIndex(email){return recipients().findIndex(r=>r.email.toLowerCase()===String(email||'').toLowerCase());}
+  function signerColor(email){const i=signerIndex(email);return SIGNER_COLORS[(i<0?0:i)%SIGNER_COLORS.length];}
+  function signerName(email){const r=recipients()[signerIndex(email)];return r?(r.name||r.email):'';}
+  function pickSigner(email){recipientsEl.querySelectorAll('.sigreq-recipient').forEach(row=>{row.querySelector('.sr-pick').checked=row.querySelector('.sr-email').value.trim().toLowerCase()===email;});renderChips();}
+  function renderChips(){
+    const wrap=document.getElementById('sigreq-signer-chips');wrap.replaceChildren();const active=selectedRecipient();
+    recipients().forEach((r,i)=>{
+      const email=r.email.toLowerCase();const count=sigreqFields.filter(f=>f.assignedTo===email).length;
+      const chip=document.createElement('button');chip.type='button';chip.className='signer-chip'+(email===active?' active':'');chip.style.borderColor=email===active?signerColor(email):'';
+      const dot=document.createElement('span');dot.className='dot';dot.style.background=signerColor(email);
+      const label=document.createElement('span');label.textContent=(i+1)+'. '+(r.name||r.email);
+      const c=document.createElement('span');c.className='count';c.textContent=count?'· '+count+' field'+(count===1?'':'s'):'· no fields yet';
+      chip.append(dot,label,c);chip.addEventListener('click',()=>pickSigner(email));wrap.appendChild(chip);
+    });
+  }
+  const EMAIL_OK=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  function validateStep(step){
+    if(step===1)return sigreqPdf?'':'Upload a PDF to continue.';
+    if(step===2){
+      const rows=Array.from(recipientsEl.querySelectorAll('.sigreq-recipient')).map(row=>({name:row.querySelector('.sr-name').value.trim(),email:row.querySelector('.sr-email').value.trim().toLowerCase()})).filter(r=>r.name||r.email);
+      if(!rows.length)return 'Add at least one signer.';
+      if(rows.length>10)return 'You can add up to 10 signers.';
+      const bad=rows.find(r=>!r.name||!EMAIL_OK.test(r.email));if(bad)return 'Each signer needs a name and a valid email address.';
+      if(new Set(rows.map(r=>r.email)).size!==rows.length)return 'Each signer needs a different email address.';
+      // Fields for signers who were removed or re-typed no longer have an owner.
+      const emails=new Set(rows.map(r=>r.email));sigreqFields=sigreqFields.filter(f=>emails.has(f.assignedTo));
+      return '';
+    }
+    if(step===3){
+      if(!sigreqFields.length)return 'Add at least one field to the document.';
+      const missing=recipients().filter(r=>!sigreqFields.some(f=>f.assignedTo===r.email.toLowerCase()));
+      if(missing.length)return (missing.map(r=>r.name||r.email).join(', '))+' still need'+(missing.length===1?'s':'')+' at least one field.';
+      return '';
+    }
+    return '';
+  }
+  function renderReview(){
+    const grid=document.getElementById('sigreq-review-grid');grid.replaceChildren();
+    const add=(k,v)=>{const dt=document.createElement('dt');dt.textContent=k;const dd=document.createElement('dd');dd.textContent=v;grid.append(dt,dd);};
+    add('Document',sigreqFile.name+' · '+sigreqPdf.numPages+' page'+(sigreqPdf.numPages===1?'':'s'));
+    add('Request name',document.getElementById('sigreq-title').value.trim()||sigreqFile.name);
+    add('Message',document.getElementById('sigreq-message').value.trim()||'(none)');
+    add('Fields',sigreqFields.length+' in total');
+    const list=document.getElementById('sigreq-review-signers');list.replaceChildren();
+    recipients().forEach((r,i)=>{
+      const row=document.createElement('div');row.className='review-signer';
+      const order=document.createElement('span');order.className='order';order.textContent=i+1;order.style.borderColor=signerColor(r.email);
+      const who=document.createElement('div');who.className='who';who.textContent=r.name;const small=document.createElement('small');small.textContent=r.email;who.appendChild(small);
+      const count=sigreqFields.filter(f=>f.assignedTo===r.email.toLowerCase()).length;
+      const c=document.createElement('span');c.style.cssText='color:var(--text3);font-size:.78rem';c.textContent=count+' field'+(count===1?'':'s');
+      row.append(order,who,c);list.appendChild(row);
+    });
+  }
+  const wizard=createWizard(document.getElementById('sigreq-wizard'),{
+    validate:validateStep,
+    onEnter(step){
+      if(step===3){if(!recipientsEl.querySelector('.sr-pick:checked')){const first=recipientsEl.querySelector('.sr-pick');if(first)first.checked=true;}renderChips();renderPage();}
+      if(step===4)renderReview();
+    },
+  });
   async function saveSigRequest(sendNow,btn){
     if(!sigreqFile)return toast('Upload a PDF first','error');
     const recips=recipients();if(!recips.length)return toast('Add at least one recipient','error');
     if(!sigreqFields.length)return toast('Place at least one field','error');
     const token=await auth.currentUser?.getIdToken(true);if(!token)return toast('Please sign in again','error');
     btn.disabled=true;showResult(resultEl,'info',sendNow?'Saving and sending signature request...':'Saving signature request draft...');
-    try{const documentBase64=await fileToDataUrl(sigreqFile);const res=await fetch(API+'/api/sign-requests',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({title:document.getElementById('sigreq-title').value||sigreqFile.name,documentName:sigreqFile.name,documentBase64,message:document.getElementById('sigreq-message').value,recipients:recips,fields:sigreqFields,sendNow})});const data=await res.json();if(!res.ok)throw new Error(data.error||'Save failed');showResult(resultEl,data.warning?'info':'success',data.warning|| (sendNow?'Signature links sent.':'Draft saved.'));showSignerLinks(data.signers||[]);loadRequests();loadSavedPeople(savedPeopleSelect);}
+    try{const documentBase64=await fileToDataUrl(sigreqFile);const res=await fetch(API+'/api/sign-requests',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({title:document.getElementById('sigreq-title').value||sigreqFile.name,documentName:sigreqFile.name,documentBase64,message:document.getElementById('sigreq-message').value,recipients:recips,fields:sigreqFields,sendNow})});const data=await res.json();if(!res.ok)throw new Error(data.error||'Save failed');resultEl.style.display='none';
+      document.getElementById('sigreq-review').style.display='none';document.getElementById('sigreq-done').style.display='';
+      document.getElementById('sigreq-done-title').textContent=sendNow?'Sent for signature':'Draft saved';
+      const first=recips[0];
+      document.getElementById('sigreq-done-text').textContent=data.warning||(sendNow?`${first.name} has been emailed a secure signing link. You'll get an email when everyone has signed.`:'Your draft is saved in “Your signature requests” below. Send it whenever you are ready.');
+      if(sendNow)showSignerLinks(data.signers||[]);loadRequests();loadSavedPeople(savedPeopleSelect);}
     catch(err){showResult(resultEl,'error',err.message);}finally{btn.disabled=false;}
   }
   document.getElementById('sigreq-save').addEventListener('click',function(){saveSigRequest(false,this);});
