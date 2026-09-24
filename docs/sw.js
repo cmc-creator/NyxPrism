@@ -2,7 +2,7 @@
 const CACHE = 'nyx-v5';
 const SHELL = [
   '/manifest.json',
-  '/nyx-brand.css?v=2',
+  '/nyx-brand.css?v=3',
   '/prismlogo.jpg?v=1'
 ];
 const SENSITIVE_HTML = new Set(['/admin.html', '/dashboard.html', '/distribution.html', '/login.html', '/sign-request.html']);

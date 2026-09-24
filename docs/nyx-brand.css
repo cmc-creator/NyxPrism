@@ -35,6 +35,8 @@
   width: 32px;
   height: 32px;
   max-width: none;
+  object-fit: cover;
+  object-position: 50% 31%;
   filter:
     drop-shadow(0 0 8px rgba(167, 139, 250, .55))
     drop-shadow(0 0 13px rgba(34, 211, 238, .2));
