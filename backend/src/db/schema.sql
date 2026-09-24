@@ -199,3 +199,13 @@ FROM (
 ) prior_recipients
 ORDER BY owner_user_id, LOWER(recipient_email), used_at DESC
 ON CONFLICT (user_id, email) DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS admin_audit_log (
+  id         SERIAL PRIMARY KEY,
+  actor      TEXT NOT NULL,
+  action     TEXT NOT NULL,
+  target     TEXT,
+  detail     TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS admin_audit_log_created_idx ON admin_audit_log (created_at DESC);

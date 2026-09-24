@@ -9,6 +9,10 @@ const developerEmails = new Set(
     .filter(Boolean),
 );
 
+export function isOwner(email) {
+  return typeof email === 'string' && ownerEmails.includes(email.trim().toLowerCase());
+}
+
 export function isDeveloper(email) {
   return typeof email === 'string' && developerEmails.has(email.trim().toLowerCase());
 }

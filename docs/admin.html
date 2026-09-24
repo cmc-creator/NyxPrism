@@ -3,482 +3,870 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NyxPrism Admin</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <title>NyxPrism Owner Portal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;0,14..32,900;1,14..32,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg:            #06080d;
-      --bg2:           #0b0f18;
-      --surface:       #0f1724;
-      --surface2:      #141e2e;
-      --border:        #1b2840;
-      --border2:       #253548;
-      --accent:        #7c3aed;
-      --accent-bright: #a78bfa;
-      --accent-glow:   rgba(124,58,237,.14);
-      --muted:         #5a7194;
-      --muted2:        #3a4f6a;
-      --text:          #e8edf5;
-      --text2:         #bbc8da;
-      --text3:         #7f96b2;
-      --green:         #22c55e;
-      --red:           #f87171;
-      --yellow:        #facc15;
-      --blue:          #60a5fa;
-      --radius:        .55rem;
-      --radius-sm:     .35rem;
-      --radius-lg:     1rem;
+      --bg:#06080d; --bg2:#0b0f18; --surface:#0f1724; --surface2:#141e2e; --surface3:#1a2638;
+      --border:#1b2840; --border2:#253548;
+      --accent:#7c3aed; --accent-bright:#a78bfa; --accent-glow:rgba(124,58,237,.16);
+      --muted:#5a7194; --text:#e8edf5; --text2:#bbc8da; --text3:#7f96b2;
+      --green:#22c55e; --red:#f87171; --yellow:#facc15; --blue:#60a5fa;
+      --radius:.6rem; --radius-sm:.4rem; --radius-lg:1rem;
     }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { color-scheme: dark; }
-    body {
-      font-family: Inter, system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{color-scheme:dark}
+    body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+    button{font:inherit;color:inherit;cursor:pointer}
+    input,select,textarea{font:inherit;color:inherit}
+    [hidden]{display:none!important}
+    a{color:var(--accent-bright)}
+    .mono{font-family:'JetBrains Mono',monospace;font-size:.8rem}
+    .muted{color:var(--text3)}
+
+    /* ── Sign in ── */
+    #signin{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem}
+    .signin-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:2.25rem 2rem;width:100%;max-width:400px;display:flex;flex-direction:column;gap:1rem}
+    .signin-title{font-size:1.3rem;font-weight:800}
+    .field{display:flex;flex-direction:column;gap:.35rem}
+    .field label{font-size:.78rem;font-weight:600;color:var(--text2)}
+    .input,.select,textarea.input{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:.6rem .75rem;outline:none;min-width:0}
+    .input:focus,.select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+    .pw-wrap{position:relative}
+    .pw-wrap .input{padding-right:2.6rem}
+    .pw-toggle{position:absolute;right:.35rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:6px}
+    .pw-toggle:hover{color:var(--text)}
+    .pw-toggle svg{width:17px;height:17px;stroke:currentColor;pointer-events:none}
+    .pw-toggle .pw-eye-off{display:none}
+    .pw-toggle.showing .pw-eye{display:none}
+    .pw-toggle.showing .pw-eye-off{display:block}
+    .btn{border:1px solid var(--border2);background:var(--surface2);border-radius:var(--radius-sm);padding:.55rem 1rem;font-weight:600;font-size:.84rem;white-space:nowrap}
+    .btn:hover{border-color:var(--accent-bright)}
+    .btn:disabled{opacity:.55;cursor:default}
+    .btn-primary{background:var(--accent);border-color:var(--accent);color:#fff}
+    .btn-primary:hover{background:#6d28d9}
+    .btn-danger{border-color:rgba(248,113,113,.4);color:var(--red);background:rgba(248,113,113,.06)}
+    .btn-danger:hover{border-color:var(--red)}
+    .btn-sm{padding:.3rem .65rem;font-size:.76rem}
+    .btn-link{background:none;border:none;color:var(--accent-bright);padding:0;font-size:.8rem}
+    .msg{font-size:.82rem;min-height:1.1em}
+    .msg.error{color:var(--red)} .msg.ok{color:var(--green)}
+
+    /* ── Shell ── */
+    header.top{position:sticky;top:0;z-index:20;background:rgba(15,23,36,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:.7rem 1.25rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+    .brand{display:flex;align-items:center;gap:.6rem;font-weight:800;font-size:1.05rem}
+    .brand img{width:32px;height:32px;border-radius:8px;border:1px solid var(--border2)}
+    .brand em{font-style:normal;color:var(--accent-bright)}
+    .badge-owner{font-size:.66rem;background:rgba(124,58,237,.2);color:var(--accent-bright);border-radius:999px;padding:.2rem .6rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+    .top-right{margin-left:auto;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+    .who{font-size:.8rem;color:var(--text3)}
+    .layout{display:flex;min-height:calc(100vh - 56px)}
+    nav.side{width:210px;flex-shrink:0;border-right:1px solid var(--border);padding:1rem .6rem;display:flex;flex-direction:column;gap:.15rem}
+    .nav-btn{display:flex;align-items:center;gap:.6rem;background:none;border:none;text-align:left;padding:.55rem .75rem;border-radius:var(--radius-sm);color:var(--text2);font-weight:500}
+    .nav-btn:hover{background:var(--surface)}
+    .nav-btn.active{background:var(--accent-glow);color:var(--accent-bright);font-weight:600}
+    .nav-btn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+    .nav-count{margin-left:auto;background:var(--accent);color:#fff;border-radius:999px;font-size:.68rem;padding:.05rem .45rem;font-weight:700}
+    main{flex:1;min-width:0;padding:1.5rem clamp(1rem,3vw,2rem) 3rem}
+    .page{display:none;max-width:1200px}
+    .page.active{display:block}
+    .page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1.25rem}
+    h1{font-size:1.35rem;font-weight:800}
+    h2{font-size:.95rem;font-weight:700;margin-bottom:.8rem}
+    .sub{color:var(--text3);font-size:.84rem;margin-top:.2rem}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem 1.2rem;margin-bottom:1.1rem}
+    .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:1.1rem}
+    .grid2 .card{margin-bottom:0}
+    .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:.8rem;margin-bottom:1.1rem}
+    .tile{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.1rem}
+    .tile-label{font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:.35rem}
+    .tile-value{font-size:1.7rem;font-weight:800;line-height:1.1}
+    .tile-note{font-size:.74rem;color:var(--text3);margin-top:.25rem}
+    .row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
+    .row > .input,.row > .select{flex:1 1 180px}
+    .toolbar{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin-bottom:.9rem}
+    .toolbar .input{flex:1 1 240px;max-width:420px}
+
+    /* ── Tables ── */
+    .tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)}
+    table{width:100%;border-collapse:collapse;font-size:.82rem}
+    th{text-align:left;color:var(--text3);font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;padding:.6rem .75rem;border-bottom:1px solid var(--border);white-space:nowrap;background:var(--surface2)}
+    td{padding:.6rem .75rem;border-bottom:1px solid var(--border);vertical-align:middle}
+    tr:last-child td{border-bottom:none}
+    tbody tr.clickable{cursor:pointer}
+    tbody tr.clickable:hover td{background:var(--surface2)}
+    .empty{padding:1.5rem;text-align:center;color:var(--text3)}
+    .pill{display:inline-block;font-size:.68rem;font-weight:700;border-radius:999px;padding:.12rem .55rem;text-transform:capitalize;white-space:nowrap;border:1px solid transparent}
+    .pill.professional,.pill.pro{background:rgba(124,58,237,.18);color:var(--accent-bright)}
+    .pill.trial,.pill.trialing{background:rgba(96,165,250,.14);color:var(--blue)}
+    .pill.free{background:rgba(127,150,178,.14);color:var(--text2)}
+    .pill.active,.pill.completed,.pill.sent,.pill.ok{background:rgba(34,197,94,.12);color:var(--green)}
+    .pill.inactive,.pill.canceled,.pill.past_due,.pill.declined,.pill.disabled,.pill.failed,.pill.expired{background:rgba(248,113,113,.12);color:var(--red)}
+    .pill.draft,.pill.pending{background:rgba(250,204,21,.1);color:var(--yellow)}
+    .pill.tag{background:none;border-color:var(--border2);color:var(--text3);text-transform:none}
+    .pager{display:flex;align-items:center;gap:.75rem;justify-content:flex-end;margin-top:.75rem;font-size:.8rem;color:var(--text3)}
+
+    /* ── Chart ── */
+    .chart-box{position:relative}
+    .chart-box svg{display:block;width:100%;height:auto}
+    .chart-tip{position:absolute;pointer-events:none;background:var(--surface3);border:1px solid var(--border2);border-radius:6px;padding:.35rem .55rem;font-size:.75rem;white-space:nowrap;transform:translate(-50%,-110%)}
+    .plan-bars{display:flex;flex-direction:column;gap:.6rem}
+    .plan-bar-row{display:grid;grid-template-columns:110px 1fr 40px;gap:.6rem;align-items:center;font-size:.82rem}
+    .plan-bar-track{height:8px;background:var(--surface2);border-radius:4px;overflow:hidden}
+    .plan-bar-fill{height:100%;background:var(--accent-bright);border-radius:4px}
+
+    /* ── Drawer ── */
+    .drawer-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:40}
+    .drawer{position:fixed;top:0;right:0;bottom:0;width:min(560px,100%);background:var(--bg2);border-left:1px solid var(--border2);z-index:41;overflow-y:auto;padding:1.25rem 1.25rem 3rem}
+    .drawer-head{display:flex;align-items:flex-start;gap:.75rem;margin-bottom:1rem}
+    .drawer-head h2{margin:0;font-size:1.1rem;word-break:break-all}
+    .close-x{margin-left:auto;background:none;border:1px solid var(--border2);border-radius:6px;width:32px;height:32px;flex-shrink:0}
+    dl.kv{display:grid;grid-template-columns:140px 1fr;gap:.45rem .75rem;font-size:.82rem}
+    dl.kv dt{color:var(--text3)}
+    dl.kv dd{word-break:break-word}
+    .section-title{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);font-weight:700;margin:1.2rem 0 .6rem}
+    .danger-zone{border:1px solid rgba(248,113,113,.3);border-radius:var(--radius);padding:1rem;margin-top:1.2rem}
+
+    /* ── Modal & toast ── */
+    .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:60;display:flex;align-items:center;justify-content:center;padding:1rem}
+    .modal{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:1.4rem;width:100%;max-width:440px;display:flex;flex-direction:column;gap:.9rem}
+    .modal h3{font-size:1.05rem}
+    .modal p{color:var(--text2);font-size:.86rem;line-height:1.5}
+    .modal-actions{display:flex;justify-content:flex-end;gap:.6rem}
+    #toasts{position:fixed;bottom:1rem;right:1rem;z-index:70;display:flex;flex-direction:column;gap:.5rem;max-width:min(380px,calc(100vw - 2rem))}
+    .toast{background:var(--surface3);border:1px solid var(--border2);border-left:3px solid var(--green);border-radius:var(--radius-sm);padding:.65rem .85rem;font-size:.84rem;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+    .toast.error{border-left-color:var(--red)}
+    .message-card{border-bottom:1px solid var(--border);padding:1rem 1.1rem}
+    .message-card:last-child{border-bottom:none}
+    .message-card.unread{background:rgba(124,58,237,.05)}
+    .message-body{white-space:pre-wrap;color:var(--text2);font-size:.85rem;margin:.55rem 0 .7rem;line-height:1.5}
+    .status-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:.4rem;vertical-align:middle}
+    .status-dot.ok{background:var(--green)} .status-dot.bad{background:var(--red)}
+
+    @media (max-width: 820px){
+      .layout{flex-direction:column}
+      nav.side{width:auto;flex-direction:row;overflow-x:auto;border-right:none;border-bottom:1px solid var(--border);padding:.5rem}
+      .nav-btn{flex-shrink:0}
+      .nav-btn span.label{display:inline}
+      dl.kv{grid-template-columns:110px 1fr}
     }
-
-    /* ── LOCK SCREEN ─────────────────────────────────────────────── */
-    #lock-screen {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .lock-card {
-      background: var(--surface);
-      border: 1px solid var(--border2);
-      border-radius: var(--radius-lg);
-      padding: 2.5rem 2.25rem;
-      width: 100%;
-      max-width: 380px;
-      display: flex;
-      flex-direction: column;
-      gap: 1.2rem;
-    }
-    .lock-title { font-size: 1.25rem; font-weight: 700; }
-    .lock-sub   { font-size: .875rem; color: var(--text3); }
-    .lock-input {
-      width: 100%;
-      background: var(--bg2);
-      border: 1px solid var(--border2);
-      border-radius: var(--radius-sm);
-      color: var(--text);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: .875rem;
-      padding: .65rem .85rem;
-      outline: none;
-    }
-    .lock-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
-    .lock-btn {
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: var(--radius-sm);
-      font-size: .875rem;
-      font-weight: 600;
-      padding: .7rem 1.5rem;
-      cursor: pointer;
-      width: 100%;
-    }
-    .lock-btn:hover { background: #6d28d9; }
-    .lock-error { font-size: .8rem; color: var(--red); display: none; }
-
-    /* ── ADMIN SHELL ─────────────────────────────────────────────── */
-    #admin-shell { display: none; flex: 1; flex-direction: column; }
-    header.admin-header {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: .85rem 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-    }
-    .admin-wordmark { font-size: 1.05rem; font-weight: 800; letter-spacing: -.01em; }
-    .admin-wordmark em { font-style: normal; color: var(--accent-bright); }
-    .admin-badge { font-size: .7rem; background: rgba(124,58,237,.18); color: var(--accent-bright); border-radius: 999px; padding: .2rem .65rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
-    .admin-logout { background: none; border: 1px solid var(--border2); color: var(--text3); border-radius: var(--radius-sm); font-size: .8rem; padding: .35rem .85rem; cursor: pointer; }
-    .admin-logout:hover { color: var(--text); border-color: var(--border3); }
-
-    .admin-body { flex: 1; padding: 2rem; max-width: 1200px; margin: 0 auto; width: 100%; }
-
-    /* ── TABS ────────────────────────────────────────────────────── */
-    .tab-row { display: flex; gap: .5rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0; }
-    .tab { background: none; border: none; color: var(--text3); font-size: .875rem; font-weight: 600; padding: .6rem 1rem; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
-    .tab.active { color: var(--accent-bright); border-bottom-color: var(--accent-bright); }
-    .tab-pane { display: none; }
-    .tab-pane.active { display: block; }
-
-    /* ── STAT CARDS ──────────────────────────────────────────────── */
-    .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; }
-    .stat-label { font-size: .72rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: .4rem; }
-    .stat-value { font-size: 2rem; font-weight: 800; line-height: 1; }
-    .stat-value.green { color: var(--green); }
-    .stat-value.accent { color: var(--accent-bright); }
-    .stat-value.blue { color: var(--blue); }
-    .stat-value.yellow { color: var(--yellow); }
-
-    /* ── PLAN BREAKDOWN ──────────────────────────────────────────── */
-    .plan-list { display: flex; flex-wrap: wrap; gap: .75rem; margin-bottom: 2rem; }
-    .plan-pill {
-      display: flex;
-      align-items: center;
-      gap: .6rem;
-      background: var(--surface2);
-      border: 1px solid var(--border2);
-      border-radius: 999px;
-      padding: .4rem 1rem;
-      font-size: .875rem;
-    }
-    .plan-pill .pill-name { font-weight: 600; text-transform: capitalize; }
-    .plan-pill .pill-count { color: var(--accent-bright); font-weight: 700; }
-
-    /* ── TABLES ──────────────────────────────────────────────────── */
-    .tbl-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: .84rem; }
-    th { text-align: left; color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .07em; padding: .6rem .75rem; border-bottom: 1px solid var(--border); white-space: nowrap; }
-    td { padding: .65rem .75rem; border-bottom: 1px solid var(--border); color: var(--text2); vertical-align: top; }
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: var(--surface); }
-    .badge {
-      display: inline-block;
-      font-size: .7rem;
-      font-weight: 700;
-      padding: .15rem .55rem;
-      border-radius: 999px;
-      text-transform: capitalize;
-    }
-    .badge-active   { background: rgba(34,197,94,.12);  color: var(--green); }
-    .badge-trial    { background: rgba(96,165,250,.12);  color: var(--blue); }
-    .badge-inactive { background: rgba(248,113,113,.12); color: var(--red); }
-    .badge-pro      { background: var(--accent-glow);    color: var(--accent-bright); }
-    .badge-free     { background: rgba(90,113,148,.12);  color: var(--muted); }
-
-    /* ── PAGINATION ──────────────────────────────────────────────── */
-    .pager { display: flex; align-items: center; gap: 1rem; margin-top: 1.5rem; }
-    .pager-btn { background: var(--surface2); border: 1px solid var(--border2); color: var(--text2); border-radius: var(--radius-sm); font-size: .8rem; padding: .45rem .9rem; cursor: pointer; }
-    .pager-btn:disabled { opacity: .35; cursor: default; }
-    .pager-btn:not(:disabled):hover { border-color: var(--border3); color: var(--text); }
-    .pager-info { font-size: .8rem; color: var(--muted); }
-
-    /* ── LOADING / ERROR ─────────────────────────────────────────── */
-    .loading { color: var(--muted); font-size: .875rem; padding: 2rem 0; }
-    .err-msg  { color: var(--red); font-size: .875rem; padding: 1rem 0; }
-
-    /* ── MESSAGE CARD ────────────────────────────────────────────── */
-    .msg-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
-    .msg-meta { display: flex; align-items: center; gap: .75rem; margin-bottom: .75rem; flex-wrap: wrap; }
-    .msg-name  { font-weight: 600; font-size: .9rem; }
-    .msg-email { font-size: .8rem; color: var(--text3); }
-    .msg-date  { font-size: .75rem; color: var(--muted); margin-left: auto; }
-    .msg-subject { font-size: .875rem; font-weight: 600; margin-bottom: .5rem; color: var(--text); }
-    .msg-body  { font-size: .84rem; color: var(--text2); line-height: 1.65; white-space: pre-wrap; }
-    .setpw-card { background: var(--surface, rgba(255,255,255,.03)); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.1rem; margin-bottom: 1.25rem; }
-    .setpw-title { font-weight: 700; margin-bottom: .7rem; }
-    .setpw-row { display: flex; flex-wrap: wrap; gap: .6rem; }
-    .setpw-input { flex: 1 1 220px; min-width: 0; background: rgba(0,0,0,.25); border: 1px solid var(--border); border-radius: 8px; color: inherit; font: inherit; padding: .6rem .75rem; outline: none; }
-    .setpw-input:focus { border-color: var(--accent); }
-    .setpw-result { font-size: .82rem; margin-top: .6rem; min-height: 1em; }
   </style>
-  <link rel="stylesheet" href="nyx-brand.css?v=3" />
 </head>
 <body>
 
-<!-- ── LOCK SCREEN ───────────────────────────────────────────────────── -->
-<div id="lock-screen">
-  <div class="lock-card">
+<!-- ── Sign in ─────────────────────────────────────────────────────────── -->
+<div id="signin" hidden>
+  <form class="signin-card" id="signin-form" autocomplete="on">
+    <div class="brand"><img src="prismlogo.jpg?v=1" alt=""><span><em>Nyx</em>Prism</span><span class="badge-owner">Owner Portal</span></div>
     <div>
-      <div class="nyx-brand-lockup nyx-brand-lockup--hero">
-        <span class="nyx-brand-icon"><img class="nyx-prism-mark" src="prismlogo.jpg?v=1" alt="NyxPrism"></span>
-        <span class="nyx-brand-copy"><span class="lock-title nyx-brand-wordmark"><em>Nyx</em>Prism</span><span class="nyx-brand-company">Admin Console</span></span>
-      </div>
-      <div class="lock-sub" style="margin-top:.4rem">Enter your admin secret to continue.</div>
+      <div class="signin-title">Sign in</div>
+      <div class="sub">Use your NyxPrism owner or admin account.</div>
     </div>
-    <input class="lock-input" type="password" id="secret-input" placeholder="Admin secret" autocomplete="off" />
-    <button class="lock-btn" id="unlock-btn">Unlock</button>
-    <div class="lock-error" id="lock-error">Incorrect secret — check the ADMIN_SECRET env var.</div>
-  </div>
+    <div id="signin-account-fields">
+      <div class="field" style="margin-bottom:.8rem"><label for="si-email">Email</label><input class="input" type="email" id="si-email" autocomplete="username" required></div>
+      <div class="field"><label for="si-password">Password</label>
+        <div class="pw-wrap"><input class="input" type="password" id="si-password" autocomplete="current-password" required><button class="pw-toggle" type="button" aria-label="Show password"><svg class="pw-eye" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><svg class="pw-eye-off" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg></button></div>
+      </div>
+    </div>
+    <div id="signin-secret-fields" hidden>
+      <div class="field"><label for="si-secret">Admin secret</label>
+        <div class="pw-wrap"><input class="input mono" type="password" id="si-secret" autocomplete="off"><button class="pw-toggle" type="button" aria-label="Show secret"><svg class="pw-eye" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><svg class="pw-eye-off" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg></button></div>
+      </div>
+    </div>
+    <button class="btn btn-primary" type="submit" id="signin-btn">Sign In</button>
+    <div class="msg error" id="signin-msg"></div>
+    <button class="btn-link" type="button" id="signin-mode">Use the admin secret instead</button>
+  </form>
 </div>
 
-<!-- ── ADMIN SHELL ───────────────────────────────────────────────────── -->
-<div id="admin-shell">
-  <header class="admin-header">
-    <div class="nyx-brand-lockup nyx-brand-lockup--compact">
-      <span class="nyx-brand-icon"><img class="nyx-prism-mark" src="prismlogo.jpg?v=1" alt="NyxPrism"></span>
-      <span class="admin-wordmark nyx-brand-wordmark"><em>Nyx</em>Prism</span>
-      <div class="admin-badge">Admin</div>
+<!-- ── Portal ─────────────────────────────────────────────────────────── -->
+<div id="portal" hidden>
+  <header class="top">
+    <div class="brand"><img src="prismlogo.jpg?v=1" alt=""><span><em>Nyx</em>Prism</span><span class="badge-owner">Owner Portal</span></div>
+    <div class="top-right">
+      <span class="who" id="who"></span>
+      <a class="btn btn-sm" href="dashboard.html">Open app</a>
+      <button class="btn btn-sm" id="refresh-btn" type="button">Refresh</button>
+      <button class="btn btn-sm" id="signout-btn" type="button">Sign out</button>
     </div>
-    <button class="admin-logout" id="logout-btn">Log Out</button>
   </header>
-
-  <div class="admin-body">
-    <div class="tab-row">
-      <button class="tab active" data-tab="overview">Overview</button>
-      <button class="tab" data-tab="users">Users</button>
-      <button class="tab" data-tab="messages">Messages</button>
-    </div>
-
-    <!-- Overview tab -->
-    <div class="tab-pane active" id="tab-overview">
-      <form class="setpw-card" id="setpw-form" autocomplete="off">
-        <div class="setpw-title">Set a user's password</div>
-        <div class="setpw-row">
-          <input class="setpw-input" type="email" id="setpw-email" placeholder="user@example.com" autocomplete="off" required />
-          <input class="setpw-input" type="text" id="setpw-password" placeholder="New password (8+ characters)" autocomplete="off" minlength="8" required />
-          <button class="lock-btn" type="submit" id="setpw-btn">Set Password</button>
+  <div class="layout">
+    <nav class="side" id="side">
+      <button class="nav-btn active" data-page="overview"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg><span class="label">Overview</span></button>
+      <button class="nav-btn" data-page="users"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg><span class="label">Users</span></button>
+      <button class="nav-btn" data-page="billing"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg><span class="label">Billing</span></button>
+      <button class="nav-btn" data-page="documents"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span class="label">Documents</span></button>
+      <button class="nav-btn" data-page="messages"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><span class="label">Messages</span><span class="nav-count" id="nav-unread" hidden></span></button>
+      <button class="nav-btn" data-page="keys"><svg viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.78 7.78 5.5 5.5 0 017.78-7.78zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg><span class="label">API Keys</span></button>
+      <button class="nav-btn" data-page="system"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg><span class="label">System</span></button>
+      <button class="nav-btn" data-page="audit"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span class="label">Audit Log</span></button>
+    </nav>
+    <main>
+      <!-- Overview -->
+      <section class="page active" id="page-overview">
+        <div class="page-head"><div><h1>Overview</h1><div class="sub">How NyxPrism is doing right now.</div></div></div>
+        <div class="tiles" id="ov-tiles"></div>
+        <div class="grid2">
+          <div class="card"><h2>New signups, last 30 days</h2><div class="chart-box" id="ov-chart"></div></div>
+          <div class="card"><h2>Users by plan</h2><div class="plan-bars" id="ov-plans"></div></div>
         </div>
-        <div class="setpw-result" id="setpw-result"></div>
-      </form>
-      <div class="stat-grid" id="stat-grid">
-        <div class="loading">Loading stats…</div>
-      </div>
-      <div id="plan-breakdown"></div>
-    </div>
+        <div class="grid2" style="margin-top:1.1rem">
+          <form class="card" id="qa-setpw" autocomplete="off">
+            <h2>Set a user's password</h2>
+            <div class="sub" style="margin:-.4rem 0 .8rem">Takes effect immediately and signs them out everywhere.</div>
+            <div class="row" style="margin-bottom:.6rem"><input class="input" type="email" id="qa-setpw-email" placeholder="user@example.com" required></div>
+            <div class="row"><input class="input" type="text" id="qa-setpw-password" placeholder="New password (8+ characters)" minlength="8" required><button class="btn btn-primary" type="submit">Set Password</button></div>
+            <div class="msg" id="qa-setpw-msg" style="margin-top:.6rem"></div>
+          </form>
+          <form class="card" id="qa-create" autocomplete="off">
+            <h2>Create a user</h2>
+            <div class="sub" style="margin:-.4rem 0 .8rem">Makes a login they can use right away (email marked verified).</div>
+            <div class="row" style="margin-bottom:.6rem"><input class="input" id="qa-create-first" placeholder="First name"><input class="input" id="qa-create-last" placeholder="Last name"></div>
+            <div class="row" style="margin-bottom:.6rem"><input class="input" type="email" id="qa-create-email" placeholder="user@example.com" required></div>
+            <div class="row"><input class="input" type="text" id="qa-create-password" placeholder="Password (8+ characters)" minlength="8" required>
+              <select class="select" id="qa-create-plan" style="flex:0 0 150px"><option value="free">Free</option><option value="professional">Professional</option><option value="trial">Trial</option></select>
+              <button class="btn btn-primary" type="submit">Create</button></div>
+            <div class="msg" id="qa-create-msg" style="margin-top:.6rem"></div>
+          </form>
+        </div>
+      </section>
 
-    <!-- Users tab -->
-    <div class="tab-pane" id="tab-users">
-      <div class="tbl-wrap">
-        <table id="users-table">
-          <thead>
-            <tr>
-              <th>Email</th>
-              <th>Name</th>
-              <th>Plan</th>
-              <th>Status</th>
-              <th>Trial</th>
-              <th>Period End</th>
-              <th>Joined</th>
-            </tr>
-          </thead>
-          <tbody id="users-tbody"><tr><td colspan="7" class="loading">Loading…</td></tr></tbody>
-        </table>
-      </div>
-      <div class="pager" id="users-pager" style="display:none">
-        <button class="pager-btn" id="users-prev" disabled>← Prev</button>
-        <span class="pager-info" id="users-info"></span>
-        <button class="pager-btn" id="users-next">Next →</button>
-      </div>
-    </div>
+      <!-- Users -->
+      <section class="page" id="page-users">
+        <div class="page-head"><div><h1>Users</h1><div class="sub" id="users-sub">Everyone with a NyxPrism account. Click a row to manage it.</div></div>
+          <button class="btn" id="users-export" type="button">Export CSV</button></div>
+        <div class="toolbar">
+          <input class="input" type="search" id="users-q" placeholder="Search email or name…" autocomplete="off">
+          <select class="select" id="users-plan" style="width:auto"><option value="">All plans</option><option value="free">Free</option><option value="professional">Professional</option><option value="trial">Trial</option><option value="inactive">Inactive</option></select>
+        </div>
+        <div class="tbl-wrap"><table><thead><tr><th>Email</th><th>Name</th><th>Plan</th><th>Status</th><th>Last sign-in</th><th>Joined</th></tr></thead><tbody id="users-tbody"></tbody></table></div>
+        <div class="pager"><button class="btn btn-sm" id="users-prev" type="button">← Prev</button><span id="users-info"></span><button class="btn btn-sm" id="users-next" type="button">Next →</button></div>
+      </section>
 
-    <!-- Messages tab -->
-    <div class="tab-pane" id="tab-messages">
-      <div id="messages-list"><div class="loading">Loading…</div></div>
-      <div class="pager" id="messages-pager" style="display:none">
-        <button class="pager-btn" id="msgs-prev" disabled>← Prev</button>
-        <span class="pager-info" id="msgs-info"></span>
-        <button class="pager-btn" id="msgs-next">Next →</button>
-      </div>
-    </div>
+      <!-- Billing -->
+      <section class="page" id="page-billing">
+        <div class="page-head"><div><h1>Billing</h1><div class="sub">Live from Stripe.</div></div><a class="btn" href="https://dashboard.stripe.com/" target="_blank" rel="noopener">Open Stripe ↗</a></div>
+        <div class="tiles" id="bill-tiles"></div>
+        <div class="msg error" id="bill-msg" style="margin-bottom:.8rem"></div>
+        <div class="tbl-wrap"><table><thead><tr><th>Customer</th><th>Status</th><th>Amount</th><th>Renews / ends</th><th>Started</th></tr></thead><tbody id="bill-tbody"></tbody></table></div>
+      </section>
+
+      <!-- Documents -->
+      <section class="page" id="page-documents">
+        <div class="page-head"><div><h1>Documents</h1><div class="sub">Signature requests and distributions across all users. File contents are never shown here.</div></div></div>
+        <h2>Signature requests</h2>
+        <div class="tbl-wrap" style="margin-bottom:1.4rem"><table><thead><tr><th>Title</th><th>Owner</th><th>Status</th><th>Signed</th><th>Created</th><th>Expires</th><th></th></tr></thead><tbody id="docs-sign"></tbody></table></div>
+        <h2>Distributions</h2>
+        <div class="tbl-wrap"><table><thead><tr><th>Title</th><th>Owner</th><th>Status</th><th>Opened</th><th>Failed</th><th>Created</th><th></th></tr></thead><tbody id="docs-dist"></tbody></table></div>
+      </section>
+
+      <!-- Messages -->
+      <section class="page" id="page-messages">
+        <div class="page-head"><div><h1>Messages</h1><div class="sub">From the contact form.</div></div>
+          <label class="row" style="font-size:.84rem;gap:.4rem"><input type="checkbox" id="msgs-unread"> Unread only</label></div>
+        <div class="tbl-wrap" id="msgs-list"></div>
+        <div class="pager"><button class="btn btn-sm" id="msgs-prev" type="button">← Prev</button><span id="msgs-info"></span><button class="btn btn-sm" id="msgs-next" type="button">Next →</button></div>
+      </section>
+
+      <!-- API keys -->
+      <section class="page" id="page-keys">
+        <div class="page-head"><div><h1>API Keys</h1><div class="sub">Every API key issued. Revoking stops it working immediately.</div></div></div>
+        <div class="tbl-wrap"><table><thead><tr><th>Key</th><th>Label</th><th>Owner</th><th>Created</th><th>Last used</th><th></th></tr></thead><tbody id="keys-tbody"></tbody></table></div>
+      </section>
+
+      <!-- System -->
+      <section class="page" id="page-system">
+        <div class="page-head"><div><h1>System</h1><div class="sub">Backend health and configuration. Secret values are never shown, only whether they're set.</div></div></div>
+        <div class="tiles" id="sys-tiles"></div>
+        <div class="grid2">
+          <div class="card"><h2>Configuration</h2><div class="tbl-wrap"><table><tbody id="sys-env"></tbody></table></div></div>
+          <div class="card"><h2>Database tables</h2><div class="tbl-wrap"><table><thead><tr><th>Table</th><th style="text-align:right">Rows</th></tr></thead><tbody id="sys-tables"></tbody></table></div></div>
+        </div>
+      </section>
+
+      <!-- Audit -->
+      <section class="page" id="page-audit">
+        <div class="page-head"><div><h1>Audit Log</h1><div class="sub">Every change made from this portal.</div></div></div>
+        <div class="tbl-wrap"><table><thead><tr><th>When</th><th>Who</th><th>Action</th><th>Target</th><th>Detail</th></tr></thead><tbody id="audit-tbody"></tbody></table></div>
+      </section>
+    </main>
   </div>
 </div>
+
+<!-- User drawer -->
+<div class="drawer-bg" id="drawer-bg" hidden></div>
+<aside class="drawer" id="drawer" hidden aria-label="User details"></aside>
+
+<!-- Modal -->
+<div class="modal-bg" id="modal-bg" hidden>
+  <div class="modal" role="dialog" aria-modal="true">
+    <h3 id="modal-title"></h3>
+    <p id="modal-text"></p>
+    <input class="input" id="modal-input" hidden autocomplete="off">
+    <div class="modal-actions"><button class="btn" id="modal-cancel" type="button">Cancel</button><button class="btn btn-primary" id="modal-ok" type="button">Confirm</button></div>
+  </div>
+</div>
+<div id="toasts"></div>
 
 <script>
+// Password show/hide toggles (plain script so it works before the module loads).
+document.addEventListener('click', function (e) {
+  var btn = e.target.closest('.pw-toggle');
+  if (!btn) return;
+  var input = btn.parentElement.querySelector('input');
+  var show = input.type === 'password';
+  input.type = show ? 'text' : 'password';
+  btn.classList.toggle('showing', show);
+});
+</script>
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+const firebaseConfig = {
+  apiKey: 'AIzaSyD7bj__SwM4gE_yDnM9jjmzOgh6mX4NiD0',
+  authDomain: 'nyxprism-2a817.firebaseapp.com',
+  projectId: 'nyxprism-2a817',
+  storageBucket: 'nyxprism-2a817.firebasestorage.app',
+  messagingSenderId: '388040998105',
+  appId: '1:388040998105:web:8e3fbfd27db0fdd60dd2c8',
+};
+const auth = getAuth(initializeApp(firebaseConfig));
 const API = 'https://nyxprism-production.up.railway.app';
+
 let adminSecret = '';
-let adminLockTimer = null;
+let me = null;
+let idleTimer = null;
+const $ = id => document.getElementById(id);
 
-function lockAdmin() {
-  adminSecret = '';
-  if (adminLockTimer) clearTimeout(adminLockTimer);
-  document.getElementById('admin-shell').style.display = 'none';
-  document.getElementById('lock-screen').style.display = 'flex';
-  document.getElementById('secret-input').value = '';
+// ── Helpers ────────────────────────────────────────────────────────────
+function esc(v) { return String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function fmtDate(d) { return d ? new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—'; }
+function fmtDateTime(d) { return d ? new Date(d).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—'; }
+function ago(d) {
+  if (!d) return 'never';
+  const s = (Date.now() - new Date(d).getTime()) / 1000;
+  if (s < 60) return 'just now';
+  if (s < 3600) return Math.floor(s / 60) + 'm ago';
+  if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+  if (s < 86400 * 30) return Math.floor(s / 86400) + 'd ago';
+  return fmtDate(d);
+}
+function money(cents, currency = 'usd') { return (cents / 100).toLocaleString('en-US', { style: 'currency', currency: currency.toUpperCase() }); }
+function pill(v, cls) { return `<span class="pill ${esc(cls || v)}">${esc(String(v || '—').replace(/_/g, ' '))}</span>`; }
+function toast(text, isError) {
+  const el = document.createElement('div');
+  el.className = 'toast' + (isError ? ' error' : '');
+  el.textContent = text;
+  $('toasts').appendChild(el);
+  setTimeout(() => el.remove(), isError ? 7000 : 4000);
+}
+function setMsg(el, text, ok) { el.textContent = text; el.className = 'msg ' + (ok ? 'ok' : 'error'); }
+
+async function api(path, opts = {}) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (adminSecret) headers['x-admin-secret'] = adminSecret;
+  else if (auth.currentUser) headers.Authorization = 'Bearer ' + await auth.currentUser.getIdToken();
+  const res = await fetch(API + path, { ...opts, headers, body: opts.body ? JSON.stringify(opts.body) : undefined });
+  const data = await res.json().catch(() => ({}));
+  if (res.status === 401 && !path.startsWith('/api/admin/me')) { showSignin('Your session expired. Please sign in again.'); }
+  if (!res.ok) throw new Error(data.error || `${res.status} ${res.statusText}`);
+  return data;
 }
 
-function resetAdminLockTimer() {
-  if (!adminSecret) return;
-  if (adminLockTimer) clearTimeout(adminLockTimer);
-  adminLockTimer = setTimeout(lockAdmin, 15 * 60 * 1000);
-}
-
-// ── Helpers ───────────────────────────────────────────────────────────────
-async function apiFetch(path, opts = {}) {
-  const res = await fetch(`${API}${path}`, {
-    ...opts,
-    headers: { 'x-admin-secret': adminSecret, 'Content-Type': 'application/json', ...(opts.headers || {}) },
+function ask({ title, text, confirmLabel = 'Confirm', danger = false, input = null }) {
+  return new Promise(resolve => {
+    $('modal-title').textContent = title;
+    $('modal-text').textContent = text;
+    const inp = $('modal-input');
+    inp.hidden = !input;
+    inp.value = '';
+    inp.placeholder = input?.placeholder || '';
+    const ok = $('modal-ok');
+    ok.textContent = confirmLabel;
+    ok.className = 'btn ' + (danger ? 'btn-danger' : 'btn-primary');
+    $('modal-bg').hidden = false;
+    (input ? inp : ok).focus();
+    const done = value => { $('modal-bg').hidden = true; ok.onclick = null; $('modal-cancel').onclick = null; inp.onkeydown = null; resolve(value); };
+    ok.onclick = () => done(input ? inp.value : true);
+    $('modal-cancel').onclick = () => done(null);
+    inp.onkeydown = e => { if (e.key === 'Enter') done(inp.value); if (e.key === 'Escape') done(null); };
   });
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-  return res.json();
 }
 
-function fmt(dateStr) {
-  if (!dateStr) return '—';
-  return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+// ── Sign in / out ──────────────────────────────────────────────────────
+function showSignin(message) {
+  $('portal').hidden = true;
+  $('signin').hidden = false;
+  $('signin-msg').textContent = message || '';
+  $('signin-msg').className = 'msg error';
 }
 
-function planBadge(plan) {
-  const cls = { pro: 'badge-pro', trial: 'badge-trial', free: 'badge-free', inactive: 'badge-inactive' }[plan] || 'badge-free';
-  return `<span class="badge ${cls}">${escHtml(plan || 'free')}</span>`;
-}
-
-function statusBadge(status) {
-  const cls = { active: 'badge-active', trialing: 'badge-trial', canceled: 'badge-inactive', past_due: 'badge-inactive', inactive: 'badge-inactive' }[status] || 'badge-inactive';
-  return `<span class="badge ${cls}">${escHtml(status || 'inactive')}</span>`;
-}
-
-// ── Lock screen ───────────────────────────────────────────────────────────
-document.getElementById('unlock-btn').addEventListener('click', tryUnlock);
-document.getElementById('secret-input').addEventListener('keydown', e => { if (e.key === 'Enter') tryUnlock(); });
-
-async function tryUnlock() {
-  const secret = document.getElementById('secret-input').value.trim();
-  if (!secret) return;
-  adminSecret = secret;
+async function enterPortal() {
   try {
-    await apiFetch('/api/admin/stats');
-    document.getElementById('secret-input').value = '';
-    document.getElementById('lock-screen').style.display = 'none';
-    document.getElementById('admin-shell').style.display = 'flex';
-    resetAdminLockTimer();
-    loadOverview();
-  } catch {
-    document.getElementById('lock-error').style.display = 'block';
+    me = await api('/api/admin/me');
+  } catch (err) {
     adminSecret = '';
+    if (auth.currentUser) {
+      // Leave their app session alone; signing in below switches accounts.
+      const email = auth.currentUser.email;
+      $('si-email').value = '';
+      showSignin(err.message === 'Not an admin.' ? `You're signed in as ${email}, which doesn't have owner access. Sign in with your owner account.` : err.message);
+    } else {
+      showSignin(err.message === 'Missing Firebase token.' ? '' : err.message);
+    }
+    return;
   }
+  $('who').textContent = me.auth === 'admin-secret' ? 'Signed in with admin secret' : `${me.email}${me.owner ? ' · Owner' : ' · Admin'}`;
+  $('signin').hidden = true;
+  $('portal').hidden = false;
+  resetIdle();
+  showPage(location.hash.slice(1) || 'overview');
 }
 
-document.getElementById('logout-btn').addEventListener('click', lockAdmin);
-document.addEventListener('pointerdown', resetAdminLockTimer, { passive: true });
-document.addEventListener('keydown', resetAdminLockTimer);
-
-// ── Tabs ──────────────────────────────────────────────────────────────────
-document.querySelectorAll('.tab').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
-    if (btn.dataset.tab === 'users') loadUsers(1);
-    if (btn.dataset.tab === 'messages') loadMessages(1);
-  });
+let secretMode = false;
+$('signin-mode').addEventListener('click', () => {
+  secretMode = !secretMode;
+  $('signin-account-fields').hidden = secretMode;
+  $('signin-secret-fields').hidden = !secretMode;
+  $('si-email').required = !secretMode;
+  $('si-password').required = !secretMode;
+  $('signin-mode').textContent = secretMode ? 'Sign in with my account instead' : 'Use the admin secret instead';
+  $('signin-msg').textContent = '';
 });
 
-// ── Overview ──────────────────────────────────────────────────────────────
-async function loadOverview() {
-  try {
-    const data = await apiFetch('/api/admin/stats');
-    const grid = document.getElementById('stat-grid');
-    grid.innerHTML = `
-      <div class="stat-card"><div class="stat-label">Total Users</div><div class="stat-value accent">${data.totalUsers}</div></div>
-      <div class="stat-card"><div class="stat-label">API Keys</div><div class="stat-value blue">${data.totalApiKeys}</div></div>
-      <div class="stat-card"><div class="stat-label">Contact Messages</div><div class="stat-value yellow">${data.totalMessages}</div></div>
-    `;
-    const bp = document.getElementById('plan-breakdown');
-    bp.innerHTML = `<div style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.75rem">Plan Breakdown</div>
-      <div class="plan-list">${data.plans.map(p => `<div class="plan-pill"><span class="pill-name">${p.plan}</span><span class="pill-count">${p.count}</span></div>`).join('')}</div>`;
-  } catch (err) {
-    document.getElementById('stat-grid').innerHTML = `<p class="err-msg">Failed to load stats: ${err.message}</p>`;
-  }
-}
-
-// ── Users ─────────────────────────────────────────────────────────────────
-let usersPage = 1;
-let userTotal = 0;
-const USERS_LIMIT = 50;
-
-async function loadUsers(page) {
-  usersPage = page;
-  document.getElementById('users-tbody').innerHTML = '<tr><td colspan="7" class="loading">Loading…</td></tr>';
-  try {
-    const data = await apiFetch(`/api/admin/users?page=${page}&limit=${USERS_LIMIT}`);
-    userTotal = data.total;
-    document.getElementById('users-tbody').innerHTML = data.users.map(u => `
-      <tr>
-        <td>${escHtml(u.email)}</td>
-        <td>${escHtml([u.first_name, u.last_name].filter(Boolean).join(' ') || '—')}</td>
-        <td>${planBadge(u.plan)}</td>
-        <td>${statusBadge(u.subscription_status)}</td>
-        <td>${u.trial_active ? '<span class="badge badge-trial">Active</span>' : '—'}</td>
-        <td>${fmt(u.current_period_end)}</td>
-        <td>${fmt(u.created_at)}</td>
-      </tr>
-    `).join('') || '<tr><td colspan="7" style="color:var(--muted)">No users yet.</td></tr>';
-
-    const pager = document.getElementById('users-pager');
-    pager.style.display = 'flex';
-    document.getElementById('users-prev').disabled = page <= 1;
-    document.getElementById('users-next').disabled = page * USERS_LIMIT >= userTotal;
-    document.getElementById('users-info').textContent = `Showing ${(page-1)*USERS_LIMIT+1}–${Math.min(page*USERS_LIMIT, userTotal)} of ${userTotal}`;
-  } catch (err) {
-    document.getElementById('users-tbody').innerHTML = `<tr><td colspan="7" class="err-msg">Error: ${err.message}</td></tr>`;
-  }
-}
-
-document.getElementById('users-prev').addEventListener('click', () => loadUsers(usersPage - 1));
-document.getElementById('users-next').addEventListener('click', () => loadUsers(usersPage + 1));
-
-// ── Messages ──────────────────────────────────────────────────────────────
-let msgsPage = 1;
-let msgsTotal = 0;
-const MSGS_LIMIT = 20;
-
-async function loadMessages(page) {
-  msgsPage = page;
-  document.getElementById('messages-list').innerHTML = '<div class="loading">Loading…</div>';
-  try {
-    const data = await apiFetch(`/api/admin/messages?page=${page}&limit=${MSGS_LIMIT}`);
-    msgsTotal = data.total;
-    if (!data.messages.length) {
-      document.getElementById('messages-list').innerHTML = '<p style="color:var(--muted);font-size:.875rem">No messages yet.</p>';
-      document.getElementById('messages-pager').style.display = 'none';
-      return;
-    }
-    document.getElementById('messages-list').innerHTML = data.messages.map(m => `
-      <div class="msg-card">
-        <div class="msg-meta">
-          <span class="msg-name">${escHtml([m.first_name, m.last_name].filter(Boolean).join(' '))}</span>
-          <span class="msg-email">${escHtml(m.email || '')}</span>
-          <span class="msg-date">${fmt(m.created_at)}</span>
-        </div>
-        ${m.subject ? `<div class="msg-subject">${escHtml(m.subject)}</div>` : ''}
-        <div class="msg-body">${escHtml(m.message || '')}</div>
-      </div>
-    `).join('');
-
-    const pager = document.getElementById('messages-pager');
-    pager.style.display = 'flex';
-    document.getElementById('msgs-prev').disabled = page <= 1;
-    document.getElementById('msgs-next').disabled = page * MSGS_LIMIT >= msgsTotal;
-    document.getElementById('msgs-info').textContent = `Showing ${(page-1)*MSGS_LIMIT+1}–${Math.min(page*MSGS_LIMIT, msgsTotal)} of ${msgsTotal}`;
-  } catch (err) {
-    document.getElementById('messages-list').innerHTML = `<p class="err-msg">Error: ${err.message}</p>`;
-  }
-}
-
-document.getElementById('msgs-prev').addEventListener('click', () => loadMessages(msgsPage - 1));
-document.getElementById('msgs-next').addEventListener('click', () => loadMessages(msgsPage + 1));
-
-document.getElementById('setpw-form').addEventListener('submit', async e => {
+$('signin-form').addEventListener('submit', async e => {
   e.preventDefault();
-  const out = document.getElementById('setpw-result');
-  const btn = document.getElementById('setpw-btn');
-  const email = document.getElementById('setpw-email').value.trim();
-  const password = document.getElementById('setpw-password').value;
-  btn.disabled = true; out.style.color = 'var(--muted)'; out.textContent = 'Saving…';
+  const btn = $('signin-btn');
+  btn.disabled = true; $('signin-msg').textContent = '';
   try {
-    const res = await fetch(`${API}/api/admin/users/set-password`, {
-      method: 'POST',
-      headers: { 'x-admin-secret': adminSecret, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || `${res.status} ${res.statusText}`);
-    document.getElementById('setpw-password').value = '';
-    out.style.color = 'var(--green)'; out.textContent = `Password set for ${data.email}. They can log in with it now.`;
+    if (secretMode) {
+      adminSecret = $('si-secret').value.trim();
+      if (!adminSecret) throw new Error('Enter the admin secret.');
+      $('si-secret').value = '';
+      await enterPortal();
+    } else {
+      await signInWithEmailAndPassword(auth, $('si-email').value.trim(), $('si-password').value);
+      $('si-password').value = '';
+      // onAuthStateChanged enters the portal.
+    }
   } catch (err) {
-    out.style.color = 'var(--red)'; out.textContent = err.message;
+    const code = err.code || '';
+    showSignin(code.includes('invalid-credential') || code.includes('wrong-password') ? 'Incorrect email or password.'
+      : code.includes('too-many-requests') ? 'Too many attempts. Wait a few minutes and try again.' : err.message);
   } finally { btn.disabled = false; }
 });
 
-function escHtml(str) {
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+async function doSignOut() {
+  adminSecret = '';
+  me = null;
+  closeDrawer();
+  if (auth.currentUser) await signOut(auth);
+  showSignin('');
 }
+$('signout-btn').addEventListener('click', doSignOut);
+
+function resetIdle() {
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(async () => { if (me) { await doSignOut(); showSignin('Signed out after 30 minutes of inactivity.'); } }, 30 * 60 * 1000);
+}
+['click', 'keydown'].forEach(evt => document.addEventListener(evt, () => { if (me) resetIdle(); }));
+
+onAuthStateChanged(auth, user => {
+  if (adminSecret) return;
+  if (user) enterPortal();
+  else if (!me) showSignin('');
+});
+
+// ── Navigation ─────────────────────────────────────────────────────────
+const loaders = {};
+function showPage(name) {
+  if (!loaders[name]) name = 'overview';
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.page === name));
+  document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + name));
+  if (history.replaceState) history.replaceState(null, '', '#' + name);
+  loaders[name]().catch(err => toast(err.message, true));
+}
+document.querySelectorAll('.nav-btn').forEach(b => b.addEventListener('click', () => showPage(b.dataset.page)));
+$('refresh-btn').addEventListener('click', () => showPage(document.querySelector('.nav-btn.active')?.dataset.page || 'overview'));
+
+// ── Overview ───────────────────────────────────────────────────────────
+function tile(label, value, note) {
+  return `<div class="tile"><div class="tile-label">${esc(label)}</div><div class="tile-value">${esc(value)}</div>${note ? `<div class="tile-note">${esc(note)}</div>` : ''}</div>`;
+}
+
+function renderSignupChart(el, series) {
+  const W = 420, H = 170, padL = 26, padB = 22, padT = 10;
+  const max = Math.max(1, ...series.map(d => d.count));
+  const step = Math.ceil(max / 4);
+  const top = step * 4;
+  const plotW = W - padL, plotH = H - padB - padT;
+  const bw = plotW / series.length;
+  let grid = '';
+  for (let v = 0; v <= top; v += step) {
+    const y = padT + plotH - (v / top) * plotH;
+    grid += `<line x1="${padL}" x2="${W}" y1="${y}" y2="${y}" stroke="var(--border)" stroke-width="1"/><text x="${padL - 6}" y="${y + 3}" text-anchor="end" font-size="11" fill="var(--text3)">${v}</text>`;
+  }
+  let bars = '';
+  series.forEach((d, i) => {
+    const h = (d.count / top) * plotH;
+    const x = padL + i * bw + 1;
+    const w = Math.max(2, bw - 2);
+    const y = padT + plotH - h;
+    const r = Math.min(4, w / 2, h);
+    const path = h > 0 ? `M${x},${y + h} V${y + r} Q${x},${y} ${x + r},${y} H${x + w - r} Q${x + w},${y} ${x + w},${y + r} V${y + h} Z` : '';
+    bars += `<g class="bar" data-i="${i}"><rect x="${padL + i * bw}" y="${padT}" width="${bw}" height="${plotH}" fill="transparent"/>${path ? `<path d="${path}" fill="var(--accent-bright)"/>` : ''}</g>`;
+  });
+  const labelIdx = [0, Math.floor(series.length / 2), series.length - 1];
+  const anchor = i => i === 0 ? 'start' : i === series.length - 1 ? 'end' : 'middle';
+  const labelX = i => i === 0 ? padL : i === series.length - 1 ? W : padL + i * bw + bw / 2;
+  const labels = labelIdx.map(i => `<text x="${labelX(i)}" y="${H - 6}" text-anchor="${anchor(i)}" font-size="11" fill="var(--text3)">${esc(new Date(series[i].day + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }))}</text>`).join('');
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="New signups per day for the last 30 days">${grid}${bars}${labels}</svg><div class="chart-tip" hidden></div>`;
+  const tip = el.querySelector('.chart-tip');
+  el.querySelectorAll('.bar').forEach(g => {
+    g.addEventListener('mouseenter', () => {
+      const d = series[+g.dataset.i];
+      const box = el.getBoundingClientRect();
+      const r = g.querySelector('rect').getBoundingClientRect();
+      tip.innerHTML = `<strong>${d.count}</strong> signup${d.count === 1 ? '' : 's'} · ${esc(new Date(d.day + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }))}`;
+      tip.hidden = false;
+      const half = tip.offsetWidth / 2;
+      const x = r.left - box.left + r.width / 2;
+      tip.style.left = Math.min(Math.max(x, half), box.width - half) + 'px';
+      tip.style.top = '40px';
+    });
+    g.addEventListener('mouseleave', () => { tip.hidden = true; });
+  });
+}
+
+loaders.overview = async () => {
+  const s = await api('/api/admin/stats');
+  const pro = s.plans.find(p => p.plan === 'professional')?.count || 0;
+  const signing = s.signRequests.reduce((t, r) => t + r.count, 0);
+  $('ov-tiles').innerHTML = [
+    tile('Total users', s.totalUsers),
+    tile('New this week', s.newUsers7d, `${s.newUsers30d} in the last 30 days`),
+    tile('Professional', pro, `${s.activeTrials} active trial${s.activeTrials === 1 ? '' : 's'}`),
+    tile('Unread messages', s.unreadMessages, `${s.totalMessages} total`),
+    tile('Signature requests', signing, `${s.signRequests.find(r => r.status === 'completed')?.count || 0} completed`),
+    tile('Distributions', s.distributions.total, `${s.distributions.sent} sent`),
+    tile('API keys', s.totalApiKeys),
+  ].join('');
+  renderSignupChart($('ov-chart'), s.signupsDaily);
+  const total = Math.max(1, s.totalUsers);
+  $('ov-plans').innerHTML = s.plans.length ? s.plans.map(p => `<div class="plan-bar-row"><span>${pill(p.plan)}</span><div class="plan-bar-track"><div class="plan-bar-fill" style="width:${(p.count / total * 100).toFixed(1)}%"></div></div><strong style="text-align:right">${p.count}</strong></div>`).join('') : '<div class="muted">No users yet.</div>';
+  setUnread(s.unreadMessages);
+};
+
+function setUnread(n) { const b = $('nav-unread'); b.hidden = !n; b.textContent = n; }
+
+$('qa-setpw').addEventListener('submit', async e => {
+  e.preventDefault();
+  const msg = $('qa-setpw-msg');
+  try {
+    const r = await api('/api/admin/users/set-password', { method: 'POST', body: { email: $('qa-setpw-email').value.trim(), password: $('qa-setpw-password').value } });
+    $('qa-setpw-password').value = '';
+    setMsg(msg, `Password set for ${r.email}. They can log in with it now.`, true);
+  } catch (err) { setMsg(msg, err.message); }
+});
+
+$('qa-create').addEventListener('submit', async e => {
+  e.preventDefault();
+  const msg = $('qa-create-msg');
+  try {
+    const r = await api('/api/admin/users/create', { method: 'POST', body: {
+      email: $('qa-create-email').value.trim(), password: $('qa-create-password').value,
+      firstName: $('qa-create-first').value.trim(), lastName: $('qa-create-last').value.trim(), plan: $('qa-create-plan').value } });
+    e.target.reset();
+    setMsg(msg, `Created ${r.email}. They can log in now.`, true);
+  } catch (err) { setMsg(msg, err.message); }
+});
+
+// ── Users ──────────────────────────────────────────────────────────────
+let usersPage = 1, usersTotal = 0, usersTimer = null;
+const USERS_LIMIT = 50;
+function userBadges(u) {
+  let out = '';
+  if (u.owner) out += ' ' + pill('owner', 'pro');
+  else if (u.is_admin) out += ' ' + pill('admin', 'pro');
+  if (u.developer && !u.owner) out += ' ' + pill('full access', 'tag');
+  if (u.firebase?.disabled) out += ' ' + pill('disabled');
+  if (!u.firebase) out += ' ' + pill('no login', 'tag');
+  return out;
+}
+loaders.users = async () => {
+  const q = encodeURIComponent($('users-q').value.trim());
+  const plan = $('users-plan').value;
+  const r = await api(`/api/admin/users?page=${usersPage}&limit=${USERS_LIMIT}&q=${q}${plan ? '&plan=' + plan : ''}`);
+  usersTotal = r.total;
+  $('users-tbody').innerHTML = r.users.length ? r.users.map(u => `
+    <tr class="clickable" data-id="${u.id}">
+      <td><strong>${esc(u.email)}</strong>${userBadges(u)}</td>
+      <td>${esc([u.first_name, u.last_name].filter(Boolean).join(' ') || '—')}</td>
+      <td>${pill(u.developer ? 'professional' : u.plan)}</td>
+      <td>${pill(u.subscription_status)}</td>
+      <td title="${esc(fmtDateTime(u.firebase?.lastSignInAt))}">${esc(ago(u.firebase?.lastSignInAt))}</td>
+      <td>${esc(fmtDate(u.created_at))}</td>
+    </tr>`).join('') : '<tr><td colspan="6" class="empty">No users match.</td></tr>';
+  $('users-tbody').querySelectorAll('tr[data-id]').forEach(tr => tr.addEventListener('click', () => openUser(+tr.dataset.id)));
+  const pages = Math.max(1, Math.ceil(usersTotal / USERS_LIMIT));
+  $('users-info').textContent = `Page ${usersPage} of ${pages} · ${usersTotal} user${usersTotal === 1 ? '' : 's'}`;
+  $('users-prev').disabled = usersPage <= 1;
+  $('users-next').disabled = usersPage >= pages;
+};
+$('users-q').addEventListener('input', () => { clearTimeout(usersTimer); usersTimer = setTimeout(() => { usersPage = 1; loaders.users().catch(err => toast(err.message, true)); }, 300); });
+$('users-plan').addEventListener('change', () => { usersPage = 1; loaders.users().catch(err => toast(err.message, true)); });
+$('users-prev').addEventListener('click', () => { usersPage--; loaders.users(); });
+$('users-next').addEventListener('click', () => { usersPage++; loaders.users(); });
+
+$('users-export').addEventListener('click', async () => {
+  try {
+    const all = [];
+    for (let page = 1; page < 100; page++) {
+      const r = await api(`/api/admin/users?page=${page}&limit=200`);
+      all.push(...r.users);
+      if (all.length >= r.total || !r.users.length) break;
+    }
+    const cols = ['id', 'email', 'first_name', 'last_name', 'plan', 'subscription_status', 'is_admin', 'created_at'];
+    const cell = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const csv = [cols.concat(['last_sign_in', 'disabled']).join(','), ...all.map(u => cols.map(c => cell(u[c])).concat([cell(u.firebase?.lastSignInAt), cell(u.firebase?.disabled)]).join(','))].join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    a.download = `nyxprism-users-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    toast(`Exported ${all.length} users.`);
+  } catch (err) { toast(err.message, true); }
+});
+
+// ── User drawer ────────────────────────────────────────────────────────
+function closeDrawer() { $('drawer').hidden = true; $('drawer-bg').hidden = true; }
+$('drawer-bg').addEventListener('click', closeDrawer);
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('modal-bg').hidden) closeDrawer(); });
+
+async function openUser(id) {
+  const d = $('drawer');
+  d.innerHTML = '<div class="muted">Loading…</div>';
+  d.hidden = false; $('drawer-bg').hidden = false;
+  let r;
+  try { r = await api(`/api/admin/users/${id}`); } catch (err) { d.innerHTML = `<div class="msg error">${esc(err.message)}</div>`; return; }
+  const u = r.user, fb = r.firebase, c = r.counts;
+  const protectedAcct = u.owner;
+  d.innerHTML = `
+    <div class="drawer-head"><div><h2>${esc(u.email)}</h2><div style="margin-top:.4rem">${pill(u.developer ? 'professional' : u.plan)} ${pill(u.subscription_status)}${userBadges({ ...u, firebase: fb })}</div></div>
+      <button class="close-x" id="dr-close" type="button" aria-label="Close">✕</button></div>
+    <dl class="kv">
+      <dt>Name</dt><dd>${esc([u.first_name, u.last_name].filter(Boolean).join(' ') || '—')}</dd>
+      <dt>User ID</dt><dd class="mono">${u.id}</dd>
+      <dt>Joined</dt><dd>${esc(fmtDateTime(u.created_at))}</dd>
+      <dt>Last sign-in</dt><dd>${esc(fb ? fmtDateTime(fb.lastSignInAt) : 'No login exists')}</dd>
+      <dt>Last active</dt><dd>${esc(fb ? fmtDateTime(fb.lastActiveAt) : '—')}</dd>
+      <dt>Email verified</dt><dd>${fb ? (fb.emailVerified ? 'Yes' : 'No') : '—'}</dd>
+      <dt>Login status</dt><dd>${fb ? (fb.disabled ? pill('disabled') : pill('active')) : '—'}</dd>
+      <dt>Stripe customer</dt><dd class="mono">${esc(u.stripe_customer_id || '—')}</dd>
+      <dt>Period ends</dt><dd>${esc(fmtDate(u.current_period_end))}</dd>
+      <dt>Usage</dt><dd>${c.sign_requests} signature requests · ${c.distributions} distributions · ${c.saved_contacts} saved people · ${c.api_keys} API keys</dd>
+    </dl>
+    ${u.developer ? '<div class="sub" style="margin-top:.8rem">This account always has full Professional access (owner / reviewer list), whatever plan is stored.</div>' : ''}
+
+    <div class="section-title">Plan</div>
+    <div class="row"><select class="select" id="dr-plan">${['free', 'trial', 'professional', 'inactive'].map(p => `<option value="${p}" ${p === u.plan ? 'selected' : ''}>${p[0].toUpperCase() + p.slice(1)}</option>`).join('')}</select><button class="btn btn-primary" id="dr-plan-save" type="button">Save plan</button></div>
+    ${u.stripe_subscription_id ? '<div class="sub" style="margin-top:.4rem">This user pays through Stripe. Stripe updates can overwrite a manual plan change.</div>' : ''}
+
+    <div class="section-title">Name</div>
+    <div class="row"><input class="input" id="dr-first" value="${esc(u.first_name || '')}" placeholder="First name"><input class="input" id="dr-last" value="${esc(u.last_name || '')}" placeholder="Last name"><button class="btn" id="dr-name-save" type="button">Save</button></div>
+
+    <div class="section-title">Login</div>
+    ${fb ? `
+    <div class="row" style="margin-bottom:.6rem"><input class="input" type="text" id="dr-pw" placeholder="New password (8+ characters)" autocomplete="off"><button class="btn btn-primary" id="dr-pw-save" type="button">Set password</button></div>
+    <div class="row">
+      <button class="btn" id="dr-reset" type="button">Get reset link</button>
+      ${fb.emailVerified ? '' : '<button class="btn" id="dr-verify" type="button">Mark email verified</button>'}
+      <button class="btn" id="dr-revoke" type="button">Sign out everywhere</button>
+      ${protectedAcct ? '' : `<button class="btn ${fb.disabled ? '' : 'btn-danger'}" id="dr-disable" type="button">${fb.disabled ? 'Enable login' : 'Disable login'}</button>`}
+    </div>
+    <div class="msg" id="dr-login-msg" style="margin-top:.6rem;word-break:break-all"></div>` : '<div class="muted">This account has no login yet. They can sign up with this email, or create one from Overview.</div>'}
+
+    ${r.apiKeys.length ? `<div class="section-title">API keys</div>
+    <div class="tbl-wrap"><table><tbody>${r.apiKeys.map(k => `<tr><td class="mono">${esc(k.key_prefix)}…</td><td>${esc(k.label)}</td><td>${esc(ago(k.last_used_at))}</td></tr>`).join('')}</tbody></table></div>` : ''}
+    ${r.recentSignRequests.length ? `<div class="section-title">Recent signature requests</div>
+    <div class="tbl-wrap"><table><tbody>${r.recentSignRequests.map(s => `<tr><td>${esc(s.title)}</td><td>${pill(s.status)}</td><td>${esc(fmtDate(s.created_at))}</td></tr>`).join('')}</tbody></table></div>` : ''}
+
+    ${me?.owner && !protectedAcct ? `<div class="danger-zone">
+      <div style="font-weight:700;margin-bottom:.6rem">Owner controls</div>
+      <div class="row">
+        <button class="btn" id="dr-admin" type="button">${u.is_admin ? 'Remove admin access' : 'Make admin'}</button>
+        <button class="btn btn-danger" id="dr-delete" type="button">Delete user</button>
+      </div></div>` : ''}
+  `;
+  const reload = () => { openUser(id); loaders.users().catch(() => {}); };
+  const act = async (fn, okText) => { try { await fn(); toast(okText); reload(); } catch (err) { toast(err.message, true); } };
+  $('dr-close').onclick = closeDrawer;
+  $('dr-plan-save').onclick = () => act(() => api(`/api/admin/users/${id}/plan`, { method: 'POST', body: { plan: $('dr-plan').value } }), 'Plan updated.');
+  $('dr-name-save').onclick = () => act(() => api(`/api/admin/users/${id}/name`, { method: 'POST', body: { firstName: $('dr-first').value, lastName: $('dr-last').value } }), 'Name updated.');
+  if (fb) {
+    $('dr-pw-save').onclick = async () => {
+      const msg = $('dr-login-msg');
+      try { await api('/api/admin/users/set-password', { method: 'POST', body: { email: u.email, password: $('dr-pw').value } }); $('dr-pw').value = ''; setMsg(msg, 'Password set. They can log in with it now.', true); }
+      catch (err) { setMsg(msg, err.message); }
+    };
+    $('dr-reset').onclick = async () => {
+      const msg = $('dr-login-msg');
+      try {
+        const { link } = await api(`/api/admin/users/${id}/reset-link`, { method: 'POST' });
+        let copied = false;
+        try { await navigator.clipboard.writeText(link); copied = true; } catch (_) {}
+        msg.className = 'msg ok';
+        msg.innerHTML = (copied ? 'Reset link copied to your clipboard. ' : 'Reset link: ') + `Send it to the user. <a href="${esc(link)}" target="_blank" rel="noopener">Open link</a>`;
+      } catch (err) { setMsg(msg, err.message); }
+    };
+    if ($('dr-verify')) $('dr-verify').onclick = () => act(() => api(`/api/admin/users/${id}/verify-email`, { method: 'POST' }), 'Email marked verified.');
+    $('dr-revoke').onclick = async () => {
+      if (!await ask({ title: 'Sign out everywhere?', text: `${u.email} will be signed out on every device and must log in again.`, confirmLabel: 'Sign out' })) return;
+      act(() => api(`/api/admin/users/${id}/revoke-sessions`, { method: 'POST' }), 'Signed out everywhere.');
+    };
+    if ($('dr-disable')) $('dr-disable').onclick = async () => {
+      const disable = !fb.disabled;
+      if (disable && !await ask({ title: 'Disable this login?', text: `${u.email} won't be able to sign in until you enable it again. Their data is kept.`, confirmLabel: 'Disable', danger: true })) return;
+      act(() => api(`/api/admin/users/${id}/disable`, { method: 'POST', body: { disabled: disable } }), disable ? 'Login disabled.' : 'Login enabled.');
+    };
+  }
+  if ($('dr-admin')) $('dr-admin').onclick = async () => {
+    const grant = !u.is_admin;
+    if (!await ask({ title: grant ? 'Make admin?' : 'Remove admin access?', text: grant ? `${u.email} will be able to sign in to this portal and manage users.` : `${u.email} will no longer be able to use this portal.`, confirmLabel: grant ? 'Make admin' : 'Remove', danger: grant })) return;
+    act(() => api(`/api/admin/users/${id}/admin`, { method: 'POST', body: { isAdmin: grant } }), grant ? 'Admin access granted.' : 'Admin access removed.');
+  };
+  if ($('dr-delete')) $('dr-delete').onclick = async () => {
+    const typed = await ask({ title: 'Delete this user permanently?', text: `This deletes ${u.email}'s login and all their data (documents, keys, saved people). It cannot be undone. Type their email to confirm.`, confirmLabel: 'Delete forever', danger: true, input: { placeholder: u.email } });
+    if (typed == null) return;
+    try { await api(`/api/admin/users/${id}`, { method: 'DELETE', body: { confirmEmail: typed } }); toast('User deleted.'); closeDrawer(); loaders.users(); }
+    catch (err) { toast(err.message, true); }
+  };
+}
+
+// ── Billing ────────────────────────────────────────────────────────────
+loaders.billing = async () => {
+  const b = await api('/api/admin/billing');
+  $('bill-msg').textContent = !b.configured ? 'Stripe is not configured on the backend (STRIPE_SECRET_KEY is missing).' : (b.error || '');
+  const counts = b.counts || {};
+  $('bill-tiles').innerHTML = [
+    tile('Monthly recurring revenue', b.configured && !b.error ? money(b.mrrCents || 0, b.currency) : '—', b.livemode === false ? 'Stripe test mode' : ''),
+    tile('Active subscriptions', counts.active || 0),
+    tile('Trialing', counts.trialing || 0),
+    tile('Past due', counts.past_due || 0),
+    tile('Canceled', counts.canceled || 0),
+  ].join('');
+  const subs = b.subscriptions || [];
+  $('bill-tbody').innerHTML = subs.length ? subs.map(s => `<tr>
+      <td>${esc(s.email || s.id)}</td><td>${pill(s.status)}${s.cancelAtPeriodEnd ? ' ' + pill('cancels at end', 'tag') : ''}</td>
+      <td>${esc(money(s.amountCents, b.currency))}${s.interval ? ' / ' + esc(s.interval) : ''}</td>
+      <td>${esc(fmtDate(s.currentPeriodEnd))}</td><td>${esc(fmtDate(s.created))}</td></tr>`).join('')
+    : `<tr><td colspan="5" class="empty">${b.configured ? 'No subscriptions yet.' : 'Connect Stripe to see subscriptions.'}</td></tr>`;
+};
+
+// ── Documents ──────────────────────────────────────────────────────────
+loaders.documents = async () => {
+  const r = await api('/api/admin/documents');
+  const del = (kind, id) => me?.owner ? `<button class="btn btn-sm btn-danger" data-del="${kind}:${id}" type="button">Delete</button>` : '';
+  $('docs-sign').innerHTML = r.signRequests.length ? r.signRequests.map(d => `<tr>
+      <td><strong>${esc(d.title)}</strong><div class="muted" style="font-size:.74rem">${esc(d.document_name)}</div></td><td>${esc(d.owner)}</td>
+      <td>${pill(d.status)}</td><td>${d.signed} / ${d.recipients}</td><td>${esc(fmtDate(d.created_at))}</td><td>${esc(fmtDate(d.expires_at))}</td><td>${del('sign', d.id)}</td></tr>`).join('')
+    : '<tr><td colspan="7" class="empty">No signature requests yet.</td></tr>';
+  $('docs-dist').innerHTML = r.distributions.length ? r.distributions.map(d => `<tr>
+      <td><strong>${esc(d.title)}</strong><div class="muted" style="font-size:.74rem">${esc(d.document_name)}</div></td><td>${esc(d.owner)}</td>
+      <td>${pill(d.status)}</td><td>${d.opened} / ${d.recipients}</td><td>${d.failed}</td><td>${esc(fmtDate(d.created_at))}</td><td>${del('dist', d.id)}</td></tr>`).join('')
+    : '<tr><td colspan="7" class="empty">No distributions yet.</td></tr>';
+  document.querySelectorAll('#page-documents [data-del]').forEach(btn => btn.addEventListener('click', async () => {
+    const [kind, id] = btn.dataset.del.split(':');
+    if (!await ask({ title: 'Delete this document?', text: 'The document, its recipients and its links are removed permanently. Recipients will no longer be able to open it.', confirmLabel: 'Delete', danger: true })) return;
+    try { await api(`/api/admin/documents/${kind}/${id}`, { method: 'DELETE' }); toast('Document deleted.'); loaders.documents(); } catch (err) { toast(err.message, true); }
+  }));
+};
+
+// ── Messages ───────────────────────────────────────────────────────────
+let msgsPage = 1;
+const MSGS_LIMIT = 20;
+loaders.messages = async () => {
+  const unread = $('msgs-unread').checked ? '&unread=1' : '';
+  const r = await api(`/api/admin/messages?page=${msgsPage}&limit=${MSGS_LIMIT}${unread}`);
+  $('msgs-list').innerHTML = r.messages.length ? r.messages.map(m => `
+    <div class="message-card ${m.read ? '' : 'unread'}" data-id="${m.id}">
+      <div class="row" style="justify-content:space-between">
+        <div><strong>${esc(m.subject)}</strong> ${m.read ? '' : pill('new', 'pro')}<div class="muted" style="font-size:.78rem;margin-top:.15rem">${esc(m.first_name)} ${esc(m.last_name)} · ${esc(m.email)} · ${esc(fmtDateTime(m.created_at))}</div></div>
+      </div>
+      <div class="message-body">${esc(m.message)}</div>
+      <div class="row">
+        <a class="btn btn-sm btn-primary" href="mailto:${esc(m.email)}?subject=${encodeURIComponent('Re: ' + m.subject)}">Reply by email</a>
+        <button class="btn btn-sm" data-act="copy" data-email="${esc(m.email)}" type="button">Copy email</button>
+        <button class="btn btn-sm" data-act="read" data-read="${m.read ? 'false' : 'true'}" type="button">${m.read ? 'Mark unread' : 'Mark read'}</button>
+        <button class="btn btn-sm btn-danger" data-act="delete" type="button">Delete</button>
+      </div>
+    </div>`).join('') : '<div class="empty">No messages.</div>';
+  $('msgs-list').querySelectorAll('.message-card').forEach(card => {
+    const id = card.dataset.id;
+    card.querySelectorAll('[data-act]').forEach(btn => btn.addEventListener('click', async () => {
+      try {
+        if (btn.dataset.act === 'copy') { await navigator.clipboard.writeText(btn.dataset.email); toast('Email copied.'); return; }
+        if (btn.dataset.act === 'read') await api(`/api/admin/messages/${id}/read`, { method: 'POST', body: { read: btn.dataset.read === 'true' } });
+        if (btn.dataset.act === 'delete') {
+          if (!await ask({ title: 'Delete this message?', text: 'It will be removed permanently.', confirmLabel: 'Delete', danger: true })) return;
+          await api(`/api/admin/messages/${id}`, { method: 'DELETE' });
+          toast('Message deleted.');
+        }
+        loaders.messages();
+      } catch (err) { toast(err.message, true); }
+    }));
+  });
+  const pages = Math.max(1, Math.ceil(r.total / MSGS_LIMIT));
+  $('msgs-info').textContent = `Page ${msgsPage} of ${pages} · ${r.total} message${r.total === 1 ? '' : 's'}`;
+  $('msgs-prev').disabled = msgsPage <= 1;
+  $('msgs-next').disabled = msgsPage >= pages;
+  api('/api/admin/stats').then(s => setUnread(s.unreadMessages)).catch(() => {});
+};
+$('msgs-unread').addEventListener('change', () => { msgsPage = 1; loaders.messages(); });
+$('msgs-prev').addEventListener('click', () => { msgsPage--; loaders.messages(); });
+$('msgs-next').addEventListener('click', () => { msgsPage++; loaders.messages(); });
+
+// ── API keys ───────────────────────────────────────────────────────────
+loaders.keys = async () => {
+  const r = await api('/api/admin/api-keys');
+  $('keys-tbody').innerHTML = r.keys.length ? r.keys.map(k => `<tr>
+      <td class="mono">${esc(k.key_prefix)}…</td><td>${esc(k.label)}</td><td>${esc(k.email)}</td><td>${esc(fmtDate(k.created_at))}</td>
+      <td>${esc(ago(k.last_used_at))}</td><td><button class="btn btn-sm btn-danger" data-id="${k.id}" type="button">Revoke</button></td></tr>`).join('')
+    : '<tr><td colspan="6" class="empty">No API keys have been created.</td></tr>';
+  $('keys-tbody').querySelectorAll('[data-id]').forEach(btn => btn.addEventListener('click', async () => {
+    if (!await ask({ title: 'Revoke this API key?', text: 'Anything using it will stop working immediately.', confirmLabel: 'Revoke', danger: true })) return;
+    try { await api(`/api/admin/api-keys/${btn.dataset.id}`, { method: 'DELETE' }); toast('Key revoked.'); loaders.keys(); } catch (err) { toast(err.message, true); }
+  }));
+};
+
+// ── System ─────────────────────────────────────────────────────────────
+loaders.system = async () => {
+  const s = await api('/api/admin/system');
+  const up = s.runtime.uptimeSeconds;
+  const upText = up > 86400 ? Math.floor(up / 86400) + 'd ' + Math.floor(up % 86400 / 3600) + 'h' : up > 3600 ? Math.floor(up / 3600) + 'h ' + Math.floor(up % 3600 / 60) + 'm' : Math.floor(up / 60) + 'm';
+  const status = (ok, label) => `<span class="status-dot ${ok ? 'ok' : 'bad'}"></span>${label}`;
+  $('sys-tiles').innerHTML = `
+    <div class="tile"><div class="tile-label">Database</div><div class="tile-value" style="font-size:1.05rem">${status(s.database.ok, s.database.ok ? 'Connected' : 'Down')}</div><div class="tile-note">${s.database.ok ? `${s.database.latencyMs} ms · ${esc(s.database.size)}` : esc(s.database.error)}</div></div>
+    <div class="tile"><div class="tile-label">Firebase Auth</div><div class="tile-value" style="font-size:1.05rem">${status(s.firebase.ok, s.firebase.ok ? 'Connected' : 'Error')}</div><div class="tile-note">${s.firebase.ok ? 'Admin SDK working' : esc(s.firebase.error)}</div></div>
+    ${tile('Uptime', upText, 'since last deploy/restart')}
+    ${tile('Memory', s.runtime.memoryMb + ' MB', `Node ${s.runtime.node}`)}
+    ${tile('Deployed commit', s.runtime.commit ? s.runtime.commit.slice(0, 7) : '—', s.runtime.environment)}`;
+  $('sys-env').innerHTML = s.env.map(e => `<tr><td class="mono">${esc(e.name)}</td><td style="text-align:right">${e.set ? pill('set', 'ok') : pill('missing', 'inactive')}</td></tr>`).join('');
+  $('sys-tables').innerHTML = (s.database.tables || []).map(t => `<tr><td class="mono">${esc(t.table)}</td><td style="text-align:right">${t.rows.toLocaleString()}</td></tr>`).join('') || '<tr><td colspan="2" class="empty">—</td></tr>';
+};
+
+// ── Audit ──────────────────────────────────────────────────────────────
+loaders.audit = async () => {
+  const r = await api('/api/admin/audit?limit=200');
+  $('audit-tbody').innerHTML = r.entries.length ? r.entries.map(e => `<tr>
+      <td title="${esc(fmtDateTime(e.created_at))}">${esc(ago(e.created_at))}</td><td>${esc(e.actor)}</td><td>${pill(e.action.replace(/-/g, ' '), 'tag')}</td>
+      <td>${esc(e.target || '—')}</td><td class="muted">${esc(e.detail || '')}</td></tr>`).join('')
+    : '<tr><td colspan="5" class="empty">Nothing yet. Changes you make here will be listed.</td></tr>';
+};
 </script>
 </body>
 </html>
