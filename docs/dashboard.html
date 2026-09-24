@@ -1470,12 +1470,15 @@
     </div>
     <div class="card">
       <div class="card-title">Security</div>
+      <form id="acc-password-form" autocomplete="on">
+      <input type="email" id="acc-pw-username" name="username" autocomplete="username" style="display:none" tabindex="-1" aria-hidden="true">
       <div class="form-group"><label class="form-label">Current password</label><div class="pw-wrap"><input class="form-input" id="acc-current-password" type="password" autocomplete="current-password" placeholder="Required to change password or email"><button class="pw-toggle" type="button" aria-label="Show password"><svg class="pw-eye" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><svg class="pw-eye-off" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg></button></div></div>
       <div class="form-row">
         <div class="form-group" style="flex:1"><label class="form-label">New password</label><div class="pw-wrap"><input class="form-input" id="acc-new-password" type="password" autocomplete="new-password" placeholder="At least 8 characters"><button class="pw-toggle" type="button" aria-label="Show password"><svg class="pw-eye" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><svg class="pw-eye-off" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg></button></div></div>
         <div class="form-group" style="flex:1"><label class="form-label">Confirm new password</label><div class="pw-wrap"><input class="form-input" id="acc-confirm-password" type="password" autocomplete="new-password"><button class="pw-toggle" type="button" aria-label="Show password"><svg class="pw-eye" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><svg class="pw-eye-off" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg></button></div></div>
       </div>
-      <div class="btn-row"><button class="btn btn-primary" id="acc-change-password" type="button">Change Password</button></div>
+      <div class="btn-row"><button class="btn btn-primary" id="acc-change-password" type="submit">Change Password</button></div>
+      </form>
       <div class="form-group" style="margin-top:1.25rem"><label class="form-label">New email address</label><input class="form-input" id="acc-new-email" type="email" autocomplete="email" placeholder="you@example.com"></div>
       <div class="form-hint">We send a verification link to the new address. Your email changes after you confirm it.</div>
       <div class="btn-row" style="margin-top:.65rem"><button class="btn btn-secondary" id="acc-change-email" type="button">Change Email</button></div>
@@ -1833,7 +1836,7 @@ onAuthStateChanged(auth,async user=>{
     else{document.getElementById('trial-days').textContent='Trial expired.';document.getElementById('trial-msg').textContent='Subscribe to continue using NyxPrism.';}
   }
   // Account panel
-  const accE=document.getElementById('acc-email');if(accE)accE.textContent=user.email;
+  const accE=document.getElementById('acc-email');if(accE)accE.textContent=user.email;const accU=document.getElementById('acc-pw-username');if(accU)accU.value=user.email;
   const accN=document.getElementById('acc-name');if(accN)accN.textContent=(firstName+(lastName?' '+lastName:''))||'—';
   const accFN=document.getElementById('acc-first-name');if(accFN)accFN.value=firstName;
   const accLN=document.getElementById('acc-last-name');if(accLN)accLN.value=lastName;
@@ -1942,16 +1945,21 @@ window.__nyxGetToken=()=>auth.currentUser?.getIdToken();
       showResult(profileResult,'success','Name updated.');
     }catch(err){showResult(profileResult,'error',err.message);}finally{this.disabled=false;}
   });
-  document.getElementById('acc-change-password').addEventListener('click',async function(){
+  document.getElementById('acc-password-form').addEventListener('submit',async function(e){
+    e.preventDefault();
     const newPass=document.getElementById('acc-new-password').value,confirmPass=document.getElementById('acc-confirm-password').value;
     if(newPass.length<8)return showResult(securityResult,'error','New password must be at least 8 characters.');
     if(newPass!==confirmPass)return showResult(securityResult,'error','New passwords do not match.');
-    this.disabled=true;
+    const btn=document.getElementById('acc-change-password');btn.disabled=true;
     try{
       await reauth();await updatePassword(auth.currentUser,newPass);
+      // Tell the browser's password manager about the new password so it stops autofilling the old one at login.
+      if(window.PasswordCredential&&navigator.credentials?.store){
+        try{await navigator.credentials.store(new PasswordCredential({id:auth.currentUser.email,password:newPass}));}catch(_){}
+      }
       ['acc-current-password','acc-new-password','acc-confirm-password'].forEach(id=>document.getElementById(id).value='');
-      showResult(securityResult,'success','Password changed.');
-    }catch(err){showResult(securityResult,'error',friendlyAuthError(err));}finally{this.disabled=false;}
+      showResult(securityResult,'success','Password changed. Use the new password next time you sign in (update it in your password manager if it doesn't prompt you).');
+    }catch(err){showResult(securityResult,'error',friendlyAuthError(err));}finally{btn.disabled=false;}
   });
   document.getElementById('acc-change-email').addEventListener('click',async function(){
     const newEmail=document.getElementById('acc-new-email').value.trim();

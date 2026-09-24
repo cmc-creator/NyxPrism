@@ -246,6 +246,14 @@
       border: 1px solid rgba(248,113,113,.2); border-radius: var(--radius-sm);
       padding: .6rem .85rem; margin-bottom: .9rem;
     }
+    .pw-wrap { position: relative; }
+    .field .pw-wrap input { padding-right: 2.6rem; }
+    .pw-toggle { position: absolute; right: .4rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--muted); width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 6px; transition: color .15s; }
+    .pw-toggle:hover { color: var(--text); }
+    .pw-toggle svg { width: 17px; height: 17px; stroke: currentColor; pointer-events: none; }
+    .pw-toggle .pw-eye-off { display: none; }
+    .pw-toggle.showing .pw-eye { display: none; }
+    .pw-toggle.showing .pw-eye-off { display: block; }
   </style>
   <link rel="stylesheet" href="nyx-brand.css?v=3" />
 </head>
@@ -300,7 +308,7 @@
           </div>
           <div class="field">
             <label for="login-password">Password</label>
-            <input type="password" id="login-password" name="password" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" autocomplete="current-password" required />
+            <div class="pw-wrap"><input type="password" id="login-password" name="password" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" autocomplete="current-password" required /><button class="pw-toggle" type="button" aria-label="Show password"><svg class="pw-eye" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><svg class="pw-eye-off" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg></button></div>
           </div>
           <div class="field-footer">
             <label class="remember">
@@ -342,7 +350,7 @@
           </div>
           <div class="field">
             <label for="trial-password">Create a password</label>
-            <input type="password" id="trial-password" name="password" placeholder="Min. 12 characters" autocomplete="new-password" required minlength="12" />
+            <div class="pw-wrap"><input type="password" id="trial-password" name="password" placeholder="Min. 12 characters" autocomplete="new-password" required minlength="12" /><button class="pw-toggle" type="button" aria-label="Show password"><svg class="pw-eye" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><svg class="pw-eye-off" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg></button></div>
           </div>
           <div class="auth-error" id="trial-error"></div>
           <button type="submit" class="submit-btn">Create Free Account</button>
@@ -365,6 +373,17 @@
   <a href="contact.html">Contact Us</a>
 </footer>
 
+<script>
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.pw-toggle');
+    if (!btn) return;
+    var input = btn.parentElement.querySelector('input');
+    var show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    btn.classList.toggle('showing', show);
+    btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+  });
+</script>
 <script type="module">
   // ── Update this once Railway gives you a URL ─────────────────────────
   const API = 'https://nyxprism-production.up.railway.app';
