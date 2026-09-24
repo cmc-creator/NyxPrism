@@ -249,6 +249,7 @@
       <!-- Billing -->
       <section class="page" id="page-billing">
         <div class="page-head"><div><h1>Billing</h1><div class="sub">Live from Stripe.</div></div><a class="btn" href="https://dashboard.stripe.com/" target="_blank" rel="noopener">Open Stripe ↗</a></div>
+        <div class="card" id="bill-conn"><h2>Stripe connection</h2><div class="muted">Loading…</div></div>
         <div class="tiles" id="bill-tiles"></div>
         <div class="msg error" id="bill-msg" style="margin-bottom:.8rem"></div>
         <div class="tbl-wrap"><table><thead><tr><th>Customer</th><th>Status</th><th>Amount</th><th>Renews / ends</th><th>Started</th></tr></thead><tbody id="bill-tbody"></tbody></table></div>
@@ -751,6 +752,7 @@ async function openUser(id) {
 loaders.billing = async () => {
   const b = await api('/api/admin/billing');
   $('bill-msg').textContent = !b.configured ? 'Stripe is not configured on the backend (STRIPE_SECRET_KEY is missing).' : (b.error || '');
+  renderStripeConnection(b);
   const counts = b.counts || {};
   $('bill-tiles').innerHTML = [
     tile('Monthly recurring revenue', b.configured && !b.error ? money(b.mrrCents || 0, b.currency) : '—', b.livemode === false ? 'Stripe test mode' : ''),
@@ -766,6 +768,34 @@ loaders.billing = async () => {
       <td>${esc(fmtDate(s.currentPeriodEnd))}</td><td>${esc(fmtDate(s.created))}</td></tr>`).join('')
     : `<tr><td colspan="5" class="empty">${b.configured ? 'No subscriptions yet.' : 'Connect Stripe to see subscriptions.'}</td></tr>`;
 };
+
+function renderStripeConnection(b) {
+  const el = $('bill-conn');
+  if (!b.configured) { el.innerHTML = '<h2>Stripe connection</h2><div class="msg error">Not connected. STRIPE_SECRET_KEY is not set on Railway.</div>'; return; }
+  if (b.error) { el.innerHTML = `<h2>Stripe connection</h2><div class="msg error">${esc(b.error)}. Check that STRIPE_SECRET_KEY on Railway is a current key from your Stripe account (Developers → API keys).</div>`; return; }
+  const ok = (good, text) => `<span class="status-dot ${good ? 'ok' : 'bad'}"></span>${text}`;
+  const a = b.account || {};
+  const mode = b.keyMode === 'live' ? pill('live', 'ok') : b.keyMode === 'test' ? pill('test mode', 'pending') : pill('unknown', 'tag');
+  const accountText = a.error ? `<span class="muted">Couldn't read account details (${esc(a.error)})</span>`
+    : `<strong>${esc(a.name || 'Unnamed account')}</strong>${a.email ? ' · ' + esc(a.email) : ''}<div class="mono muted" style="margin-top:.2rem">${esc(a.id || '')}${a.country ? ' · ' + esc(a.country) : ''}</div>`;
+  const priceRow = p => !p.set ? ok(false, `${esc(p.label)} price ID is not set on Railway`)
+    : !p.found ? ok(false, `${esc(p.label)} price <span class="mono">${esc(p.id)}</span> was not found in this Stripe account/mode`)
+    : ok(p.active, `${esc(p.label)}: ${esc(p.product || 'product')} · ${esc(money(p.amountCents || 0, p.currency))}${p.interval ? ' / ' + esc(p.interval) : ''}${p.active ? '' : ' (archived)'} <span class="mono muted">${esc(p.id)}</span>`);
+  const w = b.webhooks || {};
+  const endpoints = w.endpoints || [];
+  const hookRows = w.error ? [`<span class="muted">Couldn't list webhooks (${esc(w.error)})</span>`]
+    : endpoints.length ? endpoints.map(e => ok(e.status === 'enabled', `Endpoint registered: <span class="mono">${esc(e.url)}</span> (${esc(e.status)})`))
+    : [ok(false, 'No webhook endpoint for NyxPrism exists in this Stripe account/mode yet')];
+  hookRows.push(ok(w.secretSet, w.secretSet ? 'STRIPE_WEBHOOK_SECRET is set on Railway' : 'STRIPE_WEBHOOK_SECRET is not set on Railway'));
+  el.innerHTML = `<h2>Stripe connection</h2>
+    <dl class="kv">
+      <dt>Account</dt><dd>${accountText}</dd>
+      <dt>Mode</dt><dd>${mode}${b.keyMode === 'test' ? ' <span class="muted">— no real charges. In Stripe, turn on Test mode (or open the sandbox) to see this data.</span>' : ''}</dd>
+      <dt>Prices</dt><dd>${(b.prices || []).map(priceRow).join('<br>')}</dd>
+      <dt>Webhook</dt><dd>${hookRows.join('<br>')}</dd>
+    </dl>
+    <div class="sub" style="margin-top:.8rem">To find this in Stripe: click the account name at the top-left of dashboard.stripe.com and pick <strong>${esc(a.name || a.id || 'the account above')}</strong>${b.keyMode === 'test' ? ', with Test mode on' : ''}.</div>`;
+}
 
 // ── Documents ──────────────────────────────────────────────────────────
 loaders.documents = async () => {

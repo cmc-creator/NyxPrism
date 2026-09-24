@@ -635,6 +635,36 @@ router.get('/billing', async (_req, res) => {
       subs.push(sub);
       if (subs.length >= 500) break;
     }
+    const key = process.env.STRIPE_SECRET_KEY;
+    const keyMode = key.startsWith('sk_live_') || key.startsWith('rk_live_') ? 'live' : key.startsWith('sk_test_') || key.startsWith('rk_test_') ? 'test' : 'unknown';
+    const account = await stripe.accounts.retrieve().then(a => ({
+      id: a.id,
+      name: a.settings?.dashboard?.display_name || a.business_profile?.name || null,
+      email: a.email || null,
+      country: a.country || null,
+    })).catch(err => ({ error: err.message }));
+    const checkPrice = async (label, id) => {
+      if (!id) return { label, set: false };
+      try {
+        const p = await stripe.prices.retrieve(id, { expand: ['product'] });
+        return { label, set: true, found: true, id, active: p.active, amountCents: p.unit_amount, currency: p.currency,
+          interval: p.recurring?.interval || null, product: typeof p.product === 'object' ? p.product.name : p.product };
+      } catch (err) {
+        return { label, set: true, found: false, id, error: err.message };
+      }
+    };
+    const prices = await Promise.all([
+      checkPrice('Monthly', process.env.STRIPE_PRICE_ID_MONTHLY),
+      checkPrice('Annual', process.env.STRIPE_PRICE_ID_ANNUAL),
+    ]);
+    const webhooks = await stripe.webhookEndpoints.list({ limit: 100 }).then(r => {
+      const ours = r.data.filter(w => w.url.includes('/api/stripe/webhook'));
+      return {
+        secretSet: !!process.env.STRIPE_WEBHOOK_SECRET,
+        endpoints: ours.map(w => ({ id: w.id, url: w.url, status: w.status, events: w.enabled_events })),
+      };
+    }).catch(err => ({ secretSet: !!process.env.STRIPE_WEBHOOK_SECRET, error: err.message }));
+
     let mrr = 0;
     for (const sub of subs.filter(s => ['active', 'past_due'].includes(s.status))) {
       for (const item of sub.items.data) {
@@ -647,7 +677,11 @@ router.get('/billing', async (_req, res) => {
     }
     res.json({
       configured: true,
-      livemode: subs[0]?.livemode ?? null,
+      keyMode,
+      account,
+      prices,
+      webhooks,
+      livemode: keyMode === 'live' ? true : keyMode === 'test' ? false : (subs[0]?.livemode ?? null),
       currency: subs[0]?.currency || 'usd',
       mrrCents: Math.round(mrr),
       counts: subs.reduce((acc, s) => { acc[s.status] = (acc[s.status] || 0) + 1; return acc; }, {}),
