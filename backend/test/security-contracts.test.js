@@ -59,6 +59,13 @@ test('paid operations enforce active plans on the server', async () => {
   }
 });
 
+test('signature links always use the public clean URL', async () => {
+  const source = await read('src/routes/sign-requests.js');
+  assert.match(source, /signingUrl = token => `\$\{APP_PUBLIC\(\)\}\/sign-request\?token=/);
+  assert.match(source, /https:\/\/www\.nyxprism\.com/);
+  assert.doesNotMatch(source, /sign-request\.html\?token/);
+});
+
 test('signature completion is consented, locked, and state checked', async () => {
   const source = await read('src/routes/sign-requests.js');
   assert.match(source, /consent !== true/);

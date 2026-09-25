@@ -41,6 +41,8 @@ async function recordNotification(clientOrPool, { requestId, recipientId = null,
   );
 }
 
+const APP_PUBLIC = () => (process.env.FRONTEND_URL || 'https://www.nyxprism.com').replace(/\/$/, '');
+const signingUrl = token => `${APP_PUBLIC()}/sign-request?token=${encodeURIComponent(token)}`;
 const API_PUBLIC = () => (process.env.PUBLIC_API_URL || 'https://nyxprism-production.up.railway.app').replace(/\/$/, '');
 
 /** The sender's branding (company name, hosted logo URL), if they set one. */
@@ -276,7 +278,7 @@ async function sendLogged(requestId, recipientId, type, message) {
 async function notifyCompleted(requestId) {
   const request = await requestSummary(requestId);
   const signers = await pool.query('SELECT id, name, email, token FROM signature_recipients WHERE request_id = $1 ORDER BY role_order, id', [requestId]);
-  const base = process.env.FRONTEND_URL || 'https://nyxprism.com';
+  const base = APP_PUBLIC();
   await Promise.all([
     sendLogged(requestId, null, 'owner_completed', {
       to: request.owner_email,
@@ -286,7 +288,7 @@ async function notifyCompleted(requestId) {
     ...signers.rows.map(signer => sendLogged(requestId, signer.id, 'signer_completed_copy', {
       to: signer.email,
       subject: `Your signed copy: ${request.title}`,
-      html: `<p>Hello ${escapeHtml(signer.name)},</p><p>All parties have signed <strong>${escapeHtml(request.document_name)}</strong>.</p><p><a href="${base}/sign-request.html?token=${signer.token}">Download the completed document</a></p><p>This link is unique to you.</p>`,
+      html: `<p>Hello ${escapeHtml(signer.name)},</p><p>All parties have signed <strong>${escapeHtml(request.document_name)}</strong>.</p><p><a href="${signingUrl(signer.token)}">Download the completed document</a></p><p>This link is unique to you.</p>`,
     })),
   ]);
 }
@@ -403,11 +405,10 @@ router.get('/:id', requireAuth, async (req, res) => {
        LIMIT 50`,
       [requestId],
     );
-    const base = process.env.FRONTEND_URL || 'https://nyxprism.com';
     const request = requestResult.rows[0];
     res.json({
       request,
-      recipients: recipients.rows.map(row => ({ ...row, ...(request.status !== 'draft' ? { url: `${base}/sign-request.html?token=${row.token}` } : {}) })),
+      recipients: recipients.rows.map(row => ({ ...row, ...(request.status !== 'draft' ? { url: signingUrl(row.token) } : {}) })),
       events: events.rows,
     });
   } catch (err) {
@@ -494,7 +495,7 @@ router.post('/', requireAuth, requireVerifiedEmail, requireActivePlan, async (re
         [request.id, recipient.name, recipient.email, recipient.roleOrder, token, recipientStatus],
       );
       recipientIds.set(inserted.rows[0].email, inserted.rows[0].id);
-      signers.push({ ...recipient, id: inserted.rows[0].id, status: recipientStatus, token, url: `${process.env.FRONTEND_URL || 'https://nyxprism.com'}/sign-request.html?token=${token}` });
+      signers.push({ ...recipient, id: inserted.rows[0].id, status: recipientStatus, token, url: signingUrl(token) });
     }
 
     for (const field of fields) {
@@ -548,7 +549,7 @@ router.post('/', requireAuth, requireVerifiedEmail, requireActivePlan, async (re
         }
       }));
     } catch (err) {
-      emailWarning = 'Draft saved, but email delivery failed. Check BREVO_API_KEY.';
+      emailWarning = `Signature request created, but the email to the first signer could not be delivered. Copy this signing link instead: ${signers.find(signer => signer.status === 'pending')?.url || 'Unavailable'}`;
       console.error('sign-requests email error:', err.message);
     }
   }
@@ -604,7 +605,7 @@ router.post('/:id/send', requireAuth, requireVerifiedEmail, requireActivePlan, a
       title: request.title,
       document_name: request.document_name,
       message: request.message,
-      url: `${process.env.FRONTEND_URL || 'https://nyxprism.com'}/sign-request.html?token=${firstResult.rows[0].token}`,
+      url: signingUrl(firstResult.rows[0].token),
     };
     await audit(client, { requestId, recipientId: signer.id, eventType: 'sent', detail: 'Draft sent', req });
     await client.query('COMMIT');
@@ -622,7 +623,7 @@ router.post('/:id/send', requireAuth, requireVerifiedEmail, requireActivePlan, a
     await sendEmail({ to: signer.email, subject: `Signature requested: ${signer.title}`, html: signerEmailHtml({ signer, title: signer.title, documentName: signer.document_name, message: signer.message, ownerEmail: req.user.email, brand }) });
     await recordNotification(pool, { requestId, recipientId: signer.id, type: 'signature_request_sent', status: 'sent' });
   } catch (error) {
-    warning = 'Request activated, but email delivery failed.';
+    warning = `Request activated, but the email could not be delivered. Copy this signing link instead: ${signer.url}`;
     await recordNotification(pool, { requestId, recipientId: signer.id, type: 'signature_request_sent', status: 'failed', error: error.message });
   }
   res.json({ ok: true, warning });
@@ -643,10 +644,9 @@ async function remindCurrentSigners(requestId) {
        AND (r.expires_at IS NULL OR r.expires_at > NOW())`,
     [requestId],
   );
-  const base = process.env.FRONTEND_URL || 'https://nyxprism.com';
   let sent = 0;
   for (const signer of rows) {
-    const url = `${base}/sign-request.html?token=${signer.token}`;
+    const url = signingUrl(signer.token);
     try {
       await sendEmail({
         to: signer.email,
@@ -888,7 +888,7 @@ router.post('/public/:token/complete', async (req, res) => {
       [recipient.request_id],
     );
     if (next.rows.length) {
-      nextSigner = { ...next.rows[0], url: `${process.env.FRONTEND_URL || 'https://nyxprism.com'}/sign-request.html?token=${next.rows[0].token}` };
+      nextSigner = { ...next.rows[0], url: signingUrl(next.rows[0].token) };
       await client.query("UPDATE signature_recipients SET status = 'pending' WHERE id = $1 AND status = 'waiting'", [nextSigner.id]);
       await client.query("UPDATE signature_requests SET status = 'in_progress', updated_at = NOW() WHERE id = $1", [recipient.request_id]);
       await audit(client, { requestId: recipient.request_id, recipientId: nextSigner.id, eventType: 'advanced', detail: 'Sequential signer activated', req });
