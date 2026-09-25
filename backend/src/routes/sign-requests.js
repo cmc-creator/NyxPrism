@@ -24,7 +24,7 @@ async function sendEmail({ to, subject, html }) {
     method: 'POST',
     headers: { 'api-key': process.env.BREVO_API_KEY, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      sender: { name: 'NyxPrism Signatures', email: 'noreply@nyxprism.com' },
+      sender: { name: 'NyxPrism Signatures', email: 'info@nyxprism.com' },
       to: [{ email: to }],
       subject,
       htmlContent: html,
