@@ -10,11 +10,11 @@ const MAX_OUTPUT_TOKENS = 1024;
 
 // POST /api/ai/desktop  { system, input, maxTokens }
 // AI for the NyxPrism desktop app (boundary detection, naming, summaries,
-// classification, key-info extraction) — included with Professional.
+// classification, key-info extraction) - included with Professional.
 router.post('/', requireAuth, requireActivePlan, aiDailyQuota, async (req, res) => {
   const { system, input } = req.body ?? {};
   if (typeof system !== 'string' || !system.trim() || system.length > MAX_SYSTEM_CHARS) {
-    return res.status(400).json({ error: `system must be 1–${MAX_SYSTEM_CHARS} characters.` });
+    return res.status(400).json({ error: `system must be 1-${MAX_SYSTEM_CHARS} characters.` });
   }
   if (typeof input !== 'string' || !input.trim()) {
     return res.status(400).json({ error: 'input is required.' });

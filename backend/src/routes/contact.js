@@ -74,7 +74,7 @@ router.post('/', limiter, async (req, res) => {
     await sendEmail({
       to:      process.env.CONTACT_EMAIL,
       replyTo: safe.email,
-      subject: `[NyxPrism] ${safe.subject} — ${safe.firstName} ${safe.lastName}`,
+      subject: `[NyxPrism] ${safe.subject} - ${safe.firstName} ${safe.lastName}`,
       html: `
         <p><strong>From:</strong> ${escapeHtml(safe.firstName)} ${escapeHtml(safe.lastName)} &lt;${escapeHtml(safe.email)}&gt;</p>
         <p><strong>Subject:</strong> ${escapeHtml(safe.subject)}</p>

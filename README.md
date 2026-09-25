@@ -19,9 +19,9 @@
   <img src="https://img.shields.io/badge/License-Apache%202.0-green?style=for-the-badge" alt="Apache 2.0" />
 </p>
 
-**Powerful AI-enhanced PDF multi-tool** — split, merge, compress, convert, OCR, watermark, protect, and AI bulk-split with auto-rename, summarize, classify, and structured data extraction.
+**Powerful AI-enhanced PDF multi-tool** - split, merge, compress, convert, OCR, watermark, protect, and AI bulk-split with auto-rename, summarize, classify, and structured data extraction.
 
-NyxPrism is a Python library and CLI covering everything you would expect from a professional PDF suite — plus an AI layer that automates the tedious parts: detecting document boundaries in batch scans, renaming files descriptively, summarizing content, and pulling out key data.
+NyxPrism is a Python library and CLI covering everything you would expect from a professional PDF suite - plus an AI layer that automates the tedious parts: detecting document boundaries in batch scans, renaming files descriptively, summarizing content, and pulling out key data.
 
 ---
 
@@ -65,7 +65,7 @@ brew install tesseract                   # macOS
 export OPENAI_API_KEY="sk-..."
 ```
 
-Without an API key every AI command automatically falls back to the built-in heuristic engine — no key required.
+Without an API key every AI command automatically falls back to the built-in heuristic engine - no key required.
 
 ---
 
@@ -73,7 +73,7 @@ Without an API key every AI command automatically falls back to the built-in heu
 
 The desktop app uses the same plans as [nyxprism.com](https://www.nyxprism.com/).
 
-| Free — no account needed | Professional — sign in with a Professional plan or trial |
+| Free - no account needed | Professional - sign in with a Professional plan or trial |
 |---|---|
 | split, merge, compress, rotate, reorder, delete-pages, extract-text, to-images, from-images, interleave, watermark, unlock | all `ai-*` commands, `ocr`, `protect`, and the full-screen app `nyxprism-ui` |
 

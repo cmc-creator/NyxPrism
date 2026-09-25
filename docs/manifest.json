@@ -2,7 +2,7 @@
   "name": "NyxPrism PDF Tools",
   "short_name": "NyxPrism",
   "id": "/dashboard.html",
-  "description": "Professional PDF tools — split, merge, compress, OCR, watermark and more.",
+  "description": "Professional PDF tools - split, merge, compress, OCR, watermark and more.",
   "start_url": "/dashboard.html",
   "scope": "/",
   "display": "standalone",

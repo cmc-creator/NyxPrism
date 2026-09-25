@@ -8,7 +8,7 @@ from nyxprism.ai.namer import suggest_name, suggest_names_bulk, _sanitise, _dedu
 
 
 # ---------------------------------------------------------------------------
-# Analyzer – heuristic strategy
+# Analyzer - heuristic strategy
 # ---------------------------------------------------------------------------
 
 class TestHeuristicBoundaries:
@@ -72,7 +72,7 @@ class TestDetectBoundariesFallback:
 
 
 # ---------------------------------------------------------------------------
-# Namer – heuristic strategy
+# Namer - heuristic strategy
 # ---------------------------------------------------------------------------
 
 class TestSuggestName:

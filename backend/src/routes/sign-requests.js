@@ -650,7 +650,7 @@ async function remindCurrentSigners(requestId) {
     try {
       await sendEmail({
         to: signer.email,
-        subject: `Reminder: signature requested — ${signer.title}`,
+        subject: `Reminder: signature requested - ${signer.title}`,
         html: signerEmailHtml({ signer: { ...signer, url }, title: signer.title, documentName: signer.document_name, message: signer.message, ownerEmail: signer.owner_email, brand: await brandFor(signer.owner_user_id).catch(() => null), reminder: true }),
       });
       await recordNotification(pool, { requestId, recipientId: signer.id, type: 'signature_reminder', status: 'sent' });

@@ -1,4 +1,4 @@
-"""NyxPrism – Powerful AI-enhanced PDF multi-tool."""
+"""NyxPrism - Powerful AI-enhanced PDF multi-tool."""
 
 from importlib.metadata import PackageNotFoundError, version
 

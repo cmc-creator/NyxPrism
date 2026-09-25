@@ -35,7 +35,7 @@ async function sendInviteEmail({ to, teamName, inviter, token }) {
   if (!res.ok) throw new Error(`Brevo error ${res.status}`);
 }
 
-// GET /api/teams/mine — the team you manage, or the team you belong to.
+// GET /api/teams/mine - the team you manage, or the team you belong to.
 router.get('/mine', requireAuth, async (req, res) => {
   try {
     const me = await userRow(req.user);
@@ -127,7 +127,7 @@ router.post('/accept', requireAuth, async (req, res) => {
   }
 });
 
-// DELETE /api/teams/members/:id — remove a member or cancel an invitation (owner/admin).
+// DELETE /api/teams/members/:id - remove a member or cancel an invitation (owner/admin).
 router.delete('/members/:id', requireAuth, async (req, res) => {
   const id = parseInt(req.params.id, 10);
   if (!Number.isInteger(id)) return res.status(400).json({ error: 'Invalid member.' });

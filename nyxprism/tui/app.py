@@ -1,4 +1,4 @@
-"""NyxPrism TUI — easy-button terminal interface.
+"""NyxPrism TUI - easy-button terminal interface.
 
 Launch with:
     nyxprism-ui
@@ -32,13 +32,13 @@ COMMANDS: dict[str, dict] = {
              "type": "input",  "ph": "/path/to/batch.pdf"},
             {"id": "output_dir", "label": "Output Folder  (leave blank for auto)",
              "type": "input",  "ph": ""},
-            {"id": "batch_dir",  "label": "Batch Folder  (optional — process ALL PDFs in folder, ignores PDF File above)",
+            {"id": "batch_dir",  "label": "Batch Folder  (optional - process ALL PDFs in folder, ignores PDF File above)",
              "type": "input",  "ph": ""},
             {"id": "strategy",   "label": "Strategy",
              "type": "select",
-             "opts": [("Auto – LLM when key available  (recommended)", "auto"),
-                      ("Heuristic – fully offline, instant",           "heuristic"),
-                      ("AI – included with Professional (or your own OPENAI_API_KEY)", "llm")],
+             "opts": [("Auto - LLM when key available  (recommended)", "auto"),
+                      ("Heuristic - fully offline, instant",           "heuristic"),
+                      ("AI - included with Professional (or your own OPENAI_API_KEY)", "llm")],
              "default": "auto"},
         ],
     },
@@ -52,8 +52,8 @@ COMMANDS: dict[str, dict] = {
             {"id": "strategy", "label": "Strategy",
              "type": "select",
              "opts": [("Auto  (recommended)", "auto"),
-                      ("Heuristic – offline",  "heuristic"),
-                      ("LLM – OpenAI",         "llm")],
+                      ("Heuristic - offline",  "heuristic"),
+                      ("LLM - OpenAI",         "llm")],
              "default": "auto"},
             {"id": "output",   "label": "Save to file  (leave blank to display here)",
              "type": "input",  "ph": ""},
@@ -69,8 +69,8 @@ COMMANDS: dict[str, dict] = {
             {"id": "strategy", "label": "Strategy",
              "type": "select",
              "opts": [("Auto  (recommended)", "auto"),
-                      ("Heuristic – offline",  "heuristic"),
-                      ("LLM – OpenAI",         "llm")],
+                      ("Heuristic - offline",  "heuristic"),
+                      ("LLM - OpenAI",         "llm")],
              "default": "auto"},
         ],
     },
@@ -84,8 +84,8 @@ COMMANDS: dict[str, dict] = {
             {"id": "strategy", "label": "Strategy",
              "type": "select",
              "opts": [("Auto  (recommended)", "auto"),
-                      ("Heuristic – offline",  "heuristic"),
-                      ("LLM – OpenAI",         "llm")],
+                      ("Heuristic - offline",  "heuristic"),
+                      ("LLM - OpenAI",         "llm")],
              "default": "auto"},
             {"id": "output",   "label": "Save JSON  (leave blank to display here)",
              "type": "input",  "ph": ""},
@@ -100,14 +100,14 @@ COMMANDS: dict[str, dict] = {
              "type": "input",  "ph": "/path/to/pdfs/"},
             {"id": "dry_run",  "label": "Mode",
              "type": "select",
-             "opts": [("Preview only – don't rename yet  (safe default)", "yes"),
-                      ("Apply – rename files now",                         "no")],
+             "opts": [("Preview only - don't rename yet  (safe default)", "yes"),
+                      ("Apply - rename files now",                         "no")],
              "default": "yes"},
             {"id": "strategy", "label": "Strategy",
              "type": "select",
              "opts": [("Auto  (recommended)", "auto"),
-                      ("Heuristic – offline",  "heuristic"),
-                      ("LLM – OpenAI",         "llm")],
+                      ("Heuristic - offline",  "heuristic"),
+                      ("LLM - OpenAI",         "llm")],
              "default": "auto"},
         ],
     },
@@ -151,7 +151,7 @@ COMMANDS: dict[str, dict] = {
              "type": "input",  "ph": "/path/to/big.pdf"},
             {"id": "output",  "label": "Output File  (leave blank for auto)",
              "type": "input",  "ph": ""},
-            {"id": "quality", "label": "Image Quality  1–95  (0 = skip image recompression)",
+            {"id": "quality", "label": "Image Quality  1-95  (0 = skip image recompression)",
              "type": "input",  "ph": "75"},
         ],
     },
@@ -166,7 +166,7 @@ COMMANDS: dict[str, dict] = {
              "type": "input",  "ph": "CONFIDENTIAL"},
             {"id": "output",  "label": "Output File  (leave blank for auto)",
              "type": "input",  "ph": ""},
-            {"id": "opacity", "label": "Opacity  (0.0 – 1.0)",
+            {"id": "opacity", "label": "Opacity  (0.0 - 1.0)",
              "type": "input",  "ph": "0.3"},
             {"id": "angle",   "label": "Angle  (degrees)",
              "type": "input",  "ph": "45"},
@@ -205,7 +205,7 @@ COMMANDS: dict[str, dict] = {
         "fields": [
             {"id": "source", "label": "PDF File",
              "type": "input",  "ph": "/path/to/doc.pdf"},
-            {"id": "pages",  "label": "Pages  (e.g. 1,2,5 — leave blank for all)",
+            {"id": "pages",  "label": "Pages  (e.g. 1,2,5 - leave blank for all)",
              "type": "input",  "ph": ""},
             {"id": "output", "label": "Save to file  (leave blank to display here)",
              "type": "input",  "ph": ""},
@@ -563,7 +563,7 @@ class CommandModal(ModalScreen):
                 for path, label in results:
                     log(f"  [green]✔[/green] {label}  →  [dim]{path}[/dim]")
                 total += len(results)
-            log(f"\n[green bold]✅ Done — {total} doc(s) from {len(pdfs)} file(s).[/green bold]")
+            log(f"\n[green bold]✅ Done - {total} doc(s) from {len(pdfs)} file(s).[/green bold]")
         else:
             if not Path(source).is_file():
                 log(f"[red]File not found:[/red] {source}")
@@ -660,7 +660,7 @@ class CommandModal(ModalScreen):
                 log(f"  [yellow]⚠  {pdf.name}:[/yellow] {exc}")
 
         if dry_run:
-            log("\n[dim italic]Dry run — no files changed. Switch Mode to 'Apply' to rename.[/dim italic]")
+            log("\n[dim italic]Dry run - no files changed. Switch Mode to 'Apply' to rename.[/dim italic]")
         log("\n[green bold]✅ Done.[/green bold]")
 
     def _split(self, v: dict, log: Callable) -> None:
@@ -800,7 +800,7 @@ class CommandModal(ModalScreen):
         else:
             preview = text[:2000]
             if len(text) > 2000:
-                preview += "\n[dim]… (truncated — use 'Save to file' for the full text)[/dim]"
+                preview += "\n[dim]… (truncated - use 'Save to file' for the full text)[/dim]"
             log(preview)
             log("\n[green bold]✅ Done.[/green bold]")
 
@@ -821,7 +821,7 @@ class CommandModal(ModalScreen):
         else:
             preview = (text or "")[:2000]
             if text and len(text) > 2000:
-                preview += "\n[dim]… (truncated — use 'Save to file' for the full text)[/dim]"
+                preview += "\n[dim]… (truncated - use 'Save to file' for the full text)[/dim]"
             log(preview)
             log("\n[green bold]✅ Done.[/green bold]")
 

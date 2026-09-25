@@ -84,7 +84,7 @@ def reorder_pages(
 
     for p in order:
         if p < 1 or p > total:
-            raise ValueError(f"Page number {p} out of range (1–{total})")
+            raise ValueError(f"Page number {p} out of range (1-{total})")
         writer.add_page(reader.pages[p - 1])
 
     with open(output, "wb") as f:

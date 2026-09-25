@@ -33,10 +33,10 @@ ${truncated}
 
 Conversation rules:
 - Be concise and friendly.
-- On the very first message, greet the user, mention the filename and page count, and ask how they'd like to split it. Give 2–3 short numbered examples (e.g. "1. Split by chapter  2. Split every N pages  3. Custom range").
+- On the very first message, greet the user, mention the filename and page count, and ask how they'd like to split it. Give 2-3 short numbered examples (e.g. "1. Split by chapter  2. Split every N pages  3. Custom range").
 - Whenever you offer multiple options or choices, always number them (1, 2, 3…) so the user can reply with just the number.
 - Ask follow-up questions if the criteria are unclear (e.g. which pages belong to which section).
-- Once you have enough information, produce the split plan inline using this exact format — no markdown fences, just the tag:
+- Once you have enough information, produce the split plan inline using this exact format - no markdown fences, just the tag:
   <SPLIT_PLAN>[{"pages":[1,2],"filename":"part1.pdf"},...]</SPLIT_PLAN>
 - After the tag, briefly explain the plan in plain language.
 - Filename rules: filesystem-safe (alphanumeric, underscores, hyphens only), end in .pdf, max 60 chars, descriptive.
@@ -60,7 +60,7 @@ Conversation rules:
         const parsed = JSON.parse(planMatch[1].trim());
         if (Array.isArray(parsed)) plan = parsed;
       } catch {
-        // Plan tag present but malformed — let the conversation continue
+        // Plan tag present but malformed - let the conversation continue
       }
     }
 

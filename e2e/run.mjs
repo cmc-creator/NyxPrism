@@ -133,6 +133,34 @@ await test('teams: owner manages seats and invites; invite links are accepted', 
   assert.deepEqual(page.errors, []);
 });
 
+await test('owner portal: add a user with a plan and team, change plans inline', async () => {
+  let created = null, planChange = null;
+  const users = [{ id: 3, email: 'jo@example.com', first_name: 'Jo', plan: 'free', subscription_status: 'active', created_at: new Date().toISOString(), firebase: { lastSignInAt: null } },
+    { id: 1, email: 'cmc@conniemichelleconsulting.com', plan: 'professional', subscription_status: 'active', owner: true, developer: true, created_at: new Date().toISOString(), firebase: {} }];
+  const page = await newPage(browser, (method, p, body) => {
+    if (p === '/api/admin/me') return { email: 'cmc@conniemichelleconsulting.com', owner: true, auth: 'owner' };
+    if (p === '/api/admin/users' && method === 'GET') return { users, total: users.length };
+    if (p === '/api/admin/teams') return { teams: [{ id: 9, name: 'Acme Legal', seats: 5, active: 1, invited: 0 }] };
+    if (p === '/api/admin/users/create') { created = body; return { ok: true, email: body.email, team: 'Acme Legal' }; }
+    if (p === '/api/admin/users/3/plan') { planChange = body; return { ok: true }; }
+    if (p === '/api/admin/stats') return { totalUsers: 2, newUsers7d: 0, newUsers30d: 0, activeTrials: 0, plans: [], signupsDaily: [{ day: '2026-09-01', count: 0 }], totalApiKeys: 0, totalMessages: 0, unreadMessages: 0, signRequests: [], distributions: { total: 0, sent: 0 }, funnel30d: {} };
+    return {};
+  });
+  await page.goto(`${SITE}/admin.html#users`, { waitUntil: 'networkidle2' }); await wait(1200);
+  assert.equal(await page.$('[data-plan-for="1"]'), null, 'owner plan is fixed');
+  await page.select('[data-plan-for="3"]', 'professional'); await wait(400);
+  assert.deepEqual(planChange, { plan: 'professional' });
+  await page.click('#users-add-open'); await wait(400);
+  await page.type('#ua-first', 'Kim'); await page.type('#ua-email', 'kim@example.com');
+  await page.click('#ua-generate');
+  await page.select('#ua-plan', 'trial'); await page.select('#ua-team', '9');
+  await page.click('#users-add button[type=submit]'); await wait(500);
+  assert.equal(created.email, 'kim@example.com'); assert.equal(created.plan, 'trial'); assert.equal(created.teamId, 9);
+  assert.ok(created.password.length >= 12, 'generated password');
+  assert.match(await page.$eval('#ua-msg', e => e.textContent), /Created kim@example\.com and added to Acme Legal/);
+  assert.deepEqual(page.errors, []);
+});
+
 await test('signer journey against the real API: draw, sign in order, completed copy with certificate', async () => {
   const work = path.join(REPO, 'e2e', '.work');
   const { pool, fb, dir } = await backendCopy(work);
@@ -182,6 +210,40 @@ await test('signer journey against the real API: draw, sign in order, completed 
   } finally {
     api.close(); signerSite.close();
   }
+});
+
+await test('password-protected distribution link: prompt, wrong password, then opens', async () => {
+  const { pool, fb, dir } = await backendCopy(path.join(REPO, 'e2e', '.work-dist'));
+  const distRouter = (await import(pathToFileURL(path.join(dir, 'routes/distributions.js')).href)).default;
+  const owner = fb.addFake('sender@example.com');
+  await pool.query(`INSERT INTO users (firebase_uid,email,plan,subscription_status) VALUES ($1,'sender@example.com','professional','active')`, [owner]);
+  const app = express();
+  app.use((req, res, next) => { res.setHeader('Access-Control-Allow-Origin', '*'); res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Document-Password'); if (req.method === 'OPTIONS') return res.end(); next(); });
+  app.use(express.json({ limit: '12mb' }));
+  app.use('/api/distributions', distRouter);
+  const api = await new Promise(r => { const s = app.listen(5704, () => r(s)); });
+  const recipientSite = await startSite(5705, 'http://localhost:5704');
+  try {
+    const res = await fetch('http://localhost:5704/api/distributions', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + owner }, body: JSON.stringify({
+      title: 'Board pack', documentName: 'board.pdf', documentBase64: fs.readFileSync(PDF2).toString('base64'), sendNow: true, expiresDays: 7, password: 'open-sesame',
+      recipients: [{ name: 'Rita', email: 'rita@example.com' }] }) });
+    assert.equal(res.status, 201);
+    const { rows } = await pool.query("SELECT r.token, b.expires_at, b.access_password_hash FROM distribution_recipients r JOIN distribution_batches b ON b.id = r.batch_id");
+    assert.match(rows[0].access_password_hash, /^scrypt:/, 'password stored hashed');
+    const days = (new Date(rows[0].expires_at) - Date.now()) / 86400000;
+    assert.ok(days > 6.9 && days < 7.1, 'expires in 7 days');
+    const page = await newPage(browser, null);
+    await page.goto(`http://localhost:5705/distribution.html?token=${rows[0].token}`, { waitUntil: 'networkidle2' }); await wait(600);
+    assert.ok(await page.$('#pw-input'), 'asks for the password');
+    await page.type('#pw-input', 'wrong'); await page.click('#pw-box button'); await wait(500);
+    assert.match(await page.$eval('#result', e => e.textContent), /9 attempts left/);
+    await page.$eval('#pw-input', e => { e.value = ''; }); await page.type('#pw-input', 'open-sesame'); await page.click('#pw-box button'); await wait(1200);
+    assert.equal(await page.$('#pw-box'), null, 'password box removed');
+    assert.equal(await page.$eval('#doc-title', e => e.textContent), 'Board pack');
+    const opened = (await pool.query('SELECT status, failed_password_attempts FROM distribution_recipients')).rows[0];
+    assert.deepEqual([opened.status, opened.failed_password_attempts], ['opened', 0]);
+    assert.deepEqual(page.errors, []);
+  } finally { api.close(); recipientSite.close(); }
 });
 
 await browser.close(); site.close();

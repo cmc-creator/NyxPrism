@@ -1,10 +1,10 @@
 """PDF splitting utilities.
 
 Supports:
-* split_by_range  – extract specific page ranges into separate files
-* split_every_n   – split into chunks of N pages
-* split_at_pages  – split at explicit page-boundary list
-* split_by_size   – split so each output is ≤ a given file-size limit (bytes)
+* split_by_range  - extract specific page ranges into separate files
+* split_every_n   - split into chunks of N pages
+* split_at_pages  - split at explicit page-boundary list
+* split_by_size   - split so each output is ≤ a given file-size limit (bytes)
 """
 from __future__ import annotations
 

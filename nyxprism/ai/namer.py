@@ -4,9 +4,9 @@ Given the first page (or summary) of a document, proposes a clean, descriptive
 filename.
 
 Two strategies:
-* ``"llm"``       – uses an OpenAI-compatible API.
-* ``"heuristic"`` – extracts keywords and dates from the text without an API.
-* ``"auto"``      – tries LLM first, falls back to heuristic.
+* ``"llm"``       - uses an OpenAI-compatible API.
+* ``"heuristic"`` - extracts keywords and dates from the text without an API.
+* ``"auto"``      - tries LLM first, falls back to heuristic.
 """
 from __future__ import annotations
 

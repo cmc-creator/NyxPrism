@@ -27,7 +27,7 @@ function hashKey(key) {
   return createHash('sha256').update(key).digest('hex');
 }
 
-// GET /api/keys — list all keys for the authenticated user
+// GET /api/keys - list all keys for the authenticated user
 router.get('/', requireAuth, async (req, res) => {
   try {
     const userId = await findOrCreateUser(req.user);
@@ -43,7 +43,7 @@ router.get('/', requireAuth, async (req, res) => {
   }
 });
 
-// POST /api/keys — create a new key
+// POST /api/keys - create a new key
 router.post('/', requireAuth, requireActivePlan, async (req, res) => {
   const label = (req.body.label || 'My API Key').trim().slice(0, 60);
 
@@ -69,7 +69,7 @@ router.post('/', requireAuth, requireActivePlan, async (req, res) => {
       [userId, label, prefix, hash]
     );
 
-    // Return the full key ONCE — it is never stored in plaintext
+    // Return the full key ONCE - it is never stored in plaintext
     res.status(201).json({ key: rawKey, prefix, label });
   } catch (err) {
     console.error('api-keys POST error:', err.message);
@@ -77,7 +77,7 @@ router.post('/', requireAuth, requireActivePlan, async (req, res) => {
   }
 });
 
-// DELETE /api/keys/:id — revoke a key
+// DELETE /api/keys/:id - revoke a key
 router.delete('/:id', requireAuth, async (req, res) => {
   const keyId = parseInt(req.params.id, 10);
   if (!Number.isInteger(keyId) || keyId < 1) {

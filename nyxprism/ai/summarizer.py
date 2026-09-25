@@ -2,10 +2,10 @@
 
 Two strategies are supported for each operation:
 
-1. **LLM** (``strategy="llm"``) – calls an OpenAI-compatible API.  Requires
+1. **LLM** (``strategy="llm"``) - calls an OpenAI-compatible API.  Requires
    ``OPENAI_API_KEY`` to be set.
-2. **Heuristic** (``strategy="heuristic"``) – rule-based, no API key needed.
-3. **Auto** (``strategy="auto"``) – tries LLM; falls back to heuristic.
+2. **Heuristic** (``strategy="heuristic"``) - rule-based, no API key needed.
+3. **Auto** (``strategy="auto"``) - tries LLM; falls back to heuristic.
 """
 from __future__ import annotations
 
@@ -154,7 +154,7 @@ _SUMMARY_SYSTEM = (
     "Summarize the provided document text in a concise, informative paragraph. "
     "Focus on the key information, purpose, and important details. "
     "Keep the summary to 3-5 sentences unless the document is very complex. "
-    "Do NOT include any preamble like 'This document is about...' — just the summary."
+    "Do NOT include any preamble like 'This document is about...' - just the summary."
 )
 
 _CLASSIFY_SYSTEM = (

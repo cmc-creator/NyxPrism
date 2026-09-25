@@ -74,7 +74,7 @@ def _recompress_images(writer: PdfWriter, quality: int) -> None:
     try:
         from PIL import Image
     except ImportError:
-        return  # Pillow not available – skip silently
+        return  # Pillow not available - skip silently
 
     for page in writer.pages:
         resources = page.get("/Resources")

@@ -1,9 +1,9 @@
 """PDF merge utilities.
 
 Supports:
-* merge         – concatenate multiple PDFs into one
-* interleave    – interleave pages from two PDFs (useful for double-sided scans)
-* merge_bookmarked – merge with per-file top-level bookmarks
+* merge         - concatenate multiple PDFs into one
+* interleave    - interleave pages from two PDFs (useful for double-sided scans)
+* merge_bookmarked - merge with per-file top-level bookmarks
 """
 from __future__ import annotations
 

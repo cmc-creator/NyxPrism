@@ -160,7 +160,7 @@ def bulk_split(
         _write_range(source, start, end, out_path)
         results.append((out_path, name))
         if progress:
-            print(f"  [{n}/{len(ranges)}] Pages {start}–{end} → {out_path.name}")
+            print(f"  [{n}/{len(ranges)}] Pages {start}-{end} → {out_path.name}")
 
     if progress:
         print(f"[NyxPrism] Done. {len(results)} document(s) written to {output_dir}")
@@ -209,7 +209,7 @@ def _boundaries_to_ranges(boundaries: list[int], total: int) -> list[tuple[int, 
 
 
 def _write_range(source: Path, start: int, end: int, output: Path) -> None:
-    """Write pages *start*–*end* (1-based, inclusive) of *source* to *output*."""
+    """Write pages *start*-*end* (1-based, inclusive) of *source* to *output*."""
     from pypdf import PdfReader, PdfWriter
 
     reader = PdfReader(str(source))

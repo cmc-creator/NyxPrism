@@ -346,7 +346,7 @@ $('complete-btn').addEventListener('click', async function () {
     const res = await fetch(`${API}/api/sign-requests/public/${token}/complete`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ values, consent: true }) });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Could not submit your signature.');
-    showDone("Thank you — you've signed", "Your signature was recorded securely. You'll receive an email with a link to the completed document once everyone has signed.", false);
+    showDone("Thank you - you've signed", "Your signature was recorded securely. You'll receive an email with a link to the completed document once everyone has signed.", false);
   } catch (err) { show($('result'), 'err', err.message); this.disabled = false; }
 });
 $('decline-open').addEventListener('click', () => setStep('decline'));
@@ -365,7 +365,7 @@ function showDone(title, text, canDownload, declined = false) {
   $('workspace').hidden = true; $('loading').hidden = true; $('done').hidden = false;
   $('done-title').textContent = title; $('done-text').textContent = text;
   $('download-final').hidden = !canDownload;
-  if (declined) { $('done').querySelector('.big').textContent = '–'; $('steps').hidden = true; }
+  if (declined) { $('done').querySelector('.big').textContent = '-'; $('steps').hidden = true; }
   else document.querySelectorAll('#steps li').forEach(li => { li.classList.remove('active'); li.classList.add('done'); });
 }
 $('download-final').addEventListener('click', async function () {

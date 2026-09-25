@@ -269,3 +269,7 @@ CREATE TABLE IF NOT EXISTS team_members (
   UNIQUE (team_id, email)
 );
 CREATE UNIQUE INDEX IF NOT EXISTS team_members_one_active_team ON team_members (user_id) WHERE status = 'active';
+
+-- Optional password and custom expiry for distribution links.
+ALTER TABLE distribution_batches ADD COLUMN IF NOT EXISTS access_password_hash TEXT;
+ALTER TABLE distribution_recipients ADD COLUMN IF NOT EXISTS failed_password_attempts INTEGER NOT NULL DEFAULT 0;

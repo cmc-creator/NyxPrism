@@ -1,7 +1,7 @@
 {
   "name": "nyxprism-api",
   "version": "1.0.0",
-  "description": "NyxPrism backend — payments, licensing, contact email",
+  "description": "NyxPrism backend - payments, licensing, contact email",
   "main": "src/index.js",
   "type": "module",
   "scripts": {

@@ -1,4 +1,4 @@
-# Stripe Integration — Remaining Setup
+# Stripe Integration - Remaining Setup
 
 NyxPrism uses **Stripe-hosted Checkout** for the Professional subscription
 ($12/month or $99/year). The code is done; what's left is configuration in

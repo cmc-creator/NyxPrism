@@ -26,7 +26,7 @@ const PAID_STATUSES = ['active', 'trialing', 'past_due'];
  * True when an account may use Professional features: a paid Professional
  * subscription, an unexpired trial, or an owner/reviewer account.
  * A free account's subscription_status is "active" too, so status alone
- * is never enough — the plan must be professional or trial.
+ * is never enough - the plan must be professional or trial.
  */
 export function hasProfessionalAccess(account, email) {
   if (isDeveloper(email ?? account?.email)) return true;

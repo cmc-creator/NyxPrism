@@ -9,7 +9,7 @@ build/
 *.egg
 .eggs/
 
-# Firebase / service account credentials — NEVER commit these
+# Firebase / service account credentials - NEVER commit these
 *adminsdk*.json
 *service-account*.json
 firebase-*.json

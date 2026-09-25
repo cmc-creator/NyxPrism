@@ -213,7 +213,7 @@ router.post('/users/set-password', async (req, res) => {
   const email = String(req.body?.email || '').trim().toLowerCase();
   const password = String(req.body?.password || '');
   if (!EMAIL_RE.test(email)) return res.status(400).json({ error: 'Enter a valid email address.' });
-  if (password.length < 8 || password.length > 128) return res.status(400).json({ error: 'Password must be 8–128 characters.' });
+  if (password.length < 8 || password.length > 128) return res.status(400).json({ error: 'Password must be 8-128 characters.' });
   try {
     const user = await admin.auth().getUserByEmail(email);
     await admin.auth().updateUser(user.uid, { password });
@@ -235,7 +235,7 @@ router.post('/users/create', async (req, res) => {
   const lastName = String(req.body?.lastName || '').trim().slice(0, 100) || null;
   const plan = PLANS.includes(req.body?.plan) ? req.body.plan : 'free';
   if (!EMAIL_RE.test(email)) return res.status(400).json({ error: 'Enter a valid email address.' });
-  if (password.length < 8 || password.length > 128) return res.status(400).json({ error: 'Password must be 8–128 characters.' });
+  if (password.length < 8 || password.length > 128) return res.status(400).json({ error: 'Password must be 8-128 characters.' });
   try {
     const record = await admin.auth().createUser({
       email, password, emailVerified: true,
@@ -247,8 +247,21 @@ router.post('/users/create', async (req, res) => {
        ON CONFLICT (email) DO UPDATE SET firebase_uid = EXCLUDED.firebase_uid, plan = EXCLUDED.plan, updated_at = NOW()`,
       [record.uid, email, firstName, lastName, plan, plan === 'inactive' ? 'inactive' : 'active']
     );
-    await audit(req, 'create-user', email, `plan=${plan}`);
-    res.json({ ok: true, email });
+    const teamId = parseInt(req.body?.teamId, 10);
+    let team = null;
+    if (Number.isInteger(teamId)) {
+      const created = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
+      const { rows } = await pool.query(
+        `INSERT INTO team_members (team_id, user_id, email, role, status, joined_at)
+         SELECT t.id, $2, $3, 'member', 'active', NOW() FROM teams t WHERE t.id = $1
+         ON CONFLICT (team_id, email) DO UPDATE SET user_id = EXCLUDED.user_id, status = 'active', joined_at = NOW(), invite_token = NULL
+         RETURNING (SELECT name FROM teams WHERE id = $1) AS name`,
+        [teamId, created.rows[0].id, email],
+      );
+      team = rows[0]?.name || null;
+    }
+    await audit(req, 'create-user', email, `plan=${plan}${team ? ` team=${team}` : ''}`);
+    res.json({ ok: true, email, team });
   } catch (err) {
     if (err?.code === 'auth/email-already-exists') return res.status(409).json({ error: 'A login already exists for that email.' });
     console.error('admin/create-user error:', err.message);

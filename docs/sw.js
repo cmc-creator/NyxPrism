@@ -1,4 +1,4 @@
-// NyxPrism Service Worker — network-first for HTML, cache-first for assets
+// NyxPrism Service Worker - network-first for HTML, cache-first for assets
 const CACHE = 'nyx-v7';
 const SHELL = [
   '/manifest.json',

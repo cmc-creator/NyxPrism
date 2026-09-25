@@ -54,7 +54,7 @@ const TEMPLATES = {
     subject: 'Welcome to NyxPrism',
     heading: `Welcome${user.first_name ? `, ${user.first_name}` : ''}!`,
     paragraphs: [
-      'Your NyxPrism account is ready. Split, merge, compress and convert PDFs right in your browser — your files stay with you.',
+      'Your NyxPrism account is ready. Split, merge, compress and convert PDFs right in your browser - your files stay with you.',
       'Professional adds AI Smart Split, e-signature requests with a certificate of completion, tracked document sending, and more.',
     ],
     cta: { label: 'Open NyxPrism', href: `${APP()}/dashboard.html` },
@@ -63,7 +63,7 @@ const TEMPLATES = {
     subject: 'Your NyxPrism trial ends in 3 days',
     heading: 'Your trial ends in 3 days',
     paragraphs: [
-      'Keep AI Smart Split, signature requests and tracked sending by subscribing before your trial ends — $12/month, or $99/year.',
+      'Keep AI Smart Split, signature requests and tracked sending by subscribing before your trial ends - $12/month, or $99/year.',
       "If you don't, nothing is lost: your account moves to the free tools.",
     ],
     cta: { label: 'Keep Professional', href: `${APP()}/dashboard.html#account` },
@@ -82,7 +82,7 @@ const TEMPLATES = {
     heading: 'That feature is part of Professional',
     paragraphs: [
       'You just tried a Professional feature. Professional includes AI Smart Split and document analysis, e-signature requests, tracked sending to up to 250 people, and API access.',
-      '$12/month, or $99/year — cancel any time.',
+      '$12/month, or $99/year - cancel any time.',
     ],
     cta: { label: 'See Professional', href: `${APP()}/dashboard.html#account` },
   }),

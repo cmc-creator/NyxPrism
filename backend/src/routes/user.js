@@ -103,7 +103,7 @@ router.get('/me', requireAuth, async (req, res) => {
       );
     }
 
-    // Firebase is the source of truth for email — reconcile after an email change.
+    // Firebase is the source of truth for email - reconcile after an email change.
     if (req.user.email && account.email.toLowerCase() !== req.user.email.toLowerCase()) {
       try {
         await pool.query('UPDATE users SET email = $1, updated_at = NOW() WHERE id = $2', [req.user.email, account.id]);

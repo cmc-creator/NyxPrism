@@ -12,7 +12,7 @@
   if (window.NYX_ENV === 'staging') {
     document.addEventListener('DOMContentLoaded', function () {
       var tag = document.createElement('div');
-      tag.textContent = 'STAGING — test data only';
+      tag.textContent = 'STAGING - test data only';
       tag.style.cssText = 'position:fixed;left:12px;bottom:12px;z-index:99999;background:#f59e0b;color:#111;font:700 12px/1 Inter,system-ui,sans-serif;padding:8px 10px;border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.35)';
       document.body.appendChild(tag);
     });

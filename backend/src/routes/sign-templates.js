@@ -35,7 +35,7 @@ router.post('/', requireAuth, async (req, res) => {
   const name = String(req.body?.name || '').trim().slice(0, 120);
   const fields = Array.isArray(req.body?.fields) ? req.body.fields : [];
   if (!name) return res.status(400).json({ error: 'Give the template a name.' });
-  if (!fields.length || fields.length > 200) return res.status(400).json({ error: 'A template needs 1–200 fields.' });
+  if (!fields.length || fields.length > 200) return res.status(400).json({ error: 'A template needs 1-200 fields.' });
   const clean = [];
   for (const f of fields) {
     const type = String(f?.type || '').toLowerCase();

@@ -41,7 +41,7 @@ app.use((_req, res, next) => {
   next();
 });
 
-// ── Stripe webhook must receive the RAW body — register BEFORE json() ───
+// ── Stripe webhook must receive the RAW body - register BEFORE json() ───
 app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
 
 // ── CORS ─────────────────────────────────────────────────────────────────
@@ -69,13 +69,13 @@ app.use(cors({
     cb(new Error(`CORS: origin ${origin} not allowed`));
   },
   methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Document-Password'],
 }));
 
 app.use(express.json({ limit: '12mb' }));
 
 // ── Rate limiting ─────────────────────────────────────────────────────────
-// General API — 300 requests per 15 minutes per IP
+// General API - 300 requests per 15 minutes per IP
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 300,
@@ -84,7 +84,7 @@ const generalLimiter = rateLimit({
   message: { error: 'Too many requests. Please slow down.' },
 });
 
-// AI split — expensive Claude calls; 20 per hour per IP
+// AI split - expensive Claude calls; 20 per hour per IP
 const aiSplitLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: 20,
@@ -93,7 +93,7 @@ const aiSplitLimiter = rateLimit({
   message: { error: 'AI rate limit exceeded. Try again in an hour.' },
 });
 
-// Desktop AI — bulk jobs make one small request per document; 120 per hour per IP
+// Desktop AI - bulk jobs make one small request per document; 120 per hour per IP
 const desktopAiLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: 120,
@@ -102,7 +102,7 @@ const desktopAiLimiter = rateLimit({
   message: { error: 'AI rate limit exceeded. Try again in an hour.' },
 });
 
-// API key creation — 10 per hour per IP
+// API key creation - 10 per hour per IP
 const keyCreateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: 10,
@@ -162,7 +162,7 @@ async function start() {
   const missing = required.filter(name => !process.env[name]);
   if (missing.length) throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
 
-  // Apply schema (idempotent — uses IF NOT EXISTS)
+  // Apply schema (idempotent - uses IF NOT EXISTS)
   const __dir   = dirname(fileURLToPath(import.meta.url));
   const schema  = await readFile(join(__dir, 'db/schema.sql'), 'utf8');
   await pool.query(schema);

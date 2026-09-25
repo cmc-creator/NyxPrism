@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { randomBytes } from 'crypto';
+import { randomBytes, scryptSync, timingSafeEqual } from 'crypto';
 import pool from '../db/index.js';
 import { requireActivePlan, requireAuth, requireVerifiedEmail } from '../middleware/auth.js';
 
@@ -8,6 +8,28 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_DOCUMENT_BYTES = 8 * 1024 * 1024;
 const MAX_USER_DOCUMENT_BYTES = 100 * 1024 * 1024;
 const DISTRIBUTION_DAYS = 30;
+const EXPIRY_CHOICES = new Set([7, 30, 90]);
+const MAX_PASSWORD_ATTEMPTS = 10;
+
+function hashPassword(password) {
+  const salt = randomBytes(16).toString('hex');
+  return `scrypt:${salt}:${scryptSync(password, salt, 32).toString('hex')}`;
+}
+
+function passwordMatches(password, stored) {
+  const [, salt, hash] = String(stored || '').split(':');
+  if (!salt || !hash) return false;
+  const given = scryptSync(String(password || ''), salt, 32);
+  const expected = Buffer.from(hash, 'hex');
+  return given.length === expected.length && timingSafeEqual(given, expected);
+}
+
+function shareEmailHtml({ name, sender, documentName, url, protectedLink, expiresAt }) {
+  return `<p>Hello ${escapeHtml(name)},</p><p>${escapeHtml(sender)} shared <strong>${escapeHtml(documentName)}</strong> with you.</p>`
+    + `<p><a href="${url}">Open document</a></p>`
+    + (protectedLink ? '<p>This document is password protected. The sender will give you the password separately.</p>' : '')
+    + (expiresAt ? `<p style="color:#6b7280">This link works until ${new Date(expiresAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}.</p>` : '');
+}
 const TOKEN_RE = /^[a-f0-9]{64}$/;
 
 function escapeHtml(value) {
@@ -108,6 +130,10 @@ router.post('/', requireAuth, requireVerifiedEmail, requireActivePlan, async (re
   const title = String(req.body?.title || 'Document distribution').trim().slice(0, 160);
   const documentName = String(req.body?.documentName || 'document.pdf').trim().slice(0, 240);
   const sendNow = req.body?.sendNow === true;
+  const expiresDays = EXPIRY_CHOICES.has(Number(req.body?.expiresDays)) ? Number(req.body.expiresDays) : DISTRIBUTION_DAYS;
+  const password = typeof req.body?.password === 'string' ? req.body.password : '';
+  if (password && (password.length < 4 || password.length > 100)) return res.status(400).json({ error: 'The link password must be 4-100 characters.' });
+  const passwordHash = password ? hashPassword(password) : null;
   const client = await pool.connect();
   let batch;
   let rows = [];
@@ -124,10 +150,10 @@ router.post('/', requireAuth, requireVerifiedEmail, requireActivePlan, async (re
       return res.status(413).json({ error: 'Document storage limit reached. Delete older workflows and try again.' });
     }
     const batchResult = await client.query(
-      `INSERT INTO distribution_batches (owner_user_id, title, document_name, document_mime, document_size, document_data, status, sent_at, expires_at)
-       VALUES ($1, $2, $3, 'application/pdf', $4, $5, $6, $7, $8)
+      `INSERT INTO distribution_batches (owner_user_id, title, document_name, document_mime, document_size, document_data, status, sent_at, expires_at, access_password_hash)
+       VALUES ($1, $2, $3, 'application/pdf', $4, $5, $6, $7, $8, $9)
        RETURNING id, title, document_name, status, created_at, sent_at, expires_at`,
-      [userId, title, documentName, documentBuffer.length, documentBuffer, sendNow ? 'sent' : 'draft', sendNow ? new Date() : null, new Date(Date.now() + DISTRIBUTION_DAYS * 86400000)],
+      [userId, title, documentName, documentBuffer.length, documentBuffer, sendNow ? 'sent' : 'draft', sendNow ? new Date() : null, new Date(Date.now() + expiresDays * 86400000), passwordHash],
     );
     batch = batchResult.rows[0];
     for (const recipient of recipients) {
@@ -160,7 +186,7 @@ router.post('/', requireAuth, requireVerifiedEmail, requireActivePlan, async (re
     await Promise.all(rows.map(async row => {
       const url = `${process.env.FRONTEND_URL || 'https://nyxprism.com'}/distribution.html?token=${row.token}`;
       try {
-        await sendEmail({ to: row.email, subject: `Document shared: ${title}`, html: `<p>Hello ${escapeHtml(row.name)},</p><p>${escapeHtml(req.user.email || 'NyxPrism')} shared <strong>${escapeHtml(documentName)}</strong> with you.</p><p><a href="${url}">Open document</a></p>` });
+        await sendEmail({ to: row.email, subject: `Document shared: ${title}`, html: shareEmailHtml({ name: row.name, sender: req.user.email || 'NyxPrism', documentName, url, protectedLink: Boolean(passwordHash), expiresAt: batch.expires_at }) });
         await pool.query('UPDATE distribution_recipients SET status = $1, sent_at = NOW() WHERE id = $2', ['sent', row.id]);
       } catch (err) {
         await pool.query('UPDATE distribution_recipients SET status = $1, failed_at = NOW(), error = $2 WHERE id = $3', ['failed', err.message, row.id]);
@@ -184,7 +210,7 @@ router.post('/:id/send', requireAuth, requireVerifiedEmail, requireActivePlan, a
     await client.query('BEGIN');
     const userId = await findOrCreateUser(req.user);
     const batchResult = await client.query(
-      `SELECT id, title, document_name
+      `SELECT id, title, document_name, expires_at, access_password_hash
        FROM distribution_batches
        WHERE id = $1 AND owner_user_id = $2 AND status = 'draft'
        FOR UPDATE`,
@@ -220,7 +246,7 @@ router.post('/:id/send', requireAuth, requireVerifiedEmail, requireActivePlan, a
   await Promise.all(recipients.map(async recipient => {
     const url = `${process.env.FRONTEND_URL || 'https://nyxprism.com'}/distribution.html?token=${recipient.token}`;
     try {
-      await sendEmail({ to: recipient.email, subject: `Document shared: ${batch.title}`, html: `<p>Hello ${escapeHtml(recipient.name)},</p><p>${escapeHtml(req.user.email || 'NyxPrism')} shared <strong>${escapeHtml(batch.document_name)}</strong> with you.</p><p><a href="${url}">Open document</a></p>` });
+      await sendEmail({ to: recipient.email, subject: `Document shared: ${batch.title}`, html: shareEmailHtml({ name: recipient.name, sender: req.user.email || 'NyxPrism', documentName: batch.document_name, url, protectedLink: Boolean(batch.access_password_hash), expiresAt: batch.expires_at }) });
       await pool.query("UPDATE distribution_recipients SET status = 'sent', sent_at = NOW() WHERE id = $1", [recipient.id]);
     } catch (error) {
       failed += 1;
@@ -277,8 +303,8 @@ router.get('/public/:token', async (req, res) => {
   if (!TOKEN_RE.test(req.params.token)) return res.status(404).json({ error: 'Document link not found.' });
   try {
     const result = await pool.query(
-      `SELECT r.id, r.name, r.email, r.status, b.title, b.document_name, b.document_mime, b.document_data,
-              b.status AS batch_status, b.expires_at
+      `SELECT r.id, r.name, r.email, r.status, r.failed_password_attempts, b.title, b.document_name, b.document_mime, b.document_data,
+              b.status AS batch_status, b.expires_at, b.access_password_hash
        FROM distribution_recipients r
        JOIN distribution_batches b ON b.id = r.batch_id
        WHERE r.token = $1
@@ -292,7 +318,19 @@ router.get('/public/:token', async (req, res) => {
     if (row.batch_status === 'draft' || row.status === 'draft') return res.status(404).json({ error: 'Document link not found.' });
     if (row.batch_status === 'revoked' || row.status === 'revoked') return res.status(410).json({ error: 'Document access was revoked.' });
     if (row.expires_at && new Date(row.expires_at).getTime() < Date.now()) return res.status(410).json({ error: 'Document link expired.' });
-    await pool.query("UPDATE distribution_recipients SET status = CASE WHEN status = 'failed' THEN status ELSE 'opened' END, opened_at = COALESCE(opened_at, NOW()) WHERE id = $1", [row.id]);
+    if (row.access_password_hash) {
+      if (row.failed_password_attempts >= MAX_PASSWORD_ATTEMPTS) return res.status(423).json({ error: 'Too many wrong passwords. Ask the sender to share the document again.' });
+      const given = req.get('x-document-password');
+      if (!given) return res.status(401).json({ passwordRequired: true, title: row.title, error: 'This document is password protected.' });
+      if (!passwordMatches(given, row.access_password_hash)) {
+        await pool.query('UPDATE distribution_recipients SET failed_password_attempts = failed_password_attempts + 1 WHERE id = $1', [row.id]);
+        const left = MAX_PASSWORD_ATTEMPTS - row.failed_password_attempts - 1;
+        return res.status(401).json({ passwordRequired: true, title: row.title, error: left > 0 ? `That password isn't right. ${left} attempt${left === 1 ? '' : 's'} left.` : 'Too many wrong passwords. Ask the sender to share the document again.' });
+      }
+      await pool.query('UPDATE distribution_recipients SET failed_password_attempts = 0 WHERE id = $1', [row.id]);
+    }
+    // Opening the link proves it arrived, even if the delivery email was reported as failed.
+    await pool.query("UPDATE distribution_recipients SET status = 'opened', opened_at = COALESCE(opened_at, NOW()) WHERE id = $1", [row.id]);
     res.json({ title: row.title, documentName: row.document_name, recipient: { name: row.name, email: row.email }, documentBase64: `data:${row.document_mime};base64,${Buffer.from(row.document_data).toString('base64')}` });
   } catch (err) {
     console.error('distribution public error:', err.message);

@@ -234,7 +234,22 @@
       <!-- Users -->
       <section class="page" id="page-users">
         <div class="page-head"><div><h1>Users</h1><div class="sub" id="users-sub">Everyone with a NyxPrism account. Click a row to manage it.</div></div>
-          <button class="btn" id="users-export" type="button">Export CSV</button></div>
+          <div class="row"><button class="btn btn-primary" id="users-add-open" type="button">+ Add user</button><button class="btn" id="users-export" type="button">Export CSV</button></div></div>
+        <form class="card" id="users-add" autocomplete="off" hidden>
+          <h2>Add a user</h2>
+          <div class="sub" style="margin:-.4rem 0 .9rem">Creates a login they can use right away. Share the password with them, or send a reset link from their user panel.</div>
+          <div class="row" style="margin-bottom:.6rem"><input class="input" id="ua-first" placeholder="First name" maxlength="100"><input class="input" id="ua-last" placeholder="Last name" maxlength="100"></div>
+          <div class="row" style="margin-bottom:.6rem"><input class="input" type="email" id="ua-email" placeholder="email@company.com" required></div>
+          <div class="row" style="margin-bottom:.6rem"><input class="input" type="text" id="ua-password" placeholder="Password (8+ characters)" minlength="8" required><button class="btn" id="ua-generate" type="button">Generate</button></div>
+          <div class="row" style="margin-bottom:.8rem">
+            <label class="sub" for="ua-plan" style="margin:0">Plan</label>
+            <select class="select" id="ua-plan" style="flex:0 0 170px"><option value="free">Free</option><option value="professional">Professional</option><option value="trial">Trial (14 days)</option><option value="inactive">Inactive</option></select>
+            <label class="sub" for="ua-team" style="margin:0">Team</label>
+            <select class="select" id="ua-team" style="flex:0 0 220px"><option value="">No team</option></select>
+          </div>
+          <div class="row"><button class="btn btn-primary" type="submit">Create user</button><button class="btn" id="ua-cancel" type="button">Cancel</button></div>
+          <div class="msg" id="ua-msg" style="margin-top:.7rem"></div>
+        </form>
         <div class="toolbar">
           <input class="input" type="search" id="users-q" placeholder="Search email or name…" autocomplete="off">
           <select class="select" id="users-plan" style="width:auto"><option value="">All plans</option><option value="free">Free</option><option value="professional">Professional</option><option value="trial">Trial</option><option value="inactive">Inactive</option></select>
@@ -352,8 +367,8 @@ const $ = id => document.getElementById(id);
 
 // ── Helpers ────────────────────────────────────────────────────────────
 function esc(v) { return String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
-function fmtDate(d) { return d ? new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—'; }
-function fmtDateTime(d) { return d ? new Date(d).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—'; }
+function fmtDate(d) { return d ? new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '-'; }
+function fmtDateTime(d) { return d ? new Date(d).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : '-'; }
 function ago(d) {
   if (!d) return 'never';
   const s = (Date.now() - new Date(d).getTime()) / 1000;
@@ -364,7 +379,7 @@ function ago(d) {
   return fmtDate(d);
 }
 function money(cents, currency = 'usd') { return (cents / 100).toLocaleString('en-US', { style: 'currency', currency: currency.toUpperCase() }); }
-function pill(v, cls) { return `<span class="pill ${esc(cls || v)}">${esc(String(v || '—').replace(/_/g, ' '))}</span>`; }
+function pill(v, cls) { return `<span class="pill ${esc(cls || v)}">${esc(String(v || '-').replace(/_/g, ' '))}</span>`; }
 function toast(text, isError) {
   const el = document.createElement('div');
   el.className = 'toast' + (isError ? ' error' : '');
@@ -543,7 +558,7 @@ loaders.overview = async () => {
   ].join('');
   renderSignupChart($('ov-chart'), s.signupsDaily);
   const f = s.funnel30d || {};
-  const rate = (n, d) => d ? Math.round(n / d * 100) + '% of sign-ups' : '—';
+  const rate = (n, d) => d ? Math.round(n / d * 100) + '% of sign-ups' : '-';
   $('ov-funnel').innerHTML = [
     tile('Signed up', f.signed_up ?? 0),
     tile('Tried a Pro feature', f.tried_pro ?? 0, rate(f.tried_pro, f.signed_up)),
@@ -581,6 +596,38 @@ $('qa-create').addEventListener('submit', async e => {
 
 // ── Users ──────────────────────────────────────────────────────────────
 let usersPage = 1, usersTotal = 0, usersTimer = null;
+const PLANS = [['free', 'Free'], ['professional', 'Professional'], ['trial', 'Trial'], ['inactive', 'Inactive']];
+function planSelect(u) {
+  return `<select class="select" data-plan-for="${u.id}" data-current="${esc(u.plan)}" aria-label="Plan for ${esc(u.email)}" style="padding:.25rem .45rem;font-size:.78rem;width:auto">`
+    + PLANS.map(([v, l]) => `<option value="${v}"${v === u.plan ? ' selected' : ''}>${l}</option>`).join('') + '</select>';
+}
+async function loadTeamChoices() {
+  try {
+    const r = await api('/api/admin/teams');
+    $('ua-team').innerHTML = '<option value="">No team</option>' + r.teams.map(t => `<option value="${t.id}">${esc(t.name)} (${t.active}/${t.seats} seats)</option>`).join('');
+  } catch (_) { /* teams optional */ }
+}
+$('users-add-open').addEventListener('click', () => { const f = $('users-add'); f.hidden = !f.hidden; if (!f.hidden) { loadTeamChoices(); $('ua-email').focus(); } });
+$('ua-cancel').addEventListener('click', () => { $('users-add').hidden = true; });
+$('ua-generate').addEventListener('click', () => {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+  const bytes = crypto.getRandomValues(new Uint8Array(14));
+  $('ua-password').value = [...bytes].map(b => chars[b % chars.length]).join('') + '!';
+});
+$('users-add').addEventListener('submit', async e => {
+  e.preventDefault();
+  const msg = $('ua-msg');
+  const body = { email: $('ua-email').value.trim(), password: $('ua-password').value, firstName: $('ua-first').value.trim(), lastName: $('ua-last').value.trim(), plan: $('ua-plan').value };
+  if ($('ua-team').value) body.teamId = Number($('ua-team').value);
+  try {
+    const r = await api('/api/admin/users/create', { method: 'POST', body });
+    const password = body.password;
+    e.target.reset();
+    msg.className = 'msg ok';
+    msg.textContent = `Created ${r.email}${r.team ? ` and added to ${r.team}` : ''}. Their password: ${password}`;
+    usersPage = 1; loaders.users();
+  } catch (err) { setMsg(msg, err.message); }
+});
 const USERS_LIMIT = 50;
 function userBadges(u) {
   let out = '';
@@ -599,13 +646,18 @@ loaders.users = async () => {
   $('users-tbody').innerHTML = r.users.length ? r.users.map(u => `
     <tr class="clickable" data-id="${u.id}">
       <td><strong>${esc(u.email)}</strong>${userBadges(u)}</td>
-      <td>${esc([u.first_name, u.last_name].filter(Boolean).join(' ') || '—')}</td>
-      <td>${pill(u.developer ? 'professional' : u.plan)}</td>
+      <td>${esc([u.first_name, u.last_name].filter(Boolean).join(' ') || '-')}</td>
+      <td>${u.developer ? pill('professional') + ' <span class="muted" style="font-size:.72rem">fixed</span>' : planSelect(u)}</td>
       <td>${pill(u.subscription_status)}</td>
       <td title="${esc(fmtDateTime(u.firebase?.lastSignInAt))}">${esc(ago(u.firebase?.lastSignInAt))}</td>
       <td>${esc(fmtDate(u.created_at))}</td>
     </tr>`).join('') : '<tr><td colspan="6" class="empty">No users match.</td></tr>';
-  $('users-tbody').querySelectorAll('tr[data-id]').forEach(tr => tr.addEventListener('click', () => openUser(+tr.dataset.id)));
+  $('users-tbody').querySelectorAll('tr[data-id]').forEach(tr => tr.addEventListener('click', e => { if (!e.target.closest('select')) openUser(+tr.dataset.id); }));
+  $('users-tbody').querySelectorAll('select[data-plan-for]').forEach(sel => sel.addEventListener('change', async () => {
+    const id = sel.dataset.planFor, previous = sel.dataset.current;
+    try { await api(`/api/admin/users/${id}/plan`, { method: 'POST', body: { plan: sel.value } }); sel.dataset.current = sel.value; toast(`Plan changed to ${sel.value}.`); }
+    catch (err) { sel.value = previous; toast(err.message, true); }
+  }));
   const pages = Math.max(1, Math.ceil(usersTotal / USERS_LIMIT));
   $('users-info').textContent = `Page ${usersPage} of ${pages} · ${usersTotal} user${usersTotal === 1 ? '' : 's'}`;
   $('users-prev').disabled = usersPage <= 1;
@@ -653,14 +705,14 @@ async function openUser(id) {
     <div class="drawer-head"><div><h2>${esc(u.email)}</h2><div style="margin-top:.4rem">${pill(u.developer ? 'professional' : u.plan)} ${pill(u.subscription_status)}${userBadges({ ...u, firebase: fb })}</div></div>
       <button class="close-x" id="dr-close" type="button" aria-label="Close">✕</button></div>
     <dl class="kv">
-      <dt>Name</dt><dd>${esc([u.first_name, u.last_name].filter(Boolean).join(' ') || '—')}</dd>
+      <dt>Name</dt><dd>${esc([u.first_name, u.last_name].filter(Boolean).join(' ') || '-')}</dd>
       <dt>User ID</dt><dd class="mono">${u.id}</dd>
       <dt>Joined</dt><dd>${esc(fmtDateTime(u.created_at))}</dd>
       <dt>Last sign-in</dt><dd>${esc(fb ? fmtDateTime(fb.lastSignInAt) : 'No login exists')}</dd>
-      <dt>Last active</dt><dd>${esc(fb ? fmtDateTime(fb.lastActiveAt) : '—')}</dd>
-      <dt>Email verified</dt><dd>${fb ? (fb.emailVerified ? 'Yes' : 'No') : '—'}</dd>
-      <dt>Login status</dt><dd>${fb ? (fb.disabled ? pill('disabled') : pill('active')) : '—'}</dd>
-      <dt>Stripe customer</dt><dd class="mono">${esc(u.stripe_customer_id || '—')}</dd>
+      <dt>Last active</dt><dd>${esc(fb ? fmtDateTime(fb.lastActiveAt) : '-')}</dd>
+      <dt>Email verified</dt><dd>${fb ? (fb.emailVerified ? 'Yes' : 'No') : '-'}</dd>
+      <dt>Login status</dt><dd>${fb ? (fb.disabled ? pill('disabled') : pill('active')) : '-'}</dd>
+      <dt>Stripe customer</dt><dd class="mono">${esc(u.stripe_customer_id || '-')}</dd>
       <dt>Period ends</dt><dd>${esc(fmtDate(u.current_period_end))}</dd>
       <dt>Usage</dt><dd>${c.sign_requests} signature requests · ${c.distributions} distributions · ${c.saved_contacts} saved people · ${c.api_keys} API keys</dd>
     </dl>
@@ -773,7 +825,7 @@ loaders.billing = async () => {
   renderStripeConnection(b);
   const counts = b.counts || {};
   $('bill-tiles').innerHTML = [
-    tile('Monthly recurring revenue', b.configured && !b.error ? money(b.mrrCents || 0, b.currency) : '—', b.livemode === false ? 'Stripe test mode' : ''),
+    tile('Monthly recurring revenue', b.configured && !b.error ? money(b.mrrCents || 0, b.currency) : '-', b.livemode === false ? 'Stripe test mode' : ''),
     tile('Active subscriptions', counts.active || 0),
     tile('Trialing', counts.trialing || 0),
     tile('Past due', counts.past_due || 0),
@@ -815,7 +867,7 @@ function renderStripeConnection(b) {
   el.innerHTML = `<h2>Stripe connection</h2>
     <dl class="kv">
       <dt>Account</dt><dd>${accountText}</dd>
-      <dt>Mode</dt><dd>${mode}${b.keyMode === 'test' ? ' <span class="muted">— no real charges. In Stripe, turn on Test mode (or open the sandbox) to see this data.</span>' : ''}</dd>
+      <dt>Mode</dt><dd>${mode}${b.keyMode === 'test' ? ' <span class="muted">- no real charges. In Stripe, turn on Test mode (or open the sandbox) to see this data.</span>' : ''}</dd>
       <dt>Prices</dt><dd>${(b.prices || []).map(priceRow).join('<br>')}</dd>
       <dt>Webhook</dt><dd>${hookRows.join('<br>')}</dd>
     </dl>
@@ -909,9 +961,9 @@ loaders.system = async () => {
     <div class="tile"><div class="tile-label">Firebase Auth</div><div class="tile-value" style="font-size:1.05rem">${status(s.firebase.ok, s.firebase.ok ? 'Connected' : 'Error')}</div><div class="tile-note">${s.firebase.ok ? 'Admin SDK working' : esc(s.firebase.error)}</div></div>
     ${tile('Uptime', upText, 'since last deploy/restart')}
     ${tile('Memory', s.runtime.memoryMb + ' MB', `Node ${s.runtime.node}`)}
-    ${tile('Deployed commit', s.runtime.commit ? s.runtime.commit.slice(0, 7) : '—', s.runtime.environment)}`;
+    ${tile('Deployed commit', s.runtime.commit ? s.runtime.commit.slice(0, 7) : '-', s.runtime.environment)}`;
   $('sys-env').innerHTML = s.env.map(e => `<tr><td class="mono">${esc(e.name)}</td><td style="text-align:right">${e.set ? pill('set', 'ok') : pill('missing', 'inactive')}</td></tr>`).join('');
-  $('sys-tables').innerHTML = (s.database.tables || []).map(t => `<tr><td class="mono">${esc(t.table)}</td><td style="text-align:right">${t.rows.toLocaleString()}</td></tr>`).join('') || '<tr><td colspan="2" class="empty">—</td></tr>';
+  $('sys-tables').innerHTML = (s.database.tables || []).map(t => `<tr><td class="mono">${esc(t.table)}</td><td style="text-align:right">${t.rows.toLocaleString()}</td></tr>`).join('') || '<tr><td colspan="2" class="empty">-</td></tr>';
 };
 
 // ── Audit ──────────────────────────────────────────────────────────────
@@ -919,7 +971,7 @@ loaders.audit = async () => {
   const r = await api('/api/admin/audit?limit=200');
   $('audit-tbody').innerHTML = r.entries.length ? r.entries.map(e => `<tr>
       <td title="${esc(fmtDateTime(e.created_at))}">${esc(ago(e.created_at))}</td><td>${esc(e.actor)}</td><td>${pill(e.action.replace(/-/g, ' '), 'tag')}</td>
-      <td>${esc(e.target || '—')}</td><td class="muted">${esc(e.detail || '')}</td></tr>`).join('')
+      <td>${esc(e.target || '-')}</td><td class="muted">${esc(e.detail || '')}</td></tr>`).join('')
     : '<tr><td colspan="5" class="empty">Nothing yet. Changes you make here will be listed.</td></tr>';
 };
 </script>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Log In &mdash; NyxPrism&#8482; | NyxCollective LLC</title>
+  <title>Log In - NyxPrism&#8482; | NyxCollective LLC</title>
   <script src="/config.js"></script>
   <meta name="robots" content="noindex, nofollow" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -343,7 +343,7 @@
         <div class="form-title">Create your free account</div>
         <p class="form-sub">No credit card required. Start with the free NyxPrism&#8482; tools and upgrade whenever you need more.</p>
         <div class="plan-hint">
-          Free forever &mdash; no payment details or company information required.
+          Free forever - no payment details or company information required.
         </div>
         <form id="form-trial">
           <div class="field">
@@ -369,7 +369,7 @@
 
 <!-- PAGE FOOTER -->
 <footer class="page-foot">
-  <span>&copy; 2024&ndash;2026 NyxCollective LLC</span>
+  <span>&copy; 2024-2026 NyxCollective LLC</span>
   <a href="terms.html">Terms of Service</a>
   <a href="privacy.html">Privacy Policy</a>
   <a href="contact.html">Contact Us</a>
@@ -452,14 +452,14 @@
       'auth/email-already-in-use':    'An account with that email already exists.',
       'auth/weak-password':           'Password must be at least 12 characters.',
       'auth/invalid-email':           'Please enter a valid email address.',
-      'auth/network-request-failed':  'Network error — check your connection.',
+      'auth/network-request-failed':  'Network error - check your connection.',
       'auth/too-many-requests':       'Too many attempts. Please wait a moment and try again.',
       'auth/operation-not-allowed':   'Email/password sign-in is not enabled. Contact support.',
     };
     return map[code] || 'Something went wrong. Please try again.';
   }
 
-  /* ── OBSERVE AUTH STATE — never redirect without an explicit choice ── */
+  /* ── OBSERVE AUTH STATE - never redirect without an explicit choice ── */
   onAuthStateChanged(auth, user => {
     if (user) {
       document.getElementById('existing-session-email').textContent = user.email || 'this account';
@@ -520,7 +520,7 @@
     clearError('login-error');
     try {
       await sendPasswordResetEmail(auth, email);
-      showError('login-error', 'Password reset email sent — check your inbox.', true);
+      showError('login-error', 'Password reset email sent - check your inbox.', true);
     } catch (err) {
       showError('login-error', authErrorMsg(err.code));
     }

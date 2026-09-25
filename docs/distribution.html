@@ -29,7 +29,18 @@ const API = window.NYX_API || 'https://nyxprism-production.up.railway.app';pdfjs
 const token=new URLSearchParams(location.search).get('token'),canvas=document.getElementById('pdf-canvas'),ctx=canvas.getContext('2d');let pdf=null,pageNo=1,data=null;
 function show(cls,msg){document.getElementById('result').className='result '+cls;document.getElementById('result').textContent=msg;}
 async function render(){if(!pdf)return;const page=await pdf.getPage(pageNo);const vp=page.getViewport({scale:1.2});canvas.width=vp.width;canvas.height=vp.height;await page.render({canvasContext:ctx,viewport:vp}).promise;document.getElementById('status').textContent='Page '+pageNo+' / '+pdf.numPages;}
-async function load(){if(!token){show('err','Missing document token.');return;}try{const res=await fetch(API+'/api/distributions/public/'+token);data=await res.json();if(!res.ok)throw new Error(data.error||'Unable to load document');document.getElementById('doc-title').textContent=data.title;document.getElementById('recipient-line').textContent='Shared with '+data.recipient.name+' ('+data.recipient.email+') · '+data.documentName;pdf=await pdfjsLib.getDocument({data:Uint8Array.from(atob(data.documentBase64.split(',').pop()),c=>c.charCodeAt(0))}).promise;show('ok','Document opened.');await render();}catch(err){show('err',err.message);}}
+let docPassword='';
+function askPassword(message){
+  let box=document.getElementById('pw-box');
+  if(!box){box=document.createElement('form');box.id='pw-box';box.style.cssText='margin:1rem 0;display:flex;gap:.5rem;flex-wrap:wrap;align-items:center';
+    box.innerHTML='<input id="pw-input" type="password" autocomplete="current-password" placeholder="Document password" style="flex:1 1 220px;padding:.6rem .7rem;border-radius:8px;border:1px solid #213049;background:#080d16;color:#f0f4fc;font:inherit"><button class="btn" type="submit">Open document</button>';
+    document.getElementById('result').before(box);
+    box.addEventListener('submit',e=>{e.preventDefault();docPassword=document.getElementById('pw-input').value;load();});}
+  show('err',message);document.getElementById('pw-input').focus();
+}
+async function load(){if(!token){show('err','Missing document token.');return;}try{const res=await fetch(API+'/api/distributions/public/'+token,{headers:docPassword?{'X-Document-Password':docPassword}:{}});data=await res.json();
+if(res.status===401&&data.passwordRequired){document.getElementById('doc-title').textContent=data.title||'Protected document';return askPassword(docPassword?data.error:'This document is password protected. Enter the password the sender gave you.');}
+if(!res.ok)throw new Error(data.error||'Unable to load document');document.getElementById('pw-box')?.remove();document.getElementById('doc-title').textContent=data.title;document.getElementById('recipient-line').textContent='Shared with '+data.recipient.name+' ('+data.recipient.email+') · '+data.documentName;pdf=await pdfjsLib.getDocument({data:Uint8Array.from(atob(data.documentBase64.split(',').pop()),c=>c.charCodeAt(0))}).promise;show('ok','Document opened.');await render();}catch(err){show('err',err.message);}}
 document.getElementById('prev-page').addEventListener('click',()=>{if(pdf&&pageNo>1){pageNo--;render();}});document.getElementById('next-page').addEventListener('click',()=>{if(pdf&&pageNo<pdf.numPages){pageNo++;render();}});document.getElementById('download-btn').addEventListener('click',()=>{if(!data)return;const a=document.createElement('a');a.href=data.documentBase64;a.download=data.documentName||'document.pdf';a.click();});load();
 </script>
 </body>

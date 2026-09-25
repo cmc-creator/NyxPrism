@@ -5,7 +5,7 @@ import { aiDailyQuota, askClaude, HELP_MODEL } from '../ai.js';
 const router = Router();
 
 const TOOL_PROMPTS = {
-  split:       'You are an AI assistant in NyxPrism\'s PDF Splitter. Help the user decide how to split their PDF — by chapter, every N pages, or custom page ranges. Be concise and practical. If they share page counts or content info, give specific recommendations.',
+  split:       'You are an AI assistant in NyxPrism\'s PDF Splitter. Help the user decide how to split their PDF - by chapter, every N pages, or custom page ranges. Be concise and practical. If they share page counts or content info, give specific recommendations.',
   merge:       'You are an AI assistant in NyxPrism\'s PDF Merge tool. Help the user decide the best order to merge multiple PDFs. Ask about their purpose and recommend logical ordering. Be concise.',
   compress:    'You are an AI assistant in NyxPrism\'s PDF Compressor. Help the user choose quality settings. Quality 80-100 preserves images well; 50-70 balances size/quality; 20-40 shrinks aggressively. Ask what the PDF will be used for.',
   watermark:   'You are an AI assistant in NyxPrism\'s PDF Watermarker. Help the user choose watermark text, position, opacity, and size. Suggest common options like "CONFIDENTIAL", "DRAFT", or a company name. Advise on subtle vs prominent based on use case.',

@@ -13,88 +13,88 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 DOCS = ROOT / "docs"
 SITE = "https://www.nyxprism.com"
-LOCAL = "Your PDF is processed right in your browser — it isn't uploaded to NyxPrism."
+LOCAL = "Your PDF is processed right in your browser - it isn't uploaded to NyxPrism."
 UPLOADED = ("The PDF is stored securely so each recipient can open it, and it is deleted automatically "
             "after the request expires. See the privacy policy for details.")
 
 # slug, dashboard panel, name, search title, one-line description, pro?, local?, steps, features, extra FAQs, related
 TOOLS = [
-    dict(slug="split-pdf", panel="split", name="Split PDF", title="Split PDF Online — Extract Pages or Split by Range",
+    dict(slug="split-pdf", panel="split", name="Split PDF", title="Split PDF Online - Extract Pages or Split by Range",
          desc="Split a PDF into several files by page range or every N pages, or pull out single pages.",
          steps=["Choose your PDF.", "Pick how to split: every N pages, custom ranges, or every page on its own.", "Download your new PDFs."],
          features=["Split by custom page ranges", "Split every N pages", "Extract every page as its own PDF", "Works in your browser"],
          related=["merge-pdf", "organize-pdf-pages", "ai-pdf-splitter"]),
-    dict(slug="merge-pdf", panel="merge", name="Merge PDF", title="Merge PDF Files — Combine PDFs into One",
+    dict(slug="merge-pdf", panel="merge", name="Merge PDF", title="Merge PDF Files - Combine PDFs into One",
          desc="Combine several PDFs into a single document, in the order you choose.",
          steps=["Add two or more PDFs.", "Drag them into the order you want.", "Download the combined PDF."],
          features=["Combine any number of PDFs", "Reorder files before merging", "Keeps original quality", "Works in your browser"],
          related=["split-pdf", "compress-pdf", "organize-pdf-pages"]),
-    dict(slug="compress-pdf", panel="compress", name="Compress PDF", title="Compress PDF — Reduce PDF File Size",
+    dict(slug="compress-pdf", panel="compress", name="Compress PDF", title="Compress PDF - Reduce PDF File Size",
          desc="Shrink PDF file size so it's easier to email and upload. Works best on PDFs with images.",
          steps=["Choose your PDF.", "Pick a quality level.", "Download the smaller PDF."],
          features=["Adjustable quality", "Shows size before and after", "Batch compress many PDFs at once", "Works in your browser"],
          related=["batch-compress-pdf", "merge-pdf", "pdf-to-image"]),
-    dict(slug="batch-compress-pdf", panel="batch", name="Batch Compress PDF", title="Batch Compress PDFs — Shrink Many PDFs at Once",
+    dict(slug="batch-compress-pdf", panel="batch", name="Batch Compress PDF", title="Batch Compress PDFs - Shrink Many PDFs at Once",
          desc="Compress many PDFs in one go and download them together as a ZIP file.",
          steps=["Add several PDFs.", "Choose a quality level.", "Download them all as a ZIP."],
          features=["Compress many files at once", "One ZIP download", "Optional ZIP password", "Works in your browser"],
          related=["compress-pdf", "merge-pdf", "split-pdf"]),
-    dict(slug="rotate-pdf", panel="rotate", name="Rotate PDF", title="Rotate PDF Pages — Fix Sideways or Upside-Down Pages",
+    dict(slug="rotate-pdf", panel="rotate", name="Rotate PDF", title="Rotate PDF Pages - Fix Sideways or Upside-Down Pages",
          desc="Rotate the whole document or just the pages that are sideways or upside down.",
          steps=["Choose your PDF.", "Pick the pages and the angle.", "Download the fixed PDF."],
          features=["Rotate all pages or specific ones", "90°, 180° or 270°", "Keeps everything else unchanged", "Works in your browser"],
          related=["organize-pdf-pages", "edit-pdf", "split-pdf"]),
-    dict(slug="organize-pdf-pages", panel="pagemanager", name="Organize PDF Pages", title="Organize PDF Pages — Reorder and Delete Pages Visually",
+    dict(slug="organize-pdf-pages", panel="pagemanager", name="Organize PDF Pages", title="Organize PDF Pages - Reorder and Delete Pages Visually",
          desc="Reorder, delete and rearrange pages with a visual drag-and-drop page view.",
          steps=["Choose your PDF.", "Drag pages into order and remove the ones you don't need.", "Download the reorganized PDF."],
          features=["Visual page thumbnails", "Drag-and-drop reordering", "Delete pages in one click", "Works in your browser"],
          related=["rotate-pdf", "split-pdf", "edit-pdf"]),
-    dict(slug="edit-pdf", panel="editpdf", name="Edit PDF", title="Edit PDF Online — Delete, Reorder Pages and Add Text",
+    dict(slug="edit-pdf", panel="editpdf", name="Edit PDF", title="Edit PDF Online - Delete, Reorder Pages and Add Text",
          desc="Delete or reorder pages and add text anywhere on a page.",
          steps=["Choose your PDF.", "Delete or reorder pages and place text where you need it.", "Download the edited PDF."],
          features=["Add text overlays", "Delete and reorder pages", "Preview as you edit", "Works in your browser"],
          related=["annotate-pdf", "organize-pdf-pages", "sign-pdf"]),
-    dict(slug="annotate-pdf", panel="annotate", name="Annotate PDF", title="Annotate PDF — Highlight, Draw and Add Notes",
+    dict(slug="annotate-pdf", panel="annotate", name="Annotate PDF", title="Annotate PDF - Highlight, Draw and Add Notes",
          desc="Highlight text, draw, add boxes and notes directly on your PDF pages.",
          steps=["Choose your PDF.", "Highlight, draw, add shapes or notes.", "Download the annotated PDF."],
          features=["Highlighter, pen, shapes and text", "Choose colours and line width", "Undo as you go", "Works in your browser"],
          related=["edit-pdf", "sign-pdf", "redact-pdf"]),
-    dict(slug="sign-pdf", panel="sign", name="Sign PDF", title="Sign PDF Online — Draw, Type or Upload Your Signature",
+    dict(slug="sign-pdf", panel="sign", name="Sign PDF", title="Sign PDF Online - Draw, Type or Upload Your Signature",
          desc="Add your own signature to a PDF: draw it, type it or upload an image.",
          steps=["Choose your PDF.", "Draw, type or upload your signature and place it on the page.", "Download the signed PDF."],
          features=["Draw, type or upload a signature", "Place and resize it anywhere", "No account needed to open the result", "Works in your browser"],
          faqs=[("How do I get someone else to sign?", "Use Request Signatures to email a secure signing link to one or more people and track who has signed.")],
          related=["request-signatures", "annotate-pdf", "flatten-pdf"]),
-    dict(slug="request-signatures", panel="signrequest", name="Request Signatures", title="Request Signatures — Send PDFs for E-Signature",
+    dict(slug="request-signatures", panel="signrequest", name="Request Signatures", title="Request Signatures - Send PDFs for E-Signature",
          desc="Email a PDF to one or more signers, in order, and get back a completed copy with a certificate of completion.",
          pro=True, local=False,
-         steps=["Upload your PDF and add your signers.", "Place signature, date, name and other fields for each signer.", "Send — signers sign from any device, and everyone gets the completed PDF."],
+         steps=["Upload your PDF and add your signers.", "Place signature, date, name and other fields for each signer.", "Send - signers sign from any device, and everyone gets the completed PDF."],
          features=["Signers draw or type their signature", "Signing in order, one person after another", "Certificate of completion with a full audit trail", "Email when everyone has signed or someone declines"],
          faqs=[("Do signers need an account?", "No. Each signer gets a unique, secure link and can sign from any browser or phone."),
                ("What does the completed PDF include?", "Every signer's fields and a certificate page listing who signed, when, from which IP address, and SHA-256 fingerprints of the document.")],
          related=["sign-pdf", "send-pdf", "flatten-pdf"]),
-    dict(slug="send-pdf", panel="distribution", name="Send PDF with Tracking", title="Send a PDF with Tracking — Know Who Opened It",
+    dict(slug="send-pdf", panel="distribution", name="Send PDF with Tracking", title="Send a PDF with Tracking - Know Who Opened It",
          desc="Send a PDF to one person or up to 250 at once, each with a private link, and see who opened it.",
          pro=True, local=False,
          steps=["Upload your PDF.", "Add recipients one by one or paste a list.", "Send, then track opens in your dashboard."],
          features=["Up to 250 recipients per send", "Paste a list of names and emails", "See who opened and when", "Revoke links at any time"],
          related=["request-signatures", "protect-pdf", "compress-pdf"]),
-    dict(slug="protect-pdf", panel="protect", name="Protect PDF", title="Password Protect PDF — Encrypt a PDF with a Password",
+    dict(slug="protect-pdf", panel="protect", name="Protect PDF", title="Password Protect PDF - Encrypt a PDF with a Password",
          desc="Add a password to a PDF so only people who know it can open it.",
          steps=["Choose your PDF.", "Set an open password (and an optional owner password).", "Download the protected PDF."],
          features=["Password to open the file", "Optional owner password for permissions", "Encrypted in your browser", "Works with any PDF reader"],
          related=["redact-pdf", "watermark-pdf", "send-pdf"]),
-    dict(slug="redact-pdf", panel="redact", name="Redact PDF", title="Redact PDF — Permanently Black Out Sensitive Information",
+    dict(slug="redact-pdf", panel="redact", name="Redact PDF", title="Redact PDF - Permanently Black Out Sensitive Information",
          desc="Permanently black out names, numbers and other sensitive details before you share a PDF.",
          steps=["Choose your PDF.", "Draw boxes over the text and images to hide.", "Download the redacted PDF."],
          features=["Covered content is removed, not just hidden", "Works on text and images", "Page-by-page preview", "Works in your browser"],
          related=["protect-pdf", "flatten-pdf", "watermark-pdf"]),
-    dict(slug="watermark-pdf", panel="watermark", name="Watermark PDF", title="Watermark PDF — Add Text Like CONFIDENTIAL or DRAFT",
+    dict(slug="watermark-pdf", panel="watermark", name="Watermark PDF", title="Watermark PDF - Add Text Like CONFIDENTIAL or DRAFT",
          desc="Stamp text such as CONFIDENTIAL or DRAFT across every page.",
          steps=["Choose your PDF.", "Type your watermark and adjust size, angle and opacity.", "Download the watermarked PDF."],
          features=["Custom text", "Adjustable opacity, size and angle", "Applied to every page", "Works in your browser"],
          related=["protect-pdf", "add-page-numbers-pdf", "pdf-header-footer"]),
-    dict(slug="add-page-numbers-pdf", panel="number", name="Add Page Numbers", title="Add Page Numbers to PDF — Custom Position and Format",
+    dict(slug="add-page-numbers-pdf", panel="number", name="Add Page Numbers", title="Add Page Numbers to PDF - Custom Position and Format",
          desc="Stamp page numbers on every page, with your choice of position, format and starting number.",
          steps=["Choose your PDF.", "Pick position, format, starting number and size.", "Download the numbered PDF."],
          features=["Six positions", "Formats like “Page 1 of 10”", "Custom starting number", "Works in your browser"],
@@ -104,12 +104,12 @@ TOOLS = [
          steps=["Choose your PDF.", "Type your header and footer text; use {page} and {total} for page numbers.", "Download the updated PDF."],
          features=["Header and footer text", "Automatic page numbers", "Applied to every page", "Works in your browser"],
          related=["add-page-numbers-pdf", "watermark-pdf", "edit-pdf-metadata"]),
-    dict(slug="ocr-pdf", panel="ocr", name="OCR PDF", title="OCR PDF — Extract Text from Scanned PDFs",
+    dict(slug="ocr-pdf", panel="ocr", name="OCR PDF", title="OCR PDF - Extract Text from Scanned PDFs",
          desc="Turn scanned pages and image-only PDFs into text you can copy and search.",
          steps=["Choose your scanned PDF.", "Pick the document language.", "Copy or download the extracted text."],
          features=["Reads scanned and photographed pages", "Multiple languages", "Copy or download as .txt", "Processed in your browser"],
          related=["extract-pdf-text", "ai-pdf-splitter", "pdf-to-image"]),
-    dict(slug="extract-pdf-text", panel="extract", name="Extract PDF Text", title="Extract Text from PDF — Copy or Download as TXT",
+    dict(slug="extract-pdf-text", panel="extract", name="Extract PDF Text", title="Extract Text from PDF - Copy or Download as TXT",
          desc="Pull all readable text out of a PDF to copy or download.",
          steps=["Choose your PDF.", "Choose all pages or a range.", "Copy the text or download it as .txt."],
          features=["All pages or a page range", "Copy to clipboard", "Download as .txt", "Works in your browser"],
@@ -120,23 +120,23 @@ TOOLS = [
          steps=["Choose a PDF, or your images.", "Pick the image format and quality, or the page order.", "Download your images or the new PDF."],
          features=["PDF to PNG or JPG", "Images to a single PDF", "Adjustable resolution", "Works in your browser"],
          related=["compress-pdf", "ocr-pdf", "merge-pdf"]),
-    dict(slug="flatten-pdf", panel="flatten", name="Flatten PDF", title="Flatten PDF — Lock Form Fields and Annotations",
+    dict(slug="flatten-pdf", panel="flatten", name="Flatten PDF", title="Flatten PDF - Lock Form Fields and Annotations",
          desc="Turn fillable form fields and annotations into static content that can't be changed.",
          steps=["Choose your PDF.", "Choose what to flatten.", "Download the flattened PDF."],
          features=["Flattens form fields", "Flattens annotations", "Prevents further edits in most readers", "Works in your browser"],
          related=["sign-pdf", "redact-pdf", "protect-pdf"]),
-    dict(slug="compare-pdf", panel="diff", name="Compare PDF", title="Compare Two PDFs — Highlight Differences",
+    dict(slug="compare-pdf", panel="diff", name="Compare PDF", title="Compare Two PDFs - Highlight Differences",
          desc="Compare two versions of a PDF side by side, with the differences highlighted in red.",
          steps=["Choose the original and the new version.", "Page through them side by side.", "Spot every change highlighted in red."],
          features=["Side-by-side view", "Pixel-level differences in red", "Page-by-page navigation", "Works in your browser"],
          related=["edit-pdf", "extract-pdf-text", "annotate-pdf"]),
-    dict(slug="edit-pdf-metadata", panel="meta", name="Edit PDF Metadata", title="Edit PDF Metadata — Title, Author, Subject and Keywords",
+    dict(slug="edit-pdf-metadata", panel="meta", name="Edit PDF Metadata", title="Edit PDF Metadata - Title, Author, Subject and Keywords",
          desc="View and change a PDF's title, author, subject, keywords and other details.",
          steps=["Choose your PDF.", "Edit the title, author, subject and keywords.", "Download the updated PDF."],
          features=["Title, author, subject, keywords", "Creator and producer fields", "See what's already set", "Works in your browser"],
          related=["pdf-header-footer", "protect-pdf", "compress-pdf"]),
-    dict(slug="ai-pdf-splitter", panel="aisplit", name="AI PDF Splitter", title="AI PDF Splitter — Split PDFs by Describing What You Want",
-         desc="Tell the AI how you want a PDF split — by chapter, by invoice, by person — and it plans and names the files for you.",
+    dict(slug="ai-pdf-splitter", panel="aisplit", name="AI PDF Splitter", title="AI PDF Splitter - Split PDFs by Describing What You Want",
+         desc="Tell the AI how you want a PDF split - by chapter, by invoice, by person - and it plans and names the files for you.",
          pro=True, note="Your PDF file stays in your browser; only its text is sent to the AI to plan the split.",
          steps=["Choose your PDF.", "Describe how you want it split, in plain words.", "Review the plan and download the named files."],
          features=["Understands chapters, invoices, statements and more", "Suggests file names", "Revise the plan by chatting", "Your PDF file stays in your browser"],
@@ -232,7 +232,7 @@ def tool_page(t: dict) -> str:
   {'<div class="pill">Professional</div>' if pro else ''}
   <h1>{html.escape(t['name'])}</h1>
   <p class="lead">{html.escape(t['desc'])}</p>
-  <div class="btns"><a class="btn primary" href="{signup_url}">Try it free</a><a class="btn secondary" href="{open_url}">I have an account — open {html.escape(t['name'])}</a></div>
+  <div class="btns"><a class="btn primary" href="{signup_url}">Try it free</a><a class="btn secondary" href="{open_url}">I have an account - open {html.escape(t['name'])}</a></div>
   <p class="note">{html.escape(t.get('note') or (LOCAL if local else 'Secure links, stored only as long as needed.'))}</p>
 </div>
 <section><h2>How it works</h2><ol class="steps">{steps}</ol></section>
@@ -259,12 +259,12 @@ def tools_index() -> str:
         f'<a class="card" href="/{t["slug"]}"><strong>{html.escape(t["name"])}{" · Pro" if t.get("pro") else ""}</strong><span>{html.escape(t["desc"])}</span></a>'
         for t in TOOLS)
     body = f"""<div class="hero"><h1>Every PDF tool, in one place</h1>
-<p class="lead">Split, merge, compress, sign, protect, convert and more — most tools run right in your browser, so your files stay with you.</p>
+<p class="lead">Split, merge, compress, sign, protect, convert and more - most tools run right in your browser, so your files stay with you.</p>
 <div class="btns"><a class="btn primary" href="/login.html#trial">Create a free account</a></div></div>
 <section><div class="grid">{cards}</div></section>"""
     schema = [{"@context": "https://schema.org", "@type": "ItemList", "itemListElement": [
         {"@type": "ListItem", "position": i, "url": f"{SITE}/{t['slug']}", "name": t["name"]} for i, t in enumerate(TOOLS, 1)]}]
-    return page("PDF Tools — Split, Merge, Compress, Sign and More", "All NyxPrism PDF tools: split, merge, compress, sign, protect, convert, OCR and more.", "/tools", body, schema)
+    return page("PDF Tools - Split, Merge, Compress, Sign and More", "All NyxPrism PDF tools: split, merge, compress, sign, protect, convert, OCR and more.", "/tools", body, schema)
 
 
 def main() -> None:

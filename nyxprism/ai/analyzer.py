@@ -5,11 +5,11 @@ the file can be split into individual named documents.
 
 Two strategies are supported:
 
-1. **LLM** (``strategy="llm"``) – sends page text to an OpenAI-compatible API
+1. **LLM** (``strategy="llm"``) - sends page text to an OpenAI-compatible API
    and asks the model to identify document boundaries.  Requires an
    ``OPENAI_API_KEY`` environment variable (or explicit ``api_key`` argument).
 
-2. **Heuristic** (``strategy="heuristic"``) – uses rule-based signals such as
+2. **Heuristic** (``strategy="heuristic"``) - uses rule-based signals such as
    very short pages, cover-page patterns, and large formatting changes to
    guess split points without any external API call.  Works without an API key
    but is less accurate.
@@ -46,9 +46,9 @@ def detect_boundaries(
     page_texts:
         List of text strings extracted from each page (index 0 = page 1).
     strategy:
-        ``"llm"``        – use OpenAI API (requires key).
-        ``"heuristic"``  – use rule-based detection (no API needed).
-        ``"auto"``       – try LLM first; fall back to heuristic on failure.
+        ``"llm"``        - use OpenAI API (requires key).
+        ``"heuristic"``  - use rule-based detection (no API needed).
+        ``"auto"``       - try LLM first; fall back to heuristic on failure.
     api_key:
         OpenAI API key.  Overrides ``OPENAI_API_KEY`` environment variable.
     model:

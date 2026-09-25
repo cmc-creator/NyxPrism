@@ -59,7 +59,7 @@ from nyxprism import account
 @click.group()
 @click.version_option(__version__, prog_name="NyxPrism")
 def cli() -> None:
-    """NyxPrism – Powerful AI-enhanced PDF multi-tool."""
+    """NyxPrism - Powerful AI-enhanced PDF multi-tool."""
 
 
 def professional(feature: str):
@@ -424,7 +424,7 @@ def delete_pages(source, pages, output):
               help="Watermark image path.")
 @click.option("--output", "-o", default=None, help="Output path.")
 @click.option("--opacity", default=0.3, show_default=True,
-              help="Opacity (0.0–1.0).")
+              help="Opacity (0.0-1.0).")
 @click.option("--angle", default=45.0, show_default=True,
               help="Rotation angle for text watermark.")
 def watermark(source, text, image, output, opacity, angle):
