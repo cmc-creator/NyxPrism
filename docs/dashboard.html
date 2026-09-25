@@ -317,6 +317,10 @@
     .wizard-steps li.done .num{background:rgba(52,211,153,.14);border-color:rgba(52,211,153,.45);color:var(--green)}
     .wizard-steps li.active{border-color:var(--accent);background:rgba(124,58,237,.1);color:var(--text)}
     .wizard-steps li.active .num{background:var(--accent);border-color:var(--accent);color:#fff}
+    .tool-steps{margin:-.5rem 0 1.1rem}
+    .tool-steps li{flex:1 1 120px;padding:.5rem .7rem;font-size:.8rem}
+    .tool-steps li .num{width:22px;height:22px;font-size:.72rem}
+    .tool-steps li.jump{cursor:pointer}
     .wizard-pane{display:none}
     .wizard-pane.active{display:block}
     .wizard-pane > .card{max-width:760px}
@@ -2276,7 +2280,18 @@ function triggerDownload(blob,filename){
 function setupDrop(dropEl,input,onFiles){
   dropEl.addEventListener('dragover',e=>{e.preventDefault();dropEl.classList.add('drag-over');});
   dropEl.addEventListener('dragleave',()=>dropEl.classList.remove('drag-over'));
-  dropEl.addEventListener('drop',e=>{e.preventDefault();dropEl.classList.remove('drag-over');const files=[...e.dataTransfer.files].filter(f=>f.name.endsWith('.pdf'));if(files.length)onFiles(files);});
+  // Accept what the file picker accepts (PDFs unless it says images), whatever the letter case.
+  const wantsImages=/image/i.test(input.accept||'');
+  const accepts=f=>wantsImages?(/^image\//.test(f.type)||/\.(png|jpe?g|gif|webp|bmp|tiff?)$/i.test(f.name)):(f.type==='application/pdf'||/\.pdf$/i.test(f.name));
+  dropEl.addEventListener('drop',e=>{
+    e.preventDefault();dropEl.classList.remove('drag-over');
+    const all=[...e.dataTransfer.files];let files=all.filter(accepts);
+    if(!files.length){if(all.length)toast(wantsImages?'Drop image files (PNG, JPG…).':'Drop a PDF file.','error');return;}
+    if(!input.multiple)files=files.slice(0,1);
+    // Tools that read input.files (not the callback) need the dropped files there too.
+    try{const dt=new DataTransfer();files.forEach(f=>dt.items.add(f));input.files=dt.files;}catch(_){}
+    onFiles(files);
+  });
   input.addEventListener('change',()=>{if(input.files.length)onFiles([...input.files]);});
 }
 
@@ -2366,7 +2381,7 @@ async function loadQRCode(){
       const pct=Math.round((1-out.byteLength/bytes.byteLength)*100);
       triggerDownload(new Blob([out],{type:'application/pdf'}),cFile.name.replace('.pdf','_compressed.pdf'));
       Stats.inc(Math.max(0,Math.round((bytes.byteLength-out.byteLength)/1048576*10)/10));
-      showResult(resultEl,'success',`${fmtSize(bytes.byteLength)} &rarr; ${fmtSize(out.byteLength)} (${pct>=0?pct+'% smaller':'already optimized'})`);
+      showResult(resultEl,'success',`${fmtSize(bytes.byteLength)} → ${fmtSize(out.byteLength)} (${pct>=0?pct+'% smaller':'already optimized'})`);
       toast('Compression complete!');
     }catch(err){showResult(resultEl,'error','Error: '+err.message);toast(err.message,'error');}
     btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Compress PDF';
@@ -3281,6 +3296,48 @@ async function loadSavedPeople(select){
     data.contacts.forEach(contact=>{const option=document.createElement('option');option.value=String(contact.id);option.textContent=contact.name+' — '+contact.email;option.dataset.name=contact.name;option.dataset.email=contact.email;select.appendChild(option);});
   }catch(err){select.replaceChildren();const option=document.createElement('option');option.value='';option.textContent='Saved people unavailable';select.appendChild(option);}
 }
+// Single-step tools get a 1 · 2 · 3 progress strip that follows what the user has done:
+// a file is chosen when the file list fills or a hidden options area appears, and the
+// last step completes when the tool shows a success result. Tool code is untouched.
+const TOOL_STEPS={
+  split:'Get your files',merge:'Get your file',compress:'Get your file',watermark:'Get your file',protect:'Get your file',
+  extract:'Get your text',ocr:'Get your text',rotate:'Get your file',editpdf:'Get your file',annotate:'Get your file',
+  pagemanager:'Get your file',number:'Get your file',redact:'Get your file',batch:'Get your files',meta:'Save changes',
+  headerfooter:'Get your file',flatten:'Get your file',
+};
+function initToolSteps(){
+  Object.entries(TOOL_STEPS).forEach(([id,finalLabel])=>{
+    const panel=document.getElementById('panel-'+id);if(!panel||panel.querySelector('.tool-steps'))return;
+    const header=panel.querySelector('.page-header');const drop=panel.querySelector('.drop-zone');if(!header||!drop)return;
+    const merge=id==='merge'||id==='batch';
+    const strip=document.createElement('ol');strip.className='wizard-steps tool-steps';strip.setAttribute('aria-label','Progress');
+    [[1,merge?'Choose files':'Choose a file'],[2,'Set options'],[3,finalLabel]].forEach(([n,label])=>{
+      const li=document.createElement('li');li.dataset.step=n;
+      const num=document.createElement('span');num.className='num';num.textContent=n;
+      const text=document.createElement('span');text.textContent=label;li.append(num,text);strip.appendChild(li);
+    });
+    header.after(strip);
+    // Areas the tool reveals once a file is loaded (hidden in the page as delivered).
+    const revealed=[...panel.querySelectorAll('[style*="display:none"],[style*="display: none"]')].filter(el=>!el.classList.contains('result-box')&&!el.closest('.result-box')&&el.id);
+    const fileList=panel.querySelector('.file-list');
+    const visible=el=>el.style.display!=='none'&&getComputedStyle(el).display!=='none';
+    function update(){
+      const picked=[...panel.querySelectorAll('input[type=file]')].some(i=>i.files&&i.files.length);
+      const hasFile=picked||(fileList&&fileList.children.length>0)||revealed.some(visible);
+      const done=[...panel.querySelectorAll('.result-box.success')].some(r=>r.classList.contains('visible')&&visible(r));
+      const step=done?4:hasFile?2:1;
+      strip.querySelectorAll('li').forEach(li=>{const n=Number(li.dataset.step);li.classList.toggle('active',n===Math.min(step,3)&&!done);li.classList.toggle('done',n<step);li.classList.toggle('jump',n===1&&step>1);});
+    }
+    strip.querySelector('li[data-step="1"]').addEventListener('click',()=>drop.scrollIntoView({behavior:'smooth',block:'center'}));
+    panel.addEventListener('change',()=>requestAnimationFrame(update),true);
+    panel.addEventListener('drop',()=>requestAnimationFrame(update),true);
+    let queued=false;
+    new MutationObserver(()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;update();});}).observe(panel,{subtree:true,childList:true,attributes:true,attributeFilter:['style','class']});
+    update();
+  });
+}
+initToolSteps();
+
 // Step-by-step workflow: validate(step) returns an error string or '', onEnter(step) runs on arrival.
 function createWizard(root,{validate=()=>'',onEnter=()=>{}}={}){
   const tabs=[...root.querySelectorAll('.wizard-steps li')],panes=[...root.querySelectorAll('.wizard-pane')];

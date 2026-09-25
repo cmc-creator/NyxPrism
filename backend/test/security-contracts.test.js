@@ -247,3 +247,11 @@ test('desktop AI endpoint is Professional-only, quota-limited and size-capped', 
   assert.match(source, /MAX_OUTPUT_TOKENS/);
   assert.match(await read('src/index.js'), /app\.use\('\/api\/ai\/desktop', desktopAiLimiter/);
 });
+
+test('single-step tools show progress and drag-and-drop feeds every tool', async () => {
+  const dashboard = await readRepo('docs/dashboard.html');
+  assert.match(dashboard, /function initToolSteps\(/);
+  assert.match(dashboard, /input\.files=dt\.files/);
+  assert.match(dashboard, /\/\\.pdf\$\/i\.test\(f\.name\)/);
+  assert.doesNotMatch(dashboard, /f\.name\.endsWith\('\.pdf'\)/);
+});
