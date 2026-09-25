@@ -1213,25 +1213,68 @@
   </div>
 
   <div class="panel" id="panel-distribution">
-    <div class="page-header"><h1>Distribute Documents</h1><p>Send a PDF version to one recipient or a bulk recipient batch and track opened / failed delivery state.</p></div>
-    <div class="sigreq-layout">
-      <div class="card">
-        <div class="card-title">Document</div>
-        <div class="drop-zone" id="dist-drop"><input type="file" id="dist-file" accept=".pdf,application/pdf" /><div class="drop-title">Drop PDF here</div><div class="drop-sub">or click to browse</div></div>
-        <div class="form-group"><label class="form-label">Batch title</label><input class="form-input" id="dist-title" placeholder="Policy update distribution" /></div>
-        <div class="card-title" style="margin-top:1rem">Recipients</div>
-        <div class="saved-person-row"><select class="form-input" id="dist-saved-person" aria-label="Saved people"><option value="">Select a saved person</option></select><button class="btn btn-secondary" id="dist-use-saved" type="button">Add Saved Person</button></div>
-        <div class="form-hint">Frequently used people appear first.</div>
-        <div id="dist-recipients"></div>
-        <button class="btn btn-ghost" id="dist-add-recipient" type="button" style="margin-top:.5rem">Add Recipient</button>
-        <div class="btn-row" style="margin-top:1rem"><button class="btn btn-primary" id="dist-send" type="button">Send Distribution</button><button class="btn btn-secondary" id="dist-save" type="button">Save Draft</button></div>
-        <div class="result-box" id="dist-result" style="display:none;margin-top:1rem"></div>
-      </div>
-      <div class="card">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1rem"><div class="card-title" style="margin:0">Distribution Batches</div><button class="btn btn-secondary" id="dist-refresh" type="button">Refresh</button></div>
-        <div id="dist-list"><div style="color:var(--muted);font-size:.85rem">No batches loaded yet.</div></div>
-        <div id="dist-detail" style="margin-top:1rem"></div>
-      </div>
+    <div class="page-header"><h1>Distribute Documents</h1><p>Send a PDF to one person or up to 250 at once, and see who opened it.</p></div>
+    <div class="wizard" id="dist-wizard">
+      <ol class="wizard-steps">
+        <li data-step="1" class="active"><span class="num">1</span><span>Document</span></li>
+        <li data-step="2"><span class="num">2</span><span>Recipients</span></li>
+        <li data-step="3"><span class="num">3</span><span>Review &amp; send</span></li>
+      </ol>
+
+      <section class="wizard-pane active" data-step="1">
+        <div class="card">
+          <div class="card-title">Step 1 · Choose your document</div>
+          <p class="wizard-lead">Each recipient gets their own secure link, so you can see exactly who opened it.</p>
+          <div class="form-group" style="margin-bottom:.9rem">
+            <div class="drop-zone" id="dist-drop"><input type="file" id="dist-file" accept=".pdf,application/pdf" /><div class="drop-title" id="dist-drop-title">Drop PDF here</div><div class="drop-sub" id="dist-drop-sub">or click to browse · up to 8 MB</div></div>
+          </div>
+          <div class="form-group"><label class="form-label" for="dist-title">Name for this send <span style="color:var(--muted);font-weight:500">(optional)</span></label><input class="form-input" id="dist-title" placeholder="e.g. Policy update — September" /></div>
+          <div class="wizard-nav"><span class="wizard-error" data-error></span><button class="btn btn-ghost" id="dist-reset" type="button">Start over</button><span class="spacer"></span><button class="btn btn-primary" type="button" data-next>Next: Recipients →</button></div>
+        </div>
+      </section>
+
+      <section class="wizard-pane" data-step="2">
+        <div class="card">
+          <div class="card-title">Step 2 · Who should receive it?</div>
+          <p class="wizard-lead">Add people one at a time, or paste a list. Up to 250 recipients.</p>
+          <div class="saved-person-row"><select class="form-input" id="dist-saved-person" aria-label="Saved people"><option value="">Pick someone you've sent to before</option></select><button class="btn btn-secondary" id="dist-use-saved" type="button">Add</button></div>
+          <div id="dist-recipients"></div>
+          <div class="btn-row" style="margin-top:.6rem"><button class="btn btn-ghost" id="dist-add-recipient" type="button">+ Add another person</button><button class="btn btn-ghost" id="dist-paste-open" type="button">Paste a list</button></div>
+          <div id="dist-paste-box" style="display:none;margin-top:.75rem">
+            <label class="form-label" for="dist-paste" style="display:block;margin-bottom:.4rem">One person per line: <code>Name, email@example.com</code></label>
+            <textarea class="form-input" id="dist-paste" rows="6" style="display:block;width:100%;resize:vertical" placeholder="Jane Smith, jane@example.com&#10;Sam Lee, sam@example.com"></textarea>
+            <div class="btn-row" style="margin-top:.5rem"><button class="btn btn-secondary" id="dist-paste-add" type="button">Add these people</button><span class="form-hint" id="dist-paste-note" style="margin:0"></span></div>
+          </div>
+          <div class="form-hint" id="dist-count" style="margin-top:.75rem"></div>
+          <div class="wizard-nav"><span class="wizard-error" data-error></span><button class="btn btn-secondary" type="button" data-back>← Back</button><span class="spacer"></span><button class="btn btn-primary" type="button" data-next>Next: Review →</button></div>
+        </div>
+      </section>
+
+      <section class="wizard-pane" data-step="3">
+        <div class="card">
+          <div id="dist-review">
+            <div class="card-title">Step 3 · Review and send</div>
+            <p class="wizard-lead"><strong>Send</strong> emails everyone their link now; <strong>Save as draft</strong> keeps it below to send later.</p>
+            <dl class="review-grid" id="dist-review-grid"></dl>
+            <div class="card-title" style="font-size:.8rem">Recipients</div>
+            <div class="review-signers" id="dist-review-list" style="max-height:260px;overflow:auto"></div>
+            <div class="result-box" id="dist-result" style="display:none;margin-top:1rem"></div>
+            <div class="wizard-nav"><span class="wizard-error" data-error></span><button class="btn btn-secondary" type="button" data-back>← Back</button><span class="spacer"></span><button class="btn btn-secondary" id="dist-save" type="button">Save as draft</button><button class="btn btn-primary" id="dist-send" type="button">Send now</button></div>
+          </div>
+          <div id="dist-done" class="wizard-done" style="display:none">
+            <div class="big">✓</div>
+            <div class="card-title" id="dist-done-title" style="justify-content:center">Sent</div>
+            <p class="wizard-lead" id="dist-done-text" style="margin:0 auto 1rem;max-width:460px"></p>
+            <button class="btn btn-primary" id="dist-restart" type="button">Send another document</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="card" style="margin-top:1.25rem">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1rem"><div class="card-title" style="margin:0">Your distributions</div><button class="btn btn-secondary" id="dist-refresh" type="button">Refresh</button></div>
+      <div id="dist-list"><div style="color:var(--muted);font-size:.85rem">No batches loaded yet.</div></div>
+      <div id="dist-detail" style="margin-top:1rem"></div>
     </div>
   </div>
 
@@ -3441,8 +3484,75 @@ function useSavedPerson(select,addRecipient){const option=select.selectedOptions
   function addRecipient(name='',email=''){const row=document.createElement('div');row.className='recipient-row distribution-recipient';const nameInput=document.createElement('input');nameInput.className='form-input dr-name';nameInput.placeholder='Name';nameInput.value=name;const emailInput=document.createElement('input');emailInput.className='form-input dr-email';emailInput.type='email';emailInput.placeholder='email@example.com';emailInput.value=email;const remove=document.createElement('button');remove.className='recipient-remove';remove.type='button';remove.title='Remove recipient';remove.setAttribute('aria-label','Remove recipient');remove.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';remove.addEventListener('click',()=>row.remove());row.append(nameInput,emailInput,remove);recipientsEl.appendChild(row);}
   function recipients(){return Array.from(recipientsEl.children).map(row=>({name:row.querySelector('.dr-name').value.trim(),email:row.querySelector('.dr-email').value.trim()})).filter(r=>r.name||r.email);}
   addRecipient();document.getElementById('dist-add-recipient').addEventListener('click',()=>addRecipient());const savedPeopleSelect=document.getElementById('dist-saved-person');document.getElementById('dist-use-saved').addEventListener('click',()=>useSavedPerson(savedPeopleSelect,addRecipient));
-  setupDrop(drop,fileInput,files=>{distFile=files[0];if(distFile)toast('PDF loaded for distribution','success');});
-  async function saveDistribution(sendNow,btn){if(!distFile)return toast('Upload a PDF first','error');const recips=recipients();if(!recips.length)return toast('Add at least one recipient','error');const token=await auth.currentUser?.getIdToken(true);if(!token)return toast('Please sign in again','error');btn.disabled=true;showResult(resultEl,'info',sendNow?'Sending document distribution...':'Saving distribution draft...');try{const documentBase64=await fileToDataUrl(distFile);const res=await fetch(API+'/api/distributions',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({title:document.getElementById('dist-title').value||distFile.name,documentName:distFile.name,documentBase64,recipients:recips,sendNow})});const data=await res.json();if(!res.ok)throw new Error(data.error||'Save failed');showResult(resultEl,'success',sendNow?'Distribution sent.':'Distribution draft saved.');loadBatches();loadSavedPeople(savedPeopleSelect);}catch(err){showResult(resultEl,'error',err.message);}finally{btn.disabled=false;}}
+  setupDrop(drop,fileInput,files=>{
+    const file=files[0];if(!file)return;
+    if(file.size>8*1024*1024){toast('That PDF is over 8 MB. Compress it first, then try again.','error');return;}
+    if(!/\.pdf$/i.test(file.name)&&file.type!=='application/pdf'){toast('Choose a PDF file.','error');return;}
+    distFile=file;
+    document.getElementById('dist-drop-title').textContent='✓ '+file.name;
+    document.getElementById('dist-drop-sub').textContent=(file.size/1024/1024).toFixed(1)+' MB · click to choose a different file';
+    const title=document.getElementById('dist-title');if(!title.value)title.value=file.name.replace(/\.pdf$/i,'');
+  });
+  const DIST_EMAIL=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  function updateCount(){const n=recipients().length;document.getElementById('dist-count').textContent=n?n+' recipient'+(n===1?'':'s')+' added':'';}
+  recipientsEl.addEventListener('input',updateCount);
+  recipientsEl.addEventListener('click',e=>{if(e.target.closest('.recipient-remove'))setTimeout(updateCount);});
+  document.getElementById('dist-paste-open').addEventListener('click',()=>{const box=document.getElementById('dist-paste-box');box.style.display=box.style.display==='none'?'block':'none';if(box.style.display==='block')document.getElementById('dist-paste').focus();});
+  document.getElementById('dist-paste-add').addEventListener('click',()=>{
+    const lines=document.getElementById('dist-paste').value.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+    const existing=new Set(recipients().map(r=>r.email.toLowerCase()));
+    let added=0,skipped=0;
+    // Drop the empty starter row before adding pasted people.
+    Array.from(recipientsEl.children).forEach(row=>{if(!row.querySelector('.dr-name').value.trim()&&!row.querySelector('.dr-email').value.trim())row.remove();});
+    for(const line of lines){
+      const emailMatch=line.match(/[^\s,;<>"]+@[^\s,;<>"]+\.[^\s,;<>"]+/);
+      if(!emailMatch){skipped++;continue;}
+      const email=emailMatch[0].toLowerCase();
+      if(existing.has(email)){skipped++;continue;}
+      let name=line.replace(emailMatch[0],'').replace(/[<>"]/g,'').replace(/[,;\t]+/g,' ').trim();
+      if(!name)name=email.split('@')[0].replace(/[._-]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+      addRecipient(name,email);existing.add(email);added++;
+    }
+    if(!recipientsEl.children.length)addRecipient();
+    document.getElementById('dist-paste').value='';
+    document.getElementById('dist-paste-note').textContent=`Added ${added}`+(skipped?`, skipped ${skipped} (duplicate or no email)`:'');
+    updateCount();
+  });
+  function validateDist(step){
+    if(step===1)return distFile?'':'Upload a PDF to continue.';
+    if(step===2){
+      const list=recipients();
+      if(!list.length)return 'Add at least one recipient.';
+      if(list.length>250)return 'You can send to up to 250 people at once.';
+      const bad=list.find(r=>!r.name||!DIST_EMAIL.test(r.email));if(bad)return 'Each recipient needs a name and a valid email address'+(bad.email?` (check ${bad.email})`:'')+'.';
+      if(new Set(list.map(r=>r.email.toLowerCase())).size!==list.length)return 'The same email address appears more than once.';
+    }
+    return '';
+  }
+  function renderDistReview(){
+    const grid=document.getElementById('dist-review-grid');grid.replaceChildren();
+    const add=(k,v)=>{const dt=document.createElement('dt');dt.textContent=k;const dd=document.createElement('dd');dd.textContent=v;grid.append(dt,dd);};
+    const list=recipients();
+    add('Document',distFile.name);add('Name',document.getElementById('dist-title').value.trim()||distFile.name);add('Recipients',list.length+' '+(list.length===1?'person':'people'));
+    const box=document.getElementById('dist-review-list');box.replaceChildren();
+    list.forEach((r,i)=>{const row=document.createElement('div');row.className='review-signer';const n=document.createElement('span');n.className='order';n.textContent=i+1;const who=document.createElement('div');who.className='who';who.textContent=r.name;const small=document.createElement('small');small.textContent=r.email;who.appendChild(small);row.append(n,who);box.appendChild(row);});
+  }
+  const distWizard=createWizard(document.getElementById('dist-wizard'),{validate:validateDist,onEnter(step){if(step===2)updateCount();if(step===3)renderDistReview();}});
+  function resetDist(){
+    distFile=null;fileInput.value='';resultEl.style.display='none';
+    document.getElementById('dist-drop-title').textContent='Drop PDF here';document.getElementById('dist-drop-sub').textContent='or click to browse · up to 8 MB';
+    document.getElementById('dist-title').value='';recipientsEl.replaceChildren();addRecipient();
+    document.getElementById('dist-paste-box').style.display='none';document.getElementById('dist-paste-note').textContent='';
+    document.getElementById('dist-review').style.display='';document.getElementById('dist-done').style.display='none';
+    distWizard.reset();
+  }
+  document.getElementById('dist-reset').addEventListener('click',resetDist);
+  document.getElementById('dist-restart').addEventListener('click',resetDist);
+  async function saveDistribution(sendNow,btn){if(!distFile)return toast('Upload a PDF first','error');const recips=recipients();if(!recips.length)return toast('Add at least one recipient','error');const token=await auth.currentUser?.getIdToken(true);if(!token)return toast('Please sign in again','error');btn.disabled=true;showResult(resultEl,'info',sendNow?'Sending document distribution...':'Saving distribution draft...');try{const documentBase64=await fileToDataUrl(distFile);const res=await fetch(API+'/api/distributions',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({title:document.getElementById('dist-title').value||distFile.name,documentName:distFile.name,documentBase64,recipients:recips,sendNow})});const data=await res.json();if(!res.ok)throw new Error(data.error||'Save failed');resultEl.style.display='none';
+      document.getElementById('dist-review').style.display='none';document.getElementById('dist-done').style.display='';
+      document.getElementById('dist-done-title').textContent=sendNow?'Sent':'Draft saved';
+      document.getElementById('dist-done-text').textContent=data.warning||(sendNow?`${recips.length} ${recips.length===1?'person has':'people have'} been emailed a secure link. Track opens in “Your distributions” below.`:'Your draft is saved in “Your distributions” below. Send it whenever you are ready.');
+      loadBatches();loadSavedPeople(savedPeopleSelect);}catch(err){showResult(resultEl,'error',err.message);}finally{btn.disabled=false;}}
   async function loadBatches(){const list=document.getElementById('dist-list'),token=await auth.currentUser?.getIdToken(true);if(!token)return;try{const res=await fetch(API+'/api/distributions',{headers:{Authorization:'Bearer '+token}});const data=await res.json();if(!res.ok)throw new Error(data.error||'Load failed');if(!data.batches.length){list.innerHTML='<div style="color:var(--muted);font-size:.85rem">No distribution batches yet.</div>';return;}list.innerHTML='';data.batches.forEach(batch=>{const row=document.createElement('div');row.className='recent-file-row';row.style.cursor='default';row.innerHTML='<span class="recent-fname">'+escapeHtml(batch.title)+'<br><span style="color:var(--muted);font-size:.72rem">'+Number(batch.recipient_count)+' recipients · '+Number(batch.opened_count)+' opened · '+Number(batch.failed_count)+' failed</span></span><span class="recent-tool-badge">'+escapeHtml(batch.status)+'</span><button class="btn btn-ghost inspect" style="font-size:.72rem;padding:.25rem .5rem">Inspect</button>'+(batch.status==='draft'?'<button class="btn btn-ghost send" style="font-size:.72rem;padding:.25rem .5rem">Send</button>':'')+(['draft','sent'].includes(batch.status)?'<button class="btn btn-ghost revoke" style="font-size:.72rem;padding:.25rem .5rem">Revoke</button>':'')+'<button class="btn btn-ghost delete" style="font-size:.72rem;padding:.25rem .5rem;color:var(--red)">Delete</button>';row.querySelector('.inspect').addEventListener('click',()=>loadBatchDetail(batch.id));row.querySelector('.send')?.addEventListener('click',()=>distributionAction(batch.id,'send'));row.querySelector('.revoke')?.addEventListener('click',()=>distributionAction(batch.id,'revoke'));row.querySelector('.delete').addEventListener('click',()=>distributionAction(batch.id,'delete'));list.appendChild(row);});}catch(err){list.innerHTML='<div style="color:var(--red);font-size:.85rem">'+escapeHtml(err.message)+'</div>';}}
   async function loadBatchDetail(id){const detail=document.getElementById('dist-detail'),token=await auth.currentUser?.getIdToken(true);const res=await fetch(API+'/api/distributions/'+id,{headers:{Authorization:'Bearer '+token}});const data=await res.json();if(!res.ok)return toast(data.error||'Could not load batch','error');detail.innerHTML='<div class="card-title">Recipients</div>';data.recipients.forEach(r=>{const row=document.createElement('div');row.className='recent-file-row';row.style.cursor='default';row.innerHTML='<span class="recent-fname">'+escapeHtml(r.name)+'<br><span style="color:var(--muted);font-size:.72rem">'+escapeHtml(r.email)+'</span></span><span class="recent-tool-badge">'+escapeHtml(r.status)+'</span>';detail.appendChild(row);});}
   async function distributionAction(id,action){if((action==='delete'||action==='revoke')&&!confirm(action==='delete'?'Permanently delete this distribution and stored PDF?':'Revoke every recipient link?'))return;const token=await auth.currentUser?.getIdToken(true);const method=action==='delete'?'DELETE':'POST';try{const res=await fetch(API+'/api/distributions/'+id+(action==='delete'?'':'/'+action),{method,headers:{Authorization:'Bearer '+token}});const data=await res.json();if(!res.ok)throw new Error(data.error||'Action failed');toast(data.warning||('Distribution '+(action==='delete'?'deleted':action==='send'?'sent':'revoked')),'success');document.getElementById('dist-detail').replaceChildren();loadBatches();}catch(err){toast(err.message,'error');}}
