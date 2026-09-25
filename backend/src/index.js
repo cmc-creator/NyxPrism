@@ -63,6 +63,8 @@ app.use(cors({
     if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
     // Allow only controlled NyxPrism subdomains. Preview deployments must be explicitly configured.
     if (/^https:\/\/([a-z0-9-]+\.)*nyxprism\.com$/.test(origin)) return cb(null, true);
+    // Staging only: Vercel preview deployments (set ALLOW_PREVIEW_ORIGINS=true on the staging service).
+    if (process.env.ALLOW_PREVIEW_ORIGINS === 'true' && /^https:\/\/[a-z0-9-]+\.vercel\.app$/.test(origin)) return cb(null, true);
     cb(new Error(`CORS: origin ${origin} not allowed`));
   },
   methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],

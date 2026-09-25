@@ -1,0 +1,15 @@
+{
+  "name": "nyxprism-e2e",
+  "private": true,
+  "type": "module",
+  "description": "Browser tests for the NyxPrism site: step-by-step flows, tools, signer journey and public pages.",
+  "scripts": {
+    "test": "node run.mjs"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.3.0",
+    "express": "^4.19.2",
+    "pdf-lib": "^1.17.1",
+    "puppeteer": "^24.0.0"
+  }
+}

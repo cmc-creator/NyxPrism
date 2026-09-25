@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Log In &mdash; NyxPrism&#8482; | NyxCollective LLC</title>
+  <script src="/config.js"></script>
   <meta name="robots" content="noindex, nofollow" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -387,7 +388,7 @@
 </script>
 <script type="module">
   // ── Update this once Railway gives you a URL ─────────────────────────
-  const API = 'https://nyxprism-production.up.railway.app';
+  const API = window.NYX_API || 'https://nyxprism-production.up.railway.app';
   // ─────────────────────────────────────────────────────────────────────
 
   import { initializeApp }                                          from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';

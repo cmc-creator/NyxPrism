@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Shared Document - NyxPrism</title>
+  <script src="/config.js"></script>
   <meta name="robots" content="noindex, nofollow" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -24,7 +25,7 @@
 <main><section class="card"><div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap"><div><h1 id="doc-title">Shared Document</h1><p id="recipient-line"></p></div><div><button class="btn secondary" id="prev-page">Prev</button> <button class="btn secondary" id="next-page">Next</button> <button class="btn" id="download-btn">Download PDF</button></div></div><div id="result"></div><div class="viewer"><canvas id="pdf-canvas"></canvas></div></section></main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
-const API='https://nyxprism-production.up.railway.app';pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const API = window.NYX_API || 'https://nyxprism-production.up.railway.app';pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 const token=new URLSearchParams(location.search).get('token'),canvas=document.getElementById('pdf-canvas'),ctx=canvas.getContext('2d');let pdf=null,pageNo=1,data=null;
 function show(cls,msg){document.getElementById('result').className='result '+cls;document.getElementById('result').textContent=msg;}
 async function render(){if(!pdf)return;const page=await pdf.getPage(pageNo);const vp=page.getViewport({scale:1.2});canvas.width=vp.width;canvas.height=vp.height;await page.render({canvasContext:ctx,viewport:vp}).promise;document.getElementById('status').textContent='Page '+pageNo+' / '+pdf.numPages;}

@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NyxPrism&#8482; — PDF Tools</title>
+  <script src="/config.js"></script>
   <meta name="robots" content="noindex, nofollow" />
   <link rel="manifest" href="manifest.json?v=5" />
   <meta name="theme-color" content="#7c3aed" />
@@ -1922,7 +1923,7 @@ const auth = getAuth(app);
 const db   = getFirestore(app);
 
 // ── Update to your Railway backend URL ────────────────────────────
-const API = 'https://nyxprism-production.up.railway.app';
+const API = window.NYX_API || 'https://nyxprism-production.up.railway.app';
 document.getElementById('verify-resend-btn')?.addEventListener('click',async function(){
   this.disabled=true;
   try{await sendEmailVerification(auth.currentUser);toast('Verification email sent. Check your inbox (and spam).','success');}
