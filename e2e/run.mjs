@@ -246,6 +246,23 @@ await test('password-protected distribution link: prompt, wrong password, then o
   } finally { api.close(); recipientSite.close(); }
 });
 
+await test('no critical or serious accessibility issues (axe, WCAG 2 A/AA)', async () => {
+  const axe = fs.readFileSync(path.join(REPO, 'e2e', 'node_modules', 'axe-core', 'axe.min.js'), 'utf8');
+  const api = (m, p) => (p === '/api/user/me' ? PRO_ME : p === '/api/admin/me' ? { email: 'owner@example.com', owner: true }
+    : p === '/api/admin/stats' ? { plans: [], signupsDaily: [{ day: '2026-09-01', count: 0 }], signRequests: [], distributions: {}, funnel30d: {} } : {});
+  const problems = [];
+  for (const p of ['/', '/tools', '/split-pdf', '/login.html', '/contact.html', '/dashboard.html', '/dashboard.html#signrequest', '/dashboard.html#account', '/admin.html']) {
+    const page = await newPage(browser, api);
+    await page.goto(SITE + p, { waitUntil: 'networkidle2' }); await wait(900);
+    await page.addScriptTag({ content: axe });
+    const found = await page.evaluate(async () => (await axe.run(document, { runOnly: ['wcag2a', 'wcag2aa'] })).violations
+      .filter(v => ['critical', 'serious'].includes(v.impact)).map(v => `${v.id}: ${v.nodes.map(n => n.target.join(' ')).slice(0, 3).join(', ')}`));
+    found.forEach(f => problems.push(`${p} ${f}`));
+    await page.close();
+  }
+  assert.deepEqual(problems, []);
+});
+
 await browser.close(); site.close();
 const failed = results.filter(r => !r.ok).length;
 console.log(`\n${results.length - failed} passed, ${failed} failed`);

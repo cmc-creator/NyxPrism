@@ -6,6 +6,8 @@
   <meta name="robots" content="noindex, nofollow" />
   <title>NyxPrism Owner Portal</title>
   <script src="/config.js"></script>
+  <script src="https://browser.sentry-cdn.com/10.75.3/bundle.min.js" integrity="sha384-jS9CKUOSAB+VN9i8uqR3dDKFThyW/VFLVW7VU8FJIEA6hwAy3aY71i329xbTIxaN" crossorigin="anonymous"></script>
+  <script src="/monitoring.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -224,7 +226,7 @@
             <div class="row" style="margin-bottom:.6rem"><input class="input" id="qa-create-first" placeholder="First name"><input class="input" id="qa-create-last" placeholder="Last name"></div>
             <div class="row" style="margin-bottom:.6rem"><input class="input" type="email" id="qa-create-email" placeholder="user@example.com" required></div>
             <div class="row"><input class="input" type="text" id="qa-create-password" placeholder="Password (8+ characters)" minlength="8" required>
-              <select class="select" id="qa-create-plan" style="flex:0 0 150px"><option value="free">Free</option><option value="professional">Professional</option><option value="trial">Trial</option></select>
+              <select class="select" id="qa-create-plan" style="flex:0 0 150px" aria-label="Plan"><option value="free">Free</option><option value="professional">Professional</option><option value="trial">Trial</option></select>
               <button class="btn btn-primary" type="submit">Create</button></div>
             <div class="msg" id="qa-create-msg" style="margin-top:.6rem"></div>
           </form>
@@ -263,7 +265,7 @@
         <div class="page-head"><div><h1>Teams</h1><div class="sub">Enterprise teams. Members get Professional through the owner's plan, so the owner must be on Professional.</div></div></div>
         <form class="card" id="team-create" autocomplete="off">
           <h2>Create a team</h2>
-          <div class="row"><input class="input" type="email" id="team-owner" placeholder="Owner's NyxPrism email" required><input class="input" id="team-name" placeholder="Team name (e.g. Acme Legal)" required><input class="input" type="number" id="team-seats" min="1" max="1000" value="5" style="flex:0 0 110px" title="Seats"><button class="btn btn-primary" type="submit">Create team</button></div>
+          <div class="row"><input class="input" type="email" id="team-owner" placeholder="Owner's NyxPrism email" required><input class="input" id="team-name" placeholder="Team name (e.g. Acme Legal)" required><input class="input" type="number" id="team-seats" aria-label="Seats" min="1" max="1000" value="5" style="flex:0 0 110px" title="Seats"><button class="btn btn-primary" type="submit">Create team</button></div>
           <div class="msg" id="team-create-msg" style="margin-top:.6rem"></div>
         </form>
         <div class="tbl-wrap"><table><thead><tr><th>Team</th><th>Owner</th><th>Seats</th><th>Members</th><th>Created</th><th></th></tr></thead><tbody id="teams-tbody"></tbody></table></div>
