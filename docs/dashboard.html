@@ -1666,6 +1666,11 @@
         <button class="btn btn-secondary" id="acc-upgrade-btn" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>Upgrade Plan</button>
       </div>
     </div>
+    <div class="card" id="team-card">
+      <div class="card-title">Team</div>
+      <div id="team-body" style="font-size:.86rem;color:var(--text2)">Loading…</div>
+      <div class="result-box" id="team-result" style="display:none;margin-top:1rem"></div>
+    </div>
     <div class="card">
       <div class="card-title">Branding</div>
       <p style="color:var(--text3);font-size:.84rem;line-height:1.55;margin:0 0 1rem">Shown to the people you send signature requests to — in the email and on the signing page.</p>
@@ -2013,7 +2018,7 @@ onAuthStateChanged(auth,async user=>{
   try{
     const token=await user.getIdToken();
     const r=await fetch(`${API}/api/user/me`,{headers:{Authorization:`Bearer ${token}`}});
-    if(r.ok){const d=await r.json();firstName=d.first_name||'';lastName=d.last_name||'';plan=d.plan||null;trialStart=d.trial_start?new Date(d.trial_start):null;subscriptionStatus=d.subscription_status||null;currentPeriodEnd=d.current_period_end?new Date(d.current_period_end):null;createdAt=d.created_at?new Date(d.created_at):null;}
+    if(r.ok){const d=await r.json();firstName=d.first_name||'';lastName=d.last_name||'';plan=d.plan||null;window.__nyxTeam=d.team||null;trialStart=d.trial_start?new Date(d.trial_start):null;subscriptionStatus=d.subscription_status||null;currentPeriodEnd=d.current_period_end?new Date(d.current_period_end):null;createdAt=d.created_at?new Date(d.created_at):null;}
   }catch(_){}
   if(ownerAccount){plan='professional';subscriptionStatus='active';trialStart=null;currentPeriodEnd=null;}
   const verifyBanner=document.getElementById('verify-banner');
@@ -2049,7 +2054,7 @@ onAuthStateChanged(auth,async user=>{
   const accFN=document.getElementById('acc-first-name');if(accFN)accFN.value=firstName;
   const accLN=document.getElementById('acc-last-name');if(accLN)accLN.value=lastName;
   const accS=document.getElementById('acc-since');if(accS&&createdAt)accS.textContent=createdAt.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
-  const accP=document.getElementById('acc-plan');if(accP)accP.textContent=planLabel;
+  const accP=document.getElementById('acc-plan');if(accP)accP.textContent=planLabel+(window.__nyxTeam?` · via ${window.__nyxTeam.name}`:'');
   const accSt=document.getElementById('acc-status');
   if(accSt){if(subscriptionStatus&&['active','trialing'].includes(subscriptionStatus))accSt.innerHTML=`<span class="account-badge-active">${subscriptionStatus}</span>`;else if(plan==='trial')accSt.innerHTML='<span class="account-badge-trial">Free Trial</span>';else if(subscriptionStatus)accSt.innerHTML=`<span class="account-badge-inactive">${subscriptionStatus}</span>`;else accSt.textContent='—';}
   const accPR=document.getElementById('acc-period-row'),accPD=document.getElementById('acc-period');
@@ -2176,6 +2181,55 @@ window.__nyxGetToken=()=>auth.currentUser?.getIdToken();
       showResult(securityResult,'success','Password changed and verified for '+auth.currentUser.email+'. Use the new password next time you sign in.');
     }catch(err){showResult(securityResult,'error',friendlyAuthError(err));}finally{btn.disabled=false;}
   });
+  // Team (Enterprise)
+  const teamBody=document.getElementById('team-body'),teamResult=document.getElementById('team-result');
+  async function teamCall(path,opts={}){const token=await auth.currentUser.getIdToken();const res=await fetch(`${API}/api/teams${path}`,{...opts,headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`}});const d=await res.json().catch(()=>({}));if(!res.ok)throw new Error(d.error||'Something went wrong.');return d;}
+  function el(tag,props={},...kids){const e=document.createElement(tag);Object.assign(e,props);kids.forEach(k=>e.append(k));return e;}
+  async function loadTeam(){
+    let d;try{d=await teamCall('/mine');}catch(err){teamBody.textContent=err.message;return;}
+    teamBody.replaceChildren();
+    if(!d.team){
+      teamBody.append(el('p',{style:'margin:0 0 .5rem;line-height:1.55',textContent:'Teams let you give colleagues Professional access under one account and bill, with shared signature templates.'}),
+        el('p',{style:'margin:0;color:var(--text3)'},'Teams are part of NyxPrism Enterprise. ',el('a',{href:'contact.html',textContent:'Contact us to set one up'}),'.'));
+      return;
+    }
+    if(!d.members){
+      teamBody.append(el('p',{style:'margin:0 0 .75rem;line-height:1.55'},'You\u2019re a ',el('strong',{textContent:d.role==='admin'?'team admin':'member'}),' of ',el('strong',{textContent:d.team.name}),d.active===false?' — the team owner\u2019s plan is inactive, so Professional access is paused.':' — Professional access comes with the team.'));
+      const leave=el('button',{className:'btn btn-secondary',type:'button',textContent:'Leave team'});
+      leave.onclick=async()=>{if(!confirm(`Leave ${d.team.name}? You'll lose the Professional access that comes with it.`))return;try{await teamCall('/leave',{method:'POST'});toast('You left the team','success');loadTeam();location.reload();}catch(err){showResult(teamResult,'error',err.message);}};
+      teamBody.append(el('div',{className:'btn-row'},leave));return;
+    }
+    teamBody.append(el('p',{style:'margin:0 0 .75rem'},el('strong',{textContent:d.team.name}),` · ${d.team.used} of ${d.team.seats} seats used`,d.role==='owner'?' · you own this team':' · you\u2019re an admin'));
+    const list=el('div',{className:'review-signers',style:'margin-bottom:.9rem'});
+    list.append(el('div',{className:'review-signer'},el('span',{className:'order',textContent:'★'}),el('div',{className:'who',textContent:(d.owner.first_name||d.owner.email)+' · owner'},el('small',{textContent:d.owner.email}))));
+    d.members.forEach(m=>{
+      const who=el('div',{className:'who',textContent:`${[m.first_name,m.last_name].filter(Boolean).join(' ')||m.email} · ${m.role}${m.status==='invited'?' · invited':''}`},el('small',{textContent:m.email}));
+      const canRemove=d.role==='owner'||m.role!=='admin';
+      const row=el('div',{className:'review-signer'},el('span',{className:'order',textContent:m.status==='invited'?'✉':'✓'}),who);
+      if(canRemove){const rm=el('button',{className:'btn btn-ghost',type:'button',textContent:m.status==='invited'?'Cancel invite':'Remove',style:'font-size:.75rem;color:var(--red)'});rm.onclick=async()=>{if(!confirm(`Remove ${m.email} from the team?`))return;try{await teamCall(`/members/${m.id}`,{method:'DELETE'});loadTeam();}catch(err){showResult(teamResult,'error',err.message);}};row.append(rm);}
+      list.append(row);
+    });
+    teamBody.append(list);
+    if(d.team.used<d.team.seats){
+      const email=el('input',{className:'form-input',type:'email',placeholder:'colleague@company.com',style:'flex:1 1 220px'});
+      const role=el('select',{className:'form-input',style:'width:auto'},el('option',{value:'member',textContent:'Member'}));
+      if(d.role==='owner')role.append(el('option',{value:'admin',textContent:'Admin (can invite)'}));
+      const invite=el('button',{className:'btn btn-primary',type:'button',textContent:'Send invite'});
+      invite.onclick=async()=>{invite.disabled=true;try{const r=await teamCall('/invite',{method:'POST',body:JSON.stringify({email:email.value.trim(),role:role.value})});showResult(teamResult,r.warning?'info':'success',r.warning||`Invitation sent to ${email.value.trim()}.`);loadTeam();}catch(err){showResult(teamResult,'error',err.message);}finally{invite.disabled=false;}};
+      teamBody.append(el('div',{className:'row',style:'display:flex;gap:.5rem;flex-wrap:wrap'},email,role,invite));
+    }else teamBody.append(el('p',{style:'margin:0;color:var(--text3)'},'All seats are in use. ',el('a',{href:'contact.html',textContent:'Contact us to add seats'}),'.'));
+  }
+  document.addEventListener('nyx:panel-changed',e=>{if(e.detail?.panel==='account')loadTeam();});
+  // Invitation links: dashboard.html?team_invite=<token>#account
+  const inviteToken=new URLSearchParams(location.search).get('team_invite');
+  if(inviteToken){
+    const acceptInvite=async()=>{
+      try{const r=await teamCall('/accept',{method:'POST',body:JSON.stringify({token:inviteToken})});toast(`Welcome to ${r.team}! Professional access is on.`,'success');history.replaceState(null,'',location.pathname+'#account');setTimeout(()=>location.reload(),1500);}
+      catch(err){toast(err.message,'error');history.replaceState(null,'',location.pathname+'#account');}
+    };
+    const waitReady=setInterval(()=>{if(window.__nyxDashboardReady&&auth.currentUser){clearInterval(waitReady);acceptInvite();}},300);
+  }
+
   // Branding
   const brandResult=document.getElementById('brand-result'),brandPreview=document.getElementById('brand-logo-preview'),brandRemove=document.getElementById('brand-logo-remove');
   let brandLogo; // undefined = keep, null = remove, string = new data URL

@@ -20,6 +20,7 @@ import apiKeysRouter  from './routes/api-keys.js';
 import adminRouter    from './routes/admin.js';
 import signRequestsRouter, { runSignatureReminders } from './routes/sign-requests.js';
 import signTemplatesRouter from './routes/sign-templates.js';
+import teamsRouter from './routes/teams.js';
 import distributionsRouter from './routes/distributions.js';
 import savedContactsRouter from './routes/saved-contacts.js';
 
@@ -144,6 +145,7 @@ app.post('/api/keys',     keyCreateLimiter);
 app.use('/api/keys',      apiKeysRouter);
 app.use('/api/sign-requests', signRequestsRouter);
 app.use('/api/sign-templates', signTemplatesRouter);
+app.use('/api/teams', teamsRouter);
 app.use('/api/distributions', distributionsRouter);
 app.use('/api/saved-contacts', savedContactsRouter);
 app.use('/api/admin',     adminRouter);

@@ -275,3 +275,14 @@ test('signature reminders are limited and templates/branding are owner-scoped', 
   assert.match(user, /MAX_LOGO_BYTES = 200 \* 1024/);
   assert.match(user, /every\(\(b, i\) => bytes\[i\] === b\)/);
 });
+
+test('team access flows through every Professional check and invites are bound to the invited email', async () => {
+  for (const path of ['src/middleware/auth.js', 'src/middleware/apiAuth.js', 'src/routes/license.js']) {
+    assert.match(await read(path), /hasAccess\(/, path);
+  }
+  const teams = await read('src/routes/teams.js');
+  assert.match(teams, /invite\.email !== String\(req\.user\.email\)\.toLowerCase\(\)/);
+  assert.match(teams, /email_verified/);
+  assert.match(teams, /All \$\{team\.seats\} seats are in use/);
+  assert.match(await read('src/teams.js'), /hasProfessionalAccess\(ownerAccount/);
+});

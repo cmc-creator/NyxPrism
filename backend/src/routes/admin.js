@@ -441,6 +441,76 @@ router.delete('/users/:id', requireOwner, async (req, res) => {
   }
 });
 
+// GET /api/admin/teams
+router.get('/teams', async (_req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT t.id, t.name, t.seats, t.created_at, u.email AS owner_email, u.plan AS owner_plan,
+              COUNT(m.id) FILTER (WHERE m.status = 'active') AS active, COUNT(m.id) FILTER (WHERE m.status = 'invited') AS invited
+       FROM teams t JOIN users u ON u.id = t.owner_user_id LEFT JOIN team_members m ON m.team_id = t.id
+       GROUP BY t.id, u.email, u.plan ORDER BY t.created_at DESC`,
+    );
+    res.json({ teams: rows.map(r => ({ ...r, active: Number(r.active), invited: Number(r.invited) })) });
+  } catch (err) {
+    console.error('admin/teams error:', err.message);
+    res.status(500).json({ error: 'Database error.' });
+  }
+});
+
+// POST /api/admin/teams { ownerEmail, name, seats }
+router.post('/teams', async (req, res) => {
+  const ownerEmail = String(req.body?.ownerEmail || '').trim().toLowerCase();
+  const name = String(req.body?.name || '').trim().slice(0, 120);
+  const seats = Math.max(1, Math.min(1000, parseInt(req.body?.seats, 10) || 5));
+  if (!EMAIL_RE.test(ownerEmail) || !name) return res.status(400).json({ error: 'Owner email and team name are required.' });
+  try {
+    const owner = await pool.query('SELECT id FROM users WHERE LOWER(email) = $1', [ownerEmail]);
+    if (!owner.rows.length) return res.status(404).json({ error: 'No NyxPrism account uses that email yet.' });
+    const { rows } = await pool.query(
+      'INSERT INTO teams (name, owner_user_id, seats) VALUES ($1, $2, $3) ON CONFLICT (owner_user_id) DO NOTHING RETURNING id',
+      [name, owner.rows[0].id, seats],
+    );
+    if (!rows.length) return res.status(409).json({ error: 'That account already owns a team.' });
+    await audit(req, 'create-team', ownerEmail, `${name} · ${seats} seats`);
+    res.status(201).json({ ok: true, id: rows[0].id });
+  } catch (err) {
+    console.error('admin/create-team error:', err.message);
+    res.status(500).json({ error: 'Could not create the team.' });
+  }
+});
+
+// POST /api/admin/teams/:id { seats?, name? }
+router.post('/teams/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (!Number.isInteger(id)) return res.status(400).json({ error: 'Invalid team.' });
+  const seats = req.body?.seats === undefined ? null : Math.max(1, Math.min(1000, parseInt(req.body.seats, 10) || 1));
+  const name = req.body?.name ? String(req.body.name).trim().slice(0, 120) : null;
+  try {
+    const { rows } = await pool.query('UPDATE teams SET seats = COALESCE($1, seats), name = COALESCE($2, name) WHERE id = $3 RETURNING name, seats', [seats, name, id]);
+    if (!rows.length) return res.status(404).json({ error: 'Team not found.' });
+    await audit(req, 'update-team', rows[0].name, `${rows[0].seats} seats`);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('admin/update-team error:', err.message);
+    res.status(500).json({ error: 'Could not update the team.' });
+  }
+});
+
+// DELETE /api/admin/teams/:id (owner only)
+router.delete('/teams/:id', requireOwner, async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (!Number.isInteger(id)) return res.status(400).json({ error: 'Invalid team.' });
+  try {
+    const { rows } = await pool.query('DELETE FROM teams WHERE id = $1 RETURNING name', [id]);
+    if (!rows.length) return res.status(404).json({ error: 'Team not found.' });
+    await audit(req, 'delete-team', rows[0].name);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('admin/delete-team error:', err.message);
+    res.status(500).json({ error: 'Could not delete the team.' });
+  }
+});
+
 // GET /api/admin/messages?page=1&limit=20&unread=1
 router.get('/messages', async (req, res) => {
   const page  = Math.max(1, parseInt(req.query.page)  || 1);

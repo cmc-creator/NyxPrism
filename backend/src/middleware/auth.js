@@ -2,6 +2,7 @@ import admin from '../firebase.js';
 import pool from '../db/index.js';
 import { developerEntitlements, hasProfessionalAccess, isDeveloper } from '../access.js';
 import { sendLifecycleEmail } from '../lifecycle.js';
+import { hasAccess } from '../teams.js';
 
 /**
  * Express middleware that verifies a Firebase ID token in the
@@ -37,7 +38,7 @@ export async function requireActivePlan(req, res, next) {
       return res.status(403).json({ error: 'Create your NyxPrism account before using this feature.' });
     }
 
-    if (!hasProfessionalAccess(result.rows[0], req.user.email)) {
+    if (!(await hasAccess(result.rows[0], req.user.email))) {
       sendLifecycleEmail(result.rows[0].id, 'pro_nudge').catch(() => {});
       return res.status(403).json({ error: 'An active trial or Professional subscription is required.' });
     }

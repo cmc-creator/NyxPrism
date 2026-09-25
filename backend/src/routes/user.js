@@ -5,6 +5,7 @@ import Stripe from 'stripe';
 import admin from '../firebase.js';
 import { developerEntitlements, isOwner } from '../access.js';
 import { sendLifecycleEmail, verifyUnsubscribeToken } from '../lifecycle.js';
+import { activeTeamFor } from '../teams.js';
 
 const router = express.Router();
 
@@ -110,8 +111,12 @@ router.get('/me', requireAuth, async (req, res) => {
       } catch (_) { /* unique-email conflict: keep the stored address */ }
     }
 
-    const { id: _id, ...publicAccount } = account;
-    res.json({ ...publicAccount, firebase_uid: req.user.uid, ...(developer || {}) });
+    const { id: accountId, ...publicAccount } = account;
+    // Members of a team get Professional through the team owner's plan.
+    const team = developer ? null : await activeTeamFor(accountId).catch(() => null);
+    const teamPlan = team && publicAccount.plan !== 'professional'
+      ? { plan: 'professional', subscription_status: 'active', trial_active: false, trial_start: null } : {};
+    res.json({ ...publicAccount, firebase_uid: req.user.uid, ...teamPlan, ...(developer || {}), team: team ? { name: team.name, role: team.role } : null });
   } catch (err) {
     console.error('User /me error:', err);
     res.status(500).json({ error: 'Internal error.' });

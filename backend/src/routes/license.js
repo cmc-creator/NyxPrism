@@ -1,7 +1,8 @@
 import express from 'express';
 import pool from '../db/index.js';
 import { requireAuth } from '../middleware/auth.js';
-import { developerEntitlements, hasProfessionalAccess } from '../access.js';
+import { developerEntitlements } from '../access.js';
+import { activeTeamFor, hasAccess } from '../teams.js';
 
 const router = express.Router();
 
@@ -18,7 +19,7 @@ router.get('/verify', requireAuth, async (req, res) => {
 
   try {
     const { rows } = await pool.query(
-      `SELECT plan, subscription_status, trial_active, trial_start, current_period_end
+      `SELECT id, plan, subscription_status, trial_active, trial_start, current_period_end
        FROM users WHERE firebase_uid = $1`,
       [uid],
     );
@@ -29,12 +30,13 @@ router.get('/verify', requireAuth, async (req, res) => {
 
     const user = rows[0];
     // Free accounts have status "active" too, so the plan decides access.
-    const valid = hasProfessionalAccess(user, req.user.email);
+    const valid = await hasAccess(user, req.user.email);
     const trialOver = user.plan === 'trial' && !valid;
 
     res.json({
       valid,
-      plan:      user.plan,
+      plan:      valid && user.plan !== 'professional' && user.plan !== 'trial' ? 'professional' : user.plan,
+      team:      (await activeTeamFor(user.id))?.name || null,
       status:    user.subscription_status,
       periodEnd: user.current_period_end ?? null,
       reason:    valid ? null

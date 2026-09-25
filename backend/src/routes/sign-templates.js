@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import pool from '../db/index.js';
 import { requireAuth } from '../middleware/auth.js';
+import { templateOwnerIds } from '../teams.js';
 
 const router = Router();
 const FIELD_TYPES = new Set(['signature', 'initials', 'name', 'date', 'text', 'checkbox']);
@@ -16,9 +17,11 @@ router.get('/', requireAuth, async (req, res) => {
   try {
     const userId = await userIdFor(req.user);
     if (!userId) return res.json({ templates: [] });
+    const owners = await templateOwnerIds(userId);
     const { rows } = await pool.query(
-      'SELECT id, name, signer_count, page_count, fields, created_at FROM signature_templates WHERE owner_user_id = $1 ORDER BY created_at DESC LIMIT 100',
-      [userId],
+      `SELECT id, name, signer_count, page_count, fields, created_at, (owner_user_id <> $2) AS shared
+       FROM signature_templates WHERE owner_user_id = ANY($1::int[]) ORDER BY shared, created_at DESC LIMIT 200`,
+      [owners, userId],
     );
     res.json({ templates: rows });
   } catch (err) {

@@ -113,6 +113,26 @@ await test('distribute: paste a list, dedupe, review and send', async () => {
   assert.deepEqual(page.errors, []);
 });
 
+await test('teams: owner manages seats and invites; invite links are accepted', async () => {
+  let invited = null, accepted = null;
+  const team = { team: { id: 1, name: 'Acme Legal', seats: 3, used: 1 }, role: 'owner', owner: { email: 'tester@example.com', first_name: 'Tess' },
+    members: [{ id: 5, email: 'amy@acme.com', role: 'member', status: 'active', first_name: 'Amy' }] };
+  const page = await newPage(browser, baseApi({
+    'GET /api/teams/mine': () => team,
+    'POST /api/teams/invite': body => { invited = body; return [201, { ok: true }]; },
+    'POST /api/teams/accept': body => { accepted = body; return { ok: true, team: 'Acme Legal' }; },
+    'GET /api/user/brand': () => ({ name: '', logoUrl: null }),
+  }));
+  await page.goto(`${SITE}/dashboard.html?team_invite=${'a'.repeat(48)}#account`, { waitUntil: 'networkidle2' }); await wait(2000);
+  assert.equal(accepted?.token, 'a'.repeat(48), 'invite link accepted');
+  const body = await page.$eval('#team-body', e => e.innerText);
+  assert.match(body, /Acme Legal/); assert.match(body, /1 of 3 seats used/); assert.match(body, /amy@acme\.com/);
+  await page.type('#team-body input[type=email]', 'bo@acme.com');
+  await page.click('#team-body .btn-primary'); await wait(500);
+  assert.deepEqual(invited, { email: 'bo@acme.com', role: 'member' });
+  assert.deepEqual(page.errors, []);
+});
+
 await test('signer journey against the real API: draw, sign in order, completed copy with certificate', async () => {
   const work = path.join(REPO, 'e2e', '.work');
   const { pool, fb, dir } = await backendCopy(work);

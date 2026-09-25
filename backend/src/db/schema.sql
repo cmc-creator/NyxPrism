@@ -247,3 +247,25 @@ CREATE TABLE IF NOT EXISTS signature_templates (
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS signature_templates_owner_idx ON signature_templates (owner_user_id);
+
+-- Teams (Enterprise): seats are granted from the owner portal; members share the owner's Professional access.
+CREATE TABLE IF NOT EXISTS teams (
+  id            SERIAL PRIMARY KEY,
+  name          TEXT NOT NULL,
+  owner_user_id INTEGER NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+  seats         INTEGER NOT NULL DEFAULT 5,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE TABLE IF NOT EXISTS team_members (
+  id           SERIAL PRIMARY KEY,
+  team_id      INTEGER NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
+  user_id      INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  email        TEXT NOT NULL,
+  role         TEXT NOT NULL DEFAULT 'member',
+  status       TEXT NOT NULL DEFAULT 'invited',
+  invite_token TEXT UNIQUE,
+  invited_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  joined_at    TIMESTAMPTZ,
+  UNIQUE (team_id, email)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS team_members_one_active_team ON team_members (user_id) WHERE status = 'active';
