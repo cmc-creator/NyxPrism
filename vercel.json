@@ -35,6 +35,102 @@
     {
       "source": "/terms",
       "destination": "/terms.html"
+    },
+    {
+      "source": "/add-page-numbers-pdf",
+      "destination": "/add-page-numbers-pdf.html"
+    },
+    {
+      "source": "/ai-pdf-splitter",
+      "destination": "/ai-pdf-splitter.html"
+    },
+    {
+      "source": "/annotate-pdf",
+      "destination": "/annotate-pdf.html"
+    },
+    {
+      "source": "/batch-compress-pdf",
+      "destination": "/batch-compress-pdf.html"
+    },
+    {
+      "source": "/compare-pdf",
+      "destination": "/compare-pdf.html"
+    },
+    {
+      "source": "/compress-pdf",
+      "destination": "/compress-pdf.html"
+    },
+    {
+      "source": "/edit-pdf",
+      "destination": "/edit-pdf.html"
+    },
+    {
+      "source": "/edit-pdf-metadata",
+      "destination": "/edit-pdf-metadata.html"
+    },
+    {
+      "source": "/extract-pdf-text",
+      "destination": "/extract-pdf-text.html"
+    },
+    {
+      "source": "/flatten-pdf",
+      "destination": "/flatten-pdf.html"
+    },
+    {
+      "source": "/merge-pdf",
+      "destination": "/merge-pdf.html"
+    },
+    {
+      "source": "/ocr-pdf",
+      "destination": "/ocr-pdf.html"
+    },
+    {
+      "source": "/organize-pdf-pages",
+      "destination": "/organize-pdf-pages.html"
+    },
+    {
+      "source": "/pdf-header-footer",
+      "destination": "/pdf-header-footer.html"
+    },
+    {
+      "source": "/pdf-to-image",
+      "destination": "/pdf-to-image.html"
+    },
+    {
+      "source": "/protect-pdf",
+      "destination": "/protect-pdf.html"
+    },
+    {
+      "source": "/redact-pdf",
+      "destination": "/redact-pdf.html"
+    },
+    {
+      "source": "/request-signatures",
+      "destination": "/request-signatures.html"
+    },
+    {
+      "source": "/rotate-pdf",
+      "destination": "/rotate-pdf.html"
+    },
+    {
+      "source": "/send-pdf",
+      "destination": "/send-pdf.html"
+    },
+    {
+      "source": "/sign-pdf",
+      "destination": "/sign-pdf.html"
+    },
+    {
+      "source": "/split-pdf",
+      "destination": "/split-pdf.html"
+    },
+    {
+      "source": "/tools",
+      "destination": "/tools.html"
+    },
+    {
+      "source": "/watermark-pdf",
+      "destination": "/watermark-pdf.html"
     }
   ],
   "headers": [

@@ -409,6 +409,9 @@
   };
   // ─────────────────────────────────────────────────────────────────────
 
+  // After signing in, return to the tool the visitor came from (e.g. login.html?next=split).
+  const nextPanel = (new URLSearchParams(location.search).get('next') || '').replace(/[^a-z]/g, '');
+  const dashboardUrl = 'dashboard.html' + (nextPanel ? '#' + nextPanel : '');
   const app  = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db   = getFirestore(app);
@@ -473,7 +476,7 @@
     }
   });
 
-  document.getElementById('continue-session').addEventListener('click', () => window.location.replace('dashboard.html'));
+  document.getElementById('continue-session').addEventListener('click', () => window.location.replace(dashboardUrl));
   document.getElementById('switch-session').addEventListener('click', async () => {
     await signOut(auth);
     document.getElementById('login-email').value = '';
@@ -499,7 +502,7 @@
         body: JSON.stringify({}),
       });
       if (!sync.ok) throw new Error('Account synchronization failed. Please try again.');
-      window.location.replace('dashboard.html');
+      window.location.replace(dashboardUrl);
     } catch (err) {
       showError('login-error', err.code ? authErrorMsg(err.code) : err.message);
       btn.textContent = 'Log In';
@@ -552,7 +555,7 @@
         body:    JSON.stringify({ plan: 'free' }),
       });
       if (!sync.ok) throw new Error('Account synchronization failed. Please log in to retry.');
-      window.location.replace('dashboard.html');
+      window.location.replace(dashboardUrl);
     } catch (err) {
       showError('trial-error', err.code ? authErrorMsg(err.code) : err.message);
       btn.textContent = 'Create Free Account';

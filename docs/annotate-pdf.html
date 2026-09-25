@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Annotate PDF — Highlight, Draw and Add Notes | NyxPrism</title>
+<meta name="description" content="Highlight text, draw, add boxes and notes directly on your PDF pages." />
+<link rel="canonical" href="https://www.nyxprism.com/annotate-pdf" />
+<meta property="og:title" content="Annotate PDF — Highlight, Draw and Add Notes" />
+<meta property="og:description" content="Highlight text, draw, add boxes and notes directly on your PDF pages." />
+<meta property="og:url" content="https://www.nyxprism.com/annotate-pdf" />
+<meta property="og:type" content="website" />
+<meta name="theme-color" content="#7c3aed" />
+<link rel="icon" href="/favicon.ico" />
+<link rel="manifest" href="/manifest.json?v=5" />
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet" />
+<style>
+:root{--bg:#06080d;--surface:#0f1724;--surface2:#141e2e;--border:#1b2840;--border2:#253548;--accent:#7c3aed;--accent-bright:#a78bfa;--text:#f0f4fc;--text2:#c8d3e0;--text3:#9aaec4;--green:#34d399}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;line-height:1.6}
+a{color:var(--accent-bright)}.wrap{max-width:1040px;margin:0 auto;padding:0 clamp(1rem,4vw,2rem)}
+header.top{border-bottom:1px solid var(--border);background:rgba(6,8,13,.8);backdrop-filter:blur(16px);position:sticky;top:0;z-index:5}
+header.top .wrap{display:flex;align-items:center;gap:1rem;height:64px}.top nav{margin-left:auto;display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
+.top nav a{color:var(--text2);text-decoration:none;font-size:.9rem;font-weight:500}.top nav a.cta{background:var(--accent);color:#fff;padding:.45rem .9rem;border-radius:8px;font-weight:700}
+.brand{display:flex;align-items:center;gap:.55rem;color:var(--text);text-decoration:none;font-weight:900;letter-spacing:-.02em}.brand img{width:32px;height:32px;border-radius:8px}.brand em{font-style:normal;color:var(--accent-bright)}
+.hero{padding:3.5rem 0 2rem}.crumbs{font-size:.8rem;color:var(--text3);margin-bottom:.8rem}.crumbs a{color:var(--text3)}
+h1{font-size:clamp(2rem,5vw,3rem);line-height:1.1;letter-spacing:-.03em;margin:0 0 .8rem}.lead{font-size:1.15rem;color:var(--text2);max-width:640px;margin:0 0 1.5rem}
+.pill{display:inline-block;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:.25rem .6rem;border-radius:999px;background:rgba(124,58,237,.18);color:var(--accent-bright);margin-bottom:.9rem}
+.btns{display:flex;gap:.75rem;flex-wrap:wrap}.btn{display:inline-block;padding:.8rem 1.3rem;border-radius:10px;font-weight:700;text-decoration:none;font-size:1rem}
+.btn.primary{background:linear-gradient(135deg,var(--accent),#5b21b6);color:#fff}.btn.secondary{border:1px solid var(--border2);color:var(--text2);background:var(--surface)}
+.note{font-size:.85rem;color:var(--text3);margin-top:.9rem}
+section{padding:2rem 0}h2{font-size:1.5rem;letter-spacing:-.02em;margin:0 0 1rem}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;list-style:none;padding:0;margin:0}
+.steps li{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.1rem}.steps .n{width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:800;margin-bottom:.6rem}
+.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.6rem;list-style:none;padding:0;margin:0}
+.features li{padding:.7rem .9rem;border:1px solid var(--border);border-radius:10px;background:var(--surface)}.features li:before{content:"✓ ";color:var(--green);font-weight:800}
+details{border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:.9rem 1.1rem;margin-bottom:.6rem}summary{cursor:pointer;font-weight:700}details p{color:var(--text2);margin:.6rem 0 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:.75rem}
+.card{display:block;text-decoration:none;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem}.card:hover{border-color:var(--accent)}
+.card strong{display:block;margin-bottom:.25rem}.card span{color:var(--text3);font-size:.86rem}
+footer{border-top:1px solid var(--border);margin-top:2rem;padding:2rem 0;color:var(--text3);font-size:.85rem}footer .wrap{display:flex;gap:1.25rem;flex-wrap:wrap}footer a{color:var(--text3)}
+</style>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "NyxPrism Annotate PDF", "applicationCategory": "BusinessApplication", "operatingSystem": "Web, Windows", "url": "https://www.nyxprism.com/annotate-pdf", "description": "Highlight text, draw, add boxes and notes directly on your PDF pages.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Is Annotate PDF free?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Create a free NyxPrism account and use it as often as you like."}}, {"@type": "Question", "name": "Are my files uploaded?", "acceptedAnswer": {"@type": "Answer", "text": "Your PDF is processed right in your browser — it isn't uploaded to NyxPrism."}}, {"@type": "Question", "name": "Does it work on Mac, Windows and phones?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. NyxPrism runs in any modern browser, and you can install it as an app on your computer."}}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.nyxprism.com/"}, {"@type": "ListItem", "position": 2, "name": "PDF tools", "item": "https://www.nyxprism.com/tools"}, {"@type": "ListItem", "position": 3, "name": "Annotate PDF", "item": "https://www.nyxprism.com/annotate-pdf"}]}</script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="/"><img src="/prism-mark.webp?v=1" alt="" width="32" height="32" /><span><em>Nyx</em>Prism</span></a>
+  <nav aria-label="Main"><a href="/tools">All tools</a><a href="/#pricing">Pricing</a><a href="/login.html">Log in</a><a class="cta" href="/login.html#trial">Start free</a></nav>
+</div></header>
+<main class="wrap">
+<div class="hero">
+  <div class="crumbs"><a href="/">Home</a> › <a href="/tools">PDF tools</a> › Annotate PDF</div>
+  
+  <h1>Annotate PDF</h1>
+  <p class="lead">Highlight text, draw, add boxes and notes directly on your PDF pages.</p>
+  <div class="btns"><a class="btn primary" href="/login.html?next=annotate#trial">Try it free</a><a class="btn secondary" href="/dashboard.html#annotate">I have an account — open Annotate PDF</a></div>
+  <p class="note">Your PDF is processed right in your browser — it isn&#x27;t uploaded to NyxPrism.</p>
+</div>
+<section><h2>How it works</h2><ol class="steps"><li><div class="n">1</div>Choose your PDF.</li><li><div class="n">2</div>Highlight, draw, add shapes or notes.</li><li><div class="n">3</div>Download the annotated PDF.</li></ol></section>
+<section><h2>What you get</h2><ul class="features"><li>Highlighter, pen, shapes and text</li><li>Choose colours and line width</li><li>Undo as you go</li><li>Works in your browser</li></ul></section>
+<section><h2>Questions</h2><details><summary>Is Annotate PDF free?</summary><p>Yes. Create a free NyxPrism account and use it as often as you like.</p></details><details><summary>Are my files uploaded?</summary><p>Your PDF is processed right in your browser — it isn&#x27;t uploaded to NyxPrism.</p></details><details><summary>Does it work on Mac, Windows and phones?</summary><p>Yes. NyxPrism runs in any modern browser, and you can install it as an app on your computer.</p></details></section>
+<section><h2>Related tools</h2><div class="grid"><a class="card" href="/edit-pdf"><strong>Edit PDF</strong><span>Delete or reorder pages and add text anywhere on a page.</span></a><a class="card" href="/sign-pdf"><strong>Sign PDF</strong><span>Add your own signature to a PDF: draw it, type it or upload an image.</span></a><a class="card" href="/redact-pdf"><strong>Redact PDF</strong><span>Permanently black out names, numbers and other sensitive details before you share a PDF.</span></a></div></section>
+</main>
+<footer><div class="wrap"><span>© 2026 NyxCollective LLC</span><a href="/tools">All PDF tools</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="/contact.html">Contact</a></div></footer>
+</body>
+</html>

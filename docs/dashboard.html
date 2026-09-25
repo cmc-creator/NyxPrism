@@ -2042,6 +2042,9 @@ onAuthStateChanged(auth,async user=>{
   setTimeout(()=>loading.style.display='none',300);
   content.style.display='block';
   window.__nyxDashboardReady=true;
+  // Deep links such as dashboard.html#split open that tool directly (used by the public tool pages).
+  const linkedPanel=decodeURIComponent(location.hash.slice(1));
+  if(/^[a-z]+$/.test(linkedPanel)&&document.getElementById('panel-'+linkedPanel))switchPanel(linkedPanel);
   window.__nyxProcessLaunchFiles();
   if(window.__checkoutSuccess){window.__checkoutSuccess=false;setTimeout(()=>toast('Subscription activated — welcome to NyxPrism Professional! 🎉','success'),400);}
 });
@@ -2218,6 +2221,7 @@ function switchPanel(name){
   if(panel)panel.classList.add('active');
   document.querySelectorAll(`[data-panel="${name}"]`).forEach(b=>b.classList.add('active'));
   window.scrollTo(0,0);
+  if(history.replaceState)history.replaceState(null,'',name==='home'?location.pathname+location.search:'#'+name);
   document.dispatchEvent(new CustomEvent('nyx:panel-changed',{detail:{panel:name}}));
 }
 document.querySelectorAll('[data-panel]').forEach(btn=>btn.addEventListener('click',()=>switchPanel(btn.dataset.panel)));

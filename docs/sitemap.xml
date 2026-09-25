@@ -1,6 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://nyxprism.com/</loc><lastmod>2026-05-01</lastmod><priority>1.0</priority></url>
-  <url><loc>https://nyxprism.com/contact.html</loc><lastmod>2026-05-01</lastmod><priority>0.6</priority></url>
-  <url><loc>https://nyxprism.com/login.html</loc><lastmod>2026-05-01</lastmod><priority>0.4</priority></url>
+  <url><loc>https://www.nyxprism.com/</loc><lastmod>2026-09-25</lastmod><priority>1.0</priority></url>
+  <url><loc>https://www.nyxprism.com/tools</loc><lastmod>2026-09-25</lastmod><priority>0.9</priority></url>
+  <url><loc>https://www.nyxprism.com/split-pdf</loc><lastmod>2026-09-25</lastmod><priority>0.8</priority></url>
+  <url><loc>https://www.nyxprism.com/merge-pdf</loc><lastmod>2026-09-25</lastmod><priority>0.8</priority></url>
+  <url><loc>https://www.nyxprism.com/compress-pdf</loc><lastmod>2026-09-25</lastmod><priority>0.8</priority></url>
+  <url><loc>https://www.nyxprism.com/batch-compress-pdf</loc><lastmod>2026-09-25</lastmod><priority>0.8</priority></url>
+  <url><loc>https://www.nyxprism.com/rotate-pdf</loc><lastmod>2026-09-25</lastmod><priority>0.8</priority></url>
+  <url><loc>https://www.nyxprism.com/organize-pdf-pages</loc><lastmod>2026-09-25</lastmod><priority>0.8</priority></url>
+  <url><loc>https://www.nyxprism.com/edit-pdf</loc><lastmod>2026-09-25</lastmod><priority>0.8</priority></url>
+  <url><loc>https://www.nyxprism.com/annotate-pdf</loc><lastmod>2026-09-25</lastmod><priority>0.8</priority></url>
+  <url><loc>https://www.nyxprism.com/sign-pdf</loc><lastmod>2026-09-25</lastmod><priority>0.8</priority></url>
+  <url><loc>https://www.nyxprism.com/request-signatures</loc><lastmod>2026-09-25</lastmod><priority>0.8</priority></url>
+  <url><loc>https://www.nyxprism.com/send-pdf</loc><lastmod>2026-09-25</lastmod><priority>0.8</priority></url>
+  <url><loc>https://www.nyxprism.com/protect-pdf</loc><lastmod>2026-09-25</lastmod><priority>0.8</priority></url>
+  <url><loc>https://www.nyxprism.com/redact-pdf</loc><lastmod>2026-09-25</lastmod><priority>0.8</priority></url>
+  <url><loc>https://www.nyxprism.com/watermark-pdf</loc><lastmod>2026-09-25</lastmod><priority>0.8</priority></url>
+  <url><loc>https://www.nyxprism.com/add-page-numbers-pdf</loc><lastmod>2026-09-25</lastmod><priority>0.8</priority></url>
+  <url><loc>https://www.nyxprism.com/pdf-header-footer</loc><lastmod>2026-09-25</lastmod><priority>0.8</priority></url>
+  <url><loc>https://www.nyxprism.com/ocr-pdf</loc><lastmod>2026-09-25</lastmod><priority>0.8</priority></url>
+  <url><loc>https://www.nyxprism.com/extract-pdf-text</loc><lastmod>2026-09-25</lastmod><priority>0.8</priority></url>
+  <url><loc>https://www.nyxprism.com/pdf-to-image</loc><lastmod>2026-09-25</lastmod><priority>0.8</priority></url>
+  <url><loc>https://www.nyxprism.com/flatten-pdf</loc><lastmod>2026-09-25</lastmod><priority>0.8</priority></url>
+  <url><loc>https://www.nyxprism.com/compare-pdf</loc><lastmod>2026-09-25</lastmod><priority>0.8</priority></url>
+  <url><loc>https://www.nyxprism.com/edit-pdf-metadata</loc><lastmod>2026-09-25</lastmod><priority>0.8</priority></url>
+  <url><loc>https://www.nyxprism.com/ai-pdf-splitter</loc><lastmod>2026-09-25</lastmod><priority>0.8</priority></url>
+  <url><loc>https://www.nyxprism.com/contact.html</loc><lastmod>2026-09-25</lastmod><priority>0.5</priority></url>
+  <url><loc>https://www.nyxprism.com/privacy.html</loc><lastmod>2026-09-25</lastmod><priority>0.3</priority></url>
+  <url><loc>https://www.nyxprism.com/terms.html</loc><lastmod>2026-09-25</lastmod><priority>0.3</priority></url>
+  <url><loc>https://www.nyxprism.com/login.html</loc><lastmod>2026-09-25</lastmod><priority>0.4</priority></url>
 </urlset>
