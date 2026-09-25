@@ -1171,6 +1171,13 @@
           <div class="card-title">Step 3 · Place signature fields</div>
           <p class="wizard-lead">Choose a signer, then click a field type to add it to this page. Drag fields into place; click × to remove one. Every signer needs at least one field.</p>
           <div class="signer-chips" id="sigreq-signer-chips"></div>
+          <div class="place-toolbar" id="sigreq-template-bar">
+            <span class="label">Template:</span>
+            <select class="form-input" id="sigreq-template-select" style="width:auto;min-width:180px;padding:.4rem .6rem"><option value="">Use a saved layout…</option></select>
+            <button class="btn btn-secondary" id="sigreq-template-apply" type="button">Apply</button>
+            <button class="btn btn-ghost" id="sigreq-template-save" type="button">Save these fields as a template</button>
+            <button class="btn btn-ghost" id="sigreq-template-delete" type="button" style="color:var(--red);display:none">Delete template</button>
+          </div>
           <div class="place-toolbar">
             <span class="label">Add field:</span>
             <button class="sigreq-field-btn" type="button" data-field="signature">✍ Signature</button>
@@ -1214,6 +1221,7 @@
     <div class="card" style="margin-top:1.25rem">
       <div class="card-title">Your signature requests</div>
       <div id="sigreq-list"><div style="color:var(--muted);font-size:.85rem">No requests loaded yet.</div></div>
+      <div id="sigreq-activity" style="margin-top:1rem"></div>
     </div>
   </div>
 
@@ -1656,6 +1664,16 @@
         <button class="btn btn-primary" id="acc-manage-billing"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Manage Billing</button>
         <button class="btn btn-secondary" id="acc-upgrade-btn" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>Upgrade Plan</button>
       </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Branding</div>
+      <p style="color:var(--text3);font-size:.84rem;line-height:1.55;margin:0 0 1rem">Shown to the people you send signature requests to — in the email and on the signing page.</p>
+      <div class="form-group"><label class="form-label" for="brand-name">Company or display name</label><input class="form-input" id="brand-name" maxlength="80" placeholder="e.g. Acme Legal"></div>
+      <div class="form-group"><label class="form-label">Logo <span style="color:var(--muted);font-weight:500">(PNG or JPG, up to 200 KB)</span></label>
+        <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap"><img id="brand-logo-preview" alt="" style="display:none;max-height:44px;max-width:180px;background:#fff;border-radius:6px;padding:4px"><input type="file" id="brand-logo-file" accept="image/png,image/jpeg"><button class="btn btn-ghost" id="brand-logo-remove" type="button" style="display:none;color:var(--red)">Remove logo</button></div>
+      </div>
+      <div class="btn-row"><button class="btn btn-primary" id="brand-save" type="button">Save branding</button></div>
+      <div class="result-box" id="brand-result" style="display:none;margin-top:1rem"></div>
     </div>
     <div class="card">
       <div class="card-title">Your data</div>
@@ -2157,6 +2175,30 @@ window.__nyxGetToken=()=>auth.currentUser?.getIdToken();
       showResult(securityResult,'success','Password changed and verified for '+auth.currentUser.email+'. Use the new password next time you sign in.');
     }catch(err){showResult(securityResult,'error',friendlyAuthError(err));}finally{btn.disabled=false;}
   });
+  // Branding
+  const brandResult=document.getElementById('brand-result'),brandPreview=document.getElementById('brand-logo-preview'),brandRemove=document.getElementById('brand-logo-remove');
+  let brandLogo; // undefined = keep, null = remove, string = new data URL
+  async function loadBrand(){
+    try{const token=await auth.currentUser.getIdToken();const res=await fetch(`${API}/api/user/brand`,{headers:{Authorization:`Bearer ${token}`}});const d=await res.json();if(!res.ok)return;
+      document.getElementById('brand-name').value=d.name||'';brandLogo=undefined;
+      if(d.logoUrl){brandPreview.src=API+d.logoUrl;brandPreview.style.display='';brandRemove.style.display='';}else{brandPreview.style.display='none';brandRemove.style.display='none';}
+    }catch(_){}
+  }
+  document.getElementById('brand-logo-file').addEventListener('change',function(){
+    const f=this.files[0];if(!f)return;
+    if(!/^image\/(png|jpeg)$/.test(f.type))return showResult(brandResult,'error','Choose a PNG or JPG image.');
+    if(f.size>200*1024)return showResult(brandResult,'error','That image is over 200 KB. Try a smaller version.');
+    const reader=new FileReader();reader.onload=()=>{brandLogo=reader.result;brandPreview.src=brandLogo;brandPreview.style.display='';brandRemove.style.display='';};reader.readAsDataURL(f);
+  });
+  brandRemove.addEventListener('click',()=>{brandLogo=null;brandPreview.style.display='none';brandRemove.style.display='none';document.getElementById('brand-logo-file').value='';});
+  document.getElementById('brand-save').addEventListener('click',async function(){
+    this.disabled=true;
+    try{const token=await auth.currentUser.getIdToken();const body={name:document.getElementById('brand-name').value.trim()};if(brandLogo!==undefined)body.logo=brandLogo;
+      const res=await fetch(`${API}/api/user/brand`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify(body)});const d=await res.json().catch(()=>({}));if(!res.ok)throw new Error(d.error||'Could not save branding.');
+      showResult(brandResult,'success','Branding saved. It appears on your next signature request.');loadBrand();
+    }catch(err){showResult(brandResult,'error',err.message);}finally{this.disabled=false;}
+  });
+  document.addEventListener('nyx:panel-changed',e=>{if(e.detail?.panel==='account')loadBrand();});
   const dataResult=document.getElementById('acc-data-result');
   document.getElementById('acc-export-btn').addEventListener('click',async function(){
     this.disabled=true;
@@ -3424,7 +3466,7 @@ function useSavedPerson(select,addRecipient){const option=select.selectedOptions
     const list=document.getElementById('sigreq-list');const token=await auth.currentUser?.getIdToken(true);if(!token)return;
     try{const res=await fetch(API+'/api/sign-requests',{headers:{Authorization:'Bearer '+token}});const data=await res.json();if(!res.ok)throw new Error(data.error||'Load failed');
       if(!data.requests.length){list.innerHTML='<div style="color:var(--muted);font-size:.85rem">No signature requests yet.</div>';return;}
-      list.innerHTML='';data.requests.forEach(req=>{const row=document.createElement('div');row.className='recent-file-row';const canVoid=['draft','sent','in_progress'].includes(req.status);row.innerHTML='<span class="recent-fname">'+escapeHtml(req.title)+'</span><span class="recent-tool-badge">'+escapeHtml(req.status)+'</span>'+(req.status==='draft'?'<button class="btn btn-ghost send" style="font-size:.72rem;padding:.25rem .5rem">Send</button>':'<button class="btn btn-ghost links" style="font-size:.72rem;padding:.25rem .5rem">Links</button>')+(req.status==='completed'?'<button class="btn btn-ghost final" style="font-size:.72rem;padding:.25rem .5rem">PDF</button>':'')+(canVoid?'<button class="btn btn-ghost void" style="font-size:.72rem;padding:.25rem .5rem">Void</button>':'')+'<button class="btn btn-ghost delete" style="font-size:.72rem;padding:.25rem .5rem;color:var(--red)">Delete</button>';row.querySelector('.send')?.addEventListener('click',()=>signatureAction(req.id,'send'));row.querySelector('.links')?.addEventListener('click',()=>loadRequestLinks(req.id));row.querySelector('.final')?.addEventListener('click',()=>downloadFinalPdf(req.id));row.querySelector('.void')?.addEventListener('click',()=>signatureAction(req.id,'void'));row.querySelector('.delete').addEventListener('click',()=>signatureAction(req.id,'delete'));list.appendChild(row);});
+      list.innerHTML='';data.requests.forEach(req=>{const row=document.createElement('div');row.className='recent-file-row';const canVoid=['draft','sent','in_progress'].includes(req.status);const canRemind=['sent','in_progress'].includes(req.status);row.innerHTML='<span class="recent-fname">'+escapeHtml(req.title)+'</span><span class="recent-tool-badge">'+escapeHtml(req.status)+'</span>'+(req.status!=='draft'?'<button class="btn btn-ghost activity" style="font-size:.72rem;padding:.25rem .5rem">Activity</button>':'')+(canRemind?'<button class="btn btn-ghost remind" style="font-size:.72rem;padding:.25rem .5rem">Remind</button>':'')+(req.status==='draft'?'<button class="btn btn-ghost send" style="font-size:.72rem;padding:.25rem .5rem">Send</button>':'<button class="btn btn-ghost links" style="font-size:.72rem;padding:.25rem .5rem">Links</button>')+(req.status==='completed'?'<button class="btn btn-ghost final" style="font-size:.72rem;padding:.25rem .5rem">PDF</button>':'')+(canVoid?'<button class="btn btn-ghost void" style="font-size:.72rem;padding:.25rem .5rem">Void</button>':'')+'<button class="btn btn-ghost delete" style="font-size:.72rem;padding:.25rem .5rem;color:var(--red)">Delete</button>';row.querySelector('.send')?.addEventListener('click',()=>signatureAction(req.id,'send'));row.querySelector('.activity')?.addEventListener('click',()=>showActivity(req.id));row.querySelector('.remind')?.addEventListener('click',()=>remindRequest(req.id));row.querySelector('.links')?.addEventListener('click',()=>loadRequestLinks(req.id));row.querySelector('.final')?.addEventListener('click',()=>downloadFinalPdf(req.id));row.querySelector('.void')?.addEventListener('click',()=>signatureAction(req.id,'void'));row.querySelector('.delete').addEventListener('click',()=>signatureAction(req.id,'delete'));list.appendChild(row);});
     }catch(err){list.innerHTML='<div style="color:var(--red);font-size:.85rem">'+escapeHtml(err.message)+'</div>';}
   }
   async function loadRequestLinks(id){const token=await auth.currentUser?.getIdToken(true);const res=await fetch(API+'/api/sign-requests/'+id,{headers:{Authorization:'Bearer '+token}});const data=await res.json();if(!res.ok)return toast(data.error||'Could not load links','error');showSignerLinks(data.recipients||[]);}
@@ -3531,9 +3573,67 @@ function useSavedPerson(select,addRecipient){const option=select.selectedOptions
       if(sendNow)showSignerLinks(data.signers||[]);loadRequests();loadSavedPeople(savedPeopleSelect);}
     catch(err){showResult(resultEl,'error',err.message);}finally{btn.disabled=false;}
   }
+  // ── Templates: reusable field layouts keyed by signer order ──
+  let sigTemplates=[];
+  const tplSelect=document.getElementById('sigreq-template-select'),tplDelete=document.getElementById('sigreq-template-delete');
+  async function loadTemplates(){
+    const token=await auth.currentUser?.getIdToken();if(!token)return;
+    try{const res=await fetch(API+'/api/sign-templates',{headers:{Authorization:'Bearer '+token}});const data=await res.json();if(!res.ok)throw new Error(data.error);sigTemplates=data.templates||[];}catch(_){sigTemplates=[];}
+    tplSelect.replaceChildren();const first=document.createElement('option');first.value='';first.textContent=sigTemplates.length?'Use a saved layout…':'No templates yet';tplSelect.appendChild(first);
+    sigTemplates.forEach(t=>{const o=document.createElement('option');o.value=t.id;o.textContent=`${t.name} · ${t.signer_count} signer${t.signer_count===1?'':'s'}`;tplSelect.appendChild(o);});
+    tplDelete.style.display='none';
+  }
+  tplSelect.addEventListener('change',()=>{tplDelete.style.display=tplSelect.value?'':'none';});
+  document.getElementById('sigreq-template-apply').addEventListener('click',()=>{
+    const t=sigTemplates.find(x=>String(x.id)===tplSelect.value);if(!t)return toast('Choose a template first','error');
+    const signers=recipients();
+    if(signers.length<t.signer_count)return toast(`This template needs ${t.signer_count} signers — go back and add ${t.signer_count-signers.length} more.`,'error');
+    const pages=sigreqPdf?.numPages||1;let skipped=0;
+    sigreqFields=t.fields.filter(f=>{if(f.pageNumber>pages){skipped++;return false;}return true;}).map(f=>({type:f.type,assignedTo:signers[f.signer].email.toLowerCase(),pageNumber:f.pageNumber,x:f.x,y:f.y,width:f.width,height:f.height,label:f.label,required:f.required!==false}));
+    renderFields();renderChips();
+    toast(`Applied “${t.name}”`+(skipped?` (${skipped} field${skipped===1?'':'s'} skipped: this PDF has fewer pages)`:''),'success');
+  });
+  document.getElementById('sigreq-template-save').addEventListener('click',async function(){
+    if(!sigreqFields.length)return toast('Place some fields first','error');
+    const nameInput=prompt('Name this template (for example “Standard NDA”):');if(!nameInput||!nameInput.trim())return;
+    const emails=recipients().map(r=>r.email.toLowerCase());
+    const fields=sigreqFields.map(f=>({type:f.type,signer:Math.max(0,emails.indexOf(f.assignedTo)),pageNumber:f.pageNumber,x:f.x,y:f.y,width:f.width,height:f.height,label:f.label,required:f.required}));
+    this.disabled=true;
+    try{const token=await auth.currentUser.getIdToken();const res=await fetch(API+'/api/sign-templates',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({name:nameInput.trim(),pageCount:sigreqPdf?.numPages||null,fields})});const data=await res.json();if(!res.ok)throw new Error(data.error||'Could not save the template');toast('Template saved','success');await loadTemplates();tplSelect.value=String(data.template.id);tplDelete.style.display='';}
+    catch(err){toast(err.message,'error');}finally{this.disabled=false;}
+  });
+  tplDelete.addEventListener('click',async()=>{
+    const t=sigTemplates.find(x=>String(x.id)===tplSelect.value);if(!t||!confirm(`Delete the template “${t.name}”?`))return;
+    try{const token=await auth.currentUser.getIdToken();const res=await fetch(API+'/api/sign-templates/'+t.id,{method:'DELETE',headers:{Authorization:'Bearer '+token}});if(!res.ok)throw new Error((await res.json()).error||'Could not delete');toast('Template deleted','success');loadTemplates();}catch(err){toast(err.message,'error');}
+  });
+
+  // ── Activity: who viewed, signed or declined, and when ──
+  const EVENT_LABELS={draft_created:'Draft created',sent:'Sent',viewed:'Viewed',advanced:'Next signer emailed',completed:'Signed',request_completed:'Completed by everyone',declined:'Declined',voided:'Voided',reminder_sent:'Reminder sent',final_pdf_downloaded:'Final PDF downloaded',signer_copy_downloaded:'Signer downloaded copy'};
+  async function showActivity(id){
+    const box=document.getElementById('sigreq-activity');box.innerHTML='<div style="color:var(--muted);font-size:.85rem">Loading activity…</div>';
+    try{
+      const token=await auth.currentUser.getIdToken();const res=await fetch(API+'/api/sign-requests/'+id,{headers:{Authorization:'Bearer '+token}});const data=await res.json();if(!res.ok)throw new Error(data.error||'Could not load activity');
+      const when=d=>d?new Date(d).toLocaleString():'—';
+      box.replaceChildren();
+      const title=document.createElement('div');title.className='card-title';title.textContent='Activity · '+data.request.title;box.appendChild(title);
+      data.recipients.forEach((r,i)=>{
+        const row=document.createElement('div');row.className='review-signer';
+        const n=document.createElement('span');n.className='order';n.textContent=i+1;
+        const who=document.createElement('div');who.className='who';who.textContent=r.name+' · '+r.status;
+        const small=document.createElement('small');small.textContent=`${r.email} — viewed ${when(r.viewed_at)} · signed ${when(r.completed_at)}${r.declined_at?' · declined '+when(r.declined_at)+(r.decline_reason?` (“${r.decline_reason}”)`:''):''}`;
+        who.appendChild(small);row.append(n,who);box.appendChild(row);
+      });
+      const log=document.createElement('div');log.style.cssText='margin-top:.75rem;font-size:.8rem;color:var(--text3);line-height:1.8';
+      (data.events||[]).forEach(e=>{const line=document.createElement('div');line.textContent=`${when(e.created_at)} — ${EVENT_LABELS[e.event_type]||e.event_type}`;log.appendChild(line);});
+      box.appendChild(log);box.scrollIntoView({behavior:'smooth',block:'nearest'});
+    }catch(err){box.textContent=err.message;}
+  }
+  async function remindRequest(id){
+    try{const token=await auth.currentUser.getIdToken();const res=await fetch(API+'/api/sign-requests/'+id+'/remind',{method:'POST',headers:{Authorization:'Bearer '+token}});const data=await res.json();if(!res.ok)throw new Error(data.error||'Could not send a reminder');toast('Reminder sent','success');}catch(err){toast(err.message,'error');}
+  }
   document.getElementById('sigreq-save').addEventListener('click',function(){saveSigRequest(false,this);});
   document.getElementById('sigreq-send').addEventListener('click',function(){saveSigRequest(true,this);});
-  document.addEventListener('nyx:panel-changed',e=>{if(e.detail&&e.detail.panel==='signrequest'){loadRequests();loadSavedPeople(savedPeopleSelect);}});
+  document.addEventListener('nyx:panel-changed',e=>{if(e.detail&&e.detail.panel==='signrequest'){loadRequests();loadSavedPeople(savedPeopleSelect);loadTemplates();}});
 })();
 
 // ═══════════════════════════════════════════════════════

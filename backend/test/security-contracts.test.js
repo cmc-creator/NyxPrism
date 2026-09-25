@@ -264,3 +264,14 @@ test('lifecycle emails are one-per-kind, respect opt-out and carry an unsubscrib
   assert.match(lifecycle, /timingSafeEqual/);
   assert.match(await read('src/routes/user.js'), /router\.get\('\/unsubscribe'/);
 });
+
+test('signature reminders are limited and templates/branding are owner-scoped', async () => {
+  const sign = await read('src/routes/sign-requests.js');
+  assert.match(sign, /MAX_REMINDERS = 3/);
+  assert.match(sign, /INTERVAL '1 hour'/);
+  const templates = await read('src/routes/sign-templates.js');
+  assert.match(templates, /owner_user_id = \$2/);
+  const user = await read('src/routes/user.js');
+  assert.match(user, /MAX_LOGO_BYTES = 200 \* 1024/);
+  assert.match(user, /every\(\(b, i\) => bytes\[i\] === b\)/);
+});

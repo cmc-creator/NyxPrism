@@ -18,7 +18,8 @@ import userRouter     from './routes/user.js';
 import aiSplitRouter  from './routes/ai-split.js';
 import apiKeysRouter  from './routes/api-keys.js';
 import adminRouter    from './routes/admin.js';
-import signRequestsRouter from './routes/sign-requests.js';
+import signRequestsRouter, { runSignatureReminders } from './routes/sign-requests.js';
+import signTemplatesRouter from './routes/sign-templates.js';
 import distributionsRouter from './routes/distributions.js';
 import savedContactsRouter from './routes/saved-contacts.js';
 
@@ -140,6 +141,7 @@ app.use('/api/ai/desktop', desktopAiLimiter, aiDesktopRouter);
 app.post('/api/keys',     keyCreateLimiter);
 app.use('/api/keys',      apiKeysRouter);
 app.use('/api/sign-requests', signRequestsRouter);
+app.use('/api/sign-templates', signTemplatesRouter);
 app.use('/api/distributions', distributionsRouter);
 app.use('/api/saved-contacts', savedContactsRouter);
 app.use('/api/admin',     adminRouter);
@@ -174,6 +176,11 @@ async function start() {
   const lifecycle = () => runLifecycleJobs().catch(error => console.error('Lifecycle email job error:', error.message));
   setTimeout(lifecycle, 60 * 1000).unref();
   setInterval(lifecycle, 6 * 60 * 60 * 1000).unref();
+
+  // Signature reminders to whoever's turn it is (every 3 days, at most 3 times).
+  const reminders = () => runSignatureReminders().catch(error => console.error('Signature reminder job error:', error.message));
+  setTimeout(reminders, 2 * 60 * 1000).unref();
+  setInterval(reminders, 6 * 60 * 60 * 1000).unref();
 
   app.listen(PORT, () => console.log(`✓ NyxPrism API listening on port ${PORT}`));
 }

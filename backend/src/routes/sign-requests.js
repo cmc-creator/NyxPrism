@@ -41,8 +41,27 @@ async function recordNotification(clientOrPool, { requestId, recipientId = null,
   );
 }
 
-function signerEmailHtml({ signer, title, documentName, message, ownerEmail }) {
-  return `<p>Hello ${escapeHtml(signer.name)},</p><p>${escapeHtml(ownerEmail || 'NyxPrism')} requested your signature on <strong>${escapeHtml(documentName)}</strong>.</p>${message ? `<p style="white-space:pre-wrap;">${escapeHtml(message)}</p>` : ''}<p><a href="${signer.url}">Review and sign the document</a></p><p>This secure link is unique to you.</p>`;
+const API_PUBLIC = () => (process.env.PUBLIC_API_URL || 'https://nyxprism-production.up.railway.app').replace(/\/$/, '');
+
+/** The sender's branding (company name, hosted logo URL), if they set one. */
+export async function brandFor(userId) {
+  if (!userId) return null;
+  const { rows } = await pool.query('SELECT id, brand_name, (brand_logo IS NOT NULL) AS has_logo FROM users WHERE id = $1', [userId]);
+  const row = rows[0];
+  if (!row || (!row.brand_name && !row.has_logo)) return null;
+  return { name: row.brand_name || null, logoUrl: row.has_logo ? `${API_PUBLIC()}/api/user/brand/${row.id}/logo` : null };
+}
+
+function brandHeader(brand) {
+  if (!brand) return '';
+  const logo = brand.logoUrl ? `<img src="${brand.logoUrl}" alt="${escapeHtml(brand.name || '')}" style="max-height:48px;max-width:200px;display:block;margin-bottom:12px">` : '';
+  const name = !brand.logoUrl && brand.name ? `<p style="font-size:18px;font-weight:700;margin:0 0 12px">${escapeHtml(brand.name)}</p>` : '';
+  return logo + name;
+}
+
+function signerEmailHtml({ signer, title, documentName, message, ownerEmail, brand = null, reminder = false }) {
+  const from = brand?.name ? `${brand.name} (${ownerEmail})` : (ownerEmail || 'NyxPrism');
+  return `${brandHeader(brand)}<p>Hello ${escapeHtml(signer.name)},</p><p>${reminder ? 'A reminder: ' : ''}${escapeHtml(from)} requested your signature on <strong>${escapeHtml(documentName)}</strong>.</p>${message ? `<p style="white-space:pre-wrap;">${escapeHtml(message)}</p>` : ''}<p><a href="${signer.url}">Review and sign the document</a></p><p>This secure link is unique to you.</p>`;
 }
 
 async function audit(clientOrPool, { requestId, recipientId = null, eventType, detail = null, req = null }) {
@@ -517,10 +536,11 @@ router.post('/', requireAuth, requireVerifiedEmail, requireActivePlan, async (re
 
   let emailWarning = null;
   if (sendNow) {
+    const brand = await brandFor((await findOrCreateUser(req.user))).catch(() => null);
     try {
       await Promise.all(signers.filter(signer => signer.status === 'pending').map(async signer => {
         try {
-          await sendEmail({ to: signer.email, subject: `Signature requested: ${title}`, html: signerEmailHtml({ signer, title, documentName, message, ownerEmail: req.user.email }) });
+          await sendEmail({ to: signer.email, subject: `Signature requested: ${title}`, html: signerEmailHtml({ signer, title, documentName, message, ownerEmail: req.user.email, brand }) });
           await recordNotification(pool, { requestId: request.id, recipientId: signer.id, type: 'signature_request_sent', status: 'sent' });
         } catch (err) {
           await recordNotification(pool, { requestId: request.id, recipientId: signer.id, type: 'signature_request_sent', status: 'failed', error: err.message });
@@ -598,13 +618,90 @@ router.post('/:id/send', requireAuth, requireVerifiedEmail, requireActivePlan, a
 
   let warning = null;
   try {
-    await sendEmail({ to: signer.email, subject: `Signature requested: ${signer.title}`, html: signerEmailHtml({ signer, title: signer.title, documentName: signer.document_name, message: signer.message, ownerEmail: req.user.email }) });
+    const brand = await brandFor(await findOrCreateUser(req.user)).catch(() => null);
+    await sendEmail({ to: signer.email, subject: `Signature requested: ${signer.title}`, html: signerEmailHtml({ signer, title: signer.title, documentName: signer.document_name, message: signer.message, ownerEmail: req.user.email, brand }) });
     await recordNotification(pool, { requestId, recipientId: signer.id, type: 'signature_request_sent', status: 'sent' });
   } catch (error) {
     warning = 'Request activated, but email delivery failed.';
     await recordNotification(pool, { requestId, recipientId: signer.id, type: 'signature_request_sent', status: 'failed', error: error.message });
   }
   res.json({ ok: true, warning });
+});
+
+
+const REMINDER_EVERY_DAYS = 3;
+const MAX_REMINDERS = 3;
+
+/** Email the signer(s) whose turn it is. Returns how many reminders were sent. */
+async function remindCurrentSigners(requestId) {
+  const { rows } = await pool.query(
+    `SELECT sr.id, sr.name, sr.email, sr.token, r.title, r.document_name, r.message, r.owner_user_id, u.email AS owner_email
+     FROM signature_recipients sr
+     JOIN signature_requests r ON r.id = sr.request_id
+     JOIN users u ON u.id = r.owner_user_id
+     WHERE sr.request_id = $1 AND sr.status = 'pending' AND r.status IN ('sent', 'in_progress')
+       AND (r.expires_at IS NULL OR r.expires_at > NOW())`,
+    [requestId],
+  );
+  const base = process.env.FRONTEND_URL || 'https://nyxprism.com';
+  let sent = 0;
+  for (const signer of rows) {
+    const url = `${base}/sign-request.html?token=${signer.token}`;
+    try {
+      await sendEmail({
+        to: signer.email,
+        subject: `Reminder: signature requested — ${signer.title}`,
+        html: signerEmailHtml({ signer: { ...signer, url }, title: signer.title, documentName: signer.document_name, message: signer.message, ownerEmail: signer.owner_email, brand: await brandFor(signer.owner_user_id).catch(() => null), reminder: true }),
+      });
+      await recordNotification(pool, { requestId, recipientId: signer.id, type: 'signature_reminder', status: 'sent' });
+      await audit(pool, { requestId, recipientId: signer.id, eventType: 'reminder_sent' });
+      sent++;
+    } catch (err) {
+      await recordNotification(pool, { requestId, recipientId: signer.id, type: 'signature_reminder', status: 'failed', error: err.message }).catch(() => {});
+    }
+  }
+  return sent;
+}
+
+/** Automatic reminders: every few days to whoever's turn it is, a limited number of times. */
+export async function runSignatureReminders() {
+  const { rows } = await pool.query(
+    `SELECT DISTINCT sr.request_id
+     FROM signature_recipients sr
+     JOIN signature_requests r ON r.id = sr.request_id
+     WHERE sr.status = 'pending' AND r.status IN ('sent', 'in_progress')
+       AND (r.expires_at IS NULL OR r.expires_at > NOW())
+       AND (SELECT MAX(n.created_at) FROM signature_notifications n
+            WHERE n.recipient_id = sr.id AND n.status = 'sent') < NOW() - ($1 || ' days')::interval
+       AND (SELECT COUNT(*) FROM signature_notifications n
+            WHERE n.recipient_id = sr.id AND n.notification_type = 'signature_reminder' AND n.status = 'sent') < $2`,
+    [REMINDER_EVERY_DAYS, MAX_REMINDERS],
+  );
+  let sent = 0;
+  for (const row of rows) sent += await remindCurrentSigners(row.request_id);
+  return sent;
+}
+
+router.post('/:id/remind', requireAuth, async (req, res) => {
+  const requestId = parseInt(req.params.id, 10);
+  if (!Number.isInteger(requestId) || requestId < 1) return res.status(400).json({ error: 'Invalid request ID.' });
+  try {
+    const userId = await findOrCreateUser(req.user);
+    const owns = await pool.query("SELECT id FROM signature_requests WHERE id = $1 AND owner_user_id = $2 AND status IN ('sent', 'in_progress')", [requestId, userId]);
+    if (!owns.rows.length) return res.status(409).json({ error: 'Only an active request can be reminded.' });
+    const recent = await pool.query(
+      `SELECT 1 FROM signature_notifications n JOIN signature_recipients sr ON sr.id = n.recipient_id
+       WHERE n.request_id = $1 AND sr.status = 'pending' AND n.status = 'sent' AND n.created_at > NOW() - INTERVAL '1 hour' LIMIT 1`,
+      [requestId],
+    );
+    if (recent.rows.length) return res.status(429).json({ error: 'The signer was emailed less than an hour ago. Try again later.' });
+    const sent = await remindCurrentSigners(requestId);
+    if (!sent) return res.status(502).json({ error: 'The reminder could not be sent. Check the signer’s email address.' });
+    res.json({ ok: true, sent });
+  } catch (err) {
+    console.error('sign-requests remind error:', err.message);
+    res.status(500).json({ error: 'Failed to send reminder.' });
+  }
 });
 
 router.post('/:id/void', requireAuth, async (req, res) => {
@@ -656,7 +753,7 @@ router.get('/public/:token', async (req, res) => {
   try {
     const recipientResult = await pool.query(
       `SELECT sr.id AS recipient_id, sr.name, sr.email, sr.status AS recipient_status,
-              r.id AS request_id, r.title, r.document_name, r.document_mime, r.document_data, r.status AS request_status, r.expires_at
+              r.id AS request_id, r.owner_user_id, r.title, r.document_name, r.document_mime, r.document_data, r.status AS request_status, r.expires_at
        FROM signature_recipients sr
        JOIN signature_requests r ON r.id = sr.request_id
        WHERE sr.token = $1
@@ -683,6 +780,7 @@ router.get('/public/:token', async (req, res) => {
     );
     res.json({
       request: { id: row.request_id, title: row.title, documentName: row.document_name, status: row.request_status },
+      brand: await brandFor(row.owner_user_id).catch(() => null),
       recipient: { name: row.name, email: row.email, status: row.recipient_status },
       fields: fields.rows,
       documentBase64: `data:${row.document_mime};base64,${Buffer.from(row.document_data).toString('base64')}`,
@@ -780,7 +878,7 @@ router.post('/public/:token/complete', async (req, res) => {
     await audit(client, { requestId: recipient.request_id, recipientId: recipient.id, eventType: 'completed', detail: `Electronic-signature consent recorded; SHA-256 ${completionHash}`, req });
 
     const next = await client.query(
-      `SELECT sr.id, sr.name, sr.email, sr.token, r.title, r.document_name, r.message, u.email AS owner_email
+      `SELECT sr.id, sr.name, sr.email, sr.token, r.title, r.document_name, r.message, u.email AS owner_email, u.id AS owner_id
        FROM signature_recipients sr
        JOIN signature_requests r ON r.id = sr.request_id
        JOIN users u ON u.id = r.owner_user_id
@@ -806,7 +904,7 @@ router.post('/public/:token/complete', async (req, res) => {
         await sendEmail({
           to: nextSigner.email,
           subject: `Signature requested: ${nextSigner.title}`,
-          html: signerEmailHtml({ signer: nextSigner, title: nextSigner.title, documentName: nextSigner.document_name, message: nextSigner.message, ownerEmail: nextSigner.owner_email }),
+          html: signerEmailHtml({ signer: nextSigner, title: nextSigner.title, documentName: nextSigner.document_name, message: nextSigner.message, ownerEmail: nextSigner.owner_email, brand: await brandFor(nextSigner.owner_id).catch(() => null) }),
         });
         await recordNotification(pool, { requestId: recipient.request_id, recipientId: nextSigner.id, type: 'signature_request_advanced', status: 'sent' });
       } catch (error) {

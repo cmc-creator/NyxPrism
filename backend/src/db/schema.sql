@@ -230,3 +230,20 @@ CREATE TABLE IF NOT EXISTS lifecycle_emails (
   sent_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   PRIMARY KEY (user_id, kind)
 );
+
+-- Sender branding shown in signing emails and on the signing page.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_name TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_logo BYTEA;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS brand_logo_type TEXT;
+
+-- Reusable field layouts for signature requests (fields reference signer order, not people).
+CREATE TABLE IF NOT EXISTS signature_templates (
+  id            SERIAL PRIMARY KEY,
+  owner_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  name          TEXT NOT NULL,
+  signer_count  INTEGER NOT NULL,
+  page_count    INTEGER,
+  fields        JSONB NOT NULL,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS signature_templates_owner_idx ON signature_templates (owner_user_id);

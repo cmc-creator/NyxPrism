@@ -147,6 +147,73 @@ async function accountRow(user) {
   return rows[0] || null;
 }
 
+
+// ── Branding: company name and logo on signing emails and the signing page ──
+const LOGO_TYPES = { 'image/png': [0x89, 0x50, 0x4e, 0x47], 'image/jpeg': [0xff, 0xd8, 0xff] };
+const MAX_LOGO_BYTES = 200 * 1024;
+
+router.get('/brand', requireAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      'SELECT id, brand_name, (brand_logo IS NOT NULL) AS has_logo FROM users WHERE firebase_uid = $1 OR LOWER(email) = LOWER($2) LIMIT 1',
+      [req.user.uid, req.user.email],
+    );
+    const row = rows[0];
+    res.json({ name: row?.brand_name || '', logoUrl: row?.has_logo ? `/api/user/brand/${row.id}/logo?v=${Date.now()}` : null });
+  } catch (err) {
+    console.error('Brand get error:', err.message);
+    res.status(500).json({ error: 'Failed to load branding.' });
+  }
+});
+
+// POST /api/user/brand  { name, logo: "data:image/png;base64,..." | null (remove) | undefined (keep) }
+router.post('/brand', requireAuth, async (req, res) => {
+  const name = String(req.body?.name || '').trim().slice(0, 80) || null;
+  let logo; let logoType;
+  if (req.body?.logo === null) { logo = null; logoType = null; }
+  else if (typeof req.body?.logo === 'string') {
+    const match = req.body.logo.match(/^data:(image\/(?:png|jpeg));base64,([A-Za-z0-9+/=]+)$/);
+    if (!match) return res.status(400).json({ error: 'The logo must be a PNG or JPG image.' });
+    const bytes = Buffer.from(match[2], 'base64');
+    const magic = LOGO_TYPES[match[1]];
+    if (!magic.every((b, i) => bytes[i] === b)) return res.status(400).json({ error: 'The logo must be a PNG or JPG image.' });
+    if (bytes.length > MAX_LOGO_BYTES) return res.status(400).json({ error: 'The logo must be 200 KB or smaller.' });
+    logo = bytes; logoType = match[1];
+  }
+  try {
+    const sets = ['brand_name = $1', 'updated_at = NOW()'];
+    const params = [name];
+    if (logo !== undefined) { params.push(logo, logoType); sets.push(`brand_logo = $${params.length - 1}`, `brand_logo_type = $${params.length}`); }
+    params.push(req.user.uid, req.user.email);
+    const { rowCount } = await pool.query(
+      `UPDATE users SET ${sets.join(', ')} WHERE firebase_uid = $${params.length - 1} OR LOWER(email) = LOWER($${params.length})`,
+      params,
+    );
+    if (!rowCount) return res.status(404).json({ error: 'Account not found.' });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('Brand save error:', err.message);
+    res.status(500).json({ error: 'Failed to save branding.' });
+  }
+});
+
+// Public: the logo image, used in emails and on signing pages.
+router.get('/brand/:id/logo', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (!Number.isInteger(id)) return res.status(404).end();
+  try {
+    const { rows } = await pool.query('SELECT brand_logo, brand_logo_type FROM users WHERE id = $1 AND brand_logo IS NOT NULL', [id]);
+    if (!rows.length) return res.status(404).end();
+    res.setHeader('Content-Type', rows[0].brand_logo_type || 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    res.send(Buffer.from(rows[0].brand_logo));
+  } catch (err) {
+    console.error('Brand logo error:', err.message);
+    res.status(500).end();
+  }
+});
+
 // ── GET /api/user/export ─────────────────────────────────────────────────
 // Everything NyxPrism stores about the account, as JSON (document files excluded).
 router.get('/export', requireAuth, async (req, res) => {

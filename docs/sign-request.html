@@ -72,7 +72,7 @@
     <span class="nyx-brand-icon"><img class="nyx-prism-mark" src="prism-mark.webp?v=1" alt="NyxPrism"></span>
     <span class="nyx-brand-copy"><span class="nyx-brand-wordmark"><em>Nyx</em>Prism&#8482;</span><span class="nyx-brand-company">by NyxCollective LLC</span></span>
   </a>
-  <div class="secure">🔒 Secure signing link</div>
+  <div class="secure"><span id="sender-brand" hidden></span>🔒 Secure signing link</div>
 </header>
 <main>
   <ol class="steps" id="steps">
@@ -394,6 +394,11 @@ async function load() {
     state.data = data;
     if (data.request.status === 'completed') return showDone('This document is complete', 'Everyone has signed. Download your copy, including the certificate of completion.', true);
     if (data.recipient.status === 'completed') return showDone("You've already signed", "Thanks! We'll email you a link to the completed document once everyone has signed.", false);
+    if (data.brand && (data.brand.name || data.brand.logoUrl)) {
+      const b = $('sender-brand'); b.hidden = false; b.style.cssText = 'display:inline-flex;align-items:center;gap:.45rem;margin-right:.75rem;color:var(--text2);font-weight:600';
+      if (data.brand.logoUrl) { const img = document.createElement('img'); img.src = data.brand.logoUrl; img.alt = data.brand.name || 'Sender'; img.style.cssText = 'max-height:28px;max-width:120px;background:#fff;border-radius:4px;padding:2px'; b.appendChild(img); }
+      if (data.brand.name) { const t = document.createElement('span'); t.textContent = 'Sent by ' + data.brand.name; b.appendChild(t); }
+    }
     $('doc-title').textContent = data.request.title;
     $('doc-sub').textContent = data.request.documentName;
     $('recipient-line').textContent = `Signing as ${data.recipient.name} (${data.recipient.email}).`;
