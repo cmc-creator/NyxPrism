@@ -194,7 +194,8 @@ test('senders must verify their email before sending documents to other people',
 
 test('desktop licence check uses the Professional access rule', async () => {
   const license = await read('src/routes/license.js');
-  assert.match(license, /hasProfessionalAccess\(/);
+  // hasAccess = the Professional plan rule plus team membership (src/teams.js).
+  assert.match(license, /hasAccess\(/);
   assert.doesNotMatch(license, /plan = 'inactive'/);
 });
 
