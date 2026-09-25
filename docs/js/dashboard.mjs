@@ -467,7 +467,10 @@ function showResult(el,type,msg){
 function triggerDownload(blob,filename){
   const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;a.click();
   setTimeout(()=>URL.revokeObjectURL(url),3000);
+  // Let recent files, confetti and cloud saving react to every download.
+  document.dispatchEvent(new CustomEvent('nyx:download',{detail:{blob,filename}}));
 }
+window.toast=toast;
 
 function setupDrop(dropEl,input,onFiles){
   dropEl.addEventListener('dragover',e=>{e.preventDefault();dropEl.classList.add('drag-over');});
@@ -1563,8 +1566,12 @@ function useSavedPerson(select,addRecipient){const option=select.selectedOptions
   const recipientsEl=document.getElementById('sigreq-recipients'),resultEl=document.getElementById('sigreq-result');
   let sigreqFile=null,sigreqPdf=null,sigreqPage=1,sigreqFields=[];
   function recipients(){return Array.from(recipientsEl.querySelectorAll('.sigreq-recipient')).map(row=>({name:row.querySelector('.sr-name').value.trim(),email:row.querySelector('.sr-email').value.trim()})).filter(r=>r.name||r.email);}
-  function selectedRecipient(){const rows=Array.from(recipientsEl.querySelectorAll('.sigreq-recipient'));const checked=rows.find(r=>r.querySelector('.sr-pick').checked)||rows[0];return checked?checked.querySelector('.sr-email').value.trim().toLowerCase():'';}
+  // The picked row wins only if it has an email; otherwise fall back to the first signer that does,
+  // so an empty row left at the top never blocks placing fields.
+  function selectedRecipient(){const rows=Array.from(recipientsEl.querySelectorAll('.sigreq-recipient')).filter(r=>r.querySelector('.sr-email').value.trim());const checked=rows.find(r=>r.querySelector('.sr-pick').checked)||rows[0];return checked?checked.querySelector('.sr-email').value.trim().toLowerCase():'';}
   function addRecipient(name='',email=''){
+    if(name||email){const empty=Array.from(recipientsEl.querySelectorAll('.sigreq-recipient')).find(r=>!r.querySelector('.sr-name').value.trim()&&!r.querySelector('.sr-email').value.trim());
+      if(empty){empty.querySelector('.sr-name').value=name;empty.querySelector('.sr-email').value=email;renderFields();return;}}
     const row=document.createElement('div');row.className='sigreq-recipient recipient-row signature-recipient';
     const pick=document.createElement('input');pick.className='sr-pick recipient-pick';pick.type='radio';pick.name='sigreq-recipient-pick';pick.checked=!recipientsEl.children.length;pick.setAttribute('aria-label','Assign fields to this recipient');
     const nameInput=document.createElement('input');nameInput.className='form-input sr-name';nameInput.placeholder='Name';nameInput.value=name;
@@ -1670,6 +1677,9 @@ function useSavedPerson(select,addRecipient){const option=select.selectedOptions
       if(new Set(rows.map(r=>r.email)).size!==rows.length)return 'Each signer needs a different email address.';
       // Fields for signers who were removed or re-typed no longer have an owner.
       const emails=new Set(rows.map(r=>r.email));sigreqFields=sigreqFields.filter(f=>emails.has(f.assignedTo));
+      // Drop empty rows so the order numbers and chips match the real signers.
+      recipientsEl.querySelectorAll('.sigreq-recipient').forEach(row=>{if(!row.querySelector('.sr-name').value.trim()&&!row.querySelector('.sr-email').value.trim())row.remove();});
+      if(!recipientsEl.querySelector('.sr-pick:checked'))recipientsEl.querySelector('.sr-pick').checked=true;
       return '';
     }
     if(step===3){
@@ -1788,7 +1798,7 @@ function useSavedPerson(select,addRecipient){const option=select.selectedOptions
   if(!fileInput||!drop||!recipientsEl)return;
   let distFile=null;
   function fileToDataUrl(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(file);});}
-  function addRecipient(name='',email=''){const row=document.createElement('div');row.className='recipient-row distribution-recipient';const nameInput=document.createElement('input');nameInput.className='form-input dr-name';nameInput.placeholder='Name';nameInput.value=name;const emailInput=document.createElement('input');emailInput.className='form-input dr-email';emailInput.type='email';emailInput.placeholder='email@example.com';emailInput.value=email;const remove=document.createElement('button');remove.className='recipient-remove';remove.type='button';remove.title='Remove recipient';remove.setAttribute('aria-label','Remove recipient');remove.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';remove.addEventListener('click',()=>row.remove());row.append(nameInput,emailInput,remove);recipientsEl.appendChild(row);}
+  function addRecipient(name='',email=''){if(name||email){const empty=Array.from(recipientsEl.querySelectorAll('.distribution-recipient')).find(r=>!r.querySelector('.dr-name').value.trim()&&!r.querySelector('.dr-email').value.trim());if(empty){empty.querySelector('.dr-name').value=name;empty.querySelector('.dr-email').value=email;return;}}const row=document.createElement('div');row.className='recipient-row distribution-recipient';const nameInput=document.createElement('input');nameInput.className='form-input dr-name';nameInput.placeholder='Name';nameInput.value=name;const emailInput=document.createElement('input');emailInput.className='form-input dr-email';emailInput.type='email';emailInput.placeholder='email@example.com';emailInput.value=email;const remove=document.createElement('button');remove.className='recipient-remove';remove.type='button';remove.title='Remove recipient';remove.setAttribute('aria-label','Remove recipient');remove.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';remove.addEventListener('click',()=>row.remove());row.append(nameInput,emailInput,remove);recipientsEl.appendChild(row);}
   function recipients(){return Array.from(recipientsEl.children).map(row=>({name:row.querySelector('.dr-name').value.trim(),email:row.querySelector('.dr-email').value.trim()})).filter(r=>r.name||r.email);}
   addRecipient();document.getElementById('dist-add-recipient').addEventListener('click',()=>addRecipient());const savedPeopleSelect=document.getElementById('dist-saved-person');document.getElementById('dist-use-saved').addEventListener('click',()=>useSavedPerson(savedPeopleSelect,addRecipient));
   setupDrop(drop,fileInput,files=>{
@@ -2594,7 +2604,6 @@ NyxRecents.render();
 
 // Wrap triggerDownload to record recent file + fire confetti
 (function(){
-  var _orig = window.triggerDownload;
   var _lastConfetti = 0;
   function _loadConfetti() {
     if (window.confetti) return Promise.resolve();
@@ -2604,8 +2613,8 @@ NyxRecents.render();
       s.onload = res; document.head.appendChild(s);
     });
   }
-  window.triggerDownload = function(blob, name){
-    _orig(blob, name);
+  document.addEventListener('nyx:download', function(e){
+    var blob = e.detail.blob, name = e.detail.filename;
     NyxRecents.add(name, window.__nyxCurrentPanel||"unknown", blob ? blob.size : 0);
     var now = Date.now();
     if (now - _lastConfetti > 2500) {
@@ -2616,7 +2625,7 @@ NyxRecents.render();
           colors: ["#7c3aed","#a78bfa","#34d399","#60a5fa","#fbbf24"] });
       });
     }
-  };
+  });
 })();
 
 // Mobile sidebar toggle

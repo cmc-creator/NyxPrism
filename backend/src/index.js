@@ -28,9 +28,10 @@ const app  = express();
 const PORT = process.env.PORT || 3000;
 
 app.disable('x-powered-by');
-// Railway terminates connections at one proxy hop; trust it so req.ip is the
-// real client (rate limits and signature audit trails depend on this).
-app.set('trust proxy', 1);
+// Browser traffic arrives via Vercel's /api proxy and then Railway's edge: two hops. Trusting both
+// keeps req.ip the real visitor (rate limits and signature audit trails depend on this); direct
+// callers (desktop app, API keys) pass through Railway only and resolve the same way.
+app.set('trust proxy', 2);
 app.use((_req, res, next) => {
   res.setHeader('Strict-Transport-Security', 'max-age=63072000; includeSubDomains');
   res.setHeader('X-Content-Type-Options', 'nosniff');

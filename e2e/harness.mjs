@@ -61,16 +61,19 @@ export async function launch() {
 }
 
 /** New page that records page errors and answers API calls with handler(method, path, body). */
-export async function newPage(browser, handler = () => ({})) {
+export async function newPage(browser, handler = () => ({}), external = null) {
   const page = await browser.newPage();
   await page.setViewport({ width: 1360, height: 1000 });
   page.errors = [];
   page.on('pageerror', e => page.errors.push(e.message));
   page.on('dialog', d => (d.type() === 'prompt' ? d.accept('E2E template') : d.accept()));
-  if (handler) {
+  if (handler || external) {
+    handler = handler || (() => ({}));
     await page.setRequestInterception(true);
     page.on('request', r => {
       const url = r.url();
+      const ext = external && external(url, r);
+      if (ext) return r.respond(ext);
       if (!url.startsWith(PROD_API)) return r.continue();
       const cors = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*', 'Access-Control-Allow-Methods': '*' };
       if (r.method() === 'OPTIONS') return r.respond({ status: 204, headers: cors });

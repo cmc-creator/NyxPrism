@@ -203,7 +203,7 @@ test('desktop licence check uses the Professional access rule', async () => {
 });
 
 test('backend trusts exactly one proxy hop so rate limits and audit IPs are per client', async () => {
-  assert.match(await read('src/index.js'), /app\.set\('trust proxy', 1\)/);
+  assert.match(await read('src/index.js'), /app\.set\('trust proxy', 2\)/);
 });
 
 test('admin portal has no shared-secret login', async () => {

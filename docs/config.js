@@ -7,8 +7,12 @@
   var host = location.hostname;
   var live = host === 'www.nyxprism.com' || host === 'nyxprism.com';
   var preview = /\.vercel\.app$/.test(host);
-  window.NYX_API = !live && preview && STAGING_API ? STAGING_API : PRODUCTION_API;
-  window.NYX_ENV = window.NYX_API === PRODUCTION_API ? 'production' : 'staging';
+  // On the live site the API is reached through our own domain (vercel.json proxies /api/* to
+  // Railway), so browser extensions and firewalls that block *.up.railway.app can't break the app.
+  window.NYX_API = live ? location.origin : (preview && STAGING_API ? STAGING_API : PRODUCTION_API);
+  window.NYX_ENV = live || window.NYX_API === PRODUCTION_API ? 'production' : 'staging';
+  // Google Drive / Dropbox import and Save to Drive. Fill in to switch on (see CLOUD_SETUP.md).
+  window.NYX_CLOUD = { googleClientId: '', googleApiKey: '', dropboxAppKey: '' };
   if (window.NYX_ENV === 'staging') {
     document.addEventListener('DOMContentLoaded', function () {
       var tag = document.createElement('div');

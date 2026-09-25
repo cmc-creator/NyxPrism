@@ -96,6 +96,26 @@ await test('request signatures: four-step flow validates each step and sends', a
   assert.deepEqual(page.errors, []);
 });
 
+await test('request signatures: a saved person fills the empty row and can be given fields', async () => {
+  const page = await newPage(browser, baseApi({ 'GET /api/saved-contacts': () => ({ contacts: [{ id: 1, name: 'Sam Saved', email: 'sam@example.com' }] }) }));
+  await page.goto(`${SITE}/dashboard.html#signrequest`, { waitUntil: 'networkidle2' }); await wait(800);
+  const W = '#sigreq-wizard';
+  await (await page.$('#sigreq-file')).uploadFile(PDF2); await wait(1200);
+  await next(page, W);
+  await page.select('#sigreq-saved-person', '1'); await page.click('#sigreq-use-saved');
+  assert.equal((await page.$$('#sigreq-recipients .sigreq-recipient')).length, 1);
+  await page.click('#sigreq-add-recipient'); await page.click('#sigreq-add-recipient');
+  const rows = await page.$$('#sigreq-recipients .sigreq-recipient');
+  await (await rows[1].$('.sr-name')).type('Bob'); await (await rows[1].$('.sr-email')).type('Bob@Example.com');
+  await next(page, W); assert.equal(await step(page, W), '3');
+  assert.equal((await page.$$('#sigreq-recipients .sigreq-recipient')).length, 2);
+  await page.click('.sigreq-field-btn[data-field="signature"]');
+  await page.click('.signer-chip:nth-child(2)'); await page.click('.sigreq-field-btn[data-field="date"]');
+  assert.equal(await page.$$eval('.sigreq-box', b => b.length), 2);
+  await next(page, W); assert.equal(await step(page, W), '4');
+  assert.deepEqual(page.errors, []);
+});
+
 await test('distribute: paste a list, dedupe, review and send', async () => {
   let posted = null;
   const page = await newPage(browser, baseApi({ 'POST /api/distributions': body => { posted = body; return [201, { batch: { id: 1 } }]; } }));
@@ -158,6 +178,39 @@ await test('owner portal: add a user with a plan and team, change plans inline',
   assert.equal(created.email, 'kim@example.com'); assert.equal(created.plan, 'trial'); assert.equal(created.teamId, 9);
   assert.ok(created.password.length >= 12, 'generated password');
   assert.match(await page.$eval('#ua-msg', e => e.textContent), /Created kim@example\.com and added to Acme Legal/);
+  assert.deepEqual(page.errors, []);
+});
+
+await test('cloud: import from Dropbox and Drive into a tool, save results to Drive, recent files recorded', async () => {
+  const pdf = fs.readFileSync(PDF3);
+  let uploaded = null;
+  const stubs = {
+    'https://www.dropbox.com/static/api/2/dropins.js': `window.Dropbox={choose:function(o){o.success([{name:'from-dropbox.pdf',link:'https://dl.dropboxusercontent.com/s/abc/from-dropbox.pdf'}]);}};`,
+    'https://accounts.google.com/gsi/client': `window.google=window.google||{};google.accounts={oauth2:{initTokenClient:function(c){return{requestAccessToken:function(){c.callback({access_token:'gtoken'});}};}}};`,
+    'https://apis.google.com/js/api.js': `window.gapi={load:function(n,cb){cb();}};window.google=window.google||{};google.picker={ViewId:{DOCS:1},Action:{PICKED:'picked'},DocsView:function(){this.setMimeTypes=function(){return this;};},PickerBuilder:function(){var cb;this.addView=function(){return this;};this.setOAuthToken=function(){return this;};this.setDeveloperKey=function(){return this;};this.setCallback=function(f){cb=f;return this;};this.build=function(){return{setVisible:function(){cb({action:'picked',docs:[{id:'f1',name:'from-drive.pdf',mimeType:'application/pdf'}]});}};};}};`,
+  };
+  const page = await newPage(browser, baseApi(), (url, r) => {
+    if (stubs[url]) return { status: 200, contentType: 'text/javascript', body: stubs[url] };
+    if (url.startsWith('https://dl.dropboxusercontent.com/') || url.startsWith('https://www.googleapis.com/drive/v3/files/f1')) return { status: 200, headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*' }, contentType: 'application/pdf', body: pdf };
+    if (url.startsWith('https://www.googleapis.com/upload/drive/v3/files')) { if (r.method() === 'POST') uploaded = r.headers().authorization; return { status: 200, headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*' }, contentType: 'application/json', body: '{"id":"n1"}' }; }
+    return null;
+  });
+  await page.evaluateOnNewDocument(() => { Object.defineProperty(window, 'NYX_CLOUD', { configurable: true, get: () => ({ googleClientId: 'cid', googleApiKey: 'key', dropboxAppKey: 'dbx' }), set: () => {} }); });
+  await page.goto(`${SITE}/dashboard.html#split`, { waitUntil: 'networkidle2' }); await wait(1000);
+  const buttons = await page.$$eval('#panel-split .cloud-import button', b => b.map(x => x.textContent));
+  assert.deepEqual(buttons, ['Google Drive', 'Dropbox']);
+  await page.click('#panel-split .cloud-import button:nth-of-type(2)'); await wait(1500);
+  assert.match(await page.$eval('#split-file-list', e => e.innerText), /from-dropbox\.pdf/);
+  await openPanel(page, 'compress');
+  await page.click('#panel-compress .cloud-import button:nth-of-type(1)'); await wait(1500);
+  assert.match(await page.$eval('#compress-file-list', e => e.innerText), /from-drive\.pdf/);
+  await page.click('#compress-run'); await wait(4000);
+  const saveBtn = await page.evaluateHandle(() => [...document.querySelectorAll('button')].find(b => b.textContent === 'Save to Google Drive'));
+  assert.ok(await saveBtn.evaluate(b => b && b.offsetParent !== null), 'Save to Google Drive offered after download');
+  await saveBtn.click(); await wait(800);
+  assert.equal(uploaded, 'Bearer gtoken');
+  const recents = await page.evaluate(() => JSON.parse(localStorage.getItem('nyx_recents_v1') || '[]'));
+  assert.ok(recents.length >= 1, 'recent files recorded');
   assert.deepEqual(page.errors, []);
 });
 
