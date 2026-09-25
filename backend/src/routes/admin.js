@@ -668,7 +668,7 @@ router.get('/system', async (_req, res) => {
   try { await admin.auth().listUsers(1); firebase = { ok: true }; } catch (err) { firebase = { ok: false, error: err.message }; }
   const env = ['DATABASE_URL', 'FIREBASE_PROJECT_ID', 'FIREBASE_CLIENT_EMAIL', 'FIREBASE_PRIVATE_KEY', 'FRONTEND_URL',
     'STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET', 'STRIPE_PRICE_ID_MONTHLY', 'STRIPE_PRICE_ID_ANNUAL',
-    'BREVO_API_KEY', 'CONTACT_EMAIL', 'ANTHROPIC_API_KEY', 'DEVELOPER_EMAILS', 'AI_DAILY_LIMIT']
+    'BREVO_API_KEY', 'CONTACT_EMAIL', 'ANTHROPIC_API_KEY', 'DEVELOPER_EMAILS', 'AI_DAILY_LIMIT', 'SENTRY_DSN']
     .map(name => ({ name, set: !!process.env[name] }));
   res.json({
     database,

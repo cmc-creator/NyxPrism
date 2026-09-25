@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import Sentry from './instrument.js';
 import express from 'express';
 import cors from 'cors';
 import { readFile } from 'fs/promises';
@@ -130,6 +131,9 @@ app.use('/api/sign-requests', signRequestsRouter);
 app.use('/api/distributions', distributionsRouter);
 app.use('/api/saved-contacts', savedContactsRouter);
 app.use('/api/admin',     adminRouter);
+
+// Report unhandled route errors to Sentry (no-op when SENTRY_DSN is unset).
+Sentry.setupExpressErrorHandler(app);
 
 // ── 404 catch-all ────────────────────────────────────────────────────────
 app.use((_req, res) => res.status(404).json({ error: 'Not found.' }));
