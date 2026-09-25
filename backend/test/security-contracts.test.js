@@ -5,6 +5,9 @@ import { developerEntitlements, hasProfessionalAccess } from '../src/access.js';
 
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 const readRepo = path => readFile(new URL(`../../${path}`, import.meta.url), 'utf8');
+// The dashboard's markup, styles and scripts live in several files; tests read them together.
+const DASHBOARD_PARTS = ['docs/dashboard.html', 'docs/css/dashboard.css', 'docs/js/dashboard-early.js', 'docs/js/dashboard.mjs'];
+const readDashboard = async () => (await Promise.all(DASHBOARD_PARTS.map(readRepo))).join(String.fromCharCode(10));
 
 test('owner account always receives Professional access', () => {
   assert.deepEqual(developerEntitlements('cmc@conniemichelleconsulting.com'), {
@@ -95,7 +98,7 @@ test('public signer renders server fields without innerHTML interpolation', asyn
 });
 
 test('dashboard panel event uses the listener contract', async () => {
-  const source = await readRepo('docs/dashboard.html');
+  const source = await readDashboard();
   assert.match(source, /detail:\{panel:name\}/);
 });
 
@@ -119,7 +122,7 @@ test('account lookup reconciles verified email and Firebase UID', async () => {
 });
 
 test('dashboard never exposes an unavailable subscription plan', async () => {
-  const source = await readRepo('docs/dashboard.html');
+  const source = await readDashboard();
   assert.doesNotMatch(source, /plan='unavailable'/);
   assert.match(source, /plan='account'/);
   assert.match(source, /ownerAccount.*cmc@conniemichelleconsulting\.com/);
@@ -129,15 +132,15 @@ test('installed PWA registers and routes PDF files into the editor', async () =>
   const manifest = JSON.parse(await readRepo('docs/manifest.json'));
   const handler = manifest.file_handlers?.[0];
   assert.deepEqual(handler?.accept?.['application/pdf'], ['.pdf']);
-  const dashboard = await readRepo('docs/dashboard.html');
+  const dashboard = await readDashboard();
   assert.match(dashboard, /launchQueue\.setConsumer/);
   assert.match(dashboard, /window\.__nyxOpenPdf/);
   assert.match(dashboard, /switchPanel\('editpdf'\)/);
 });
 
 test('landing and dashboard wallpapers use faceted glass geometry', async () => {
-  for (const path of ['docs/index.html', 'docs/dashboard.html']) {
-    const source = await readRepo(path);
+  for (const read of [() => readRepo('docs/index.html'), readDashboard]) {
+    const source = await read();
     assert.match(source, /function transformPoint/);
     assert.match(source, /function polygonPath/);
     assert.match(source, /back\[side\].*front\[side\]/s);
@@ -145,7 +148,7 @@ test('landing and dashboard wallpapers use faceted glass geometry', async () => 
 });
 
 test('dynamic recipient rows use fixed accessible remove controls', async () => {
-  const dashboard = await readRepo('docs/dashboard.html');
+  const dashboard = await readDashboard();
   assert.match(dashboard, /\.recipient-remove\{width:36px;height:36px;min-width:36px/);
   assert.match(dashboard, /sigreq-recipient recipient-row signature-recipient/);
   assert.match(dashboard, /recipient-row distribution-recipient/);
@@ -162,14 +165,14 @@ test('saved people are user-scoped and automatically updated by document workflo
   assert.match(contacts, /WHERE user_id = \$1/);
   assert.match(signatures, /INSERT INTO saved_contacts/);
   assert.match(distributions, /INSERT INTO saved_contacts/);
-  const dashboard = await readRepo('docs/dashboard.html');
+  const dashboard = await readDashboard();
   assert.match(dashboard, /api\/saved-contacts/);
   assert.match(dashboard, /id="sigreq-saved-person"/);
   assert.match(dashboard, /id="dist-saved-person"/);
 });
 
 test('account settings support name, password, email, and appearance changes', async () => {
-  const dashboard = await readRepo('docs/dashboard.html');
+  const dashboard = await readDashboard();
   assert.match(dashboard, /id="acc-save-name"/);
   assert.match(dashboard, /id="acc-change-password"/);
   assert.match(dashboard, /id="acc-change-email"/);
@@ -227,7 +230,7 @@ test('completed signature PDFs carry a certificate and notify the sender', async
 });
 
 test('signature requests are prepared in a four-step flow with validation', async () => {
-  const dashboard = await readRepo('docs/dashboard.html');
+  const dashboard = await readDashboard();
   assert.match(dashboard, /function createWizard\(/);
   for (const step of ['Document', 'Signers', 'Place fields', 'Review &amp; send']) assert.ok(dashboard.includes(step), step);
   assert.match(dashboard, /still need.*at least one field/);
@@ -250,7 +253,7 @@ test('desktop AI endpoint is Professional-only, quota-limited and size-capped', 
 });
 
 test('single-step tools show progress and drag-and-drop feeds every tool', async () => {
-  const dashboard = await readRepo('docs/dashboard.html');
+  const dashboard = await readDashboard();
   assert.match(dashboard, /function initToolSteps\(/);
   assert.match(dashboard, /input\.files=dt\.files/);
   assert.match(dashboard, /\/\\.pdf\$\/i\.test\(f\.name\)/);

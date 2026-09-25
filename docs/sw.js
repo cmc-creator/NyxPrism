@@ -1,5 +1,5 @@
 // NyxPrism Service Worker - network-first for HTML, cache-first for assets
-const CACHE = 'nyx-v7';
+const CACHE = 'nyx-v8';
 const SHELL = [
   '/manifest.json',
   '/nyx-brand.css?v=3',
@@ -37,8 +37,8 @@ self.addEventListener('fetch', function(e) {
     return;
   }
 
-  // HTML must refresh after deployments so auth and security fixes are not stale.
-  if (e.request.mode === 'navigate' || url.pathname.endsWith('.html')) {
+  // HTML and the app's own scripts/styles must refresh after deployments so they always match.
+  if (e.request.mode === 'navigate' || url.pathname.endsWith('.html') || url.pathname.startsWith('/js/') || url.pathname.startsWith('/css/') || url.pathname === '/config.js' || url.pathname === '/monitoring.js') {
     e.respondWith(
       fetch(e.request).then(function(response) {
         if (response && response.status === 200) {

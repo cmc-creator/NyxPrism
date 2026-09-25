@@ -38,7 +38,7 @@ export function startSite(port, apiBase = PROD_API) {
     if (!file.startsWith(DOCS) || !fs.existsSync(file)) { res.statusCode = 404; return res.end('not found'); }
     let body = fs.readFileSync(file);
     if (file.endsWith('config.js')) body = body.toString().replaceAll(PROD_API, apiBase);
-    if (file.endsWith('.html')) {
+    if (/\.(html|mjs)$/.test(file)) {
       body = body.toString()
         .replace(/https:\/\/www\.gstatic\.com\/firebasejs\/[\d.]+\/firebase-app\.js/g, '/__stubs/app.js')
         .replace(/https:\/\/www\.gstatic\.com\/firebasejs\/[\d.]+\/firebase-auth\.js/g, '/__stubs/auth.js')
