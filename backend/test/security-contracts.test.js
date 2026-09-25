@@ -59,6 +59,11 @@ test('paid operations enforce active plans on the server', async () => {
   }
 });
 
+test('signature requests use the verified Brevo sender', async () => {
+  const source = await read('src/routes/sign-requests.js');
+  assert.match(source, /email: 'info@nyxprism\.com'/);
+});
+
 test('signature links always use the public clean URL', async () => {
   const source = await read('src/routes/sign-requests.js');
   assert.match(source, /signingUrl = token => `\$\{APP_PUBLIC\(\)\}\/sign-request\?token=/);
