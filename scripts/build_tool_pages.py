@@ -193,6 +193,7 @@ def page(title: str, description: str, path: str, body: str, schema: list[dict])
 <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet" />
 <style>{CSS}</style>
 {ld}
+<script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 <header class="top"><div class="wrap">

@@ -255,3 +255,12 @@ test('single-step tools show progress and drag-and-drop feeds every tool', async
   assert.match(dashboard, /\/\\.pdf\$\/i\.test\(f\.name\)/);
   assert.doesNotMatch(dashboard, /f\.name\.endsWith\('\.pdf'\)/);
 });
+
+test('lifecycle emails are one-per-kind, respect opt-out and carry an unsubscribe link', async () => {
+  const lifecycle = await read('src/lifecycle.js');
+  assert.match(lifecycle, /ON CONFLICT \(user_id, kind\) DO NOTHING/);
+  assert.match(lifecycle, /marketing_opt_out/);
+  assert.match(lifecycle, /Unsubscribe from these emails/);
+  assert.match(lifecycle, /timingSafeEqual/);
+  assert.match(await read('src/routes/user.js'), /router\.get\('\/unsubscribe'/);
+});

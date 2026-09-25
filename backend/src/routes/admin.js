@@ -127,7 +127,7 @@ router.get('/me', (req, res) => {
 // GET /api/admin/stats
 router.get('/stats', async (_req, res) => {
   try {
-    const [users, plans, keys, messages, unread, recent, daily, signReqs, dists, trials] = await Promise.all([
+    const [users, plans, keys, messages, unread, recent, daily, signReqs, dists, trials, funnel] = await Promise.all([
       pool.query('SELECT COUNT(*) AS total FROM users'),
       pool.query('SELECT plan, COUNT(*) AS count FROM users GROUP BY plan ORDER BY count DESC'),
       pool.query('SELECT COUNT(*) AS total FROM api_keys'),
@@ -143,6 +143,12 @@ router.get('/stats', async (_req, res) => {
       pool.query('SELECT status, COUNT(*) AS count FROM signature_requests GROUP BY status'),
       pool.query('SELECT COUNT(*) AS total, COUNT(*) FILTER (WHERE sent_at IS NOT NULL) AS sent FROM distribution_batches'),
       pool.query('SELECT COUNT(*) AS total FROM users WHERE trial_active = TRUE'),
+      pool.query(`SELECT
+          COUNT(*) AS signed_up,
+          COUNT(*) FILTER (WHERE EXISTS (SELECT 1 FROM lifecycle_emails e WHERE e.user_id = u.id AND e.kind = 'pro_nudge')) AS tried_pro,
+          COUNT(*) FILTER (WHERE u.trial_start IS NOT NULL) AS trials,
+          COUNT(*) FILTER (WHERE u.stripe_subscription_id IS NOT NULL AND u.plan = 'professional') AS paid
+        FROM users u WHERE u.created_at > NOW() - INTERVAL '30 days'`),
     ]);
     res.json({
       totalUsers:     Number(users.rows[0].total),
@@ -156,6 +162,7 @@ router.get('/stats', async (_req, res) => {
       unreadMessages: Number(unread.rows[0].total),
       signRequests:   signReqs.rows.map(r => ({ status: r.status, count: Number(r.count) })),
       distributions:  { total: Number(dists.rows[0].total), sent: Number(dists.rows[0].sent) },
+      funnel30d:      Object.fromEntries(Object.entries(funnel.rows[0]).map(([k, v]) => [k, Number(v)])),
     });
   } catch (err) {
     console.error('admin/stats error:', err.message);

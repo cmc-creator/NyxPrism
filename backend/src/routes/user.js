@@ -4,6 +4,7 @@ import { requireAuth } from '../middleware/auth.js';
 import Stripe from 'stripe';
 import admin from '../firebase.js';
 import { developerEntitlements, isOwner } from '../access.js';
+import { sendLifecycleEmail, verifyUnsubscribeToken } from '../lifecycle.js';
 
 const router = express.Router();
 
@@ -17,7 +18,7 @@ router.post('/sync', requireAuth, async (req, res) => {
   const subscriptionStatus = accountPlan === 'trial' ? 'trialing' : 'active';
 
   try {
-    await pool.query(
+    const result = await pool.query(
       `INSERT INTO users (firebase_uid, email, first_name, last_name, plan, subscription_status, trial_active, trial_start)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        ON CONFLICT (email) DO UPDATE SET
@@ -25,15 +26,35 @@ router.post('/sync', requireAuth, async (req, res) => {
          firebase_uid = CASE WHEN $9 OR users.firebase_uid = EXCLUDED.firebase_uid THEN EXCLUDED.firebase_uid ELSE users.firebase_uid END,
          first_name = COALESCE(NULLIF(EXCLUDED.first_name, ''), users.first_name),
          last_name = COALESCE(NULLIF(EXCLUDED.last_name, ''), users.last_name),
-         updated_at = NOW()`,
+         updated_at = NOW()
+       RETURNING id, (xmax = 0) AS inserted`,
           [uid, email, String(firstName || '').slice(0, 100) || null, String(lastName || '').slice(0, 100) || null,
             accountPlan, subscriptionStatus, accountPlan === 'trial', accountPlan === 'trial' ? new Date() : null,
             Boolean(req.user.email_verified)],
     );
+    const row = result.rows[0];
+    if (row?.inserted) sendLifecycleEmail(row.id, 'welcome').catch(() => {});
     res.json({ ok: true });
   } catch (err) {
     console.error('User sync error:', err);
     res.status(500).json({ error: 'Failed to sync user.' });
+  }
+});
+
+// ── GET /api/user/unsubscribe?u=<id>&t=<token> ────────────────────────────
+// One-click unsubscribe from lifecycle emails (link in every email footer).
+router.get('/unsubscribe', async (req, res) => {
+  const id = parseInt(req.query.u, 10);
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  if (!Number.isInteger(id) || !verifyUnsubscribeToken(id, req.query.t)) {
+    return res.status(400).send('<!DOCTYPE html><title>NyxPrism</title><h1>This unsubscribe link is not valid.</h1><p>Contact info@nyxprism.com and we will remove you.</p>');
+  }
+  try {
+    await pool.query('UPDATE users SET marketing_opt_out = TRUE, updated_at = NOW() WHERE id = $1', [id]);
+    res.send("<!DOCTYPE html><title>Unsubscribed · NyxPrism</title><h1>You're unsubscribed.</h1><p>You won't receive NyxPrism tips or trial reminders. Account and security emails (like password resets and signature requests) still arrive.</p><p><a href='https://www.nyxprism.com/'>Back to NyxPrism</a></p>");
+  } catch (err) {
+    console.error('Unsubscribe error:', err.message);
+    res.status(500).send('<!DOCTYPE html><title>NyxPrism</title><h1>Something went wrong.</h1><p>Please try the link again.</p>');
   }
 });
 

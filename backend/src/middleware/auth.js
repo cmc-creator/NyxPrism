@@ -1,6 +1,7 @@
 import admin from '../firebase.js';
 import pool from '../db/index.js';
 import { developerEntitlements, hasProfessionalAccess, isDeveloper } from '../access.js';
+import { sendLifecycleEmail } from '../lifecycle.js';
 
 /**
  * Express middleware that verifies a Firebase ID token in the
@@ -26,7 +27,7 @@ export async function requireActivePlan(req, res, next) {
 
   try {
     const result = await pool.query(
-      `SELECT plan, subscription_status, trial_start
+      `SELECT id, plan, subscription_status, trial_start
        FROM users
        WHERE firebase_uid = $1
        LIMIT 1`,
@@ -37,6 +38,7 @@ export async function requireActivePlan(req, res, next) {
     }
 
     if (!hasProfessionalAccess(result.rows[0], req.user.email)) {
+      sendLifecycleEmail(result.rows[0].id, 'pro_nudge').catch(() => {});
       return res.status(403).json({ error: 'An active trial or Professional subscription is required.' });
     }
     next();

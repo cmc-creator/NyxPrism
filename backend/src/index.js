@@ -10,6 +10,7 @@ import aiAssistRouter from './routes/ai-assist.js';
 import aiDesktopRouter from './routes/ai-desktop.js';
 
 import pool          from './db/index.js';
+import { runLifecycleJobs } from './lifecycle.js';
 import contactRouter  from './routes/contact.js';
 import stripeRouter   from './routes/stripe.js';
 import licenseRouter  from './routes/license.js';
@@ -168,6 +169,11 @@ async function start() {
   await purgeExpiredDocuments();
   const cleanupTimer = setInterval(() => purgeExpiredDocuments().catch(error => console.error('Retention cleanup error:', error.message)), 6 * 60 * 60 * 1000);
   cleanupTimer.unref();
+
+  // Trial reminder emails (each is sent once per user, so repeated runs are safe).
+  const lifecycle = () => runLifecycleJobs().catch(error => console.error('Lifecycle email job error:', error.message));
+  setTimeout(lifecycle, 60 * 1000).unref();
+  setInterval(lifecycle, 6 * 60 * 60 * 1000).unref();
 
   app.listen(PORT, () => console.log(`✓ NyxPrism API listening on port ${PORT}`));
 }

@@ -221,3 +221,12 @@ DELETE FROM ai_usage WHERE day < CURRENT_DATE - 30;
 -- Ended trials and canceled subscriptions fall back to Free rather than a lockout.
 UPDATE users SET plan = 'free', updated_at = NOW()
 WHERE plan = 'inactive' AND subscription_status IN ('trial_expired', 'canceled');
+
+-- Lifecycle emails (welcome, trial reminders, upgrade nudge): each kind once per user.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS marketing_opt_out BOOLEAN NOT NULL DEFAULT FALSE;
+CREATE TABLE IF NOT EXISTS lifecycle_emails (
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  kind    TEXT NOT NULL,
+  sent_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (user_id, kind)
+);

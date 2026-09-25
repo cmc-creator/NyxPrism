@@ -203,6 +203,7 @@
       <section class="page active" id="page-overview">
         <div class="page-head"><div><h1>Overview</h1><div class="sub">How NyxPrism is doing right now.</div></div></div>
         <div class="tiles" id="ov-tiles"></div>
+        <div class="card"><h2>Growth, last 30 days</h2><div class="sub" style="margin:-.4rem 0 .9rem">From sign-up to paying customer.</div><div class="tiles" id="ov-funnel" style="margin-bottom:0"></div></div>
         <div class="grid2">
           <div class="card"><h2>New signups, last 30 days</h2><div class="chart-box" id="ov-chart"></div></div>
           <div class="card"><h2>Users by plan</h2><div class="plan-bars" id="ov-plans"></div></div>
@@ -528,6 +529,14 @@ loaders.overview = async () => {
     tile('API keys', s.totalApiKeys),
   ].join('');
   renderSignupChart($('ov-chart'), s.signupsDaily);
+  const f = s.funnel30d || {};
+  const rate = (n, d) => d ? Math.round(n / d * 100) + '% of sign-ups' : '—';
+  $('ov-funnel').innerHTML = [
+    tile('Signed up', f.signed_up ?? 0),
+    tile('Tried a Pro feature', f.tried_pro ?? 0, rate(f.tried_pro, f.signed_up)),
+    tile('Started a trial', f.trials ?? 0, rate(f.trials, f.signed_up)),
+    tile('Paying', f.paid ?? 0, rate(f.paid, f.signed_up)),
+  ].join('');
   const total = Math.max(1, s.totalUsers);
   $('ov-plans').innerHTML = s.plans.length ? s.plans.map(p => `<div class="plan-bar-row"><span>${pill(p.plan)}</span><div class="plan-bar-track"><div class="plan-bar-fill" style="width:${(p.count / total * 100).toFixed(1)}%"></div></div><strong style="text-align:right">${p.count}</strong></div>`).join('') : '<div class="muted">No users yet.</div>';
   setUnread(s.unreadMessages);
