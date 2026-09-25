@@ -908,7 +908,17 @@ class NyxPrismTUI(App):
 # ─────────────────────────────────────────────────────────────────────────────
 
 def launch() -> None:
-    """Launch the NyxPrism TUI. Entry point for `nyxprism-ui`."""
+    """Launch the NyxPrism TUI. Entry point for `nyxprism-ui` (a Professional feature)."""
+    import sys
+
+    from nyxprism import account
+
+    try:
+        account.require_professional("The NyxPrism full-screen app")
+    except account.AccountError as exc:
+        print(exc, file=sys.stderr)
+        print("Free tools are available from the `nyxprism` command. Sign in with `nyxprism login`.", file=sys.stderr)
+        sys.exit(1)
     app = NyxPrismTUI()
     app.run()
 

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { requireActivePlan, requireAuth } from '../middleware/auth.js';
-import { aiDailyQuota, askClaude } from '../ai.js';
+import { aiDailyQuota, askClaude, SPLIT_MODEL } from '../ai.js';
 
 const router = Router();
 
@@ -45,6 +45,7 @@ Conversation rules:
 
   try {
     const raw = await askClaude({
+      model: SPLIT_MODEL,
       system: systemPrompt,
       messages: messages.map(message => ({ role: message.role, content: message.content.trim() })),
       maxTokens: 16000,

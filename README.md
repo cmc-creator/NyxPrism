@@ -69,6 +69,22 @@ Without an API key every AI command automatically falls back to the built-in heu
 
 ---
 
+## Free and Professional
+
+The desktop app uses the same plans as [nyxprism.com](https://www.nyxprism.com/).
+
+| Free — no account needed | Professional — sign in with a Professional plan or trial |
+|---|---|
+| split, merge, compress, rotate, reorder, delete-pages, extract-text, to-images, from-images, interleave, watermark, unlock | all `ai-*` commands, `ocr`, `protect`, and the full-screen app `nyxprism-ui` |
+
+```bash
+nyxprism login      # sign in with your nyxprism.com email and password
+nyxprism account    # show your plan
+nyxprism logout
+```
+
+Your plan is re-checked once a day. Offline, a recent check keeps working for up to 7 days.
+
 ## Quick Start
 
 ### AI bulk split (flagship feature)

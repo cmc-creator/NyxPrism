@@ -2,7 +2,10 @@ import Anthropic from '@anthropic-ai/sdk';
 import pool from './db/index.js';
 import { isDeveloper } from './access.js';
 
-export const AI_MODEL = 'claude-opus-5';
+// Quick in-tool help chats: short answers, so the fastest, cheapest model.
+export const HELP_MODEL = 'claude-haiku-4-5';
+// AI Smart Split reads a whole document and plans page groups.
+export const SPLIT_MODEL = 'claude-sonnet-5';
 // AI requests allowed per user per UTC day (owner/reviewer accounts are exempt).
 const DAILY_AI_LIMIT = Number(process.env.AI_DAILY_LIMIT) || 100;
 
@@ -38,20 +41,14 @@ export async function aiDailyQuota(req, res, next) {
 
 /**
  * One Claude call. Returns the reply text, or throws with a user-facing message.
- * Thinking is on by default for this model, so the reply is gathered from the
- * text blocks rather than assumed to be content[0].
+ * Replies are gathered from text blocks (adaptive-thinking models emit a
+ * thinking block first). `effort` is skipped for Claude Haiku 4.5, which
+ * does not accept it.
  */
-export async function askClaude({ system, messages, maxTokens, effort }) {
-  const response = await getClient().beta.messages.create({
-    model: AI_MODEL,
-    max_tokens: maxTokens,
-    output_config: { effort },
-    // If a safety classifier declines, re-run on Anthropic's recommended fallback model.
-    betas: ['server-side-fallback-2026-07-01'],
-    fallbacks: 'default',
-    system,
-    messages,
-  });
+export async function askClaude({ model, system, messages, maxTokens, effort }) {
+  const params = { model, max_tokens: maxTokens, system, messages };
+  if (effort && model !== 'claude-haiku-4-5') params.output_config = { effort };
+  const response = await getClient().messages.create(params);
   if (response.stop_reason === 'refusal') {
     const err = new Error('The AI assistant declined this request. Try rephrasing it.');
     err.userFacing = true;

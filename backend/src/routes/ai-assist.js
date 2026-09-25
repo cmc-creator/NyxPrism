@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { requireActivePlan, requireAuth } from '../middleware/auth.js';
-import { aiDailyQuota, askClaude } from '../ai.js';
+import { aiDailyQuota, askClaude, HELP_MODEL } from '../ai.js';
 
 const router = Router();
 
@@ -43,10 +43,10 @@ router.post('/', requireAuth, requireActivePlan, aiDailyQuota, async (req, res) 
 
   try {
     const reply = await askClaude({
+      model: HELP_MODEL,
       system: systemPrompt,
       messages: messages.slice(-10).map(message => ({ role: message.role, content: message.content.trim() })),
-      maxTokens: 4000,
-      effort: 'low',
+      maxTokens: 1024,
     });
     res.json({ reply });
   } catch (err) {

@@ -38,23 +38,82 @@ Usage examples::
     # OCR a scanned PDF
     nyxprism ocr scan.pdf --lang eng
 
+    # Sign in (needed for Professional features: AI, OCR, protect, nyxprism-ui)
+    nyxprism login
+
     # Show version
     nyxprism --version
 """
 from __future__ import annotations
 
+import functools
 import sys
 from pathlib import Path
 
 import click
 
 from nyxprism import __version__
+from nyxprism import account
 
 
 @click.group()
 @click.version_option(__version__, prog_name="NyxPrism")
 def cli() -> None:
     """NyxPrism – Powerful AI-enhanced PDF multi-tool."""
+
+
+def professional(feature: str):
+    """Only run the command for accounts with Professional access (same tiers as nyxprism.com)."""
+    def decorate(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            try:
+                account.require_professional(feature)
+            except account.AccountError as exc:
+                click.secho(str(exc), fg="yellow", err=True)
+                sys.exit(1)
+            return func(*args, **kwargs)
+        return wrapper
+    return decorate
+
+
+# ---------------------------------------------------------------------------
+# account
+# ---------------------------------------------------------------------------
+
+@cli.command("login")
+@click.option("--email", prompt="NyxPrism email", help="The email you use on nyxprism.com.")
+@click.option("--password", prompt=True, hide_input=True, help="Your NyxPrism password.")
+def login(email, password):
+    """Sign in with your NyxPrism account (needed for Professional features)."""
+    try:
+        info = account.login(email.strip(), password)
+    except account.AccountError as exc:
+        click.secho(str(exc), fg="red", err=True)
+        sys.exit(1)
+    plan = (info.get("plan") or "free").capitalize()
+    click.secho(f"Signed in as {info['email']} ({plan}).", fg="green")
+    if not info.get("valid"):
+        click.echo(f"Free tools are ready. Professional features need an upgrade: {account.UPGRADE_URL}")
+
+
+@cli.command("logout")
+def logout():
+    """Sign out of your NyxPrism account on this computer."""
+    click.echo("Signed out." if account.logout() else "You weren't signed in.")
+
+
+@cli.command("account")
+def account_status():
+    """Show which account is signed in and its plan."""
+    try:
+        info = account.check_plan(force=True)
+    except account.AccountError as exc:
+        click.echo(str(exc))
+        sys.exit(1)
+    plan = (info.get("plan") or "free").capitalize()
+    access = "Professional features: available" if info.get("valid") else f"Professional features: not included ({info.get('reason') or 'upgrade to unlock'})"
+    click.echo(f"Signed in as {info['email']}\nPlan: {plan}\n{access}")
 
 
 # ---------------------------------------------------------------------------
@@ -84,6 +143,7 @@ def cli() -> None:
 @click.option("--batch-dir", "-b", default=None,
               type=click.Path(exists=True, file_okay=False),
               help="Process ALL PDFs in this directory (ignores SOURCE).")
+@professional("AI Smart Split")
 def ai_split(source, output_dir, strategy, api_key, model, no_ocr, ocr_lang, ocr_dpi,
              quiet, batch_dir):
     """Bulk-split SOURCE using AI-detected document boundaries.
@@ -397,6 +457,7 @@ def watermark(source, text, image, output, opacity, angle):
 @click.option("--owner-password", default=None,
               help="Owner password (defaults to user password).")
 @click.option("--output", "-o", default=None, help="Output path.")
+@professional("Password protection")
 def protect(source, password, owner_password, output):
     """Password-protect a PDF."""
     from nyxprism.core.protect import protect as _protect
@@ -515,6 +576,7 @@ def from_images(images, output):
               help="Rendering DPI.")
 @click.option("--pages", "-p", default=None,
               help="Comma-separated 1-based page numbers (default: all).")
+@professional("OCR")
 def ocr(source, output, lang, dpi, pages):
     """OCR a scanned PDF and extract text."""
     from nyxprism.core.ocr import ocr_pdf
@@ -574,6 +636,7 @@ def interleave(odd_source, even_source, output, no_reverse):
               help="Comma-separated 1-based page numbers to summarise (default: all).")
 @click.option("--sentences", type=int, default=5, show_default=True,
               help="Target sentences for heuristic summary.")
+@professional("AI summaries")
 def ai_summarize(source, output, strategy, api_key, model, pages, sentences):
     """Summarize a PDF using AI or extractive heuristics.
 
@@ -616,6 +679,7 @@ def ai_summarize(source, output, strategy, api_key, model, pages, sentences):
               show_default=True)
 @click.option("--api-key", default=None, envvar="OPENAI_API_KEY")
 @click.option("--model", default="gpt-4o-mini", show_default=True)
+@professional("AI classification")
 def ai_classify(source, strategy, api_key, model):
     """Classify the document type of a PDF (invoice, contract, report, etc.).
 
@@ -652,6 +716,7 @@ def ai_classify(source, strategy, api_key, model):
               show_default=True)
 @click.option("--api-key", default=None, envvar="OPENAI_API_KEY")
 @click.option("--model", default="gpt-4o-mini", show_default=True)
+@professional("AI key-info extraction")
 def ai_extract_info(source, output, strategy, api_key, model):
     """Extract structured key information from a PDF (dates, amounts, parties, etc.).
 
@@ -696,6 +761,7 @@ def ai_extract_info(source, output, strategy, api_key, model):
 @click.option("--dry-run", is_flag=True, default=False,
               help="Preview new names without renaming files.")
 @click.option("--prefix", default="", help="Optional prefix added to every new name.")
+@professional("AI renaming")
 def ai_rename(sources, strategy, api_key, model, dry_run, prefix):
     """Rename one or more PDF files using AI-suggested descriptive names.
 
