@@ -51,6 +51,11 @@
     .spinner{width:36px;height:36px;border-radius:50%;border:3px solid var(--border2);border-top-color:var(--accent-bright);animation:spin .7s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
     nav{position:sticky;top:0;z-index:500;background:rgba(6,8,13,.72);backdrop-filter:blur(24px) saturate(1.25);border-bottom:1px solid rgba(167,139,250,.16);height:62px;padding:0 1.5rem;display:flex;align-items:center;gap:1rem;box-shadow:0 10px 40px rgba(0,0,0,.22)}
+    /* Installed app with the title-bar overlay on: the top bar becomes the window's drag area and leaves room for the Windows caption buttons. */
+    @media (display-mode: window-controls-overlay){
+      nav{-webkit-app-region:drag;app-region:drag;height:max(62px,env(titlebar-area-height,62px));padding-left:max(1.5rem,calc(env(titlebar-area-x,0px) + .75rem));padding-right:calc(100vw - env(titlebar-area-x,0px) - env(titlebar-area-width,100vw) + 1rem)}
+      nav a,nav button,nav input,nav select,nav [role="button"],nav .nav-avatar{-webkit-app-region:no-drag;app-region:no-drag}
+    }
     .nav-brand{display:flex;align-items:center;gap:.5rem;border:0;background:none;color:inherit;padding:0;font:inherit;cursor:pointer}
     .nav-brand-logo{width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 30% 18%,rgba(255,255,255,.16),rgba(5,7,13,.92) 62%);border:1px solid rgba(255,255,255,.18);border-radius:10px;box-shadow:0 0 30px rgba(124,58,237,.38),inset 0 1px 0 rgba(255,255,255,.12)}
     .nav-brand-logo img{width:28px;height:28px;display:block;filter:drop-shadow(0 0 12px rgba(167,139,250,.58)) drop-shadow(0 0 18px rgba(34,211,238,.24))}
@@ -1945,7 +1950,9 @@ onAuthStateChanged(auth,async user=>{
   }catch(_){}
   if(ownerAccount){plan='professional';subscriptionStatus='active';trialStart=null;currentPeriodEnd=null;}
   const verifyBanner=document.getElementById('verify-banner');
-  if(verifyBanner){verifyBanner.style.display=(user.emailVerified||ownerAccount)?'none':'flex';document.getElementById('verify-email').textContent=user.email;}
+  // Owner and store-reviewer accounts are exempt from email verification on the server, so don't nag them.
+  const reviewerAccount=(user.email||'').toLowerCase()==='msstore-review@nyxprism.com';
+  if(verifyBanner){verifyBanner.style.display=(user.emailVerified||ownerAccount||reviewerAccount)?'none':'flex';document.getElementById('verify-email').textContent=user.email;}
   const ownerLink=document.getElementById('sidebar-owner-portal');if(ownerLink)ownerLink.style.display=ownerAccount?'flex':'none';
   if(!plan){plan='account';setTimeout(()=>toast('Account status could not be refreshed. Your tools remain available while we retry.','error'),400);}
   // Fallback: Firestore for name only
