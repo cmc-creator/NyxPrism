@@ -15,7 +15,7 @@ Quick usage example::
     results = bulk_split(
         "batch_scan.pdf",
         output_dir="split_docs",
-        strategy="auto",   # uses LLM if OPENAI_API_KEY is set
+        strategy="auto",   # uses NyxPrism AI when signed in, or OPENAI_API_KEY
     )
     for path, label in results:
         print(f"{label:40s} → {path}")

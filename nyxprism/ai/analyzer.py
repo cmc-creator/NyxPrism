@@ -22,6 +22,8 @@ import re
 from pathlib import Path
 from typing import Literal
 
+from nyxprism.ai.llm import chat, llm_available
+
 
 # ---------------------------------------------------------------------------
 # Public API
@@ -65,8 +67,7 @@ def detect_boundaries(
         return _llm_boundaries(page_texts, api_key=api_key, model=model,
                                 max_chars=max_chars_per_page)
     # "auto"
-    key = api_key or os.environ.get("OPENAI_API_KEY", "")
-    if key:
+    if llm_available(api_key):
         try:
             return _llm_boundaries(page_texts, api_key=api_key, model=model,
                                    max_chars=max_chars_per_page)
@@ -97,16 +98,6 @@ def _llm_boundaries(
     model: str,
     max_chars: int,
 ) -> list[int]:
-    from openai import OpenAI
-
-    effective_key = api_key or os.environ.get("OPENAI_API_KEY")
-    if not effective_key:
-        raise EnvironmentError(
-            "OPENAI_API_KEY environment variable is not set.  "
-            "Set it or use strategy='heuristic'."
-        )
-
-    client = OpenAI(api_key=effective_key)
 
     # Build a compact representation of the document for the model
     lines: list[str] = []
@@ -115,17 +106,10 @@ def _llm_boundaries(
         lines.append(f"[Page {i}]: {snippet}")
     content = "\n".join(lines)
 
-    response = client.chat.completions.create(
-        model=model,
-        messages=[
-            {"role": "system", "content": _SYSTEM_PROMPT},
-            {"role": "user", "content": content},
-        ],
-        temperature=0,
-        max_tokens=512,
-    )
+    reply = chat(_SYSTEM_PROMPT, content, api_key=api_key, model=model,
+                 max_tokens=512, temperature=0)
 
-    raw = response.choices[0].message.content.strip()
+    raw = reply
     # Strip markdown code fences if present
     raw = re.sub(r"^```[a-z]*\n?", "", raw).rstrip("```").strip()
     boundaries = json.loads(raw)

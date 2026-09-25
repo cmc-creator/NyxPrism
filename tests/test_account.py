@@ -86,3 +86,24 @@ def test_offline_grace_is_limited_to_seven_days(env):
     creds.write_text(json.dumps(data))
     with pytest.raises(account.AccountError):
         account.require_professional("x")
+
+
+def test_ai_uses_nyxprism_when_signed_in_and_own_key_when_given(env, monkeypatch):
+    from nyxprism.ai import llm
+
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    assert llm.llm_available() is False  # signed out, no key: heuristics only
+    account.login("pro@example.com", "pw")
+    assert llm.llm_available() is True
+
+    calls = []
+    monkeypatch.setattr(llm, "_nyxprism_chat", lambda system, user, max_tokens: calls.append("nyxprism") or "Named_By_NyxPrism")
+    assert llm.chat("sys", "text") == "Named_By_NyxPrism"
+
+    import types
+    import openai
+    reply = types.SimpleNamespace(choices=[types.SimpleNamespace(message=types.SimpleNamespace(content="Named_By_Own_Key"))])
+    monkeypatch.setattr(openai, "OpenAI", lambda api_key=None: types.SimpleNamespace(
+        chat=types.SimpleNamespace(completions=types.SimpleNamespace(create=lambda **kw: reply))))
+    assert llm.chat("sys", "text", api_key="sk-own") == "Named_By_Own_Key"
+    assert calls == ["nyxprism"]

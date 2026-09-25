@@ -15,6 +15,8 @@ import re
 import unicodedata
 from typing import Literal
 
+from nyxprism.ai.llm import chat, llm_available
+
 
 # ---------------------------------------------------------------------------
 # Public API
@@ -51,8 +53,7 @@ def suggest_name(
     if strategy == "llm":
         return _llm_name(text, api_key=api_key, model=model, max_chars=max_chars)
     # "auto"
-    key = api_key or os.environ.get("OPENAI_API_KEY", "")
-    if key:
+    if llm_available(api_key):
         try:
             return _llm_name(text, api_key=api_key, model=model, max_chars=max_chars)
         except Exception:
@@ -102,25 +103,11 @@ _NAME_SYSTEM = (
 
 
 def _llm_name(text: str, api_key: str | None, model: str, max_chars: int) -> str:
-    from openai import OpenAI
-
-    effective_key = api_key or os.environ.get("OPENAI_API_KEY")
-    if not effective_key:
-        raise EnvironmentError("OPENAI_API_KEY is not set.")
-
-    client = OpenAI(api_key=effective_key)
     snippet = text.strip()[:max_chars]
 
-    response = client.chat.completions.create(
-        model=model,
-        messages=[
-            {"role": "system", "content": _NAME_SYSTEM},
-            {"role": "user", "content": snippet},
-        ],
-        temperature=0,
-        max_tokens=64,
-    )
-    raw = response.choices[0].message.content.strip()
+    reply = chat(_NAME_SYSTEM, snippet, api_key=api_key, model=model,
+                 max_tokens=64, temperature=0)
+    raw = reply
     return _sanitise(raw)
 
 

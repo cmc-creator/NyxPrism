@@ -86,3 +86,9 @@ def batch_pdf(tmp_path):
         ],
     ]
     return make_batch_pdf(tmp_path, "batch.pdf", doc_texts)
+
+
+@pytest.fixture(autouse=True)
+def _isolated_account(tmp_path, monkeypatch):
+    """Tests never see a real `nyxprism login` session or call NyxPrism AI."""
+    monkeypatch.setenv("NYXPRISM_HOME", str(tmp_path / ".nyxprism"))

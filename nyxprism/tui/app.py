@@ -38,7 +38,7 @@ COMMANDS: dict[str, dict] = {
              "type": "select",
              "opts": [("Auto – LLM when key available  (recommended)", "auto"),
                       ("Heuristic – fully offline, instant",           "heuristic"),
-                      ("LLM – requires OPENAI_API_KEY env var",        "llm")],
+                      ("AI – included with Professional (or your own OPENAI_API_KEY)", "llm")],
              "default": "auto"},
         ],
     },

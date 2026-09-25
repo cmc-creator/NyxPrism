@@ -129,9 +129,9 @@ def account_status():
               show_default=True,
               help="Boundary detection strategy.")
 @click.option("--api-key", default=None, envvar="OPENAI_API_KEY",
-              help="OpenAI API key (overrides OPENAI_API_KEY env var).")
+              help="Optional: your own OpenAI key. Without it, NyxPrism AI (included with Professional) is used.")
 @click.option("--model", default="gpt-4o-mini", show_default=True,
-              help="OpenAI model for boundary detection and naming.")
+              help="OpenAI model, only used with your own --api-key.")
 @click.option("--no-ocr", is_flag=True, default=False,
               help="Disable OCR fallback for scanned/image pages.")
 @click.option("--ocr-lang", default="eng", show_default=True,
@@ -630,7 +630,8 @@ def interleave(odd_source, even_source, output, no_reverse):
 @click.option("--strategy", "-s",
               type=click.Choice(["auto", "llm", "heuristic"]), default="auto",
               show_default=True)
-@click.option("--api-key", default=None, envvar="OPENAI_API_KEY")
+@click.option("--api-key", default=None, envvar="OPENAI_API_KEY",
+              help="Optional: your own OpenAI key. Without it, NyxPrism AI (included with Professional) is used.")
 @click.option("--model", default="gpt-4o-mini", show_default=True)
 @click.option("--pages", "-p", default=None,
               help="Comma-separated 1-based page numbers to summarise (default: all).")
@@ -640,8 +641,8 @@ def interleave(odd_source, even_source, output, no_reverse):
 def ai_summarize(source, output, strategy, api_key, model, pages, sentences):
     """Summarize a PDF using AI or extractive heuristics.
 
-    Works without an API key (heuristic mode). Set OPENAI_API_KEY for
-    higher-quality LLM summaries.
+    Uses NyxPrism AI (included with Professional), or your own OpenAI key
+    if you pass --api-key. Falls back to extractive heuristics if AI is unavailable.
     """
     from nyxprism.ai.summarizer import summarize_text
     from nyxprism.core.extract import extract_text as _extract_text
@@ -677,14 +678,15 @@ def ai_summarize(source, output, strategy, api_key, model, pages, sentences):
 @click.option("--strategy", "-s",
               type=click.Choice(["auto", "llm", "heuristic"]), default="auto",
               show_default=True)
-@click.option("--api-key", default=None, envvar="OPENAI_API_KEY")
+@click.option("--api-key", default=None, envvar="OPENAI_API_KEY",
+              help="Optional: your own OpenAI key. Without it, NyxPrism AI (included with Professional) is used.")
 @click.option("--model", default="gpt-4o-mini", show_default=True)
 @professional("AI classification")
 def ai_classify(source, strategy, api_key, model):
     """Classify the document type of a PDF (invoice, contract, report, etc.).
 
-    Works without an API key (heuristic mode). Set OPENAI_API_KEY for
-    higher-accuracy LLM classification.
+    Uses NyxPrism AI (included with Professional), or your own OpenAI key
+    if you pass --api-key. Falls back to keyword heuristics if AI is unavailable.
     """
     from nyxprism.ai.summarizer import classify_document
     from nyxprism.core.extract import extract_text as _extract_text
@@ -714,7 +716,8 @@ def ai_classify(source, strategy, api_key, model):
 @click.option("--strategy", "-s",
               type=click.Choice(["auto", "llm", "heuristic"]), default="auto",
               show_default=True)
-@click.option("--api-key", default=None, envvar="OPENAI_API_KEY")
+@click.option("--api-key", default=None, envvar="OPENAI_API_KEY",
+              help="Optional: your own OpenAI key. Without it, NyxPrism AI (included with Professional) is used.")
 @click.option("--model", default="gpt-4o-mini", show_default=True)
 @professional("AI key-info extraction")
 def ai_extract_info(source, output, strategy, api_key, model):
@@ -756,7 +759,8 @@ def ai_extract_info(source, output, strategy, api_key, model):
 @click.option("--strategy", "-s",
               type=click.Choice(["auto", "llm", "heuristic"]), default="auto",
               show_default=True)
-@click.option("--api-key", default=None, envvar="OPENAI_API_KEY")
+@click.option("--api-key", default=None, envvar="OPENAI_API_KEY",
+              help="Optional: your own OpenAI key. Without it, NyxPrism AI (included with Professional) is used.")
 @click.option("--model", default="gpt-4o-mini", show_default=True)
 @click.option("--dry-run", is_flag=True, default=False,
               help="Preview new names without renaming files.")

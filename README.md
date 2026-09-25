@@ -85,6 +85,9 @@ nyxprism logout
 
 Your plan is re-checked once a day. Offline, a recent check keeps working for up to 7 days.
 
+**AI is included with Professional.** Once you're signed in, the `ai-*` commands use NyxPrism AI with nothing to set up.
+Prefer your own OpenAI account? Pass `--api-key` (or set `OPENAI_API_KEY`) and requests go straight to OpenAI instead.
+
 ## Quick Start
 
 ### AI bulk split (flagship feature)

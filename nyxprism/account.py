@@ -142,6 +142,17 @@ def _id_token(data: dict[str, Any]) -> str:
     return data["id_token"]
 
 
+def id_token() -> str:
+    """A current Firebase ID token for the signed-in account (refreshed as needed)."""
+    data = _load()
+    if not data or not data.get("refresh_token"):
+        raise AccountError("You're not signed in. Run `nyxprism login` with your NyxPrism account.")
+    try:
+        return _id_token(data)
+    except urllib.error.URLError:
+        raise AccountError("Could not reach NyxPrism. Check your internet connection.") from None
+
+
 def check_plan(force: bool = False) -> dict[str, Any]:
     """Return ``{"email", "plan", "valid", "reason"}`` for the signed-in account.
 

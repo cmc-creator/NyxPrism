@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import rateLimit from 'express-rate-limit';
 import aiAssistRouter from './routes/ai-assist.js';
+import aiDesktopRouter from './routes/ai-desktop.js';
 
 import pool          from './db/index.js';
 import contactRouter  from './routes/contact.js';
@@ -87,6 +88,15 @@ const aiSplitLimiter = rateLimit({
   message: { error: 'AI rate limit exceeded. Try again in an hour.' },
 });
 
+// Desktop AI — bulk jobs make one small request per document; 120 per hour per IP
+const desktopAiLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'AI rate limit exceeded. Try again in an hour.' },
+});
+
 // API key creation — 10 per hour per IP
 const keyCreateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
@@ -125,6 +135,7 @@ app.use('/api/license',   licenseRouter);
 app.use('/api/user',      userRouter);
 app.use('/api/ai-split',  aiSplitLimiter, aiSplitRouter);
 app.use('/api/ai-assist', aiSplitLimiter, aiAssistRouter);
+app.use('/api/ai/desktop', desktopAiLimiter, aiDesktopRouter);
 app.post('/api/keys',     keyCreateLimiter);
 app.use('/api/keys',      apiKeysRouter);
 app.use('/api/sign-requests', signRequestsRouter);

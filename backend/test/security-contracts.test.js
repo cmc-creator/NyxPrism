@@ -239,3 +239,11 @@ test('signers can draw or type signatures and download the completed copy', asyn
   assert.match(signer, /\/final-pdf/);
   assert.doesNotMatch(signer, /\bprompt\(|\bconfirm\(/);
 });
+
+test('desktop AI endpoint is Professional-only, quota-limited and size-capped', async () => {
+  const source = await read('src/routes/ai-desktop.js');
+  assert.match(source, /requireAuth, requireActivePlan, aiDailyQuota/);
+  assert.match(source, /MAX_INPUT_CHARS/);
+  assert.match(source, /MAX_OUTPUT_TOKENS/);
+  assert.match(await read('src/index.js'), /app\.use\('\/api\/ai\/desktop', desktopAiLimiter/);
+});

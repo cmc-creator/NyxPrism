@@ -13,6 +13,8 @@ import os
 import re
 from typing import Literal
 
+from nyxprism.ai.llm import chat, llm_available
+
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
@@ -52,8 +54,7 @@ def summarize_text(
         return _llm_summary(text, api_key=api_key, model=model,
                             max_chars=max_chars)
     # "auto"
-    key = api_key or os.environ.get("OPENAI_API_KEY", "")
-    if key:
+    if llm_available(api_key):
         try:
             return _llm_summary(text, api_key=api_key, model=model,
                                 max_chars=max_chars)
@@ -95,8 +96,7 @@ def classify_document(
         return _llm_classify(text, api_key=api_key, model=model,
                              max_chars=max_chars)
     # "auto"
-    key = api_key or os.environ.get("OPENAI_API_KEY", "")
-    if key:
+    if llm_available(api_key):
         try:
             return _llm_classify(text, api_key=api_key, model=model,
                                  max_chars=max_chars)
@@ -136,8 +136,7 @@ def extract_key_info(
         return _llm_key_info(text, api_key=api_key, model=model,
                              max_chars=max_chars)
     # "auto"
-    key = api_key or os.environ.get("OPENAI_API_KEY", "")
-    if key:
+    if llm_available(api_key):
         try:
             return _llm_key_info(text, api_key=api_key, model=model,
                                  max_chars=max_chars)
@@ -183,72 +182,30 @@ Do NOT include any explanation or markdown fences."""
 
 
 def _llm_summary(text: str, api_key: str | None, model: str, max_chars: int) -> str:
-    from openai import OpenAI
-
-    effective_key = api_key or os.environ.get("OPENAI_API_KEY")
-    if not effective_key:
-        raise EnvironmentError("OPENAI_API_KEY is not set.")
-
-    client = OpenAI(api_key=effective_key)
     snippet = text.strip()[:max_chars]
 
-    response = client.chat.completions.create(
-        model=model,
-        messages=[
-            {"role": "system", "content": _SUMMARY_SYSTEM},
-            {"role": "user", "content": snippet},
-        ],
-        temperature=0.3,
-        max_tokens=256,
-    )
-    return response.choices[0].message.content.strip()
+    reply = chat(_SUMMARY_SYSTEM, snippet, api_key=api_key, model=model,
+                 max_tokens=256, temperature=0.3)
+    return reply
 
 
 def _llm_classify(text: str, api_key: str | None, model: str,
                   max_chars: int) -> str:
-    from openai import OpenAI
-
-    effective_key = api_key or os.environ.get("OPENAI_API_KEY")
-    if not effective_key:
-        raise EnvironmentError("OPENAI_API_KEY is not set.")
-
-    client = OpenAI(api_key=effective_key)
     snippet = text.strip()[:max_chars]
 
-    response = client.chat.completions.create(
-        model=model,
-        messages=[
-            {"role": "system", "content": _CLASSIFY_SYSTEM},
-            {"role": "user", "content": snippet},
-        ],
-        temperature=0,
-        max_tokens=16,
-    )
-    return response.choices[0].message.content.strip().lower()
+    reply = chat(_CLASSIFY_SYSTEM, snippet, api_key=api_key, model=model,
+                 max_tokens=16, temperature=0)
+    return reply.lower()
 
 
 def _llm_key_info(text: str, api_key: str | None, model: str,
                   max_chars: int) -> dict[str, str]:
     import json
-    from openai import OpenAI
-
-    effective_key = api_key or os.environ.get("OPENAI_API_KEY")
-    if not effective_key:
-        raise EnvironmentError("OPENAI_API_KEY is not set.")
-
-    client = OpenAI(api_key=effective_key)
     snippet = text.strip()[:max_chars]
 
-    response = client.chat.completions.create(
-        model=model,
-        messages=[
-            {"role": "system", "content": _KEY_INFO_SYSTEM},
-            {"role": "user", "content": snippet},
-        ],
-        temperature=0,
-        max_tokens=256,
-    )
-    raw = response.choices[0].message.content.strip()
+    reply = chat(_KEY_INFO_SYSTEM, snippet, api_key=api_key, model=model,
+                 max_tokens=256, temperature=0)
+    raw = reply
     raw = re.sub(r"^```[a-z]*\n?", "", raw).rstrip("`").strip()
     try:
         return json.loads(raw)
