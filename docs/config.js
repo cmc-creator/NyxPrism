@@ -5,7 +5,7 @@
   var PRODUCTION_API = 'https://nyxprism-production.up.railway.app';
   var STAGING_API = ''; // e.g. 'https://nyxprism-staging.up.railway.app'
   var host = location.hostname;
-  var live = host === 'www.nyxprism.com' || host === 'nyxprism.com';
+  var live = host === 'www.nyxprism.com' || host === 'nyxprism.com' || host === 'nyx-prism.vercel.app' || host === 'nyx-prism-connie-s-projects-97efb420.vercel.app' || host === 'nyx-prism-git-main-connie-s-projects-97efb420.vercel.app';
   var preview = /\.vercel\.app$/.test(host);
   // On the live site the API is reached through our own domain (vercel.json proxies /api/* to
   // Railway), so browser extensions and firewalls that block *.up.railway.app can't break the app.
