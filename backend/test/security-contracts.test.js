@@ -59,6 +59,12 @@ test('paid operations enforce active plans on the server', async () => {
   }
 });
 
+test('production Vercel aliases use the same-origin API proxy', async () => {
+  const config = await readRepo('docs/config.js');
+  assert.match(config, /host === 'nyx-prism\.vercel\.app'/);
+  assert.match(config, /window\.NYX_API = live \? location\.origin/);
+});
+
 test('signature requests use the verified Brevo sender', async () => {
   const source = await read('src/routes/sign-requests.js');
   assert.match(source, /email: 'info@nyxprism\.com'/);
